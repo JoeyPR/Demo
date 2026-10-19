@@ -297,3 +297,30 @@ test("5.6d the tint reaches the final draw call as 0..255 and RGB entries are pa
   assert.deepEqual(c.tint,[255,128,0]);
   for(const k of ["Particle.initalRGB","Particle.interpolateRGB","Particle.finalRGB"])assert.equal(SUPPORT[k],"partial",k);
 });
+
+// ---- 5.7a inSpecificOrder + randomSpriteFrame -------------------------------------------------------------------------
+import {frameTrack} from "./xml-fixture.mjs";
+const cells=[[0,0],[1,0],[2,0]];
+// emission order (oldest first) -> frame cell column of each live particle
+const frameOrder=(particleAttrs,extra=[])=>{
+  const run=fixture({particleAttrs,animations:[frameTrack(cells)],emitter:[set("emissionInterval",.1)],particle:[set("lifeTime",10),...extra]});
+  const ps=run.until(0,950,50);return ps.sort((a,b)=>b.xmlParticleAge-a.xmlParticleAge).map(p=>p.sx/p.sw);
+};
+test("5.7a randomSpriteFrame + inSpecificOrder=true: frames cycle 0,1,2,0,1,2... in emission order", () => {
+  assert.deepEqual(frameOrder({randomSpriteFrame:"true"},[set("inSpecificOrder",true)]).slice(0,7),[0,1,2,0,1,2,0]);
+});
+test("5.7a randomSpriteFrame + inSpecificOrder=false: frames are pseudo-random (not the cycle) but always valid and repeatable", () => {
+  const a=frameOrder({randomSpriteFrame:"true"},[set("inSpecificOrder",false)]);
+  assert.notDeepEqual(a.slice(0,10),[0,1,2,0,1,2,0,1,2,0]);
+  assert.ok(a.every(c=>[0,1,2].includes(c)));
+  assert.deepEqual(frameOrder({randomSpriteFrame:"true"},[set("inSpecificOrder",false)]),a,"same seed, same frames");
+});
+test("5.7a randomSpriteFrame with inSpecificOrder absent behaves as random (previous behaviour)", () => {
+  assert.deepEqual(frameOrder({randomSpriteFrame:"true"}),frameOrder({randomSpriteFrame:"true"},[set("inSpecificOrder",false)]));
+});
+test("5.7a inSpecificOrder without randomSpriteFrame does not change the frame", () => {
+  assert.deepEqual(frameOrder({},[set("inSpecificOrder",true)]),frameOrder({},[]));
+});
+test("5.7a inSpecificOrder / randomSpriteFrame are partial in xml-support", () => {
+  assert.equal(SUPPORT["Particle.inSpecificOrder"],"partial");assert.equal(SUPPORT["Particle@randomSpriteFrame"],"partial");
+});

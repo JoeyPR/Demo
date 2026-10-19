@@ -24,6 +24,7 @@ export const SUPPORT = {
   "Particle.flipX": "full",
   "Particle.flipY": "full",
   "Particle.gravityVector": "partial",
+  "Particle.inSpecificOrder": "partial",
   "Particle.initalRGB": "partial",
   "Particle.initialAlpha": "partial",
   "Particle.initialAngle": "partial",

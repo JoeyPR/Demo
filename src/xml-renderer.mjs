@@ -425,10 +425,16 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;p.xmlSystem=sys.a.name;
     p.add=get(pt,"blendingMode","")==="ADDITIVE";
     const track=renderer.animations.find(n=>n.tag==="SpriteAnimation"&&n.a.sprite===spriteName);
-    if(truth(pt.a.randomSpriteFrame)&&track) {
-      const frames=children(track,"Frame");
-      if(frames.length){const cell=numbers(frames[seed%frames.length].v);
-        p.sx=cell[0]*p.sw;p.sy=cell[1]*p.sh;p.xmlSprite=null;}
+    // 5.7 sprite frame choice. randomSpriteFrame picks a frame from the sprite's animation track; [HYP] inSpecificOrder=true makes
+    // that pick cycle in emission order (particleIndex % frameCount) instead of random (seed % frameCount, the previous behaviour).
+    const frames=track?children(track,"Frame"):[];
+    let pick=null;
+    const particleIndex=emission*count+k;
+    if(frames.length&&truth(pt.a.randomSpriteFrame))
+      pick=truth(get(pt,"inSpecificOrder","false",seed))?particleIndex%frames.length:seed%frames.length;
+    if(pick!==null) {
+      const cell=numbers(frames[pick].v);
+      p.sx=cell[0]*p.sw;p.sy=cell[1]*p.sh;p.xmlSprite=null;p.xmlFrameIndex=pick;
     }
     out.push(p);
     if(out.length>=256)return out;
