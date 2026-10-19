@@ -432,6 +432,8 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const particleIndex=emission*count+k;
     if(frames.length&&truth(pt.a.randomSpriteFrame))
       pick=truth(get(pt,"inSpecificOrder","false",seed))?particleIndex%frames.length:seed%frames.length;
+    // particleIndexSpriteFrame: the frame IS the particle's emission index (wrapping), and outranks the random pick.
+    if(frames.length&&truth(pt.a.particleIndexSpriteFrame))pick=particleIndex%frames.length;
     if(pick!==null) {
       const cell=numbers(frames[pick].v);
       p.sx=cell[0]*p.sw;p.sy=cell[1]*p.sh;p.xmlSprite=null;p.xmlFrameIndex=pick;

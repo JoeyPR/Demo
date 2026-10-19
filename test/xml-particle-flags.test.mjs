@@ -324,3 +324,19 @@ test("5.7a inSpecificOrder without randomSpriteFrame does not change the frame",
 test("5.7a inSpecificOrder / randomSpriteFrame are partial in xml-support", () => {
   assert.equal(SUPPORT["Particle.inSpecificOrder"],"partial");assert.equal(SUPPORT["Particle@randomSpriteFrame"],"partial");
 });
+
+// ---- 5.7b particleIndexSpriteFrame ------------------------------------------------------------------------------------
+test("5.7b particleIndexSpriteFrame=true: the frame is the particle's emission index, wrapping at the frame count", () => {
+  assert.deepEqual(frameOrder({particleIndexSpriteFrame:"true"}).slice(0,8),[0,1,2,0,1,2,0,1]);
+});
+test("5.7b particleIndexSpriteFrame outranks randomSpriteFrame (even with inSpecificOrder=false)", () => {
+  assert.deepEqual(frameOrder({particleIndexSpriteFrame:"true",randomSpriteFrame:"true"},[set("inSpecificOrder",false)]).slice(0,6),[0,1,2,0,1,2]);
+});
+test("5.7b particleIndexSpriteFrame=false/absent leaves the frame choice alone", () => {
+  assert.deepEqual(frameOrder({particleIndexSpriteFrame:"false"}),frameOrder({}));
+});
+test("5.7b particleIndexSpriteFrame counts particles within one emission (particlesPerEmission=3 -> 0,1,2 inside one burst)", () => {
+  const run=fixture({particleAttrs:{particleIndexSpriteFrame:"true"},animations:[frameTrack(cells)],emitter:[set("emissionInterval",5),set("particlesPerEmission",3)],particle:[set("lifeTime",10)]});
+  assert.deepEqual(run(0,{}).map(p=>p.sx/p.sw).sort(),[0,1,2]);
+  assert.equal(SUPPORT["Particle@particleIndexSpriteFrame"],"partial");
+});

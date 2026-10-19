@@ -44,6 +44,7 @@ export const SUPPORT = {
   "Particle.rotateWithVelocity": "partial",
   "Particle.sprite": "partial",
   "Particle.useGravity": "partial",
+  "Particle@particleIndexSpriteFrame": "partial",
   "Particle@randomSpriteFrame": "partial",
   "Particle@usePlayerFacing": "partial",
   "op:Curve": "partial",
