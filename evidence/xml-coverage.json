@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 310,
-   "blocked": 614
+   "partial-only": 337,
+   "blocked": 587
   }
  },
  "blockedBy": [
@@ -59,10 +59,6 @@
   [
    "Emitter@attachment",
    130
-  ],
-  [
-   "Particle.initalRGB",
-   79
   ],
   [
    "Emitter.useCharacterPos",
@@ -135,14 +131,6 @@
   [
    "Emitter.rgbTint",
    15
-  ],
-  [
-   "Particle.finalRGB",
-   13
-  ],
-  [
-   "Particle.interpolateRGB",
-   13
   ],
   [
    "Particle.orbitStart",
@@ -560,10 +548,8 @@
    {
     "system": "smoke_particle",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -574,6 +560,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -590,10 +577,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -609,6 +593,9 @@
      "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -620,10 +607,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -639,6 +623,9 @@
      "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -650,10 +637,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -670,6 +654,9 @@
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -679,10 +666,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -699,6 +683,9 @@
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -756,10 +743,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -773,6 +757,9 @@
      "Particle.initialVelocity",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialScale",
      "op:Random",
      "Particle.relativeToEmitter"
@@ -784,8 +771,7 @@
     "status": "blocked",
     "missing": [
      "Particle@angleRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -800,7 +786,8 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
-     "Particle.initialScale"
+     "Particle.initialScale",
+     "Particle.initalRGB"
     ]
    }
   ],
@@ -833,7 +820,6 @@
     "status": "blocked",
     "missing": [
      "Particle.inSpecificOrder",
-     "Particle.initalRGB",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -852,6 +838,7 @@
      "op:Random",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.initalRGB",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -1721,7 +1708,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle.initalRGB",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -1739,6 +1725,7 @@
      "op:Curve",
      "Particle.initialAngle",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
@@ -1755,7 +1742,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle.initalRGB",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -1773,6 +1759,7 @@
      "op:Curve",
      "Particle.initialAngle",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
@@ -1791,7 +1778,6 @@
     "status": "blocked",
     "missing": [
      "Particle.variantId",
-     "Particle.initalRGB",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
@@ -1805,6 +1791,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Particle.sprite",
+     "Particle.initalRGB",
      "op:Select",
      "Particle.blendingMode",
      "Particle.initialVelocity",
@@ -1816,8 +1803,7 @@
     "category": "no-trigger",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.initalRGB"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -1825,6 +1811,7 @@
      "Emitter.particlesToEmit",
      "Emitter.emissionInterval",
      "Particle.sprite",
+     "Particle.initalRGB",
      "op:Select",
      "Particle.blendingMode",
      "Particle.initialAlpha",
@@ -1836,8 +1823,7 @@
     "category": "no-trigger",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.initalRGB"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -1845,6 +1831,7 @@
      "Emitter.particlesToEmit",
      "Emitter.emissionInterval",
      "Particle.sprite",
+     "Particle.initalRGB",
      "op:Select",
      "Particle.blendingMode",
      "Particle.initialAlpha",
@@ -1856,8 +1843,7 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.initalRGB"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.offset",
@@ -1866,6 +1852,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Particle.sprite",
+     "Particle.initalRGB",
      "op:Select",
      "Particle.blendingMode",
      "Particle.initialAlpha",
@@ -1942,8 +1929,7 @@
     "missing": [
      "Emitter@attachment",
      "Particle.variantId",
-     "Particle.variantIdVar",
-     "Particle.initalRGB"
+     "Particle.variantIdVar"
     ],
     "notFull": [
      "Emitter.offset",
@@ -1961,6 +1947,7 @@
      "Particle.initialAlpha",
      "op:Random",
      "op:SetVar",
+     "Particle.initalRGB",
      "op:Select"
     ]
    },
@@ -1970,8 +1957,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.variantId",
-     "Particle.initalRGB"
+     "Particle.variantId"
     ],
     "notFull": [
      "Emitter.offset",
@@ -1987,6 +1973,7 @@
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
+     "Particle.initalRGB",
      "op:Select"
     ]
    },
@@ -2612,7 +2599,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
      "Particle.variantId"
     ],
     "notFull": [
@@ -2624,6 +2610,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.initialScale",
+     "Particle.initalRGB",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
@@ -3782,8 +3769,7 @@
      "Particle.applyOrbit",
      "Particle.orbitScaleVariation",
      "Particle.inSpecificOrder",
-     "Particle.orbit",
-     "Particle.initalRGB"
+     "Particle.orbit"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3802,7 +3788,8 @@
      "op:Random",
      "Particle.finalAngle",
      "Particle.initialScale",
-     "Particle.interpolateScale"
+     "Particle.interpolateScale",
+     "Particle.initalRGB"
     ]
    }
   ],
@@ -4588,10 +4575,8 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -4600,6 +4585,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -4755,10 +4741,8 @@
    {
     "system": "ps_HitSparkle",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -4767,6 +4751,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -4890,10 +4875,8 @@
    {
     "system": "double_jump_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -4906,6 +4889,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -5456,10 +5440,8 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -5468,6 +5450,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -5532,10 +5515,8 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -5544,6 +5525,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -6102,7 +6084,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
      "Particle.finalRotationRate",
      "Particle.posOffset"
     ],
@@ -6117,6 +6098,7 @@
      "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector",
+     "Particle.initalRGB",
      "Particle.initialRotationRate",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
@@ -6186,10 +6168,8 @@
    {
     "system": "double_jump_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -6201,6 +6181,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -6212,10 +6193,8 @@
    {
     "system": "double_jump_particle2",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -6227,6 +6206,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -7087,10 +7067,8 @@
    {
     "system": "ps_hitSparks",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -7099,6 +7077,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -8385,8 +8364,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.initalRGB"
+     "Particle@velocityRelativeToPlayerSpeed"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -8401,6 +8379,7 @@
      "Particle.blendingMode",
      "Particle.useGravity",
      "Particle.gravityVector",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.interpolateAlpha",
      "Particle.initialAlpha",
@@ -8868,8 +8847,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.initalRGB"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.infLifeTime",
@@ -8882,6 +8860,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.initalRGB",
      "Particle.initialVelocity",
      "op:RandomRadial",
      "Particle.initialAlpha",
@@ -8895,8 +8874,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.initalRGB"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.infLifeTime",
@@ -8908,6 +8886,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.offset",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -8923,8 +8902,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.initalRGB"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.infLifeTime",
@@ -8937,6 +8915,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.initalRGB",
      "Particle.initialVelocity",
      "op:RandomRadial",
      "Particle.initialAlpha",
@@ -8947,10 +8926,8 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -8959,6 +8936,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -8971,8 +8949,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.randomizeInterval",
-     "Particle.initalRGB"
+     "Emitter.randomizeInterval"
     ],
     "notFull": [
      "Emitter.offset",
@@ -8985,6 +8962,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.offset",
      "op:Random",
      "Particle.initialVelocity",
@@ -9513,7 +9491,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
      "Particle.finalRotationRate",
      "Particle.posOffset"
     ],
@@ -9528,6 +9505,7 @@
      "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector",
+     "Particle.initalRGB",
      "Particle.initialRotationRate",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
@@ -9685,8 +9663,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9701,6 +9678,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
@@ -9714,8 +9692,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9730,6 +9707,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
@@ -9743,8 +9721,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9758,6 +9735,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
@@ -9771,8 +9749,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9786,6 +9763,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
@@ -9799,8 +9777,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9813,6 +9790,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -9826,8 +9804,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9840,6 +9817,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -9853,8 +9831,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.intervalMin",
@@ -9867,6 +9844,7 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -9882,8 +9860,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9897,6 +9874,7 @@
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
+     "Particle.initalRGB",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -10318,10 +10296,8 @@
    {
     "system": "ps_feather",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -10334,6 +10310,7 @@
      "op:Random",
      "Particle.blendingMode",
      "Particle.initialAlpha",
+     "Particle.initalRGB",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
      "Particle.useGravity",
@@ -10347,10 +10324,8 @@
    {
     "system": "ps_fogLocal",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -10364,6 +10339,7 @@
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -10373,10 +10349,8 @@
    {
     "system": "ps_fogWorld",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -10389,6 +10363,7 @@
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -10754,10 +10729,8 @@
    {
     "system": "ps_Hit",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -10766,6 +10739,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
@@ -11770,10 +11744,8 @@
    {
     "system": "double_jump_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -11786,6 +11758,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -12797,8 +12770,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -12814,6 +12786,7 @@
      "op:Random",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialVelocity"
     ]
@@ -12823,8 +12796,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -12840,6 +12812,7 @@
      "op:Random",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialVelocity"
     ]
@@ -13934,10 +13907,8 @@
    {
     "system": "trail_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -13951,6 +13922,7 @@
      "Particle.blendingMode",
      "Particle.useGravity",
      "Particle.gravityVector",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.initialAngle",
      "op:Curve",
@@ -14104,10 +14076,8 @@
    {
     "system": "ps_hitSparks",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -14121,6 +14091,7 @@
      "Particle.initialScale",
      "Particle.offset",
      "op:Random",
+     "Particle.initalRGB",
      "op:Select"
     ]
    }
@@ -14150,10 +14121,8 @@
    {
     "system": "trail_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -14163,6 +14132,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.interpolateAlpha",
      "Particle.initialAlpha",
@@ -14173,10 +14143,8 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -14185,6 +14153,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -15247,10 +15216,8 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -15259,6 +15226,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -15375,10 +15343,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -15393,6 +15358,9 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialScale",
      "Particle.initialAngle"
     ]
@@ -15402,10 +15370,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -15420,6 +15385,9 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialScale",
      "Particle.initialAngle"
     ]
@@ -16046,7 +16014,6 @@
     "status": "blocked",
     "missing": [
      "Particle.inSpecificOrder",
-     "Particle.initalRGB",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -16065,6 +16032,7 @@
      "op:Random",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.initalRGB",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -16268,7 +16236,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle.initalRGB",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -16286,6 +16253,7 @@
      "op:Curve",
      "Particle.initialAngle",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
@@ -16302,7 +16270,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle.initalRGB",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -16320,6 +16287,7 @@
      "op:Curve",
      "Particle.initialAngle",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
@@ -16896,10 +16864,8 @@
    {
     "system": "ps_HitSparkle",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -16908,6 +16874,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -17380,10 +17347,8 @@
    {
     "system": "ps_hitSparks",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -17392,6 +17357,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -18622,10 +18588,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.particlesPerEmission",
@@ -18638,6 +18601,9 @@
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha"
@@ -19466,10 +19432,8 @@
    {
     "system": "hitPieces_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -19478,6 +19442,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
@@ -19489,15 +19454,14 @@
    {
     "system": "hit_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialAngle",
      "op:Random",
      "Particle.initialAlpha",
@@ -19510,8 +19474,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19523,6 +19486,7 @@
      "Emitter.infParticles",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.initalRGB",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale"
@@ -19577,10 +19541,8 @@
    {
     "system": "ps_destroyFeathers",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -19594,6 +19556,7 @@
      "Particle.blendingMode",
      "Particle.useGravity",
      "Particle.gravityVector",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.renderAlignment",
      "Particle.initialAngle",
@@ -19609,8 +19572,7 @@
     "category": "no-trigger",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentEmitterAngle",
-     "Particle.initalRGB"
+     "Particle@UseParentEmitterAngle"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -19623,6 +19585,7 @@
      "Particle.blendingMode",
      "Particle.useGravity",
      "Particle.gravityVector",
+     "Particle.initalRGB",
      "Particle.initialScale",
      "Particle.finalAngle",
      "Particle.renderAlignment",
@@ -20606,10 +20569,8 @@
    {
     "system": "smoke_particle",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -20620,6 +20581,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.initialAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -20636,10 +20598,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20655,6 +20614,9 @@
      "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -20666,10 +20628,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20685,6 +20644,9 @@
      "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -20696,10 +20658,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20716,6 +20675,9 @@
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -20725,10 +20687,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.initalRGB",
-     "Particle.finalRGB",
-     "Particle.interpolateRGB"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20745,6 +20704,9 @@
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
+     "Particle.initalRGB",
+     "Particle.finalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -20802,10 +20764,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalRGB",
-     "Particle.initalRGB",
-     "Particle.interpolateRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20819,6 +20778,9 @@
      "Particle.initialVelocity",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.finalRGB",
+     "Particle.initalRGB",
+     "Particle.interpolateRGB",
      "Particle.initialScale",
      "op:Random",
      "Particle.relativeToEmitter"
@@ -20830,8 +20792,7 @@
     "status": "blocked",
     "missing": [
      "Particle@angleRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20846,7 +20807,8 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
-     "Particle.initialScale"
+     "Particle.initialScale",
+     "Particle.initalRGB"
     ]
    }
   ],
@@ -21035,10 +20997,8 @@
    {
     "system": "ps_JumpParticles",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.initalRGB"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -21050,6 +21010,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
+     "Particle.initalRGB",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
@@ -21209,8 +21170,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21232,7 +21192,8 @@
      "Particle.useGravity",
      "Particle.initialVelocity",
      "Particle.gravityVector",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.initalRGB"
     ]
    },
    {
@@ -21240,8 +21201,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21263,7 +21223,8 @@
      "Particle.useGravity",
      "Particle.initialVelocity",
      "Particle.gravityVector",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.initalRGB"
     ]
    },
    {
@@ -21271,8 +21232,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21294,7 +21254,8 @@
      "Particle.useGravity",
      "Particle.initialVelocity",
      "Particle.gravityVector",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.initalRGB"
     ]
    },
    {
@@ -21302,8 +21263,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.initalRGB"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21325,7 +21285,8 @@
      "Particle.useGravity",
      "Particle.initialVelocity",
      "Particle.gravityVector",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.initalRGB"
     ]
    },
    {

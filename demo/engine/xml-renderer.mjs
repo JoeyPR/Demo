@@ -288,12 +288,17 @@ export const RELATIVE_TO_EMITTER_DEFAULT=true;
 // 5.4 renderAlignment: which point of the sprite sits on the particle position. (ax,ay) are fractions of the sprite size, y down.
 // Rotation and scale pivot on that point (spriteMatrix). Absent -> CENTER, the previous behaviour. Unknown values -> CENTER, reported.
 export const RENDER_ALIGNMENT={CENTER:[.5,.5],DOWN_CENTER:[.5,1],UPPER_CENTER:[.5,0],LEFT_CENTER:[0,.5],RIGHT_CENTER:[1,.5]};
+// 5.6 interpolate*/final*: values come ONLY from the evaluator (pr.values). The legacy property() fallback picks a random Select
+// item when its input is unavailable, which would silently invent a colour/angle/velocity.
 // 5.6 interpolate*/final*: [HYP] linear initial -> final over age/lifeTime. A final value the evaluator cannot resolve is ignored
 // (never zeroed) and listed in item.xmlIgnoredValues so the fidelity badge can say so.
 export const INTERPOLATION_EASING="linear";
 const lerp=(a,b,u)=>a+(b-a)*u;
 const finiteList=v=>Array.isArray(v)&&v.length&&v.every(x=>Number.isFinite(Number(x)))?v.map(Number):null;
 const ignoreValue=(item,system,name,why)=>{(item.xmlIgnoredValues??={})[`${system}.${name}`]=why;};
+// 5.6 RGB: the shipped XML spells it "initalRGB" (sic); "initialRGB" is accepted too. Values are 0..1 floats, the draw list tints 0..255.
+export const RGB_INITIAL_KEYS=["initalRGB","initialRGB"];
+const toTint=rgb=>rgb.slice(0,3).map(v=>Math.round(Math.min(1,Math.max(0,v))*255));
 // 5.5 isBackgroundParticle: true draws the particle in the first pass, behind the whole player, instead of the item's own pass.
 export const BACKGROUND_PARTICLE_PASS="RenderBehind";
 // 5.3 Facing. The whole player (every draw call) is already mirrored by the rig's facing matrix when facing<0, so a particle is
@@ -352,7 +357,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const delta=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed)),velocity=fx(pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed));
     const gravity=truth(get(pt,"useGravity","false"))?fx(get(pt,"gravityVector",[0,0],seed)):[0,0];
     // 5.6 interpolateVelocity + finalVelocity: v(a)=lerp(v0,vF,a/life), so travel(a)=v0*a+(vF-v0)*a^2/(2*life) per axis.
-    const authoredFinal=interpolateVelocity?pr.values.get("finalVelocity")??get(pt,"finalVelocity",null,seed):null;
+    const authoredFinal=interpolateVelocity?pr.values.get("finalVelocity"):null;
     const finalVelocity=authoredFinal?finiteList(fx(authoredFinal)):null;
     if(interpolateVelocity&&!finalVelocity)ignoreValue(item,sys.a.name,"finalVelocity",authoredFinal?"not numeric":"missing");
     const accel=[0,1].map(i=>finalVelocity?((finalVelocity[i]??0)-(velocity[i]??0))/life:0);   // d(velocity)/d(age) from interpolation
@@ -374,13 +379,28 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       anchor[0]+(entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+travel(0,age),
       anchor[1]+(entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+travel(1,age)],entry.pass);if(!p)continue;
     if(truth(get(pt,"isBackgroundParticle","false",seed)))p.pass=BACKGROUND_PARTICLE_PASS;
+    // 5.6 initalRGB / interpolateRGB / finalRGB
+    const initialKey=RGB_INITIAL_KEYS.find(k=>value(pt,k));
+    if(initialKey) {
+      const start=finiteList(pr.values.get(initialKey));
+      if(!start||start.length<3)ignoreValue(item,sys.a.name,initialKey,"not three numbers (unresolved expression)");
+      else {
+        let rgb=start;
+        if(truth(get(pt,"interpolateRGB","false",seed))) {
+          const end=finiteList(pr.values.get("finalRGB"));
+          if(end&&end.length>=3)rgb=start.map((v,i)=>lerp(v,end[i],age/life));
+          else ignoreValue(item,sys.a.name,"finalRGB",end?"not three numbers":"missing or unresolved");
+        }
+        if(rgb.slice(0,3).some(v=>v!==1))p.t=toTint(rgb);
+      }
+    }
     const alignment=String(get(pt,"renderAlignment","CENTER",seed));
     if(RENDER_ALIGNMENT[alignment])[p.ax,p.ay]=RENDER_ALIGNMENT[alignment];
     else (item.xmlUnsupportedValues??={})[`${sys.a.name}.renderAlignment`]=alignment;
     const alpha=get(pt,"initialAlpha",[1],seed,age/life);
     // 5.6 interpolateAlpha + finalAlpha
     if(truth(get(pt,"interpolateAlpha","false",seed))) {
-      const end=finiteList(pr.values.get("finalAlpha")??get(pt,"finalAlpha",null,seed)),start=finiteList(get(pt,"initialAlpha",[1],seed,0));
+      const end=finiteList(pr.values.get("finalAlpha")),start=finiteList(get(pt,"initialAlpha",[1],seed,0));
       if(end&&start)alpha[0]=lerp(start[0],end[0],age/life);
       else ignoreValue(item,sys.a.name,"finalAlpha",end?"initialAlpha unresolved":"finalAlpha missing or unresolved");
     }
@@ -393,7 +413,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     p.r=Number(get(pt,"initialAngle",[0],seed)[0])+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
     // 5.6 interpolateAngle + finalAngle: [HYP] angle = lerp(initialAngle, finalAngle, age/life), still plus the constant rotation rate.
     if(truth(get(pt,"interpolateAngle","false",seed))) {
-      const end=finiteList(pr.values.get("finalAngle")??get(pt,"finalAngle",null,seed)),start=Number(get(pt,"initialAngle",[0],seed)[0]);
+      const end=finiteList(pr.values.get("finalAngle")),start=Number(get(pt,"initialAngle",[0],seed)[0]);
       if(end&&Number.isFinite(start))p.r=lerp(start,end[0],age/life)+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
       else ignoreValue(item,sys.a.name,"finalAngle",end?"initialAngle unresolved":"finalAngle missing or unresolved");
     }

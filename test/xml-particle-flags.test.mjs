@@ -261,3 +261,39 @@ test("5.6c a Random-valued finalAngle (shape from CloakofChaos: min 0, max 360) 
 test("5.6c both angle entries are partial in xml-support", () => {
   assert.equal(SUPPORT["Particle.finalAngle"],"partial");assert.equal(SUPPORT["Particle.interpolateAngle"],"partial");
 });
+
+// ---- 5.6d initalRGB + interpolateRGB + finalRGB -----------------------------------------------------------------------
+const tintAt=(extra,t)=>{const run=withFlags(extra);run(0,{});return run(t,{})[0].t;};
+test("5.6d initalRGB (sic) tints the particle: 0..1 floats become 0..255", () => {
+  assert.deepEqual(tintAt([set("initalRGB","1,0.5,0")],0),[255,128,0]);
+});
+test("5.6d initialRGB (correct spelling) is accepted too, and spaces in the list are fine", () => {
+  assert.deepEqual(tintAt([set("initialRGB","0, 0.53, 0.78")],0),[0,135,199]);
+});
+test("5.6d white initalRGB (1,1,1) is no tint at all", () => {
+  assert.equal(tintAt([set("initalRGB","1, 1, 1")],0),undefined);
+  assert.equal(tintAt([],0),undefined);
+});
+test("5.6d interpolateRGB=true: colour goes linearly initial -> final over the lifetime", () => {
+  const flags=[set("initalRGB","1,1,1"),set("finalRGB","0,0.5,1"),set("interpolateRGB",true)];
+  assert.equal(tintAt(flags,0),undefined,"starts white");
+  assert.deepEqual(tintAt(flags,5000),[128,191,255]);
+  assert.deepEqual(tintAt([set("initalRGB","1,0,0"),set("finalRGB","0,0,1"),set("interpolateRGB",true)],5000),[128,0,128]);
+});
+test("5.6d interpolateRGB=false/absent: finalRGB is ignored", () => {
+  assert.deepEqual(tintAt([set("initalRGB","1,0,0"),set("finalRGB","0,0,1")],5000),[255,0,0]);
+  assert.deepEqual(tintAt([set("initalRGB","1,0,0"),set("finalRGB","0,0,1"),set("interpolateRGB",false)],5000),[255,0,0]);
+});
+test("5.6d out-of-range components clamp to 0..255", () => {
+  assert.deepEqual(tintAt([set("initalRGB","2,-1,0.5")],0),[255,0,128]);
+});
+test("5.6d an unresolvable initalRGB (Select by variantId) is ignored and reported, not zeroed to black", () => {
+  const sel=n("Select",{name:"initalRGB",input:"variantId"},"",[n("Item",{},"1,0,0"),n("Item",{},"0,1,0")]);
+  const run=withFlags([sel]);run(0,{});const [p]=run(100,{});
+  assert.equal(p.t,undefined);assert.match(run.item.xmlIgnoredValues["ps.initalRGB"],/not three numbers/);
+});
+test("5.6d the tint reaches the final draw call as 0..255 and RGB entries are partial", () => {
+  const c=finalCall(withFlags([set("initalRGB","1,0.5,0")]),1);
+  assert.deepEqual(c.tint,[255,128,0]);
+  for(const k of ["Particle.initalRGB","Particle.interpolateRGB","Particle.finalRGB"])assert.equal(SUPPORT[k],"partial",k);
+});
