@@ -44,3 +44,12 @@ Systems needing a hit target (initialVelocity: targetPos) are skipped with a rea
 
 ## Still open
 - Select inputs `variantId` (6 initalRGB + 4 finalVelocity uses) are not supplied by the planner, so those values are ignored/skipped.
+
+
+## Follow-ups after Step 5 acceptance
+- SwitchOffClothingParticles fires ONCE, on unequip (`SWITCH_OFF_CLOTHING`, `unequipXmlItem`, `PlannerPlayer.equip`). All 92 systems (24 scripts) that have both an AddClothingParticles Update and a SwitchOff Off are tested to emit while worn. This found one real bug: an unresolvable `IsWearing` symbol (`ITEM_ID_HAUNTED`, PearlTreasuredOctopus) halted the whole hook; it now counts as not worn (`UNRESOLVED_ITEM_SYMBOL_WORN=false`) and is listed by `unresolvedWearingSymbols`.
+- One player-level `PunchCounter` (src/punch-counter.mjs) feeds Select `punchCount` and Emitter `onPunchCount` odd/even. Items keep no private counter. `Emitter@onPunchCount` is partial.
+- Step 7.0: `motion.punch.target` is in pixels of the 32x32 player cell (32 per tile), origin cell top-left, x facing-local, y relative to the lifted player. Shared converter `aimToPunchTarget` (src/punch-target.mjs) now used by the demo.
+- Step 7: env.targetPos is the vector from the particle's spawn point to the target (`TARGET_POS_RELATIVE_TO="spawn"` [HYP]); Emitter attachment table `EMITTER_ATTACHMENT`: targetPos (emitter at target), handspotRoot (front-hand matrix, hand-item box origin [HYP]), contextRotation (punch aim direction from shoulder [24,18] [HYP]), targetPos2 (unsupported, reported: no second target in the planner). `targetPosOffset` defaults to [0,0].
+- Step 8: `BLEND_PREMULT_MODE` in src/blend.mjs. Values off (default, legacy straight alpha), A (premultiply once, then source-over), B (GL ONE, ONE_MINUS_SRC_ALPHA on straight RGB: destination-out then lighter). Runtime switch in the Render settings panel. Nothing decides A vs B until the user's capture.
+- Vercel: project `demo` (team grow-tool) is linked to JoeyPR/Demo with production branch `main`. Pushes to other branches get preview deployments only, protected by Vercel Authentication. `origin` (the repo default branch) also gets previews only.
