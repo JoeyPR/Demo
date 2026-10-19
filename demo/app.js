@@ -9,6 +9,7 @@ import {normalizeCatalogItem,advanceCatalogItem} from "./engine/catalog-adapter.
 import {drawBounds} from "./engine/draw-bounds.mjs";
 import {resolveAbilities} from "./engine/abilities.mjs";
 import {fidelityOf} from "./engine/xml-badge.mjs";
+import {aimToPunchTarget} from "./engine/punch-target.mjs";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const world=$("#world"),ctx=world.getContext("2d"),avatar=document.createElement("canvas");
@@ -217,9 +218,7 @@ function step(dt) {
   if(state.aim&&state.view&&input.punch) {
     const {rootX,rootY,s}=state.view;
     if(input.punch)motion.facing=state.aim.x>=rootX+16*s?1:-1;
-    let x=(state.aim.x-rootX)/s;
-    if(motion.facing<0)x=32-x;
-    input.punchTarget=[x,(state.aim.y-rootY)/s-(state.lastResult?.lift?.y??0)];
+    input.punchTarget=aimToPunchTarget({aim:state.aim,view:state.view,facing:motion.facing,liftY:state.lastResult?.lift?.y??0});
   }
   // Preserve discrete press edges even when keydown and keyup both occur between ticks.
   if(state.mode==="play"&&state.jumpQueued)motion.lastJump=false;
