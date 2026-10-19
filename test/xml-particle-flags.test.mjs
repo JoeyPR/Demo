@@ -148,3 +148,26 @@ test("5.4 renderAlignment: absent keeps CENTER; an unknown value falls back to C
   assert.deepEqual([b.ax,b.ay],[.5,.5]);assert.equal(run.item.xmlUnsupportedValues["ps.renderAlignment"],"NOT_A_REAL_ONE");
   assert.equal(SUPPORT["Particle.renderAlignment"],"partial");
 });
+
+// ---- 5.5 isBackgroundParticle -----------------------------------------------------------------------------------------
+import {BACKGROUND_PARTICLE_PASS} from "../src/xml-renderer.mjs";
+import {PLANNER_PROFILE} from "../src/planner-profile.mjs";
+test("5.5 isBackgroundParticle=true: the particle is assigned the BEHIND pass, which is the first pass in the profile", () => {
+  const [p]=withFlags([set("isBackgroundParticle",true)])(0,{});
+  assert.equal(p.pass,BACKGROUND_PARTICLE_PASS);assert.equal(PLANNER_PROFILE.passOrder[0],BACKGROUND_PARTICLE_PASS);
+});
+test("5.5 isBackgroundParticle=false/absent: the particle keeps the pass of the hook that started it", () => {
+  const hook=[n("AddClothingParticles",{},"",upd())];
+  const [a]=withFlags([set("isBackgroundParticle",false)],{hooks:hook})(0,{});
+  const [b]=withFlags([],{hooks:hook})(0,{});
+  assert.notEqual(a.pass,BACKGROUND_PARTICLE_PASS);assert.equal(a.pass,b.pass);
+});
+test("5.5 isBackgroundParticle=true overrides a front pass (RenderInFront hook) and reaches the final draw list in the BEHIND pass", () => {
+  const hooks=[n("RenderInFront",{},"",upd())];
+  const run=withFlags([set("isBackgroundParticle",true)],{hooks});
+  const [p]=run(0,{});assert.equal(p.pass,"RenderBehind");
+  assert.equal(finalCall(run,1).pass,"RenderBehind");
+});
+test("5.5 isBackgroundParticle is marked partial in xml-support", () => {
+  assert.equal(SUPPORT["Particle.isBackgroundParticle"],"partial");
+});

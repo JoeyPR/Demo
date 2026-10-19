@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 273,
-   "blocked": 651
+   "partial-only": 290,
+   "blocked": 634
   }
  },
  "blockedBy": [
@@ -63,10 +63,6 @@
   [
    "Particle.initalRGB",
    79
-  ],
-  [
-   "Particle.isBackgroundParticle",
-   78
   ],
   [
    "Particle.interpolateAlpha",
@@ -443,8 +439,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -457,6 +452,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.initialScale",
      "op:Random",
@@ -470,8 +466,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -484,6 +479,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.initialScale",
      "op:Random",
@@ -590,7 +586,6 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha"
@@ -604,6 +599,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
@@ -1251,8 +1247,7 @@
     "missing": [
      "Emitter.useCharacterPos",
      "Particle@particleIndexSpriteFrame",
-     "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -1265,6 +1260,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -2244,7 +2240,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -2260,6 +2255,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity"
     ]
@@ -2643,7 +2639,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.variantId",
      "Particle.interpolateVelocity",
@@ -2656,6 +2651,7 @@
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
@@ -2672,7 +2668,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2684,6 +2679,7 @@
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
@@ -2699,7 +2695,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2712,6 +2707,7 @@
      "Emitter.checkParticleNumToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
@@ -2726,7 +2722,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2739,6 +2734,7 @@
      "Emitter.checkParticleNumToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
@@ -2751,10 +2747,8 @@
    {
     "system": "ps_Aura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -2768,6 +2762,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity"
     ]
@@ -3564,9 +3559,7 @@
     "system": "punch_particle_trail",
     "category": "no-trigger",
     "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -3579,6 +3572,7 @@
      "op:Random",
      "Particle.initialVelocity",
      "Particle.rotateWithVelocity",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -3605,7 +3599,6 @@
     "missing": [
      "Particle.variantId",
      "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -3619,6 +3612,7 @@
      "Particle.sprite",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -3630,7 +3624,6 @@
     "missing": [
      "Particle.variantId",
      "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -3644,6 +3637,7 @@
      "Particle.sprite",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -3653,8 +3647,7 @@
     "category": "no-trigger",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.isBackgroundParticle"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -3665,6 +3658,7 @@
      "Particle.sprite",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -3674,8 +3668,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.isBackgroundParticle"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -3685,7 +3678,8 @@
      "Emitter.checkParticleNumToEmit",
      "Particle.sprite",
      "op:Select",
-     "Particle.blendingMode"
+     "Particle.blendingMode",
+     "Particle.isBackgroundParticle"
     ]
    }
   ],
@@ -3697,14 +3691,14 @@
     "missing": [
      "Emitter.useCharacterPos",
      "Particle.rainbowShift",
-     "Particle.useAvatarShadow",
-     "Particle.isBackgroundParticle"
+     "Particle.useAvatarShadow"
     ],
     "notFull": [
      "Emitter.infLifeTime",
      "Emitter.infParticles",
      "Emitter.particlesPerEmission",
      "Emitter.emissionInterval",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -4003,8 +3997,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.isBackgroundParticle"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -4017,6 +4010,7 @@
      "Particle.initialVelocity",
      "op:RandomRadial",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
@@ -4435,10 +4429,8 @@
    {
     "system": "ps_godRays",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -4451,6 +4443,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale"
     ]
    },
@@ -4755,8 +4748,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4766,6 +4758,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.renderAlignment",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale"
@@ -4928,7 +4921,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.interpolateAlpha"
     ],
@@ -4943,6 +4935,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -5596,8 +5589,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -5613,6 +5605,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "Particle.initialAlpha",
@@ -5624,8 +5617,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -5641,6 +5633,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "Particle.initialAlpha",
@@ -6058,7 +6051,6 @@
     "status": "blocked",
     "missing": [
      "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle",
      "Particle.finalVelocity",
      "Particle.interpolateVelocity"
     ],
@@ -6073,6 +6065,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -6086,7 +6079,6 @@
     "status": "blocked",
     "missing": [
      "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle",
      "Particle.finalVelocity",
      "Particle.interpolateVelocity"
     ],
@@ -6101,6 +6093,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -6140,7 +6133,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.finalRotationRate",
      "Particle.finalAlpha",
@@ -6157,6 +6149,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector",
      "Particle.initialRotationRate",
@@ -6175,7 +6168,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -6184,6 +6176,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -6227,7 +6220,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -6240,6 +6232,7 @@
      "Particle.offset",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -6253,7 +6246,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -6266,6 +6258,7 @@
      "Particle.offset",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -6303,10 +6296,8 @@
    {
     "system": "jumpTrailParticle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -6318,6 +6309,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.initialAngle",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -6530,7 +6522,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.isBackgroundParticle",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -6544,6 +6535,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -7010,10 +7002,8 @@
    {
     "system": "explosion_particle",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -7025,6 +7015,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale"
     ]
    },
@@ -7477,8 +7468,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.isBackgroundParticle"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
@@ -7496,6 +7486,7 @@
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
+     "Particle.isBackgroundParticle",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
@@ -7579,8 +7570,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle@angleRelativeToPlayerSpeed",
-     "Particle.isBackgroundParticle"
+     "Particle@angleRelativeToPlayerSpeed"
     ],
     "notFull": [
      "Emitter.offset",
@@ -7592,6 +7582,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.sprite",
+     "Particle.isBackgroundParticle",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve"
@@ -8829,8 +8820,7 @@
     "missing": [
      "Emitter.useCharacterPos",
      "Particle@particleIndexSpriteFrame",
-     "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -8843,6 +8833,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -9068,10 +9059,8 @@
    {
     "system": "ps_Aura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -9085,6 +9074,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity"
     ]
@@ -9222,10 +9212,8 @@
    {
     "system": "LineAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -9235,6 +9223,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.interpolateScale",
@@ -9247,10 +9236,8 @@
    {
     "system": "LineMoveAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -9260,6 +9247,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
@@ -9272,10 +9260,8 @@
    {
     "system": "SparksAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -9285,6 +9271,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -9558,7 +9545,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.finalRotationRate",
      "Particle.finalAlpha",
@@ -9575,6 +9561,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector",
      "Particle.initialRotationRate",
@@ -9730,7 +9717,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9745,6 +9731,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "op:Curve",
@@ -9759,7 +9746,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9774,6 +9760,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "op:Curve",
@@ -9788,7 +9775,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9802,6 +9788,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "op:Curve",
@@ -9816,7 +9803,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9830,6 +9816,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "op:Curve",
@@ -9844,7 +9831,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9857,6 +9843,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialAlpha",
@@ -9871,7 +9858,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9884,6 +9870,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialAlpha",
@@ -9898,7 +9885,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9911,6 +9897,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialAlpha",
@@ -9927,7 +9914,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
      "Particle.initalRGB"
     ],
@@ -9940,6 +9926,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
@@ -9982,7 +9969,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.finalRotationRate",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -9998,6 +9984,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.interpolateScale",
@@ -10013,7 +10000,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -10022,6 +10008,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -10244,10 +10231,8 @@
    {
     "system": "ps_doubleJump",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -10255,6 +10240,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
@@ -10398,7 +10384,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -10413,6 +10398,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -10424,7 +10410,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -10438,6 +10423,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -11064,7 +11050,6 @@
     "missing": [
      "Emitter.useCharacterPos",
      "Particle.inSpecificOrder",
-     "Particle.isBackgroundParticle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -11079,6 +11064,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.offset",
@@ -11821,7 +11807,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -11835,6 +11820,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -13508,10 +13494,8 @@
    {
     "system": "ps_doubleJump",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -13522,6 +13506,7 @@
      "Emitter.delayTimer",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13590,10 +13575,8 @@
    {
     "system": "LineAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -13603,6 +13586,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.interpolateScale",
@@ -13615,10 +13599,8 @@
    {
     "system": "LineMoveAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -13628,6 +13610,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13640,10 +13623,8 @@
    {
     "system": "SparksAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -13653,6 +13634,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -15776,7 +15758,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -15787,6 +15768,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.isBackgroundParticle",
      "Particle.offset",
      "Particle.initialScale",
      "Particle.initialVelocity"
@@ -15797,7 +15779,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -15808,6 +15789,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.isBackgroundParticle",
      "Particle.offset",
      "Particle.initialScale",
      "Particle.initialVelocity"
@@ -15818,8 +15800,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentScale",
-     "Particle.isBackgroundParticle"
+     "Particle@UseParentScale"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -15831,6 +15812,7 @@
      "Emitter.particlesToEmit",
      "Emitter.delayTimer",
      "Particle.sprite",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector"
     ]
@@ -16394,7 +16376,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -16410,6 +16391,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.isBackgroundParticle",
      "Particle.initialScale",
      "Particle.initialVelocity"
     ]
@@ -16918,8 +16900,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -16929,6 +16910,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.renderAlignment",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale"
@@ -17624,10 +17606,8 @@
    {
     "system": "LineAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -17637,6 +17617,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.interpolateScale",
@@ -17649,10 +17630,8 @@
    {
     "system": "LineMoveAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -17662,6 +17641,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
@@ -17674,10 +17654,8 @@
    {
     "system": "SparksAura",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -17687,6 +17665,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -18512,8 +18491,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle@angleRelativeToPlayerSpeed",
-     "Particle.isBackgroundParticle"
+     "Particle@angleRelativeToPlayerSpeed"
     ],
     "notFull": [
      "Emitter.offset",
@@ -18526,6 +18504,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector",
      "Particle.blendingMode",
@@ -19329,8 +19308,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.randomizeInterval",
-     "Particle@angleRelativeToPlayerSpeed",
-     "Particle.isBackgroundParticle"
+     "Particle@angleRelativeToPlayerSpeed"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19343,6 +19321,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.gravityVector",
      "Particle.blendingMode",
@@ -19510,8 +19489,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@angleRelativeToPlayerSpeed",
-     "Particle.isBackgroundParticle"
+     "Particle@angleRelativeToPlayerSpeed"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19521,6 +19499,7 @@
      "Emitter.emissionInterval",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale"
@@ -19727,8 +19706,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.isBackgroundParticle"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19741,6 +19719,7 @@
      "Particle.offset",
      "op:Random",
      "Particle.initialAngle",
+     "Particle.isBackgroundParticle",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
      "Particle.initialScale"
@@ -19805,7 +19784,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.isBackgroundParticle",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -19819,6 +19797,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -20524,8 +20503,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20538,6 +20516,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.initialScale",
      "op:Random",
@@ -20551,8 +20530,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20565,6 +20543,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.initialScale",
      "op:Random",
@@ -20671,7 +20650,6 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha"
@@ -20685,6 +20663,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
@@ -21101,7 +21080,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
      "Particle.initalRGB",
      "Particle.interpolateAlpha"
     ],
@@ -21115,6 +21093,7 @@
      "Emitter.delayTimer",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
      "Particle.initialScale",
@@ -21166,7 +21145,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -21179,6 +21157,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.offset",
      "op:Random",
@@ -21195,7 +21174,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.useCharacterPos",
-     "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -21208,6 +21186,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.isBackgroundParticle",
      "Particle.useGravity",
      "Particle.offset",
      "op:Random",
@@ -22381,10 +22360,8 @@
    {
     "system": "ps_Sparkles",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.isBackgroundParticle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -22402,7 +22379,8 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.initialRotationRate",
-     "op:Select"
+     "op:Select",
+     "Particle.isBackgroundParticle"
     ]
    }
   ]

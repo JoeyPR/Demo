@@ -26,6 +26,7 @@ export const SUPPORT = {
   "Particle.initialScale": "partial",
   "Particle.initialVelocity": "partial",
   "Particle.interpolateScale": "partial",
+  "Particle.isBackgroundParticle": "partial",
   "Particle.lifeTime": "full",
   "Particle.offset": "partial",
   "Particle.relativeToEmitter": "partial",
