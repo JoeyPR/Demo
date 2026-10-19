@@ -47,15 +47,11 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 560,
-   "blocked": 364
+   "partial-only": 659,
+   "blocked": 265
   }
  },
  "blockedBy": [
-  [
-   "Emitter@attachment",
-   130
-  ],
   [
    "Emitter.useCharacterPos",
    46
@@ -274,11 +270,10 @@
    {
     "system": "ps_wandSparklesPunchTarget",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -300,11 +295,10 @@
    {
     "system": "ps_ember",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "op:Random",
@@ -324,11 +318,10 @@
    {
     "system": "ps_muzzleFlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -347,11 +340,10 @@
    {
     "system": "ps_punch",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -427,11 +419,10 @@
    {
     "system": "fire_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.infParticles",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -456,11 +447,10 @@
    {
     "system": "meteor_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -547,11 +537,10 @@
    {
     "system": "ps_punchBack",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -577,11 +566,10 @@
    {
     "system": "ps_punchFront",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -607,11 +595,10 @@
    {
     "system": "ps_thrustBack",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -636,11 +623,10 @@
    {
     "system": "ps_thrustFront",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -817,11 +803,10 @@
    {
     "system": "punch_continue_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -837,11 +822,10 @@
    {
     "system": "punch_continue_particle_trial",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -860,11 +844,10 @@
    {
     "system": "punch_end_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -879,11 +862,10 @@
    {
     "system": "punch_start_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -1265,11 +1247,10 @@
    {
     "system": "ps_orbGodRays1",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -1291,11 +1272,10 @@
    {
     "system": "ps_orbGodRays2",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -1885,11 +1865,11 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.variantId",
      "Particle.variantIdVar"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -1914,10 +1894,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.variantId"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -1983,11 +1963,10 @@
    {
     "system": "p_punch",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -2206,11 +2185,10 @@
    {
     "system": "ps_slash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -2283,11 +2261,10 @@
    {
     "system": "punch_start_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -2303,11 +2280,10 @@
    {
     "system": "punch_continue_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -2324,11 +2300,10 @@
    {
     "system": "punch_end_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -2914,10 +2889,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle@UseParentScale"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
@@ -3670,11 +3645,10 @@
    {
     "system": "punch_splash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
@@ -3732,11 +3706,10 @@
    {
     "system": "PunchParticle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -3759,11 +3732,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -3805,11 +3778,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -3973,11 +3946,10 @@
    {
     "system": "punch_start_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -3993,11 +3965,10 @@
    {
     "system": "punch_continue_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -4014,11 +3985,10 @@
    {
     "system": "punch_end_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -4090,11 +4060,10 @@
    {
     "system": "p_punch",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -4696,10 +4665,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "op:Random",
@@ -4720,11 +4689,10 @@
    {
     "system": "ps_hitFlame",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.emissionInterval",
@@ -5080,10 +5048,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "op:Random",
@@ -5265,10 +5233,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "op:Random",
@@ -5726,11 +5694,10 @@
    {
     "system": "punch_start_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -5748,11 +5715,10 @@
    {
     "system": "punch_continue_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -5770,11 +5736,10 @@
    {
     "system": "punch_end_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -5794,10 +5759,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Emitter.rgbTint"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -5818,11 +5783,10 @@
    {
     "system": "ps_mistFront",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -5843,11 +5807,10 @@
    {
     "system": "ps_tileHit",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.offset",
@@ -6346,11 +6309,10 @@
    {
     "system": "MuzzleFlash1",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
@@ -6373,11 +6335,10 @@
    {
     "system": "Punch1",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -6401,11 +6362,10 @@
    {
     "system": "MuzzleFlash2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
@@ -6428,11 +6388,10 @@
    {
     "system": "Punch2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -6634,11 +6593,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -6662,10 +6621,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -6871,11 +6830,10 @@
    {
     "system": "trail_particle1",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -6892,11 +6850,10 @@
    {
     "system": "trail_particle2",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -6940,11 +6897,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPos",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -7962,11 +7919,10 @@
    {
     "system": "ps_wandSparklesPunchTarget",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -8098,11 +8054,10 @@
    {
     "system": "ps_sparklesPunchTarget",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -8144,11 +8099,10 @@
    {
     "system": "MuzzleFlash1",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -8168,11 +8122,10 @@
    {
     "system": "Punch1",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -8191,11 +8144,10 @@
    {
     "system": "MuzzleFlash2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -8215,11 +8167,10 @@
    {
     "system": "Punch2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -8511,10 +8462,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Emitter.arrow.target.offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.delayTimer",
      "Emitter.infLifeTime",
      "Emitter.infParticles",
@@ -8543,11 +8494,10 @@
    {
     "system": "ps_hit",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.delayTimer",
      "Emitter.infLifeTime",
      "Emitter.infParticles",
@@ -8575,11 +8525,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -9914,7 +9864,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Emitter@needsHandItemActive",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
@@ -9922,6 +9871,7 @@
      "Particle@UseParentVariantId"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.delayTimer",
      "Emitter.infLifeTime",
      "Emitter.infParticles",
@@ -10280,11 +10230,10 @@
    {
     "system": "ps_slash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -10405,10 +10354,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -10474,11 +10423,10 @@
    {
     "system": "ps_GodRay",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -11298,11 +11246,10 @@
    {
     "system": "ps_muzzleFlash",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -11322,11 +11269,11 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "op:Random",
      "Emitter.lifeTime",
@@ -11442,11 +11389,10 @@
    {
     "system": "PunchParticle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -11925,11 +11871,10 @@
    {
     "system": "ps_frontHandMist",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -11948,11 +11893,10 @@
    {
     "system": "ps_frontHandSnow",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "op:Random",
@@ -12067,11 +12011,10 @@
    {
     "system": "MuzzleFlash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -12091,10 +12034,10 @@
     "category": "staged+secondary",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "op:Random",
      "Emitter.lifeTime",
@@ -12393,10 +12336,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Emitter.rgbTint"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -12765,10 +12708,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.isBeamParticle"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -12784,11 +12727,10 @@
    {
     "system": "ps_explosion",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -13416,11 +13358,11 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPos",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -13440,11 +13382,11 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPos",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -13600,11 +13542,11 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -13642,11 +13584,10 @@
    {
     "system": "ps_muzzleFlash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -13667,10 +13608,10 @@
     "category": "staged+secondary",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "op:Random",
      "Emitter.lifeTime",
@@ -14412,11 +14353,10 @@
    {
     "system": "p_punch",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -14451,11 +14391,10 @@
    {
     "system": "p_punchLeft",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -14545,11 +14484,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -15332,11 +15271,10 @@
    {
     "system": "ps_Flash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -15854,11 +15792,10 @@
    {
     "system": "punch_continue_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -15874,11 +15811,10 @@
    {
     "system": "punch_continue_particle_trial",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -15897,11 +15833,10 @@
    {
     "system": "punch_end_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -15916,11 +15851,10 @@
    {
     "system": "punch_start_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -16161,11 +16095,10 @@
    {
     "system": "ps_slash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
@@ -16932,11 +16865,10 @@
    {
     "system": "punch_start_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -16954,11 +16886,10 @@
    {
     "system": "punch_continue_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -16976,11 +16907,10 @@
    {
     "system": "punch_end_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -17000,10 +16930,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Emitter.rgbTint"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -17024,11 +16954,10 @@
    {
     "system": "ps_mistFront",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -17049,11 +16978,10 @@
    {
     "system": "ps_tileHit",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.offset",
@@ -17118,11 +17046,11 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPos",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -17537,11 +17465,10 @@
    {
     "system": "MuzzleFlash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -17561,10 +17488,10 @@
     "category": "staged+secondary",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "op:Random",
      "Emitter.lifeTime",
@@ -17670,10 +17597,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Emitter.rgbTint"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.offsetFacing",
      "Emitter.emissionInterval",
@@ -18126,11 +18053,10 @@
    {
     "system": "p_flash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -18178,11 +18104,10 @@
    {
     "system": "p_punch",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
@@ -18229,11 +18154,10 @@
    {
     "system": "ps_hitSlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -18318,11 +18242,10 @@
    {
     "system": "ps_slash",
     "category": "hooked+secondary",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Particle.sprite",
@@ -18338,10 +18261,10 @@
     "category": "no-trigger",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle@UseParentEmitterAngle"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.delayTimer",
@@ -18425,11 +18348,10 @@
    {
     "system": "ps_PunchR",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -18447,11 +18369,10 @@
    {
     "system": "ps_PunchL",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -18753,11 +18674,10 @@
    {
     "system": "ps_punch",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -19036,11 +18956,10 @@
    {
     "system": "ps_mainPunchSparkleMain",
     "category": "staged+secondary",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -19246,11 +19165,10 @@
    {
     "system": "muzzle_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -19376,11 +19294,10 @@
    {
     "system": "ElectricParticle",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -19399,11 +19316,10 @@
    {
     "system": "ElectricParticle_Back",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.infParticles",
@@ -19423,11 +19339,10 @@
    {
     "system": "MuzzleFlash1",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
@@ -19475,11 +19390,10 @@
    {
     "system": "Punch1",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -19503,11 +19417,10 @@
    {
     "system": "MuzzleFlash2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
@@ -19530,11 +19443,10 @@
    {
     "system": "Punch2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -20044,11 +19956,10 @@
    {
     "system": "punch_start_particle_left",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.checkParticleNumToEmit",
@@ -20067,11 +19978,10 @@
    {
     "system": "punch_start_particle_right",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.checkParticleNumToEmit",
@@ -20108,11 +20018,10 @@
    {
     "system": "ps_ember",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "op:Random",
@@ -20132,11 +20041,10 @@
    {
     "system": "ps_muzzleFlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20155,11 +20063,10 @@
    {
     "system": "ps_punch",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20235,11 +20142,10 @@
    {
     "system": "fire_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.infParticles",
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -20264,11 +20170,10 @@
    {
     "system": "meteor_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -20355,11 +20260,10 @@
    {
     "system": "ps_punchBack",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20385,11 +20289,10 @@
    {
     "system": "ps_punchFront",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20415,11 +20318,10 @@
    {
     "system": "ps_thrustBack",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20444,11 +20346,10 @@
    {
     "system": "ps_thrustFront",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20681,11 +20582,10 @@
    {
     "system": "MuzzleFlash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20704,11 +20604,10 @@
    {
     "system": "Punch",
     "category": "staged+secondary",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20780,11 +20679,10 @@
    {
     "system": "ps_web",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.delayTimer",
@@ -20796,11 +20694,10 @@
    {
     "system": "ps_webHit",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@attachment"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.checkParticleNumToEmit",
@@ -20877,11 +20774,11 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
     "notFull": [
+     "Emitter@attachment",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",

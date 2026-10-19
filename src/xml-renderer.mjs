@@ -4,6 +4,7 @@ import {locomotionState} from "./motion-policy.mjs";
 import {PLANNER_PROFILE} from "./planner-profile.mjs";
 import {resolveProperties,makeRng} from "./xml-expr.mjs";
 import {buildTriggerTable} from "./xml-triggers.mjs";
+import {PUNCH_TARGET_UNITS,punchTargetToParticleSpace} from "./punch-target.mjs";
 const children=(n,tag)=>(n?.c??[]).filter(c=>!tag||c.tag===tag);
 const walk=n=>n?[n,...children(n).flatMap(walk)]:[];
 export const numbers=s=>String(s??"").split(",").map(Number);
@@ -252,6 +253,18 @@ function particleEntryActive(renderer,entry,states,motion) {
     const [machine,state]=s.split(".");return states[machine]?.state===state;
   }))));
 }
+// ---- Step 7: targets and Emitter attachment [HYP] ---------------------------------------------------------------------
+// env.targetPos for VectorTo / RandomRadial(baseAnglePosition=targetPos): the vector from the particle's SPAWN point to the punch target,
+// so a VectorTo with duration=lifeTime ends on the target. Flip to "player" to use the target relative to the player origin instead.
+export const TARGET_POS_RELATIVE_TO="spawn";
+// Emitter attachment meanings. Nothing here is verified against the game; each is a constant so one capture can correct it.
+export const EMITTER_ATTACHMENT={
+  targetPos:{supported:true,meaning:"emitter origin is the punch target"},
+  targetPos2:{supported:false,meaning:"second target spot; the planner has only one punch target"},
+  handspotRoot:{supported:true,meaning:"emitter origin is the front hand's item-root spot; offset is in hand-item sprite space (top-left origin), drawn with the rig's frontHand matrix"},
+  contextRotation:{supported:true,meaning:"particle offset, travel and sprite angle are rotated by the punch aim direction from the shoulder",pivot:[24,18]}
+};
+export const CONTEXT_ROTATION_FALLBACK_TARGET=PUNCH_TARGET_UNITS.defaultTarget;
 // ---- Stage-driven particle starts (work order step 2) ----------------------------------------------------------------
 // 298 systems have no <ParticleSystemUpdate> rule; they start from attributes ON the <ParticleSystem> element.
 // The vocabulary is [DATA]; every mapping below is [HYP] until a user capture confirms it. ONE place to change them.
@@ -373,9 +386,32 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const name=get(pt,"sprite","",seed),spriteName=Array.isArray(name)?name[0]:name;
     // Native operators (RandomRadial, Multiply, Increment, Select-by-input, ...) come from xml-expr.mjs. A property it cannot
     // resolve is reported in item.xmlUnsupportedParticleExpressions (with reason) and the particle is skipped - never zeroed.
-    const pr=resolveProperties(pt,{rng:makeRng(seed),t:0,
-      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:punchCountAt(entry,(entry.startMs??0)+(delay+T(emission))*1000),intervalMS:(range?T(emission+1)-T(emission):interval)*1000},
-      env:{lifeTime:life}});
+    const unmirror=facingLeft&&!truth(pt.a.usePlayerFacing??String(USE_PLAYER_FACING_DEFAULT));
+    const fx=v=>unmirror?[-v[0],...v.slice(1)]:v;
+    // Step 7: the punch target at the moment of birth, in particle space (feet-centre origin); undefined when nobody is aiming.
+    const spawnMs=(entry.startMs??0)+(delay+T(emission))*1000;
+    const attach=String(em.a.attachment??"");
+    const targetCell=punchTargetAt(entry,spawnMs),targetP=targetCell?punchTargetToParticleSpace(targetCell):null;
+    if(attach&&EMITTER_ATTACHMENT[attach]&&!EMITTER_ATTACHMENT[attach].supported) {
+      item.xmlUnsupportedParticleExpressions??=new Set();item.xmlUnsupportedParticleExpressions.add(sys.a.name);
+      (item.xmlUnsupportedReasons??={})[sys.a.name]=[`Emitter attachment ${attach}: ${EMITTER_ATTACHMENT[attach].meaning}`];continue;
+    }
+    if(attach==="targetPos"&&!targetP) {
+      item.xmlUnsupportedParticleExpressions??=new Set();item.xmlUnsupportedParticleExpressions.add(sys.a.name);
+      (item.xmlUnsupportedReasons??={})[sys.a.name]=["Emitter attachment targetPos: needs a hit target (punch target) and none is set"];continue;
+    }
+    const emitterBase=attach==="targetPos"?targetP:[0,0];
+    const resolve=env=>resolveProperties(pt,{rng:makeRng(seed),t:0,
+      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:punchCountAt(entry,spawnMs),intervalMS:(range?T(emission+1)-T(emission):interval)*1000},
+      env:{lifeTime:life,...env}});
+    let pr=resolve({});
+    // env.targetPos is relative to the particle's spawn point (TARGET_POS_RELATIVE_TO), so find the spawn point from the first pass.
+    if(targetP) {
+      const firstOffset=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed));
+      const spawnPoint=[0,1].map(i=>(emitterBase[i]??0)+(entry.offset?.[i]??0)+(offset[i]??0)+(firstOffset[i]??0));
+      const targetPos=TARGET_POS_RELATIVE_TO==="spawn"?[0,1].map(i=>targetP[i]-spawnPoint[i]):targetP;
+      pr=resolve({targetPos});
+    }
     const interpolateVelocity=truth(get(pt,"interpolateVelocity","false",seed));
     // finalVelocity only changes the path when interpolateVelocity is on; then it is required like initialVelocity.
     const needed=pr.unsupported.filter(u=>["offset","initialVelocity",...(interpolateVelocity?["finalVelocity"]:[])].includes(u.name));
@@ -383,13 +419,11 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       item.xmlUnsupportedParticleExpressions??=new Set();item.xmlUnsupportedParticleExpressions.add(sys.a.name);
       (item.xmlUnsupportedReasons??={})[sys.a.name]=needed.map(u=>`${u.name}: ${u.reason}`);continue;
     }
-    // 5.3 usePlayerFacing=false: this particle ignores the player's facing -> cancel the rig mirror on its offset, velocity, gravity and sprite.
-    const unmirror=facingLeft&&!truth(pt.a.usePlayerFacing??String(USE_PLAYER_FACING_DEFAULT));
-    const fx=v=>unmirror?[-v[0],...v.slice(1)]:v;
+    // 5.3 usePlayerFacing=false: this particle ignores the player's facing -> cancel the rig mirror (unmirror/fx, defined above).
     const delta=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed)),ownVelocity=fx(pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed));
     // 5.9 velocityRelativeToPlayerSpeed: add the player's velocity at spawn to the particle's initial velocity. It is a WORLD vector, and
     // the rig mirrors facing=-1 draw calls, so x is negated in player space to come out right after that mirror.
-    const spawnMs=(entry.startMs??0)+(delay+T(emission))*1000,[speedX,speedY]=playerSpeedAt(entry,spawnMs);
+    const [speedX,speedY]=playerSpeedAt(entry,spawnMs);
     const playerVector=[facingLeft?-speedX:speedX,speedY];
     const velocity=truth(pt.a.velocityRelativeToPlayerSpeed??"false")?[(ownVelocity[0]??0)+playerVector[0],(ownVelocity[1]??0)+playerVector[1]]:ownVelocity;
     const gravity=truth(get(pt,"useGravity","false"))?fx(get(pt,"gravityVector",[0,0],seed)):[0,0];
@@ -412,9 +446,20 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       const spawnMs=(entry.startMs??0)+(delay+T(emission))*1000,at=emitterPosAt(entry,spawnMs,[motion.x??0,motion.y??0]);
       anchor=[at[0]-(motion.x??0),at[1]-(motion.y??0)];
     }
+    // Step 7 contextRotation: particle-relative motion (offset + travel) is rotated by the punch aim direction; the emitter offset is not.
+    let aim=0;
+    if(attach==="contextRotation") {
+      const [pivotX,pivotY]=EMITTER_ATTACHMENT.contextRotation.pivot,aimTarget=targetCell??CONTEXT_ROTATION_FALLBACK_TARGET;
+      aim=Math.atan2(aimTarget[1]-pivotY,aimTarget[0]-pivotX)*180/Math.PI;
+    }
+    const rel=[(delta[0]??0)+travel(0,age),(delta[1]??0)+travel(1,age)];
+    const turned=aim?[rel[0]*Math.cos(aim*Math.PI/180)-rel[1]*Math.sin(aim*Math.PI/180),rel[0]*Math.sin(aim*Math.PI/180)+rel[1]*Math.cos(aim*Math.PI/180)]:rel;
+    const handspot=attach==="handspotRoot";
     const p=spritePiece(renderer,spriteName,[
-      anchor[0]+(entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+travel(0,age),
-      anchor[1]+(entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+travel(1,age)],entry.pass);if(!p)continue;
+      (handspot?0:anchor[0]+(entry.offset?.[0]??0)+emitterBase[0])+(offset[0]??0)+turned[0],
+      (handspot?0:anchor[1]+(entry.offset?.[1]??0)+emitterBase[1])+(offset[1]??0)+turned[1]],entry.pass);if(!p)continue;
+    if(handspot){p.attachment="frontHand";p.x-=16;p.y-=32;}      // hand-item sprite space has its origin at the box corner, not the feet
+    if(aim)p.xmlAimDeg=aim;
     if(truth(get(pt,"isBackgroundParticle","false",seed)))p.pass=BACKGROUND_PARTICLE_PASS;
     // 5.6 initalRGB / interpolateRGB / finalRGB
     const initialKey=RGB_INITIAL_KEYS.find(k=>value(pt,k));
@@ -469,6 +514,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       const vx=velocityAt(0,age),vy=velocityAt(1,age);
       if(vx||vy)p.r+=Math.atan2(vy,vx)*180/Math.PI;
     }
+    if(aim)p.r+=aim;
     p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;p.xmlSystem=sys.a.name;
     p.add=get(pt,"blendingMode","")==="ADDITIVE";
     const track=renderer.animations.find(n=>n.tag==="SpriteAnimation"&&n.a.sprite===spriteName);
@@ -509,6 +555,12 @@ export function playerSpeedAt(run,ms) {
   const trail=run.trail??[];let best=trail[0];
   for(const point of trail){if(point[0]>ms)break;best=point;}
   return [best?.[4]??0,best?.[5]??0];
+}
+// The punch target (cell pixels, see punch-target.mjs) the player was aiming at when a given moment happened, or null.
+export function punchTargetAt(run,ms) {
+  const trail=run.trail??[];let best=trail[0];
+  for(const point of trail){if(point[0]>ms)break;best=point;}
+  return best?.[6]??null;
 }
 // The punch count the item had when a given moment happened (last trail sample at or before it).
 export function punchCountAt(run,ms) {
@@ -586,7 +638,7 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
   }
   for(const run of runs) {
     if(run.stopMs!==undefined&&run.stopMs<=timeMs&&run.trail.length)continue;
-    run.trail.push([timeMs,motion.x??0,motion.y??0,punchCount,variable("speed.x",motion)??0,variable("speed.y",motion)??0]);
+    run.trail.push([timeMs,motion.x??0,motion.y??0,punchCount,variable("speed.x",motion)??0,variable("speed.y",motion)??0,motion.punch?.target?[...motion.punch.target]:null]);
     if(run.trail.length>TRAIL_LIMIT)run.trail.shift();
   }
   // Retain finite-life particles across action changes. Native world-position

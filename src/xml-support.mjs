@@ -16,6 +16,7 @@ export const SUPPORT = {
   "Emitter.particlesPerEmission": "partial",
   "Emitter.particlesToEmit": "partial",
   "Emitter.randomizeInterval": "partial",
+  "Emitter@attachment": "partial",
   "Emitter@onPunchCount": "partial",
   "Particle.blendingMode": "partial",
   "Particle.finalAlpha": "partial",
