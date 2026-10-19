@@ -171,3 +171,27 @@ test("5.5 isBackgroundParticle=true overrides a front pass (RenderInFront hook) 
 test("5.5 isBackgroundParticle is marked partial in xml-support", () => {
   assert.equal(SUPPORT["Particle.isBackgroundParticle"],"partial");
 });
+
+// ---- 5.6a interpolateAlpha + finalAlpha -------------------------------------------------------------------------------
+const alphaAt=(extra,t)=>{const run=withFlags(extra);run(0,{});return run(t,{})[0].o;};
+test("5.6a interpolateAlpha=true: alpha goes linearly from initialAlpha to finalAlpha over the lifetime", () => {
+  const flags=[set("initialAlpha",1),set("finalAlpha",0),set("interpolateAlpha",true)];
+  approx(alphaAt(flags,0),1);approx(alphaAt(flags,2500),.75);approx(alphaAt(flags,5000),.5);approx(alphaAt(flags,9000),.1,1e-9);
+});
+test("5.6a interpolateAlpha=true can rise: initial 0.2 -> final 1", () => {
+  const flags=[set("initialAlpha",.2),set("finalAlpha",1),set("interpolateAlpha",true)];
+  approx(alphaAt(flags,5000),.6);
+});
+test("5.6a interpolateAlpha=false or absent: finalAlpha is ignored and alpha stays at initialAlpha", () => {
+  approx(alphaAt([set("initialAlpha",.7),set("finalAlpha",0),set("interpolateAlpha",false)],5000),.7);
+  approx(alphaAt([set("initialAlpha",.7),set("finalAlpha",0)],5000),.7);
+});
+test("5.6a interpolateAlpha=true with no finalAlpha is ignored and reported, alpha unchanged", () => {
+  const run=withFlags([set("initialAlpha",.7),set("interpolateAlpha",true)]);run(0,{});
+  approx(run(5000,{})[0].o,.7);assert.match(run.item.xmlIgnoredValues["ps.finalAlpha"],/missing/);
+});
+test("5.6a interpolateAlpha: the shipped data has 40+ systems using it, and both SUPPORT entries are partial", () => {
+  const sets=[...Object.values(scripts)].flatMap(r=>r.particles??[]).filter(ps=>ps.c.some(c=>c.tag==="Particle"&&c.c.some(x=>x.a.name==="interpolateAlpha"&&x.v==="true")));
+  assert.ok(sets.length>=40);
+  assert.equal(SUPPORT["Particle.interpolateAlpha"],"partial");assert.equal(SUPPORT["Particle.finalAlpha"],"partial");
+});

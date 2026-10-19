@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 290,
-   "blocked": 634
+   "partial-only": 294,
+   "blocked": 630
   }
  },
  "blockedBy": [
@@ -63,14 +63,6 @@
   [
    "Particle.initalRGB",
    79
-  ],
-  [
-   "Particle.interpolateAlpha",
-   68
-  ],
-  [
-   "Particle.finalAlpha",
-   64
   ],
   [
    "Emitter.useCharacterPos",
@@ -493,9 +485,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.infParticles",
@@ -509,6 +499,8 @@
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "op:Random",
      "Particle.interpolateScale",
      "Particle.initialScale",
@@ -586,9 +578,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -601,6 +591,8 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -834,9 +826,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -846,6 +836,8 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale"
@@ -858,8 +850,6 @@
     "missing": [
      "Particle.inSpecificOrder",
      "Particle.initalRGB",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -879,6 +869,8 @@
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale"
@@ -910,9 +902,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.inSpecificOrder",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -924,7 +914,9 @@
      "Particle.sprite",
      "Particle.offset",
      "Particle.blendingMode",
-     "Particle.initialAlpha"
+     "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha"
     ]
    },
    {
@@ -996,7 +988,6 @@
      "Particle.inSpecificOrder",
      "Particle.interpolateVelocity",
      "Particle.finalAngle",
-     "Particle.finalAlpha",
      "Particle.finalVelocity"
     ],
     "notFull": [
@@ -1011,6 +1002,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -1095,8 +1087,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -1111,7 +1101,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -1556,7 +1548,6 @@
     "missing": [
      "Particle.interpolateVelocity",
      "Particle.finalAngle",
-     "Particle.finalAlpha",
      "Particle.finalVelocity"
     ],
     "notFull": [
@@ -1569,6 +1560,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -2343,8 +2335,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -2357,7 +2347,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -4568,8 +4560,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -4582,7 +4572,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -4594,8 +4586,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -4608,7 +4598,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -4619,8 +4611,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4632,6 +4623,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -4786,8 +4778,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4799,6 +4790,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -4921,8 +4913,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4938,6 +4929,7 @@
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -5153,8 +5145,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -5169,7 +5159,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -5294,8 +5286,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -5310,7 +5300,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -5438,8 +5430,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -5452,7 +5442,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -5464,8 +5456,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -5478,7 +5468,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -5489,8 +5481,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -5502,6 +5493,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -5514,8 +5506,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -5528,7 +5518,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -5540,8 +5532,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -5554,7 +5544,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -5565,8 +5557,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -5578,6 +5569,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -6022,9 +6014,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.randomizeInterval",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Emitter.randomizeInterval"
     ],
     "notFull": [
      "Emitter.infLifeTime",
@@ -6039,8 +6029,10 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.finalAlpha",
      "op:Select",
-     "Particle.initialAlpha"
+     "Particle.initialAlpha",
+     "Particle.interpolateAlpha"
     ]
    }
   ],
@@ -6109,8 +6101,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -6123,7 +6113,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -6135,8 +6127,6 @@
     "missing": [
      "Particle.initalRGB",
      "Particle.finalRotationRate",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha",
      "Particle.interpolateAngle",
      "Particle.finalAngle",
      "Particle.posOffset"
@@ -6154,6 +6144,8 @@
      "Particle.gravityVector",
      "Particle.initialRotationRate",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -6166,11 +6158,8 @@
    {
     "system": "break_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -6180,7 +6169,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    }
   ],
@@ -6495,9 +6486,7 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.inSpecificOrder",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -6512,7 +6501,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -6521,9 +6512,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Emitter@onPunchCount"
     ],
     "notFull": [
      "Emitter.offset",
@@ -6540,7 +6529,9 @@
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -6550,9 +6541,7 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.inSpecificOrder",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -6567,7 +6556,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -6576,9 +6567,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Emitter@onPunchCount"
     ],
     "notFull": [
      "Emitter.offset",
@@ -6594,7 +6583,9 @@
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -7121,8 +7112,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -7134,6 +7124,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -8418,9 +8409,7 @@
     "status": "blocked",
     "missing": [
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -8436,7 +8425,9 @@
      "Particle.useGravity",
      "Particle.gravityVector",
      "Particle.initialScale",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -9519,8 +9510,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -9535,7 +9524,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -9547,8 +9538,6 @@
     "missing": [
      "Particle.initalRGB",
      "Particle.finalRotationRate",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha",
      "Particle.interpolateAngle",
      "Particle.finalAngle",
      "Particle.posOffset"
@@ -9566,6 +9555,8 @@
      "Particle.gravityVector",
      "Particle.initialRotationRate",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -9970,8 +9961,6 @@
     "status": "blocked",
     "missing": [
      "Particle.finalRotationRate",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha",
      "Particle.interpolateAngle",
      "Particle.finalAngle",
      "Particle.posOffset"
@@ -9987,6 +9976,8 @@
      "Particle.isBackgroundParticle",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -9998,11 +9989,8 @@
    {
     "system": "smoke_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -10012,7 +10000,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialAngle",
      "op:Random",
      "Particle.initialRotationRate"
@@ -10206,8 +10196,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -10220,8 +10208,10 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -10258,11 +10248,8 @@
    {
     "system": "smoke_hearts",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesToEmit",
      "Emitter.particlesPerEmission",
@@ -10272,6 +10259,8 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:Random",
@@ -10284,9 +10273,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Emitter.randomizeInterval",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Emitter.randomizeInterval"
     ],
     "notFull": [
      "Emitter.infParticles",
@@ -10302,7 +10289,9 @@
      "Particle.initialVelocity",
      "Particle.offset",
      "op:Random",
-     "Particle.initialAlpha"
+     "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha"
     ]
    },
    {
@@ -10355,9 +10344,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -10371,6 +10358,8 @@
      "op:Random",
      "Particle.blendingMode",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.useGravity",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -11151,7 +11140,6 @@
     "missing": [
      "Particle.interpolateVelocity",
      "Particle.targetPosOffset",
-     "Particle.finalAlpha",
      "Particle.finalVelocity",
      "Particle.finalAngle",
      "Particle.OnFinish"
@@ -11172,6 +11160,7 @@
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
      "op:Random",
+     "Particle.finalAlpha",
      "op:Select",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -11185,7 +11174,6 @@
     "missing": [
      "Particle.interpolateVelocity",
      "Particle.targetPosOffset",
-     "Particle.finalAlpha",
      "Particle.finalVelocity",
      "Particle.finalAngle",
      "Particle.OnFinish"
@@ -11206,6 +11194,7 @@
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
      "op:Random",
+     "Particle.finalAlpha",
      "op:Select",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -12225,8 +12214,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -12239,7 +12226,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -12251,8 +12240,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -12265,7 +12252,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -13972,9 +13961,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -13993,7 +13980,9 @@
      "Particle.initialAngle",
      "op:Curve",
      "Particle.initialVelocity",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    }
   ],
@@ -14167,8 +14156,6 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -14179,7 +14166,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -14189,9 +14178,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -14203,7 +14190,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity"
     ]
    },
@@ -14212,8 +14201,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -14225,6 +14213,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -15261,8 +15250,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -15275,8 +15262,10 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -15286,8 +15275,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -15299,6 +15287,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -15308,11 +15297,8 @@
    {
     "system": "arrow_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -15322,7 +15308,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -15984,8 +15972,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -16000,7 +15986,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -16062,9 +16050,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -16074,6 +16060,8 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale"
@@ -16086,8 +16074,6 @@
     "missing": [
      "Particle.inSpecificOrder",
      "Particle.initalRGB",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -16107,6 +16093,8 @@
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale"
@@ -16138,9 +16126,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.inSpecificOrder",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -16152,7 +16138,9 @@
      "Particle.sprite",
      "Particle.offset",
      "Particle.blendingMode",
-     "Particle.initialAlpha"
+     "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha"
     ]
    },
    {
@@ -16224,7 +16212,6 @@
      "Particle.inSpecificOrder",
      "Particle.interpolateVelocity",
      "Particle.finalAngle",
-     "Particle.finalAlpha",
      "Particle.finalVelocity"
     ],
     "notFull": [
@@ -16239,6 +16226,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -16938,8 +16926,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -16951,6 +16938,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -17422,8 +17410,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -17435,6 +17422,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -17683,7 +17671,6 @@
      "Emitter@needsHandItemActive",
      "Particle.interpolateVelocity",
      "Particle.finalAngle",
-     "Particle.finalAlpha",
      "Particle.finalVelocity",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
@@ -17702,6 +17689,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.offset",
@@ -17717,7 +17705,6 @@
      "Emitter@needsHandItemActive",
      "Particle.interpolateVelocity",
      "Particle.finalAngle",
-     "Particle.finalAlpha",
      "Particle.finalVelocity",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
@@ -17736,6 +17723,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.offset",
@@ -18665,9 +18653,7 @@
      "Particle.inSpecificOrder",
      "Particle.initalRGB",
      "Particle.finalRGB",
-     "Particle.interpolateRGB",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.interpolateRGB"
     ],
     "notFull": [
      "Emitter.particlesPerEmission",
@@ -18680,7 +18666,9 @@
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
-     "Particle.initialAlpha"
+     "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha"
     ]
    },
    {
@@ -18688,9 +18676,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -18707,6 +18693,8 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "op:Curve"
     ]
@@ -19438,8 +19426,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -19452,7 +19438,9 @@
      "Particle.renderAlignment",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialVelocity",
@@ -19464,8 +19452,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -19479,7 +19465,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -19621,9 +19609,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -19643,7 +19629,9 @@
      "Particle.initialAngle",
      "op:Curve",
      "Particle.initialVelocity",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -19654,9 +19642,7 @@
      "Particle@UseParentEmitterAngle",
      "Particle.initalRGB",
      "Particle.finalAngle",
-     "Particle.interpolateAngle",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.interpolateAngle"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -19673,7 +19659,9 @@
      "Particle.renderAlignment",
      "Particle.initialVelocity",
      "op:Curve",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    }
   ],
@@ -19732,9 +19720,7 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.inSpecificOrder",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19749,7 +19735,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -19783,9 +19771,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Emitter@onPunchCount"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19802,7 +19788,9 @@
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -19812,9 +19800,7 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.inSpecificOrder",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19829,7 +19815,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -19838,9 +19826,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter@onPunchCount",
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha"
+     "Emitter@onPunchCount"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19856,7 +19842,9 @@
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
-     "Particle.initialAlpha"
+     "Particle.interpolateAlpha",
+     "Particle.initialAlpha",
+     "Particle.finalAlpha"
     ]
    },
    {
@@ -20557,9 +20545,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.infParticles",
@@ -20573,6 +20559,8 @@
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "op:Random",
      "Particle.interpolateScale",
      "Particle.initialScale",
@@ -20650,9 +20638,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.finalAlpha",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20665,6 +20651,8 @@
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
+     "Particle.interpolateAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -20898,8 +20886,6 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -20912,8 +20898,10 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialRotationRate",
      "op:Select",
      "Particle.initialVelocity",
@@ -21080,8 +21068,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.interpolateAlpha"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21096,6 +21083,7 @@
      "Particle.isBackgroundParticle",
      "Particle.relativeToEmitter",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -22301,8 +22289,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.interpolateAlpha",
-     "Particle.finalAlpha",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -22317,7 +22303,9 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.rotateWithVelocity",
+     "Particle.interpolateAlpha",
      "Particle.initialAlpha",
+     "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:VectorTo"

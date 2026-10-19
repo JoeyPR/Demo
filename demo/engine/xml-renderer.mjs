@@ -288,6 +288,12 @@ export const RELATIVE_TO_EMITTER_DEFAULT=true;
 // 5.4 renderAlignment: which point of the sprite sits on the particle position. (ax,ay) are fractions of the sprite size, y down.
 // Rotation and scale pivot on that point (spriteMatrix). Absent -> CENTER, the previous behaviour. Unknown values -> CENTER, reported.
 export const RENDER_ALIGNMENT={CENTER:[.5,.5],DOWN_CENTER:[.5,1],UPPER_CENTER:[.5,0],LEFT_CENTER:[0,.5],RIGHT_CENTER:[1,.5]};
+// 5.6 interpolate*/final*: [HYP] linear initial -> final over age/lifeTime. A final value the evaluator cannot resolve is ignored
+// (never zeroed) and listed in item.xmlIgnoredValues so the fidelity badge can say so.
+export const INTERPOLATION_EASING="linear";
+const lerp=(a,b,u)=>a+(b-a)*u;
+const finiteList=v=>Array.isArray(v)&&v.length&&v.every(x=>Number.isFinite(Number(x)))?v.map(Number):null;
+const ignoreValue=(item,system,name,why)=>{(item.xmlIgnoredValues??={})[`${system}.${name}`]=why;};
 // 5.5 isBackgroundParticle: true draws the particle in the first pass, behind the whole player, instead of the item's own pass.
 export const BACKGROUND_PARTICLE_PASS="RenderBehind";
 // 5.3 Facing. The whole player (every draw call) is already mirrored by the rig's facing matrix when facing<0, so a particle is
@@ -363,6 +369,12 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     if(RENDER_ALIGNMENT[alignment])[p.ax,p.ay]=RENDER_ALIGNMENT[alignment];
     else (item.xmlUnsupportedValues??={})[`${sys.a.name}.renderAlignment`]=alignment;
     const alpha=get(pt,"initialAlpha",[1],seed,age/life);
+    // 5.6 interpolateAlpha + finalAlpha
+    if(truth(get(pt,"interpolateAlpha","false",seed))) {
+      const end=finiteList(pr.values.get("finalAlpha")??get(pt,"finalAlpha",null,seed)),start=finiteList(get(pt,"initialAlpha",[1],seed,0));
+      if(end&&start)alpha[0]=lerp(start[0],end[0],age/life);
+      else ignoreValue(item,sys.a.name,"finalAlpha",end?"initialAlpha unresolved":"finalAlpha missing or unresolved");
+    }
     const initial=get(pt,"initialScale",[1,1],seed,age/life);
     p.o=alpha[0];p.k=[initial[0],initial[1]??initial[0]];
     if(truth(get(pt,"flipX","false",seed))!==unmirror)p.k[0]*=-1;
