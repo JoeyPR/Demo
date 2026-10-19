@@ -435,12 +435,18 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     if(truth(get(pt,"flipY","false",seed)))p.k[1]*=-1;
     const final=get(pt,"finalScale",null,seed);
     if(final&&truth(get(pt,"interpolateScale","false")))p.k=p.k.map((v,i)=>v+((final[i]??final[0])-v)*age/life);
-    p.r=Number(get(pt,"initialAngle",[0],seed)[0])+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
+    // An angle/rate the runtime cannot resolve (source="boomerangAngle", a Curve rate, ...) must not poison the matrix with NaN:
+    // use 0 and say so in item.xmlIgnoredValues.
+    const rawAngle=Number(get(pt,"initialAngle",[0],seed)[0]),rawRate=Number(get(pt,"initialRotationRate",[0],seed)[0]);
+    if(!Number.isFinite(rawAngle))ignoreValue(item,sys.a.name,"initialAngle","value comes from an unsupported source or expression");
+    if(!Number.isFinite(rawRate))ignoreValue(item,sys.a.name,"initialRotationRate","unsupported expression (Curve/source)");
+    const angle0=Number.isFinite(rawAngle)?rawAngle:0,rate0=Number.isFinite(rawRate)?rawRate:0;
+    p.r=angle0+rate0*age;
     // 5.6 interpolateAngle + finalAngle: [HYP] angle = lerp(initialAngle, finalAngle, age/life), still plus the constant rotation rate.
     if(truth(get(pt,"interpolateAngle","false",seed))) {
-      const end=finiteList(pr.values.get("finalAngle")),start=Number(get(pt,"initialAngle",[0],seed)[0]);
-      if(end&&Number.isFinite(start))p.r=lerp(start,end[0],age/life)+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
-      else ignoreValue(item,sys.a.name,"finalAngle",end?"initialAngle unresolved":"finalAngle missing or unresolved");
+      const end=finiteList(pr.values.get("finalAngle"));
+      if(end)p.r=lerp(angle0,end[0],age/life)+rate0*age;
+      else ignoreValue(item,sys.a.name,"finalAngle","finalAngle missing or unresolved");
     }
     // 5.9 angleRelativeToPlayerSpeed [HYP]: the base angle is turned by the heading of the player's velocity at spawn (same piece-space
     // vector as above, so it reads correctly after the rig mirror). A player standing still has no heading, so no rotation.

@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {fixture,n,set,upd,base,punchEvent} from "./xml-fixture.mjs";
 import {emitterPosAt,USE_PLAYER_FACING_DEFAULT,OFFSET_FACING_DEFAULT} from "../src/xml-renderer.mjs";
+import {normalizeCatalogItem,advanceCatalogItem} from "../src/catalog-adapter.mjs";
 import {SUPPORT} from "../src/xml-support.mjs";
 const scripts=JSON.parse(fs.readFileSync(new URL("../evidence/renderer-data.json",import.meta.url),"utf8")).scripts;
 const approx=(a,b,eps=1e-6)=>assert.ok(Math.abs(a-b)<=eps,`${a} != ${b}`);
@@ -470,4 +471,28 @@ test("5.9b angleRelativeToPlayerSpeed=true with a still player adds nothing (no 
 test("5.9b angleRelativeToPlayerSpeed=false/absent leaves the angle alone; entry is partial", () => {
   approx(angleWith({angleRelativeToPlayerSpeed:"false"},{vx:90,vy:90,ground:false}),0);approx(angleWith({},{vx:90,vy:90,ground:false}),0);
   assert.equal(SUPPORT["Particle@angleRelativeToPlayerSpeed"],"partial");
+});
+
+// ---- guard: unresolvable angles never produce NaN ---------------------------------------------------------------------
+test("guard: initialAngle with source=\"boomerangAngle\" (CarrotBoomerang shape) gives angle 0, finite matrices, and a report", () => {
+  const run=fixture({particle:[n("Set",{name:"initialAngle",source:"boomerangAngle"})]});
+  const [p]=run(0,{});assert.equal(p.r,0);assert.match(run.item.xmlIgnoredValues["ps.initialAngle"],/unsupported source/);
+});
+test("guard: a Curve-valued initialRotationRate gives rate 0 (no NaN) and a report", () => {
+  const run=fixture({particle:[n("Curve",{name:"initialRotationRate"},"",[])]});
+  const [p]=run(500,{});assert.ok(Number.isFinite(p.r));
+});
+test("guard: sweep of all 256 particle scripts (walk, punches, facing flip, 6 s) draws no non-finite x, y, r or tint", () => {
+  let bad=[];
+  for(const [name,r] of Object.entries(scripts)) {
+    if(!r.particles?.length)continue;
+    const item=normalizeCatalogItem({id:7,name:"T",slot:9,script:name,gameIcon:[]},{renderers:{[name]:r}});
+    for(let ms=0;ms<=6000;ms+=100) {
+      const walking=ms>1000&&ms<3000,ev=(ms===3500||ms===4200)?[{type:"punch",id:"p"+ms,at:ms}]:[];
+      advanceCatalogItem(item,ms,{clockMs:ms,moveMs:ms,x:walking?(ms-1000)*.09:0,y:0,vx:walking?90:0,vy:0,facing:ms>4500?-1:1,ground:true,
+        locomotion:walking?"walk":"idle",punch:ev.length||(ms>3500&&ms<3760)?{}:null,events:ev});
+      for(const p of item.pieces)for(const k of ["x","y","r","o"])if(p[k]!==undefined&&!Number.isFinite(p[k]))bad.push(`${name}.${k}`);
+    }
+  }
+  assert.deepEqual([...new Set(bad)],[]);
 });
