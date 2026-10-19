@@ -374,7 +374,12 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     // 5.3 usePlayerFacing=false: this particle ignores the player's facing -> cancel the rig mirror on its offset, velocity, gravity and sprite.
     const unmirror=facingLeft&&!truth(pt.a.usePlayerFacing??String(USE_PLAYER_FACING_DEFAULT));
     const fx=v=>unmirror?[-v[0],...v.slice(1)]:v;
-    const delta=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed)),velocity=fx(pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed));
+    const delta=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed)),ownVelocity=fx(pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed));
+    // 5.9 velocityRelativeToPlayerSpeed: add the player's velocity at spawn to the particle's initial velocity. It is a WORLD vector, and
+    // the rig mirrors facing=-1 draw calls, so x is negated in player space to come out right after that mirror.
+    const spawnMs=(entry.startMs??0)+(delay+T(emission))*1000,[speedX,speedY]=playerSpeedAt(entry,spawnMs);
+    const playerVector=[facingLeft?-speedX:speedX,speedY];
+    const velocity=truth(pt.a.velocityRelativeToPlayerSpeed??"false")?[(ownVelocity[0]??0)+playerVector[0],(ownVelocity[1]??0)+playerVector[1]]:ownVelocity;
     const gravity=truth(get(pt,"useGravity","false"))?fx(get(pt,"gravityVector",[0,0],seed)):[0,0];
     // 5.6 interpolateVelocity + finalVelocity: v(a)=lerp(v0,vF,a/life), so travel(a)=v0*a+(vF-v0)*a^2/(2*life) per axis.
     const authoredFinal=interpolateVelocity?pr.values.get("finalVelocity"):null;
@@ -477,6 +482,12 @@ export function emitterPosAt(run,ms,fallback=[0,0]) {
   for(const point of trail){if(point[0]>ms)break;best=point;}
   return [best[1],best[2]];
 }
+// The player's velocity vector (world axes, +x right, +y down) when a given moment happened.
+export function playerSpeedAt(run,ms) {
+  const trail=run.trail??[];let best=trail[0];
+  for(const point of trail){if(point[0]>ms)break;best=point;}
+  return [best?.[4]??0,best?.[5]??0];
+}
 // The punch count the item had when a given moment happened (last trail sample at or before it).
 export function punchCountAt(run,ms) {
   const trail=run.trail??[];let best=trail[0];
@@ -533,7 +544,7 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
   }
   for(const run of runs) {
     if(run.stopMs!==undefined&&run.stopMs<=timeMs&&run.trail.length)continue;
-    run.trail.push([timeMs,motion.x??0,motion.y??0,punchCount]);
+    run.trail.push([timeMs,motion.x??0,motion.y??0,punchCount,variable("speed.x",motion)??0,variable("speed.y",motion)??0]);
     if(run.trail.length>TRAIL_LIMIT)run.trail.shift();
   }
   // Retain finite-life particles across action changes. Native world-position

@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 524,
-   "blocked": 400
+   "partial-only": 532,
+   "blocked": 392
   }
  },
  "blockedBy": [
@@ -79,10 +79,6 @@
   [
    "Particle.OnFinish",
    25
-  ],
-  [
-   "Particle@velocityRelativeToPlayerSpeed",
-   24
   ],
   [
    "Emitter@needsHandItemActive",
@@ -1085,10 +1081,8 @@
    {
     "system": "EmberLeftParticle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -1096,6 +1090,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Particle@randomSpriteFrame",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.offset",
@@ -3243,8 +3238,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter.forceXScaling",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Emitter.forceXScaling"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3252,6 +3246,7 @@
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -3270,8 +3265,7 @@
     "category": "hooked+staged",
     "status": "blocked",
     "missing": [
-     "Emitter.forceXScaling",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Emitter.forceXScaling"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3279,6 +3273,7 @@
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -7230,16 +7225,15 @@
    {
     "system": "ps_skin_stars_purple",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.offset",
@@ -8269,10 +8263,8 @@
    {
     "system": "ps_cakeChunks",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
@@ -8282,6 +8274,7 @@
      "op:Random",
      "Emitter.emissionInterval",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.useGravity",
@@ -8513,16 +8506,15 @@
    {
     "system": "ps_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -9864,8 +9856,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -9881,6 +9872,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -9907,8 +9899,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -9924,6 +9915,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -9951,8 +9943,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -9968,6 +9959,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -12851,8 +12843,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -12868,6 +12859,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -12893,8 +12885,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -12910,6 +12901,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -12935,8 +12927,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -12952,6 +12943,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -12977,8 +12969,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -12994,6 +12985,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13020,8 +13012,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13037,6 +13028,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13064,8 +13056,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13081,6 +13072,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13325,16 +13317,15 @@
    {
     "system": "drop_particles_left",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -13352,16 +13343,15 @@
    {
     "system": "drop_particles_right",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -15176,16 +15166,15 @@
    {
     "system": "ps_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -17343,16 +17332,15 @@
    {
     "system": "ps_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@velocityRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
@@ -21571,8 +21559,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -21589,6 +21576,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialAngle",
@@ -21613,8 +21601,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -21630,6 +21617,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.initialAlpha",
      "Particle.initialAngle",
      "Particle.blendingMode",
@@ -21653,8 +21641,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -21671,6 +21658,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialAngle",
@@ -21694,8 +21682,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -21712,6 +21699,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialAngle",
@@ -21736,8 +21724,7 @@
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
-     "Particle@UseParentVariantId",
-     "Particle@velocityRelativeToPlayerSpeed"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -21753,6 +21740,7 @@
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
+     "Particle@velocityRelativeToPlayerSpeed",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialAngle",

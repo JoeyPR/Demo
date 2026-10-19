@@ -420,3 +420,33 @@ test("5.8 randomizeInterval: a different run (later start) draws a different seq
   assert.notDeepEqual(mk(0),mk(1000));
   assert.equal(SUPPORT["Emitter.randomizeInterval"],"partial");
 });
+
+// ---- 5.9a velocityRelativeToPlayerSpeed -------------------------------------------------------------------------------
+import {playerSpeedAt} from "../src/xml-renderer.mjs";
+// Piece-space x/y drift after 2 s for a player moving at vx the whole time, relative to the same particle with a still player.
+// Piece space is pre-mirror: at facing=-1 the rig flips x afterwards, so world drift = -(piece drift).
+const driftX=(attrs,facing=1,vx=90)=>{
+  const mk=v=>{const run=fixture({particleAttrs:attrs,emitter:[set("emissionInterval",5),set("particlesToEmit",1),set("infParticles",false)],
+    particle:[set("lifeTime",10),set("offset","0,0"),set("initialVelocity","0,0")]});
+    let p;for(let t=0;t<=2000;t+=50)[p]=run(t,{facing,vx:v,locomotion:v?"walk":"idle"});return p;};
+  const moving=mk(vx),still=mk(0);return [moving.x-still.x,moving.y-still.y];
+};
+test("5.9a velocityRelativeToPlayerSpeed=true: the particle's velocity includes the player's (90 px/s * 2 s = 180 px along the walk)", () => {
+  const [dx,dy]=driftX({velocityRelativeToPlayerSpeed:"true"});
+  approx(dx,180,1e-6);approx(dy,0,1e-6);
+});
+test("5.9a velocityRelativeToPlayerSpeed=true, facing=-1 walking left: piece-space x is +180 so the rig mirror makes it -180 in the world", () => {
+  const [dx]=driftX({velocityRelativeToPlayerSpeed:"true"},-1,-90);
+  approx(dx,180,1e-6);
+});
+test("5.9a velocityRelativeToPlayerSpeed=false/absent: the player's speed is not added", () => {
+  approx(driftX({velocityRelativeToPlayerSpeed:"false"})[0],0,1e-9);approx(driftX({})[0],0,1e-9);
+});
+test("5.9a the speed used is the one at SPAWN: speeding up afterwards does not change a live particle's path", () => {
+  const run=fixture({particleAttrs:{velocityRelativeToPlayerSpeed:"true"},emitter:[set("emissionInterval",5),set("particlesToEmit",1),set("infParticles",false)],
+    particle:[set("lifeTime",10),set("offset","0,0"),set("initialVelocity","0,0")]});
+  run(0,{vx:0});const a=run(1000,{vx:0})[0].x;for(let t=1050;t<=2000;t+=50)run(t,{vx:300,locomotion:"walk"});
+  approx(run(2000,{vx:300,locomotion:"walk"})[0].x,a,1e-6);
+  assert.deepEqual(playerSpeedAt(run.item.xmlParticleRuns[0],500),[0,0]);
+  assert.equal(SUPPORT["Particle@velocityRelativeToPlayerSpeed"],"partial");
+});
