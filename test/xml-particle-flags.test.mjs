@@ -21,3 +21,28 @@ test("infra: a run records the emitter position each frame and emitterPosAt retu
   assert.deepEqual(emitterPosAt(r,200),[30,5]);
   assert.deepEqual(emitterPosAt(r,-5),[0,0],"before the first sample uses the first sample");
 });
+
+// ---- 5.1 relativeToEmitter --------------------------------------------------------------------------------------------
+const moveAfterSpawn=run=>{run(0,{x:0,y:0});run(100,{x:0,y:0});return run(600,{x:100,y:-20});};
+test("5.1 relativeToEmitter=true: the particle follows the player after spawn", () => {
+  const [p]=moveAfterSpawn(withFlags([set("relativeToEmitter",true)]));
+  approx(p.x,16);approx(p.y,32);
+});
+test("5.1 relativeToEmitter=false: the particle stays where it spawned when the player moves (x and y)", () => {
+  const [p]=moveAfterSpawn(withFlags([set("relativeToEmitter",false)]));
+  approx(p.x,16-100);approx(p.y,32+20);
+});
+test("5.1 relativeToEmitter=false: a particle born after the player moved is anchored at the NEW spawn position", () => {
+  const run=fixture({emitter:[set("emissionInterval",.5)],particle:[set("lifeTime",10),set("relativeToEmitter",false)]});
+  run(0,{x:0});run(400,{x:0});run(600,{x:100});run(1100,{x:100});
+  const xs=run(1600,{x:150}).map(p=>Math.round(p.x)).sort((a,b)=>a-b);
+  assert.ok(xs.includes(16-150),"born at x=0, now 150 away");
+  assert.ok(xs.includes(16-50),"born at x=100, now 50 away");
+});
+test("5.1 relativeToEmitter absent: default is RELATIVE_TO_EMITTER_DEFAULT (follows), so existing items do not change", () => {
+  const [p]=moveAfterSpawn(withFlags([]));
+  approx(p.x,16);
+});
+test("5.1 relativeToEmitter is marked partial in xml-support (default is [HYP])", () => {
+  assert.equal(SUPPORT["Particle.relativeToEmitter"],"partial");
+});

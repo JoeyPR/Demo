@@ -27,6 +27,7 @@ export const SUPPORT = {
   "Particle.interpolateScale": "partial",
   "Particle.lifeTime": "full",
   "Particle.offset": "partial",
+  "Particle.relativeToEmitter": "partial",
   "Particle.sprite": "partial",
   "Particle.useGravity": "partial",
   "Particle@randomSpriteFrame": "partial",
@@ -37,5 +38,5 @@ export const SUPPORT = {
   "op:RandomRadial": "partial",
   "op:Select": "partial",
   "op:SetVar": "evaluator",
-  "op:VectorTo": "evaluator",
+  "op:VectorTo": "evaluator"
 };

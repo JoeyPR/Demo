@@ -283,6 +283,8 @@ function emitterDelayMs(renderer,name) {
   const em=first(renderer.particles.find(n=>n.a.name===name),"Emitter");
   return Math.max(0,Number(property(value(em,"delayTimer"),{},0)?.[0]??0))*1000;
 }
+// [HYP] A particle with no relativeToEmitter property follows the emitter (the behaviour before this flag was read).
+export const RELATIVE_TO_EMITTER_DEFAULT=true;
 function particlesFor(renderer,entry,timeMs,motion,item,states) {
   const sys=renderer.particles.find(n=>n.a.name===entry.node.a.name);if(!sys)return [];
   const em=first(sys,"Emitter"),pt=first(sys,"Particle");if(!em||!pt)return [];
@@ -332,9 +334,15 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       item.xmlUnsupportedParticleExpressions??=new Set();
       item.xmlUnsupportedParticleExpressions.add(sys.a.name);continue;
     }
+    // 5.1 relativeToEmitter: true follows the player; false stays where the emitter was at spawn (player space = spawn - now).
+    let anchor=[0,0];
+    if(!truth(get(pt,"relativeToEmitter",String(RELATIVE_TO_EMITTER_DEFAULT),seed))) {
+      const spawnMs=(entry.startMs??0)+(delay+emission*interval)*1000,at=emitterPosAt(entry,spawnMs,[motion.x??0,motion.y??0]);
+      anchor=[at[0]-(motion.x??0),at[1]-(motion.y??0)];
+    }
     const p=spritePiece(renderer,spriteName,[
-      (entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+(velocity[0]??0)*age+.5*(gravity[0]??0)*age*age,
-      (entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+(velocity[1]??0)*age+.5*(gravity[1]??0)*age*age],entry.pass);if(!p)continue;
+      anchor[0]+(entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+(velocity[0]??0)*age+.5*(gravity[0]??0)*age*age,
+      anchor[1]+(entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+(velocity[1]??0)*age+.5*(gravity[1]??0)*age*age],entry.pass);if(!p)continue;
     const alpha=get(pt,"initialAlpha",[1],seed,age/life);
     const initial=get(pt,"initialScale",[1,1],seed,age/life);
     p.o=alpha[0];p.k=[initial[0],initial[1]??initial[0]];
