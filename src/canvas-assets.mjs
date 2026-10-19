@@ -1,3 +1,4 @@
+import {premultiplyPixels,opaqueRgbPixels} from "./blend.mjs";
 // Browser-only adapter; the engine itself does not depend on DOM.
 export function extractSpritePixels(rgba,width,height,call) {
   const out=new Uint8ClampedArray(call.sw*call.sh*4);
@@ -45,6 +46,18 @@ export function registerAtlas(image,{pixelsPerUnit=1,canvasFactory=makeCanvas,ma
       // Deliberately preserve every source alpha byte, including transparent RGB.
       for(let p=0;p<rgba.length;p+=4)
         for(let c=0;c<3;c++) rgba[p+c]=Math.round(rgba[p+c]*call.tint[c]/255);
+      ctx.putImageData(pixels,0,0);
+      if(cache.size>=maxTintedCrops) cache.delete(cache.keys().next().value);
+      cache.set(key,canvas);return canvas;
+    },
+    // Step 8: derived crops for the blend plan. `base` is the plain (possibly tinted) crop or null for a direct atlas read.
+    blendCrop(call,kind,base) {
+      const key=JSON.stringify(["blend",kind,call.sx,call.sy,call.sw,call.sh,call.tint]);
+      if(cache.has(key)) return cache.get(key);
+      const canvas=canvasFactory(call.sw,call.sh),ctx=canvas.getContext("2d",{willReadFrequently:true});
+      if(base)ctx.drawImage(base,0,0);else ctx.drawImage(sampleCrop(call),0,0);
+      const pixels=ctx.getImageData(0,0,call.sw,call.sh);
+      pixels.data.set(kind==="premult"?premultiplyPixels(pixels.data):opaqueRgbPixels(pixels.data));
       ctx.putImageData(pixels,0,0);
       if(cache.size>=maxTintedCrops) cache.delete(cache.keys().next().value);
       cache.set(key,canvas);return canvas;

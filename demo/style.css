@@ -120,6 +120,7 @@
   .inspector{padding:var(--space-4);overflow:auto;scrollbar-width:thin;scrollbar-color:var(--raised) transparent}
   .setting-section{padding-bottom:var(--space-4);margin-bottom:var(--space-4);border-bottom:1px solid var(--line)}
   .resolution{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:5px;padding:3px;gap:2px}
+  .blend-mode{grid-template-columns:repeat(3,1fr)}
   .resolution button{font:var(--text-xs)/1 monospace;min-height:32px;border-radius:3px;color:var(--muted)}
   .resolution button.selected{background:var(--raised);color:var(--accent)}
   .switches{display:flex;flex-direction:column;gap:var(--space-1)}

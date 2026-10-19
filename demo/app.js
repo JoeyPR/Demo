@@ -9,6 +9,7 @@ import {normalizeCatalogItem,advanceCatalogItem} from "./engine/catalog-adapter.
 import {drawBounds} from "./engine/draw-bounds.mjs";
 import {resolveAbilities} from "./engine/abilities.mjs";
 import {fidelityOf} from "./engine/xml-badge.mjs";
+import {setBlendPremultMode,getBlendPremultMode,BLEND_MODES} from "./engine/blend.mjs";
 import {aimToPunchTarget} from "./engine/punch-target.mjs";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -18,7 +19,7 @@ const atlasLoads=new Map(),failedAtlases=new Set();
 const state={
   catalog:null,equipped:new Map(),slot:0,skin:[255,206,180,255],
   mode:"preview",baseAction:"idle",resolution:128,paused:matchMedia("(prefers-reduced-motion: reduce)").matches,
-  speed:1,rig:false,grid:false,fx:true,approxFx:false,hover:false,environment:"day",
+  speed:1,blendMode:getBlendPremultMode(),rig:false,grid:false,fx:true,approxFx:false,hover:false,environment:"day",
   hiddenPasses:new Set(),clock:0,actionStart:0,keys:{},touch:{},
   jumpUntil:0,punchUntil:0,doubleAt:null,width:800,height:420,aim:null,previewPunch:false,
   lastFrame:null,lastResult:null,layerSignature:"",ready:false,jumpQueued:false,punchQueued:false,page:0,pageSize:36
@@ -328,7 +329,7 @@ function renderAvatar() {
   for(const name of missing)loadAtlas(name);
   if(missing.some(name=>failedAtlases.has(name)))$("#coverage-status").textContent=
     `Unavailable sprite sheets: ${missing.filter(n=>failedAtlases.has(n)).join(", ")}. Other outfit pieces remain visible.`;
-  drawCanvas(avatarCtx,calls,atlases,{tilePixels:state.resolution,camera:[bounds.x,bounds.y]});
+  drawCanvas(avatarCtx,calls,atlases,{tilePixels:state.resolution,camera:[bounds.x,bounds.y],blendMode:state.blendMode});
   return calls.length;
 }
 function paintRig(rootX,rootY,s) {
@@ -466,6 +467,13 @@ function setupControls() {
     state.mode=b.dataset.mode;state.keys={};state.touch={};state.previewPunch=false;state.jumpQueued=false;state.punchQueued=false;setSelected("[data-mode]","data-mode",state.mode);
     $("#help").textContent="A / D move · Space jump · Hold F or the preview to punch. Abilities come from equipment.";
     if(state.mode==="play")world.focus({preventScroll:true});
+  });
+  const BLEND_NOTES={off:"Off: straight alpha, as before. A and B are candidates until a capture decides.",
+    A:"A: art premultiplied once (rgb x alpha), then source-over. Soft edges darken.",B:"B: GL ONE, ONE_MINUS_SRC_ALPHA on the straight RGB. Edges stay bright."};
+  $$("[data-blend]").forEach(b=>b.onclick=()=>{
+    if(!BLEND_MODES.includes(b.dataset.blend))return;
+    state.blendMode=setBlendPremultMode(b.dataset.blend);setSelected("[data-blend]","data-blend",state.blendMode);
+    $("#blend-note").textContent=BLEND_NOTES[state.blendMode];updateRig(0);
   });
   $$("[data-resolution]").forEach(b=>b.onclick=()=>{state.resolution=Number(b.dataset.resolution);setSelected("[data-resolution]","data-resolution",state.resolution);});
   for(const key of ["rig","grid","fx","hover","approxFx"])$("#"+(key==="approxFx"?"approxfx":key)).onchange=e=>{state[key]=e.target.checked;updateRig(0);};

@@ -88,6 +88,11 @@
           <div class="resolution" role="group" aria-label="Output resolution"><button data-resolution="32">32</button><button data-resolution="64">64</button><button data-resolution="128" class="selected" aria-pressed="true">128</button><button data-resolution="256">256</button></div>
           <p class="micro">Same rig. Independent render resolution.</p>
         </div>
+        <div class="setting-section">
+          <span class="field-label">Particle blend (premultiply)</span>
+          <div class="resolution blend-mode" id="blend-mode" role="group" aria-label="Particle blend premultiply mode"><button data-blend="off" class="selected" aria-pressed="true" title="Plain source-over on the straight-alpha art (what the demo did before). Default.">Off</button><button data-blend="A" title="A: premultiply the art once into a cached crop, then source-over.">A</button><button data-blend="B" title="B: GL-style ONE, ONE_MINUS_SRC_ALPHA applied to the straight RGB.">B</button></div>
+          <p class="micro" id="blend-note">Off: straight alpha, as before. A and B are candidates until a capture decides.</p>
+        </div>
         <div class="setting-section switches">
           <label class="switch-row"><span><i data-lucide="bone"></i>Show rig & joints</span><input id="rig" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
           <label class="switch-row"><span><i data-lucide="grid-2x2"></i>World grid</span><input id="grid" type="checkbox"><span class="switch" aria-hidden="true"></span></label>

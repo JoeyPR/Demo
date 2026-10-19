@@ -3,15 +3,16 @@ import { PLANNER_PROFILE } from "./planner-profile.mjs";
 import { armMatrix, heldMatrix, punchMatrix, playerRoot } from "./rig.mjs";
 import { sampleFrames } from "./animation.mjs";
 import { spriteMatrix, samplePublicParts } from "./items.mjs";
+import { blendPlan, callBlend } from "./blend.mjs";
 
 // Semantic hide tags in our API. Never equate these with native numeric flags.
 const slotPass={0:"RenderHat",1:"RenderShirt",2:"RenderPants",3:"RenderShoes",4:"RenderFaceItem",
   5:"RenderHandItem",6:"RenderBackpack",7:"RenderHair",8:"RenderChestItem",9:"RenderAura"};
-const blank=()=>({alpha:1,tint:null,add:false});
+const blank=()=>({alpha:1,tint:null,add:false,blend:"normal"});
 function rawCall(record,pass,local=IDENTITY) {
   return {...blank(),atlas:record.a,sx:record.sx,sy:record.sy,sw:record.sw,sh:record.sh,
     matrix:compose(local,spriteMatrix(record)),alpha:record.o??1,pass,tint:record.t??null,
-    sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,pet:!!record.pet,smooth:!!record.sm};
+    sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,blend:record.add?"additive":record.blend??"normal",pet:!!record.pet,smooth:!!record.sm};
 }
 export function resolveWear(items,baseSkin=[255,206,180,255]) {
   // Priority is deterministic but not claimed to be official for conflicting items.
@@ -160,7 +161,7 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
 
 // Atlas registry stores source pixels per logical pixel independently per atlas.
 // A 64px source frame covering 32 logical units has pixelsPerUnit=2.
-export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}={}) {
+export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1,blendMode}={}) {
   if(![32,64,128,256].includes(tilePixels)) throw Error("tilePixels must be 32/64/128/256");
   const viewport=compose(scale(tilePixels/32*dpr),translate(-camera[0],-camera[1]));
   ctx.save();
@@ -175,17 +176,23 @@ export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}=
         throw Error(`Descriptor/atlas density mismatch for ${call.atlas}`);
       const m=compose(viewport,call.matrix,scale(1/ppu));
       ctx.setTransform(...m);ctx.globalAlpha=call.alpha;
-      ctx.globalCompositeOperation=call.add?"lighter":"source-over";
       ctx.imageSmoothingEnabled=!!call.smooth;
-      // Tint must multiply RGB and preserve source alpha. Adapter can cache tinted crops.
-      if(call.tint) {
-        if(!atlas.tintedCrop) throw Error(`Tint adapter required for ${call.atlas}`);
-        const crop=atlas.tintedCrop(call);
-        ctx.drawImage(crop,0,0,call.sw,call.sh);
-      } else {
+      // Step 8: the blend plan decides the composite operation and which crop (plain / premultiplied / opaque RGB) each pass draws.
+      const plain=()=>{
+        // Tint must multiply RGB and preserve source alpha. Adapter can cache tinted crops.
+        if(call.tint) {
+          if(!atlas.tintedCrop) throw Error(`Tint adapter required for ${call.atlas}`);
+          return atlas.tintedCrop(call);
+        }
         const width=atlas.image.naturalWidth??atlas.image.width,height=atlas.image.naturalHeight??atlas.image.height;
         const edge=call.sx<0||call.sy<0||call.sx+call.sw>width||call.sy+call.sh>height;
-        if(edge&&atlas.sampleCrop)ctx.drawImage(atlas.sampleCrop(call),0,0,call.sw,call.sh);
+        return edge&&atlas.sampleCrop?atlas.sampleCrop(call):null;
+      };
+      for(const step of blendPlan(call,blendMode)) {
+        ctx.globalCompositeOperation=step.op;
+        const crop=step.crop==="plain"?plain():atlas.blendCrop?.(call,step.crop,plain());
+        if(step.crop!=="plain"&&!crop) throw Error(`Atlas ${call.atlas} cannot supply a ${step.crop} crop`);
+        if(crop)ctx.drawImage(crop,0,0,call.sw,call.sh);
         else ctx.drawImage(atlas.image,call.sx,call.sy,call.sw,call.sh,0,0,call.sw,call.sh);
       }
     }

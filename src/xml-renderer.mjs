@@ -4,6 +4,7 @@ import {locomotionState} from "./motion-policy.mjs";
 import {PLANNER_PROFILE} from "./planner-profile.mjs";
 import {resolveProperties,makeRng} from "./xml-expr.mjs";
 import {buildTriggerTable} from "./xml-triggers.mjs";
+import {blendKindOf} from "./blend.mjs";
 import {PUNCH_TARGET_UNITS,punchTargetToParticleSpace} from "./punch-target.mjs";
 const children=(n,tag)=>(n?.c??[]).filter(c=>!tag||c.tag===tag);
 const walk=n=>n?[n,...children(n).flatMap(walk)]:[];
@@ -234,6 +235,7 @@ function spriteProperties(p,node,motion,time) {
   if(a.rotation)p.r=Number(a.rotation);
   if(rotation)p.r=property(rotation,motion,time)?.[0]??0;
   p.add=a.blend==="ADDITIVE"||a.blendingMode==="ADDITIVE";
+  p.blend=blendKindOf(a.blendingMode??a.blend);
 }
 function actionActive(spec,motion) {
   if(!spec)return true;
@@ -517,6 +519,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     if(aim)p.r+=aim;
     p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;p.xmlSystem=sys.a.name;
     p.add=get(pt,"blendingMode","")==="ADDITIVE";
+    p.blend=blendKindOf(String(get(pt,"blendingMode","")));
     const track=renderer.animations.find(n=>n.tag==="SpriteAnimation"&&n.a.sprite===spriteName);
     // 5.7 sprite frame choice. randomSpriteFrame picks a frame from the sprite's animation track; [HYP] inSpecificOrder=true makes
     // that pick cycle in emission order (particleIndex % frameCount) instead of random (seed % frameCount, the previous behaviour).
