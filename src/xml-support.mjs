@@ -15,6 +15,7 @@ export const SUPPORT = {
   "Emitter.offsetFacing": "partial",
   "Emitter.particlesPerEmission": "partial",
   "Emitter.particlesToEmit": "partial",
+  "Emitter.randomizeInterval": "partial",
   "Particle.blendingMode": "partial",
   "Particle.finalAlpha": "partial",
   "Particle.finalAngle": "partial",

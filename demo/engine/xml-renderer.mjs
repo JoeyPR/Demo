@@ -296,6 +296,18 @@ export const INTERPOLATION_EASING="linear";
 const lerp=(a,b,u)=>a+(b-a)*u;
 const finiteList=v=>Array.isArray(v)&&v.length&&v.every(x=>Number.isFinite(Number(x)))?v.map(Number):null;
 const ignoreValue=(item,system,name,why)=>{(item.xmlIgnoredValues??={})[`${system}.${name}`]=why;};
+// 5.8 randomizeInterval: with the flag on, every emission waits a fresh interval in [intervalMin,intervalMax], drawn from the RUN's
+// seeded RNG (so replay is deterministic). Emission e happens at the sum of the first e intervals.
+const MAX_RANDOM_EMISSIONS=20000;
+function emissionClock(entry,item,name,interval,range) {
+  if(!range)return {at:e=>e*interval,indexAt:t=>Math.floor(t/interval)};
+  const [lo,hi]=range,rng=makeRng(((item.id*2654435761)^Math.trunc(entry.startMs??0)^[...name].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7))>>>0);
+  const times=[0],grow=()=>times.push(times[times.length-1]+Math.max(.016,lo+(hi-lo)*rng()));
+  const upToCount=e=>{while(times.length<=e&&times.length<MAX_RANDOM_EMISSIONS)grow();};
+  const upToTime=t=>{while(times[times.length-1]<=t&&times.length<MAX_RANDOM_EMISSIONS)grow();};
+  return {at:e=>{upToCount(e);return times[Math.min(e,times.length-1)];},
+    indexAt:t=>{upToTime(t);let i=0;while(i+1<times.length&&times[i+1]<=t)i++;return i;}};
+}
 // 5.6 RGB: the shipped XML spells it "initalRGB" (sic); "initialRGB" is accepted too. Values are 0..1 floats, the draw list tints 0..255.
 export const RGB_INITIAL_KEYS=["initalRGB","initialRGB"];
 const toTint=rgb=>rgb.slice(0,3).map(v=>Math.round(Math.min(1,Math.max(0,v))*255));
@@ -313,6 +325,13 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
   const intervalNode=value(em,"emissionInterval");
   const interval=Math.max(.016,intervalNode?Number(get(em,"emissionInterval",[.2])[0]):
     (Number(get(em,"intervalMin",[.2])[0])+Number(get(em,"intervalMax",[.2])[0]))/2);
+  // 5.8 randomizeInterval
+  let range=null;
+  if(truth(get(em,"randomizeInterval","false"))) {
+    const lo=value(em,"intervalMin")&&Number(get(em,"intervalMin",[.2])[0]),hi=value(em,"intervalMax")&&Number(get(em,"intervalMax",[.2])[0]);
+    if(Number.isFinite(lo)&&Number.isFinite(hi)&&value(em,"intervalMin")&&value(em,"intervalMax"))range=[Math.min(lo,hi),Math.max(lo,hi)];
+    else ignoreValue(item,sys.a.name,"randomizeInterval","intervalMin/intervalMax missing");
+  }
   const count=Math.max(0,Math.min(32,Math.trunc(Number(get(em,"particlesPerEmission",[1])[0]))));
   if(!count)return [];
   const lifetime=Math.max(.016,Number(get(pt,"lifeTime",[1])[0]));
@@ -331,18 +350,19 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
   const emissionEnd=Math.min(now,stop,emissionLife);
   if(emissionEnd<0)return [];
   // Deterministic replay within a bounded run avoids duplicate repaint births.
-  const out=[],last=Math.min(Math.floor(emissionEnd/interval),Math.ceil(total/count)-1);
-  const firstIndex=Math.max(0,last-96,Math.floor((now-lifetime)/interval));
+  const clock=emissionClock(entry,item,sys.a.name,interval,range),T=clock.at;
+  const out=[],last=Math.min(clock.indexAt(emissionEnd),Math.ceil(total/count)-1);
+  const firstIndex=Math.max(0,last-96,clock.indexAt(now-lifetime));
   for(let emission=firstIndex;emission<=last;emission++)for(let k=0;k<count;k++) {
     if(emission*count+k>=total)break;
-    const seed=(emission*31+k*17+item.id)>>>0,age=now-emission*interval;
+    const seed=(emission*31+k*17+item.id)>>>0,age=now-T(emission);
     const life=Math.max(.016,Number(get(pt,"lifeTime",[1],seed)[0]));
     if(age<0||age>=life)continue;
     const name=get(pt,"sprite","",seed),spriteName=Array.isArray(name)?name[0]:name;
     // Native operators (RandomRadial, Multiply, Increment, Select-by-input, ...) come from xml-expr.mjs. A property it cannot
     // resolve is reported in item.xmlUnsupportedParticleExpressions (with reason) and the particle is skipped - never zeroed.
     const pr=resolveProperties(pt,{rng:makeRng(seed),t:0,
-      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:punchCountAt(entry,(entry.startMs??0)+(delay+emission*interval)*1000),intervalMS:interval*1000},
+      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:punchCountAt(entry,(entry.startMs??0)+(delay+T(emission))*1000),intervalMS:(range?T(emission+1)-T(emission):interval)*1000},
       env:{lifeTime:life}});
     const interpolateVelocity=truth(get(pt,"interpolateVelocity","false",seed));
     // finalVelocity only changes the path when interpolateVelocity is on; then it is required like initialVelocity.
@@ -372,7 +392,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     // 5.1 relativeToEmitter: true follows the player; false stays where the emitter was at spawn (player space = spawn - now).
     let anchor=[0,0];
     if(!truth(get(pt,"relativeToEmitter",String(RELATIVE_TO_EMITTER_DEFAULT),seed))) {
-      const spawnMs=(entry.startMs??0)+(delay+emission*interval)*1000,at=emitterPosAt(entry,spawnMs,[motion.x??0,motion.y??0]);
+      const spawnMs=(entry.startMs??0)+(delay+T(emission))*1000,at=emitterPosAt(entry,spawnMs,[motion.x??0,motion.y??0]);
       anchor=[at[0]-(motion.x??0),at[1]-(motion.y??0)];
     }
     const p=spritePiece(renderer,spriteName,[
@@ -435,7 +455,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     // alternateSpriteFrameWithPunch [HYP]: frame parity follows the number of punches the item had when the particle was born.
     // Precedence: particleIndexSpriteFrame > alternateSpriteFrameWithPunch > randomSpriteFrame.
     if(frames.length&&truth(pt.a.alternateSpriteFrameWithPunch))
-      pick=(punchCountAt(entry,(entry.startMs??0)+(delay+emission*interval)*1000)%2)%frames.length;
+      pick=(punchCountAt(entry,(entry.startMs??0)+(delay+T(emission))*1000)%2)%frames.length;
     // particleIndexSpriteFrame: the frame IS the particle's emission index (wrapping), and outranks the random pick.
     if(frames.length&&truth(pt.a.particleIndexSpriteFrame))pick=particleIndex%frames.length;
     if(pick!==null) {

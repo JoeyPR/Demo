@@ -378,3 +378,45 @@ test("5.7c alternateSpriteFrameWithPunch=false/absent leaves frames alone; entry
   assert.deepEqual(frames(mk({alternateSpriteFrameWithPunch:"false"})),frames(mk({})));
   assert.equal(SUPPORT["Particle@alternateSpriteFrameWithPunch"],"partial");
 });
+
+// ---- 5.8 Emitter randomizeInterval ------------------------------------------------------------------------------------
+// births (ms after the run started) of the particles alive at a late frame, oldest first
+const births=(emitter,until=4000)=>{
+  const run=fixture({emitter:[set("infLifeTime",true),...emitter],particle:[set("lifeTime",1000)]});
+  const t=until;run.until(0,t,50);return {run,list:run(t,{}).map(p=>Math.round(t-p.xmlParticleAge)).sort((a,b)=>a-b)};
+};
+test("5.8 randomizeInterval=true: gaps between emissions are NOT constant and stay inside [intervalMin, intervalMax]", () => {
+  const {list}=births([set("randomizeInterval",true),set("intervalMin",.1),set("intervalMax",.5)]);
+  const gaps=list.slice(1).map((v,i)=>v-list[i]);
+  assert.ok(gaps.length>=8,`enough emissions (${gaps.length})`);
+  assert.ok(gaps.every(g=>g>=99&&g<=501),`gaps ${gaps}`);
+  assert.ok(new Set(gaps).size>3,"not a constant interval");
+});
+test("5.8 randomizeInterval=true is deterministic: replaying the same run gives the same births", () => {
+  const e=[set("randomizeInterval",true),set("intervalMin",.1),set("intervalMax",.5)];
+  assert.deepEqual(births(e).list,births(e).list);
+});
+test("5.8 randomizeInterval=false/absent: the fixed emissionInterval is used and intervalMin/Max are ignored", () => {
+  const fixed=[set("emissionInterval",.25),set("intervalMin",.1),set("intervalMax",.5)];
+  for(const extra of [[],[set("randomizeInterval",false)]]) {
+    const gaps=births([...fixed,...extra]).list.map((v,i,a)=>v-a[i-1]).slice(1);
+    assert.ok(gaps.every(g=>Math.abs(g-250)<1),`gaps ${gaps}`);
+  }
+});
+test("5.8 randomizeInterval: the mean gap is near the midpoint of the range (uniform draw)", () => {
+  const {list}=births([set("randomizeInterval",true),set("intervalMin",.1),set("intervalMax",.3)],60000);
+  assert.ok(list.length>40);
+  const mean=(list.at(-1)-list[0])/(list.length-1);
+  assert.ok(mean>150&&mean<250,`mean gap ${mean}`);
+});
+test("5.8 randomizeInterval=true without intervalMin/Max falls back to the fixed interval and is reported", () => {
+  const {run,list}=births([set("randomizeInterval",true),set("emissionInterval",.25)]);
+  assert.ok(list.map((v,i,a)=>v-a[i-1]).slice(1).every(g=>Math.abs(g-250)<1));
+  assert.match(run.item.xmlIgnoredValues["ps.randomizeInterval"],/intervalMin/);
+});
+test("5.8 randomizeInterval: a different run (later start) draws a different sequence from its own seed", () => {
+  const mk=startAt=>{const run=fixture({emitter:[set("randomizeInterval",true),set("intervalMin",.1),set("intervalMax",.5)],particle:[set("lifeTime",1000)]});
+    const t0=startAt;run.until(t0,t0+3000,50);return run(t0+3000,{}).map(p=>Math.round(t0+3000-p.xmlParticleAge-t0)).sort((a,b)=>a-b);};
+  assert.notDeepEqual(mk(0),mk(1000));
+  assert.equal(SUPPORT["Emitter.randomizeInterval"],"partial");
+});
