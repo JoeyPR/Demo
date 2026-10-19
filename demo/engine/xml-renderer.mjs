@@ -442,6 +442,10 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       if(end&&Number.isFinite(start))p.r=lerp(start,end[0],age/life)+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
       else ignoreValue(item,sys.a.name,"finalAngle",end?"initialAngle unresolved":"finalAngle missing or unresolved");
     }
+    // 5.9 angleRelativeToPlayerSpeed [HYP]: the base angle is turned by the heading of the player's velocity at spawn (same piece-space
+    // vector as above, so it reads correctly after the rig mirror). A player standing still has no heading, so no rotation.
+    if(truth(pt.a.angleRelativeToPlayerSpeed??"false")&&(playerVector[0]||playerVector[1]))
+      p.r+=Math.atan2(playerVector[1],playerVector[0])*180/Math.PI;
     // 5.2 rotateWithVelocity [HYP]: sprite art points along +x, so heading = atan2(vy,vx) in degrees, from the instantaneous velocity.
     if(truth(get(pt,"rotateWithVelocity","false",seed))) {
       const vx=velocityAt(0,age),vy=velocityAt(1,age);

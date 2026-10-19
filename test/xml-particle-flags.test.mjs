@@ -450,3 +450,24 @@ test("5.9a the speed used is the one at SPAWN: speeding up afterwards does not c
   assert.deepEqual(playerSpeedAt(run.item.xmlParticleRuns[0],500),[0,0]);
   assert.equal(SUPPORT["Particle@velocityRelativeToPlayerSpeed"],"partial");
 });
+
+// ---- 5.9b angleRelativeToPlayerSpeed ----------------------------------------------------------------------------------
+const angleWith=(attrs,motion,extra=[])=>{
+  const run=fixture({particleAttrs:attrs,emitter:[set("emissionInterval",5),set("particlesToEmit",1),set("infParticles",false)],particle:[set("lifeTime",10),...extra]});
+  return run(0,motion)[0].r;
+};
+test("5.9b angleRelativeToPlayerSpeed=true: heading of the player's velocity (walking right = 0, down = +90) is added to the angle", () => {
+  approx(angleWith({angleRelativeToPlayerSpeed:"true"},{vx:90,locomotion:"walk"}),0);
+  approx(angleWith({angleRelativeToPlayerSpeed:"true"},{vx:0,vy:100,ground:false,locomotion:"fall"}),90);
+  approx(angleWith({angleRelativeToPlayerSpeed:"true"},{vx:90,vy:90,ground:false,locomotion:"fall"},[set("initialAngle",10)]),55);
+});
+test("5.9b angleRelativeToPlayerSpeed=true while facing left walking left: piece-space heading is 0 (rig mirror then points it left)", () => {
+  approx(angleWith({angleRelativeToPlayerSpeed:"true"},{vx:-90,facing:-1,locomotion:"walk"}),0);
+});
+test("5.9b angleRelativeToPlayerSpeed=true with a still player adds nothing (no NaN)", () => {
+  approx(angleWith({angleRelativeToPlayerSpeed:"true"},{},[set("initialAngle",20)]),20);
+});
+test("5.9b angleRelativeToPlayerSpeed=false/absent leaves the angle alone; entry is partial", () => {
+  approx(angleWith({angleRelativeToPlayerSpeed:"false"},{vx:90,vy:90,ground:false}),0);approx(angleWith({},{vx:90,vy:90,ground:false}),0);
+  assert.equal(SUPPORT["Particle@angleRelativeToPlayerSpeed"],"partial");
+});

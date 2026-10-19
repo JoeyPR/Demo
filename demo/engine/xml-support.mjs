@@ -46,6 +46,7 @@ export const SUPPORT = {
   "Particle.sprite": "partial",
   "Particle.useGravity": "partial",
   "Particle@alternateSpriteFrameWithPunch": "partial",
+  "Particle@angleRelativeToPlayerSpeed": "partial",
   "Particle@particleIndexSpriteFrame": "partial",
   "Particle@randomSpriteFrame": "partial",
   "Particle@usePlayerFacing": "partial",

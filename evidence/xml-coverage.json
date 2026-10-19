@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 532,
-   "blocked": 392
+   "partial-only": 552,
+   "blocked": 372
   }
  },
  "blockedBy": [
@@ -59,10 +59,6 @@
   [
    "Emitter.useCharacterPos",
    46
-  ],
-  [
-   "Particle@angleRelativeToPlayerSpeed",
-   38
   ],
   [
    "Particle.targetPosOffset",
@@ -745,10 +741,8 @@
    {
     "system": "ps_Trail",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -758,6 +752,7 @@
      "Emitter.particlesToEmit",
      "Emitter.delayTimer",
      "Particle@randomSpriteFrame",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -2445,16 +2440,15 @@
    {
     "system": "LeftWingTrailSmoke",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -2533,16 +2527,15 @@
    {
     "system": "RightWingTrailSmoke",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -4126,10 +4119,8 @@
    {
     "system": "ps_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -4137,6 +4128,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -7425,10 +7417,8 @@
    {
     "system": "MistParticles",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -7436,6 +7426,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.offset",
      "op:Select",
      "Particle.sprite",
@@ -7448,10 +7439,8 @@
    {
     "system": "EmberLeftParticleLeft",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -7459,6 +7448,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.relativeToEmitter",
@@ -7473,10 +7463,8 @@
    {
     "system": "EmberLeftParticleRight",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -7484,6 +7472,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.relativeToEmitter",
@@ -7584,10 +7573,8 @@
    {
     "system": "jumpTrailLeft",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -7595,6 +7582,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.offset",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
@@ -7607,10 +7595,8 @@
    {
     "system": "jumpTrailRight",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -7618,6 +7604,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.offset",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
@@ -9852,7 +9839,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -9869,6 +9855,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -9895,7 +9882,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -9912,6 +9898,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -9939,7 +9926,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -9956,6 +9942,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -10668,10 +10655,8 @@
    {
     "system": "jumpTrailLeft",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -10679,6 +10664,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.offset",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
@@ -10691,10 +10677,8 @@
    {
     "system": "jumpTrailRight",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -10702,6 +10686,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.offset",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
@@ -11722,10 +11707,8 @@
    {
     "system": "jumpTrailLeft",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -11733,6 +11716,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.offset",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
@@ -11745,10 +11729,8 @@
    {
     "system": "jumpTrailRight",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.infParticles",
      "Emitter.infLifeTime",
@@ -11756,6 +11738,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Emitter.offset",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
@@ -12839,7 +12822,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -12856,6 +12838,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -12881,7 +12864,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -12898,6 +12880,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -12923,7 +12906,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -12940,6 +12922,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -12965,7 +12948,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -12982,6 +12964,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -13008,7 +12991,6 @@
     "missing": [
      "Emitter@needsHandItemActive",
      "Emitter.useCharacterPos",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -13025,6 +13007,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -13052,7 +13035,6 @@
     "missing": [
      "Emitter@needsHandItemActive",
      "Emitter.useCharacterPos",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -13069,6 +13051,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -16337,10 +16320,8 @@
    {
     "system": "ps_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -16348,6 +16329,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -18230,10 +18212,8 @@
    {
     "system": "particle_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.infLifeTime",
@@ -18242,6 +18222,7 @@
      "Emitter.intervalMin",
      "Emitter.intervalMax",
      "Emitter.randomizeInterval",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.offset",
@@ -19038,10 +19019,8 @@
    {
     "system": "ps_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.infLifeTime",
@@ -19050,6 +19029,7 @@
      "Emitter.intervalMin",
      "Emitter.intervalMax",
      "Emitter.randomizeInterval",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.offset",
@@ -19218,16 +19198,15 @@
    {
     "system": "particle_trail",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.infLifeTime",
      "Emitter.infParticles",
      "Emitter.particlesPerEmission",
      "Emitter.emissionInterval",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.isBackgroundParticle",
@@ -19968,16 +19947,15 @@
    {
     "system": "LeftWingTrailSmoke",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -20056,16 +20034,15 @@
    {
     "system": "RightWingTrailSmoke",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.infParticles",
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -20580,10 +20557,8 @@
    {
     "system": "ps_Trail",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle@angleRelativeToPlayerSpeed"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -20593,6 +20568,7 @@
      "Emitter.particlesToEmit",
      "Emitter.delayTimer",
      "Particle@randomSpriteFrame",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -21081,8 +21057,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.rgbTint",
-     "Particle@angleRelativeToPlayerSpeed"
+     "Emitter.rgbTint"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21091,6 +21066,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.offsetFacing",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -21103,8 +21079,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.rgbTint",
-     "Particle@angleRelativeToPlayerSpeed"
+     "Emitter.rgbTint"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21113,6 +21088,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.offsetFacing",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -21125,8 +21101,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.rgbTint",
-     "Particle@angleRelativeToPlayerSpeed"
+     "Emitter.rgbTint"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21135,6 +21110,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.offsetFacing",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -21147,8 +21123,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.rgbTint",
-     "Particle@angleRelativeToPlayerSpeed"
+     "Emitter.rgbTint"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21157,6 +21132,7 @@
      "Emitter.infLifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.offsetFacing",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle.sprite",
      "Particle.inSpecificOrder",
      "Particle.blendingMode",
@@ -21555,7 +21531,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -21573,6 +21548,7 @@
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -21597,7 +21573,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -21614,6 +21589,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -21637,7 +21613,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -21655,6 +21630,7 @@
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -21678,7 +21654,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -21696,6 +21671,7 @@
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
@@ -21720,7 +21696,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle@angleRelativeToPlayerSpeed",
      "Particle@autoLifeTimeToTarget",
      "Particle@UseParentEmitterAngle",
      "Particle@UseParentScale",
@@ -21737,6 +21712,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle@alternateSpriteFrameWithPunch",
+     "Particle@angleRelativeToPlayerSpeed",
      "Particle@particleIndexSpriteFrame",
      "Particle@randomSpriteFrame",
      "Particle@usePlayerFacing",
