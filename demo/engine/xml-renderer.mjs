@@ -356,6 +356,16 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
   }
   return out;
 }
+// Every run owns its emitter state and a short history of the emitter's (player's) position. The history is what lets a
+// stateless seed-replay know where the emitter WAS when a given particle was born (flags that freeze or inherit spawn state).
+const TRAIL_LIMIT=720;
+const newRun=(entry,timeMs,extra={})=>({...entry,...extra,startMs:timeMs,emitter:{running:true,emitted:0,delayMs:0},trail:[]});
+export function emitterPosAt(run,ms,fallback=[0,0]) {
+  const trail=run.trail??[];if(!trail.length)return fallback;
+  let best=trail[0];
+  for(const point of trail){if(point[0]>ms)break;best=point;}
+  return [best[1],best[2]];
+}
 function resetEmitter(run,timeMs) {
   run.stopMs=timeMs;
   run.emitter={running:false,emitted:0,delayMs:0};
@@ -394,11 +404,16 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
     if(entry.pulse) {
       // One-shot start: the run lasts one frame plus the emitter's own delay, then existing particles finish their life.
       if(runs.some(r=>r.node.a.name===name&&r.pulseStamp===stamp))continue;
-      runs.push({...entry,startMs:timeMs,stamp,pulseStamp:stamp,stopMs:timeMs+16+emitterDelayMs(renderer,name)});continue;
+      runs.push(newRun(entry,timeMs,{stamp,pulseStamp:stamp,stopMs:timeMs+16+emitterDelayMs(renderer,name)}));continue;
     }
     if(ongoing&&stamp!==undefined&&ongoing.stamp!==stamp)ongoing.stopMs=timeMs;
-    if(!ongoing||ongoing.stopMs!==undefined)runs.push({...entry,startMs:timeMs,stamp});
+    if(!ongoing||ongoing.stopMs!==undefined)runs.push(newRun(entry,timeMs,{stamp}));
     else {ongoing.offset=entry.offset;ongoing.pass=entry.pass;}
+  }
+  for(const run of runs) {
+    if(run.stopMs!==undefined&&run.stopMs<=timeMs&&run.trail.length)continue;
+    run.trail.push([timeMs,motion.x??0,motion.y??0]);
+    if(run.trail.length>TRAIL_LIMIT)run.trail.shift();
   }
   // Retain finite-life particles across action changes. Native world-position
   // capture and systems living beyond this bounded window remain partial.
