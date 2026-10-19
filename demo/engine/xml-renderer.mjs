@@ -351,6 +351,11 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const final=get(pt,"finalScale",null,seed);
     if(final&&truth(get(pt,"interpolateScale","false")))p.k=p.k.map((v,i)=>v+((final[i]??final[0])-v)*age/life);
     p.r=Number(get(pt,"initialAngle",[0],seed)[0])+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
+    // 5.2 rotateWithVelocity [HYP]: sprite art points along +x, so heading = atan2(vy,vx) in degrees, from the instantaneous velocity.
+    if(truth(get(pt,"rotateWithVelocity","false",seed))) {
+      const vx=(velocity[0]??0)+(gravity[0]??0)*age,vy=(velocity[1]??0)+(gravity[1]??0)*age;
+      if(vx||vy)p.r+=Math.atan2(vy,vx)*180/Math.PI;
+    }
     p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;p.xmlSystem=sys.a.name;
     p.add=get(pt,"blendingMode","")==="ADDITIVE";
     const track=renderer.animations.find(n=>n.tag==="SpriteAnimation"&&n.a.sprite===spriteName);

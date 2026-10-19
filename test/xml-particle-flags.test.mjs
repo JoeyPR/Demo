@@ -46,3 +46,28 @@ test("5.1 relativeToEmitter absent: default is RELATIVE_TO_EMITTER_DEFAULT (foll
 test("5.1 relativeToEmitter is marked partial in xml-support (default is [HYP])", () => {
   assert.equal(SUPPORT["Particle.relativeToEmitter"],"partial");
 });
+
+// ---- 5.2 rotateWithVelocity -------------------------------------------------------------------------------------------
+const veloc=(v,extra=[])=>withFlags([set("initialVelocity",v),...extra]);
+test("5.2 rotateWithVelocity=true: velocity (0,1) rotates the sprite +90 degrees", () => {
+  const [p]=veloc("0,1",[set("rotateWithVelocity",true)])(0,{});
+  approx(p.r,90);
+});
+test("5.2 rotateWithVelocity=true: velocity (1,0) is 0, (-1,0) is 180, (0,-1) is -90", () => {
+  for(const [v,deg] of [["1,0",0],["-1,0",180],["0,-1",-90]]) {
+    const [p]=veloc(v,[set("rotateWithVelocity",true)])(0,{});approx(p.r,deg,1e-9);
+  }
+});
+test("5.2 rotateWithVelocity=true adds to initialAngle; false/absent leaves the angle alone", () => {
+  const [a]=veloc("0,1",[set("rotateWithVelocity",true),set("initialAngle",10)])(0,{});approx(a.r,100);
+  const [b]=veloc("0,1",[set("rotateWithVelocity",false),set("initialAngle",10)])(0,{});approx(b.r,10);
+  const [c]=veloc("0,1",[set("initialAngle",10)])(0,{});approx(c.r,10);
+});
+test("5.2 rotateWithVelocity=true with zero velocity does not rotate (no NaN)", () => {
+  const [p]=veloc("0,0",[set("rotateWithVelocity",true)])(0,{});approx(p.r,0);
+});
+test("5.2 rotateWithVelocity follows the instantaneous velocity when gravity bends the path", () => {
+  const run=veloc("10,0",[set("rotateWithVelocity",true),set("useGravity",true),set("gravityVector","0,10")]);
+  run(0,{});const [p]=run(1000,{});
+  approx(p.r,Math.atan2(10,10)*180/Math.PI,1e-6);
+});

@@ -47,18 +47,14 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 153,
-   "blocked": 771
+   "partial-only": 192,
+   "blocked": 732
   }
  },
  "blockedBy": [
   [
    "Particle.inSpecificOrder",
    340
-  ],
-  [
-   "Particle.rotateWithVelocity",
-   212
   ],
   [
    "Emitter@attachment",
@@ -274,10 +270,8 @@
    {
     "system": "PunchParticle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -286,6 +280,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialVelocity",
@@ -362,8 +357,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter.offsetFacing",
-     "Particle.rotateWithVelocity"
+     "Emitter.offsetFacing"
     ],
     "notFull": [
      "Emitter.offset",
@@ -374,6 +368,7 @@
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -434,8 +429,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -448,6 +442,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle"
@@ -515,7 +510,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha"
     ],
@@ -529,6 +523,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Random",
      "Particle.interpolateScale",
@@ -543,8 +538,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -554,6 +548,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -636,7 +631,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -652,6 +646,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAlpha",
@@ -666,7 +661,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -682,6 +676,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAlpha",
@@ -696,7 +691,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -712,6 +706,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -725,7 +720,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -741,6 +735,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -878,7 +873,6 @@
     "status": "blocked",
     "missing": [
      "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -899,6 +893,7 @@
      "Particle.initialRotationRate",
      "op:Random",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -1017,7 +1012,6 @@
      "Emitter.offsetFacing",
      "Particle.inSpecificOrder",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.finalVelocity"
@@ -1030,6 +1024,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
      "Particle.initialVelocity",
@@ -1116,7 +1111,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -1132,6 +1126,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -1293,10 +1288,8 @@
    {
     "system": "ps_punchFrag",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -1305,6 +1298,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -1319,7 +1313,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -1333,6 +1326,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -1343,7 +1337,6 @@
     "status": "blocked",
     "missing": [
      "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -1357,6 +1350,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -1582,7 +1576,6 @@
     "missing": [
      "Emitter.offsetFacing",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.finalVelocity"
@@ -1593,6 +1586,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
      "Particle.initialScale",
@@ -1750,10 +1744,8 @@
    {
     "system": "Punch",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -1763,6 +1755,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -1777,8 +1770,7 @@
      "Emitter@needsHandItemActive",
      "Particle.renderAlignment",
      "Particle.initalRGB",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -1797,6 +1789,7 @@
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -1811,8 +1804,7 @@
      "Emitter@needsHandItemActive",
      "Particle.renderAlignment",
      "Particle.initalRGB",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -1831,6 +1823,7 @@
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -2094,8 +2087,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -2107,6 +2099,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.relativeToEmitter",
@@ -2119,9 +2112,7 @@
     "system": "p_death",
     "category": "no-trigger",
     "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -2131,7 +2122,8 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesToEmit",
      "Particle.sprite",
-     "Particle.blendingMode"
+     "Particle.blendingMode",
+     "Particle.rotateWithVelocity"
     ]
    },
    {
@@ -2380,7 +2372,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -2394,6 +2385,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -2678,7 +2670,6 @@
     "missing": [
      "Particle.isBackgroundParticle",
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2692,6 +2683,7 @@
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "op:Random",
@@ -2706,7 +2698,6 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2718,6 +2709,7 @@
      "Emitter.infParticles",
      "Emitter.checkParticleNumToEmit",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.sprite",
@@ -2733,7 +2725,6 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2746,6 +2737,7 @@
      "Emitter.checkParticleNumToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "op:Select",
@@ -2760,7 +2752,6 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity",
      "Particle.variantId",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
@@ -2773,6 +2764,7 @@
      "Emitter.checkParticleNumToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "op:Select",
@@ -2840,8 +2832,7 @@
      "Emitter.offsetFacing",
      "Particle@autoLifeTimeToTarget",
      "Particle.inSpecificOrder",
-     "Particle.renderAlignment",
-     "Particle.rotateWithVelocity"
+     "Particle.renderAlignment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -2853,6 +2844,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -3049,8 +3041,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle@UseParentScale",
-     "Particle.rotateWithVelocity"
+     "Particle@UseParentScale"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -3059,6 +3050,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -3130,8 +3122,7 @@
     "missing": [
      "Emitter.offsetFacing",
      "Particle@autoLifeTimeToTarget",
-     "Particle.renderAlignment",
-     "Particle.rotateWithVelocity"
+     "Particle.renderAlignment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3143,6 +3134,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -3372,8 +3364,7 @@
     "missing": [
      "Emitter.forceXScaling",
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3384,6 +3375,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -3398,8 +3390,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.forceXScaling",
-     "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.rotateWithVelocity"
+     "Particle@velocityRelativeToPlayerSpeed"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3410,6 +3401,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -3421,16 +3413,15 @@
    {
     "system": "punch_projectile",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "op:Random",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -3438,13 +3429,12 @@
    {
     "system": "tile_break_particle",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -3473,13 +3463,12 @@
    {
     "system": "tile_hit_splash",
     "category": "hooked+staged",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -3605,7 +3594,6 @@
     "category": "no-trigger",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.isBackgroundParticle"
     ],
     "notFull": [
@@ -3619,6 +3607,7 @@
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve"
     ]
@@ -3802,8 +3791,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle@autoLifeTimeToTarget",
-     "Particle.rotateWithVelocity"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
@@ -3813,6 +3801,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.blendingMode",
      "Particle.initialVelocity",
@@ -3824,8 +3813,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -3834,6 +3822,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -3912,7 +3901,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
@@ -3925,6 +3913,7 @@
      "Emitter.offset",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "op:Random",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -3933,16 +3922,15 @@
    {
     "system": "ps_ketchupSplash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -3959,7 +3947,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
@@ -3972,6 +3959,7 @@
      "Emitter.offset",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "op:Random",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -3980,16 +3968,15 @@
    {
     "system": "ps_mustardSplash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -4071,10 +4058,8 @@
    {
     "system": "PunchParticle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -4083,6 +4068,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialVelocity",
@@ -4230,13 +4216,12 @@
    {
     "system": "p_pumch2",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -4374,8 +4359,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4384,6 +4368,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -4423,7 +4408,6 @@
     "missing": [
      "Particle.variantId",
      "Particle.targetPosOffset",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset",
      "Particle.variantIdVar"
     ],
@@ -4443,6 +4427,7 @@
      "Particle.initialAngle",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.rotateWithVelocity",
      "op:SetVar"
     ]
    },
@@ -4619,7 +4604,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -4633,6 +4617,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -4645,7 +4630,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -4659,6 +4643,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -4671,7 +4656,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -4683,6 +4667,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -4779,8 +4764,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4788,6 +4772,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAlpha",
@@ -4838,7 +4823,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -4850,6 +4834,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -4863,7 +4848,6 @@
     "missing": [
      "Emitter@attachment",
      "Particle.renderAlignment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -4875,6 +4859,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -4934,14 +4919,13 @@
    {
     "system": "ps_hit",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -4954,8 +4938,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.renderAlignment",
-     "Particle.rotateWithVelocity"
+     "Particle.renderAlignment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4963,6 +4946,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -4976,7 +4960,6 @@
     "missing": [
      "Particle.isBackgroundParticle",
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -4991,6 +4974,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -5210,7 +5194,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -5226,6 +5209,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -5259,7 +5243,6 @@
      "Emitter@attachment",
      "Particle.inSpecificOrder",
      "Particle.renderAlignment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -5271,6 +5254,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -5351,7 +5335,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -5367,6 +5350,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -5446,7 +5430,6 @@
      "Emitter@attachment",
      "Particle.inSpecificOrder",
      "Particle.renderAlignment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -5458,6 +5441,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -5495,7 +5479,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -5509,6 +5492,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -5521,7 +5505,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -5535,6 +5518,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -5547,7 +5531,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -5559,6 +5542,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -5571,7 +5555,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -5585,6 +5568,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -5597,7 +5581,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -5611,6 +5594,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -5623,7 +5607,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -5635,6 +5618,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -5859,14 +5843,14 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.rotateWithVelocity"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -6168,7 +6152,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -6182,6 +6165,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -6280,8 +6264,7 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.initalRGB",
-     "Particle.rotateWithVelocity"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -6294,6 +6277,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -6306,8 +6290,7 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.initalRGB",
-     "Particle.rotateWithVelocity"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -6320,6 +6303,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -6511,10 +6495,8 @@
    {
     "system": "ps_punchSlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -6526,6 +6508,7 @@
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -6556,7 +6539,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.inSpecificOrder",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
@@ -6568,6 +6550,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAngle",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialScale",
@@ -6584,7 +6567,6 @@
      "Emitter@attachment",
      "Emitter@onPunchCount",
      "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -6598,6 +6580,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
@@ -6611,7 +6594,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.inSpecificOrder",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
@@ -6623,6 +6605,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAngle",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialScale",
@@ -6638,7 +6621,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -6651,6 +6633,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -6848,7 +6831,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.projectile_offset"
     ],
@@ -6862,6 +6844,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "op:Random",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -6876,7 +6859,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset"
     ],
     "notFull": [
@@ -6889,6 +6871,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "op:SetVar",
@@ -7184,7 +7167,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -7196,6 +7178,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -7245,8 +7228,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@alternateSpriteFrameWithPunch",
-     "Particle.rotateWithVelocity"
+     "Particle@alternateSpriteFrameWithPunch"
     ],
     "notFull": [
      "Emitter.offset",
@@ -7256,6 +7238,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
@@ -7265,10 +7248,8 @@
    {
     "system": "ps_combinedSlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -7277,6 +7258,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
@@ -7504,8 +7486,7 @@
     "missing": [
      "Emitter.offsetFacing",
      "Emitter.randomizeInterval",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.rotateWithVelocity"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
@@ -7523,7 +7504,8 @@
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
-     "op:VectorTo"
+     "op:VectorTo",
+     "Particle.rotateWithVelocity"
     ]
    },
    {
@@ -8111,10 +8093,8 @@
    {
     "system": "ps_punchCurved",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.infLifeTime",
@@ -8123,6 +8103,7 @@
      "Emitter.delayTimer",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -8633,10 +8614,8 @@
    {
     "system": "ps_punchSlash",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -8648,6 +8627,7 @@
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -8689,8 +8669,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -8699,6 +8678,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Select",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -8759,8 +8739,7 @@
     "missing": [
      "Emitter@attachment",
      "Emitter.arrow.target.offset",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -8779,6 +8758,7 @@
      "Particle.initialAngle",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -8792,8 +8772,7 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -8808,6 +8787,7 @@
      "Particle.initialAngle",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -8824,7 +8804,6 @@
      "Emitter@attachment",
      "Particle.renderAlignment",
      "Particle.targetPosOffset",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset"
     ],
     "notFull": [
@@ -8841,6 +8820,7 @@
      "op:Random",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.rotateWithVelocity",
      "op:SetVar"
     ]
    },
@@ -9182,16 +9162,15 @@
    {
     "system": "ps_projectile",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.offset",
      "op:Select",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -9315,8 +9294,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity"
+     "Particle.isBackgroundParticle"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9327,6 +9305,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -9415,7 +9394,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -9431,7 +9409,8 @@
      "op:Curve",
      "Particle.offset",
      "Particle.initialVelocity",
-     "op:VectorTo"
+     "op:VectorTo",
+     "Particle.rotateWithVelocity"
     ]
    },
    {
@@ -9599,7 +9578,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -9615,6 +9593,7 @@
      "op:Random",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -9716,16 +9695,15 @@
    {
     "system": "punch_projectile",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -9998,7 +9976,6 @@
      "Emitter.randomizeInterval",
      "Particle.isBackgroundParticle",
      "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -10011,6 +9988,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -10028,7 +10006,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateVelocity",
      "Particle.finalVelocity"
     ],
@@ -10040,6 +10017,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.interpolateScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.initialVelocity",
@@ -10052,7 +10030,6 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity",
      "Particle.finalRotationRate",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -10068,6 +10045,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.interpolateScale",
      "Particle.initialScale",
@@ -10118,8 +10096,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -10139,6 +10116,7 @@
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -10161,8 +10139,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -10182,6 +10159,7 @@
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -10205,8 +10183,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -10226,6 +10203,7 @@
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -10239,8 +10217,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -10251,6 +10228,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -10262,8 +10240,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -10274,6 +10251,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -10288,7 +10266,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -10302,6 +10279,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
@@ -10315,8 +10293,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity"
+     "Particle.isBackgroundParticle"
     ],
     "notFull": [
      "Emitter.offset",
@@ -10325,6 +10302,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "op:Random",
@@ -10590,10 +10568,8 @@
    {
     "system": "ps_hit",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -10602,6 +10578,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -10696,7 +10673,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset"
     ],
     "notFull": [
@@ -10711,6 +10687,7 @@
      "Particle.blendingMode",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.rotateWithVelocity",
      "op:SetVar"
     ]
    },
@@ -10875,8 +10852,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.rotateWithVelocity"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -10887,6 +10863,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -11235,7 +11212,6 @@
     "missing": [
      "Particle.renderAlignment",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.finalAlpha",
      "Particle.finalVelocity",
@@ -11255,6 +11231,7 @@
      "Particle.sprite",
      "Particle.offset",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "op:Random",
      "op:Select",
      "Particle.initialVelocity",
@@ -11269,7 +11246,6 @@
     "missing": [
      "Particle.renderAlignment",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.finalAlpha",
      "Particle.finalVelocity",
@@ -11289,6 +11265,7 @@
      "Particle.sprite",
      "Particle.offset",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "op:Random",
      "op:Select",
      "Particle.initialVelocity",
@@ -11628,7 +11605,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.inSpecificOrder",
      "Particle.OnFinish"
@@ -11644,6 +11620,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -11677,7 +11654,6 @@
     "status": "blocked",
     "missing": [
      "Particle.variantId",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateVelocity",
      "Particle.targetPosOffset",
      "Particle.finalVelocity",
@@ -11695,6 +11671,7 @@
      "Particle.sprite",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -11706,8 +11683,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@UseParentVariantId",
-     "Particle.rotateWithVelocity"
+     "Particle@UseParentVariantId"
     ],
     "notFull": [
      "Emitter.particlesPerEmission",
@@ -11717,6 +11693,7 @@
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -11825,12 +11802,12 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle@particleIndexSpriteFrame",
-     "Particle.rotateWithVelocity"
+     "Particle@particleIndexSpriteFrame"
     ],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -11896,8 +11873,7 @@
     "status": "blocked",
     "missing": [
      "Particle.isBackgroundParticle",
-     "Particle.initalRGB",
-     "Particle.rotateWithVelocity"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -11911,6 +11887,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -12316,7 +12293,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -12330,6 +12306,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -12342,7 +12319,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -12356,6 +12332,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -12411,7 +12388,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -12424,6 +12400,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -12456,10 +12433,8 @@
    {
     "system": "ps_Dance",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -12468,6 +12443,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -12478,15 +12454,14 @@
    {
     "system": "ps_Punch",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -12621,16 +12596,15 @@
    {
     "system": "ps_waterSplash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -12649,7 +12623,6 @@
     "status": "blocked",
     "missing": [
      "Particle.renderAlignment",
-     "Particle.rotateWithVelocity",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -12659,6 +12632,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -12693,16 +12667,15 @@
    {
     "system": "ps_drops",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -12884,16 +12857,15 @@
    {
     "system": "ps_WaterHitSpray",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13154,8 +13126,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13173,6 +13144,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.sprite",
      "Particle.initialVelocity",
@@ -13196,8 +13168,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13215,6 +13186,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.sprite",
      "Particle.initialVelocity",
@@ -13238,8 +13210,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13257,6 +13228,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.sprite",
      "Particle.initialVelocity",
@@ -13280,8 +13252,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13299,6 +13270,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.sprite",
      "Particle.initialVelocity",
@@ -13323,8 +13295,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13343,6 +13314,7 @@
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "op:Random",
@@ -13367,8 +13339,7 @@
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
      "Particle.renderAlignment",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -13387,6 +13358,7 @@
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "op:Random",
@@ -13463,14 +13435,14 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.rotateWithVelocity"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial"
@@ -13506,10 +13478,8 @@
    {
     "system": "ps_punchLines",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -13521,6 +13491,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialScale",
@@ -13602,8 +13573,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity"
+     "Particle.isBackgroundParticle"
     ],
     "notFull": [
      "Emitter.offset",
@@ -13615,6 +13585,7 @@
      "Emitter.delayTimer",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -13629,8 +13600,7 @@
     "status": "blocked",
     "missing": [
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -13641,6 +13611,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13656,8 +13627,7 @@
     "status": "blocked",
     "missing": [
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -13668,6 +13638,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -13709,8 +13680,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity"
+     "Particle.isBackgroundParticle"
     ],
     "notFull": [
      "Emitter.offset",
@@ -13721,6 +13691,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -13875,14 +13846,14 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.rotateWithVelocity"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -14013,7 +13984,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -14026,6 +13996,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -14214,10 +14185,8 @@
    {
     "system": "ps_punchSlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -14229,6 +14198,7 @@
      "Particle.initialScale",
      "op:Curve",
      "Particle.initialAlpha",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -14280,7 +14250,6 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -14292,6 +14261,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -14326,7 +14296,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -14338,6 +14307,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -14694,7 +14664,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset",
      "Particle.targetPosOffset"
     ],
@@ -14702,6 +14671,7 @@
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Emitter.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "op:SetVar",
@@ -14754,12 +14724,11 @@
     "system": "p_pumch2",
     "category": "no-trigger",
     "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -14794,12 +14763,11 @@
     "system": "p_pumch2Left",
     "category": "no-trigger",
     "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -14833,14 +14801,13 @@
    {
     "system": "ps_punchSlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.sprite",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -14907,7 +14874,6 @@
     "missing": [
      "Emitter@attachment",
      "Particle.targetPosOffset",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset"
     ],
     "notFull": [
@@ -14924,6 +14890,7 @@
      "op:Random",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.rotateWithVelocity",
      "op:SetVar"
     ]
    },
@@ -15390,7 +15357,6 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -15404,6 +15370,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
@@ -15416,7 +15383,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -15428,6 +15394,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -15439,7 +15406,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -15451,6 +15417,7 @@
      "op:Select",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -15625,7 +15592,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -15633,6 +15599,7 @@
      "op:Random",
      "Emitter.offset",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -15648,7 +15615,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -15656,6 +15622,7 @@
      "op:Random",
      "Emitter.offset",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -15978,8 +15945,7 @@
     "status": "blocked",
     "missing": [
      "Particle@autoLifeTimeToTarget",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -15990,6 +15956,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -16005,7 +15972,6 @@
     "missing": [
      "Particle@autoLifeTimeToTarget",
      "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -16017,6 +15983,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Curve",
      "Particle.blendingMode",
@@ -16113,7 +16080,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -16129,6 +16095,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -16214,7 +16181,6 @@
     "status": "blocked",
     "missing": [
      "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha",
@@ -16235,6 +16201,7 @@
      "Particle.initialRotationRate",
      "op:Random",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.finalScale",
@@ -16353,7 +16320,6 @@
      "Emitter.offsetFacing",
      "Particle.inSpecificOrder",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.finalVelocity"
@@ -16366,6 +16332,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
      "Particle.initialVelocity",
@@ -16438,8 +16405,7 @@
      "Emitter@needsHandItemActive",
      "Particle.renderAlignment",
      "Particle.initalRGB",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -16458,6 +16424,7 @@
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -16472,8 +16439,7 @@
      "Emitter@needsHandItemActive",
      "Particle.renderAlignment",
      "Particle.initalRGB",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -16492,6 +16458,7 @@
      "op:Random",
      "Particle.relativeToEmitter",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -16776,10 +16743,8 @@
    {
     "system": "ps_Projectile",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
@@ -16787,6 +16752,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -16826,7 +16792,6 @@
     "missing": [
      "Particle.variantId",
      "Particle.targetPosOffset",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset",
      "Particle.variantIdVar"
     ],
@@ -16846,6 +16811,7 @@
      "Particle.initialAngle",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.rotateWithVelocity",
      "op:SetVar"
     ]
    },
@@ -17011,8 +16977,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -17020,6 +16985,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAlpha",
@@ -17070,7 +17036,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -17082,6 +17047,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -17558,7 +17524,6 @@
     "status": "blocked",
     "missing": [
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -17570,6 +17535,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialScale",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -17619,8 +17585,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle@alternateSpriteFrameWithPunch",
-     "Particle.rotateWithVelocity"
+     "Particle@alternateSpriteFrameWithPunch"
     ],
     "notFull": [
      "Emitter.offset",
@@ -17630,6 +17595,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
@@ -17639,10 +17605,8 @@
    {
     "system": "ps_combinedSlash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -17651,6 +17615,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
@@ -17677,8 +17642,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter.useCharacterPos",
-     "Particle.rotateWithVelocity"
+     "Emitter.useCharacterPos"
     ],
     "notFull": [
      "Emitter.offset",
@@ -17687,6 +17651,7 @@
      "Particle.sprite",
      "Particle.offset",
      "op:Select",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialVelocity",
@@ -17770,8 +17735,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity"
+     "Particle.isBackgroundParticle"
     ],
     "notFull": [
      "Emitter.offset",
@@ -17782,6 +17746,7 @@
      "Particle.sprite",
      "Particle.relativeToEmitter",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -17822,7 +17787,6 @@
     "missing": [
      "Emitter@needsHandItemActive",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.finalVelocity",
@@ -17840,6 +17804,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
      "Particle.initialVelocity",
@@ -17856,7 +17821,6 @@
     "missing": [
      "Emitter@needsHandItemActive",
      "Particle.interpolateVelocity",
-     "Particle.rotateWithVelocity",
      "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.finalVelocity",
@@ -17874,6 +17838,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
      "Particle.initialVelocity",
@@ -17982,7 +17947,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -17995,6 +17959,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -18047,10 +18012,8 @@
    {
     "system": "ps_Dance",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.emissionInterval",
@@ -18059,6 +18022,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -18069,15 +18033,14 @@
    {
     "system": "ps_Punch",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -18366,7 +18329,6 @@
     "missing": [
      "Particle.inSpecificOrder",
      "Particle.renderAlignment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -18378,6 +18340,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -18612,8 +18575,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -18623,6 +18585,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -18664,8 +18627,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -18680,6 +18642,7 @@
      "op:Select",
      "Particle.initialVelocity",
      "op:RandomRadial",
+     "Particle.rotateWithVelocity",
      "Particle.offset"
     ]
    },
@@ -18862,8 +18825,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -18876,7 +18838,8 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialVelocity",
-     "op:VectorTo"
+     "op:VectorTo",
+     "Particle.rotateWithVelocity"
     ]
    },
    {
@@ -18884,8 +18847,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -18898,7 +18860,8 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialVelocity",
-     "op:VectorTo"
+     "op:VectorTo",
+     "Particle.rotateWithVelocity"
     ]
    },
    {
@@ -18993,10 +18956,8 @@
    {
     "system": "HitGhostParticle",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -19004,6 +18965,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -19028,14 +18990,13 @@
    {
     "system": "PunchParticle",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.useGravity",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -19388,10 +19349,8 @@
    {
     "system": "ps_punchCurved",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.infLifeTime",
@@ -19400,6 +19359,7 @@
      "Emitter.delayTimer",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -19487,8 +19447,7 @@
     "category": "staged+secondary",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19498,6 +19457,7 @@
      "Particle.offset",
      "op:Random",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -19589,7 +19549,6 @@
     "status": "blocked",
     "missing": [
      "Particle.renderAlignment",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -19602,6 +19561,7 @@
      "Emitter.offset",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "op:Curve",
@@ -19614,7 +19574,6 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -19629,6 +19588,7 @@
      "Emitter.delayTimer",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialVelocity",
      "op:VectorTo"
@@ -19660,8 +19620,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.initalRGB",
-     "Particle.rotateWithVelocity"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.offset",
@@ -19671,6 +19630,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.initialScale",
@@ -19728,7 +19688,6 @@
     "status": "blocked",
     "missing": [
      "Particle.targetPosOffset",
-     "Particle.rotateWithVelocity",
      "Particle.projectile_offset"
     ],
     "notFull": [
@@ -19745,6 +19704,7 @@
      "op:Random",
      "Particle.initialVelocity",
      "op:VectorTo",
+     "Particle.rotateWithVelocity",
      "op:SetVar"
     ]
    },
@@ -19883,7 +19843,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.inSpecificOrder",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
@@ -19895,6 +19854,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAngle",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialScale",
@@ -19908,7 +19868,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -19922,6 +19881,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
@@ -19936,7 +19896,6 @@
      "Emitter@attachment",
      "Emitter@onPunchCount",
      "Particle.isBackgroundParticle",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -19950,6 +19909,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
@@ -19963,7 +19923,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.inSpecificOrder",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
@@ -19975,6 +19934,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.initialAngle",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialScale",
@@ -19990,7 +19950,6 @@
     "missing": [
      "Emitter@attachment",
      "Emitter@onPunchCount",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha"
     ],
@@ -20003,6 +19962,7 @@
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -20015,7 +19975,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset"
     ],
     "notFull": [
@@ -20029,6 +19988,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle",
@@ -20281,10 +20241,8 @@
    {
     "system": "ps_Punch",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
@@ -20294,6 +20252,7 @@
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesToEmit",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.useGravity",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -20306,10 +20265,8 @@
    {
     "system": "ps_Shard",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
@@ -20318,6 +20275,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Random",
      "Particle.initialRotationRate",
@@ -20630,8 +20588,7 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20644,6 +20601,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAngle"
@@ -20711,7 +20669,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.finalAlpha",
      "Particle.interpolateAlpha"
     ],
@@ -20725,6 +20682,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Random",
      "Particle.interpolateScale",
@@ -20739,8 +20697,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Particle.rotateWithVelocity"
+     "Emitter@attachment"
     ],
     "notFull": [
      "Emitter.offset",
@@ -20750,6 +20707,7 @@
      "Particle.offset",
      "op:Select",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -20832,7 +20790,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -20848,6 +20805,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAlpha",
@@ -20862,7 +20820,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -20878,6 +20835,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.initialAlpha",
@@ -20892,7 +20850,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -20908,6 +20865,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -20921,7 +20879,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.initalRGB",
      "Particle.finalRGB",
      "Particle.interpolateRGB"
@@ -20937,6 +20894,7 @@
      "Particle@randomSpriteFrame",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.relativeToEmitter",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -21051,7 +21009,6 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -21065,6 +21022,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "Particle.initialRotationRate",
@@ -21235,7 +21193,6 @@
     "missing": [
      "Particle.isBackgroundParticle",
      "Particle.initalRGB",
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha"
     ],
     "notFull": [
@@ -21249,6 +21206,7 @@
      "Particle.sprite",
      "Particle.blendingMode",
      "Particle.relativeToEmitter",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "op:Random",
      "Particle.initialVelocity",
@@ -21300,8 +21258,7 @@
      "Emitter.offsetFacing",
      "Emitter.useCharacterPos",
      "Particle.isBackgroundParticle",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21315,6 +21272,7 @@
      "Particle.useGravity",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -21329,8 +21287,7 @@
      "Emitter.offsetFacing",
      "Emitter.useCharacterPos",
      "Particle.isBackgroundParticle",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21344,6 +21301,7 @@
      "Particle.useGravity",
      "Particle.offset",
      "op:Random",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialVelocity",
      "op:RandomRadial",
@@ -21358,7 +21316,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Particle.rotateWithVelocity",
      "Particle.targetPosOffset",
      "Particle.renderAlignment",
      "Particle.OnFinish"
@@ -21371,6 +21328,7 @@
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo",
      "op:Random"
@@ -21379,16 +21337,15 @@
    {
     "system": "p_splash",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
      "Emitter.particlesPerEmission",
      "op:Random",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.blendingMode",
      "Particle.initialAlpha",
      "op:Curve",
@@ -21946,14 +21903,14 @@
     "status": "blocked",
     "missing": [
      "Particle@alternateSpriteFrameWithPunch",
-     "Particle@autoLifeTimeToTarget",
-     "Particle.rotateWithVelocity"
+     "Particle@autoLifeTimeToTarget"
     ],
     "notFull": [
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialScale",
      "Particle.initialAlpha",
      "op:Curve",
@@ -22016,8 +21973,7 @@
      "Particle@UseParentVariantId",
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -22036,6 +21992,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -22058,8 +22015,7 @@
      "Particle@UseParentVariantId",
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -22076,6 +22032,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -22098,8 +22055,7 @@
      "Particle@UseParentVariantId",
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -22118,6 +22074,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -22139,8 +22096,7 @@
      "Particle@UseParentVariantId",
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -22159,6 +22115,7 @@
      "Particle.initialAngle",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -22181,8 +22138,7 @@
      "Particle@UseParentVariantId",
      "Particle@usePlayerFacing",
      "Particle@velocityRelativeToPlayerSpeed",
-     "Particle.inSpecificOrder",
-     "Particle.rotateWithVelocity"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.delayTimer",
@@ -22201,6 +22157,7 @@
      "op:Random",
      "Particle.blendingMode",
      "Particle.offset",
+     "Particle.rotateWithVelocity",
      "Particle.initialRotationRate",
      "Particle.initialScale",
      "Particle.sprite",
@@ -22233,14 +22190,13 @@
    {
     "system": "Drops",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -22253,14 +22209,13 @@
    {
     "system": "DropsDestroy",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.particlesPerEmission",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -22305,16 +22260,15 @@
    {
     "system": "PaintBall",
     "category": "staged+secondary",
-    "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.particlesPerEmission",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialVelocity",
      "op:VectorTo"
     ]
@@ -22323,15 +22277,14 @@
     "system": "PaintDrops",
     "category": "no-trigger",
     "status": "blocked",
-    "missing": [
-     "Particle.rotateWithVelocity"
-    ],
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "op:Random",
      "Emitter.particlesPerEmission",
      "Particle@randomSpriteFrame",
      "Particle.sprite",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "op:Curve",
      "Particle.useGravity",
@@ -22462,7 +22415,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.rotateWithVelocity",
      "Particle.interpolateAlpha",
      "Particle.finalAlpha",
      "Particle.interpolateVelocity",
@@ -22478,6 +22430,7 @@
      "Emitter.particlesToEmit",
      "Particle.sprite",
      "Particle.blendingMode",
+     "Particle.rotateWithVelocity",
      "Particle.initialAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
