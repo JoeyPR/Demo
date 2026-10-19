@@ -2,7 +2,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import {fixture,n,set,upd,base} from "./xml-fixture.mjs";
+import {fixture,n,set,upd,base,punchEvent} from "./xml-fixture.mjs";
 import {emitterPosAt,USE_PLAYER_FACING_DEFAULT,OFFSET_FACING_DEFAULT} from "../src/xml-renderer.mjs";
 import {SUPPORT} from "../src/xml-support.mjs";
 const scripts=JSON.parse(fs.readFileSync(new URL("../evidence/renderer-data.json",import.meta.url),"utf8")).scripts;
@@ -339,4 +339,42 @@ test("5.7b particleIndexSpriteFrame counts particles within one emission (partic
   const run=fixture({particleAttrs:{particleIndexSpriteFrame:"true"},animations:[frameTrack(cells)],emitter:[set("emissionInterval",5),set("particlesPerEmission",3)],particle:[set("lifeTime",10)]});
   assert.deepEqual(run(0,{}).map(p=>p.sx/p.sw).sort(),[0,1,2]);
   assert.equal(SUPPORT["Particle@particleIndexSpriteFrame"],"partial");
+});
+
+// ---- 5.7c alternateSpriteFrameWithPunch -------------------------------------------------------------------------------
+import {punchCountAt} from "../src/xml-renderer.mjs";
+test("5.7c alternateSpriteFrameWithPunch=true: frame parity follows the punch count at birth (0 -> frame 0, 1 -> 1, 2 -> 0)", () => {
+  const run=fixture({particleAttrs:{alternateSpriteFrameWithPunch:"true"},animations:[frameTrack(cells)],emitter:[set("emissionInterval",.5)],particle:[set("lifeTime",100)]});
+  run(0,{});run(400,{});                                  // born before any punch
+  run(500,punchEvent(500));run(900,{});                  // punch 1
+  run(1000,punchEvent(1000));run(1400,{});               // punch 2
+  const byBirth=run(1600,{}).sort((a,b)=>b.xmlParticleAge-a.xmlParticleAge).map(p=>[Math.round(1600-p.xmlParticleAge),p.sx/p.sw]);
+  const frameAt=ms=>byBirth.find(([b])=>Math.abs(b-ms)<30)?.[1];
+  assert.equal(frameAt(0),0,"no punch yet");
+  assert.equal(frameAt(500),1,"punch 1 counted on its own frame");
+  assert.equal(frameAt(1000),0,"punch 2");
+  assert.equal(frameAt(1500),0);
+});
+test("5.7c particles keep the frame they were born with when later punches happen", () => {
+  const run=fixture({particleAttrs:{alternateSpriteFrameWithPunch:"true"},animations:[frameTrack(cells)],emitter:[set("emissionInterval",5),set("infParticles",false),set("particlesToEmit",1)],particle:[set("lifeTime",100)]});
+  run(0,{});const before=run(100,{})[0].sx;
+  run(200,punchEvent(200));const after=run(300,{})[0].sx;
+  assert.equal(before,after);
+});
+test("5.7c the item counts each distinct punch event once, however many frames it stays in motion.events", () => {
+  const run=fixture();
+  const ev=punchEvent(100);run(0,{});run(100,ev);run(116,ev);run(132,ev);
+  assert.equal(run.item.xmlPunchCount,1);
+  assert.equal(punchCountAt(run.item.xmlParticleRuns[0],200),1);
+  run(500,punchEvent(500));assert.equal(run.item.xmlPunchCount,2);
+});
+test("5.7c scrubbing time backwards resets the punch counter with the runs", () => {
+  const run=fixture();run(0,{});run(500,punchEvent(500));assert.equal(run.item.xmlPunchCount,1);
+  run(100,{});assert.equal(run.item.xmlPunchCount,0);
+});
+test("5.7c alternateSpriteFrameWithPunch=false/absent leaves frames alone; entry is partial", () => {
+  const mk=a=>fixture({particleAttrs:a,animations:[frameTrack(cells)],emitter:[set("emissionInterval",.5)],particle:[set("lifeTime",100)]});
+  const frames=r=>{r(0,{});r(500,punchEvent(500));return r(900,{}).map(p=>p.sx).sort();};
+  assert.deepEqual(frames(mk({alternateSpriteFrameWithPunch:"false"})),frames(mk({})));
+  assert.equal(SUPPORT["Particle@alternateSpriteFrameWithPunch"],"partial");
 });

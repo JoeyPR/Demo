@@ -342,7 +342,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     // Native operators (RandomRadial, Multiply, Increment, Select-by-input, ...) come from xml-expr.mjs. A property it cannot
     // resolve is reported in item.xmlUnsupportedParticleExpressions (with reason) and the particle is skipped - never zeroed.
     const pr=resolveProperties(pt,{rng:makeRng(seed),t:0,
-      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:motion.punchCount??0,intervalMS:interval*1000},
+      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:punchCountAt(entry,(entry.startMs??0)+(delay+emission*interval)*1000),intervalMS:interval*1000},
       env:{lifeTime:life}});
     const interpolateVelocity=truth(get(pt,"interpolateVelocity","false",seed));
     // finalVelocity only changes the path when interpolateVelocity is on; then it is required like initialVelocity.
@@ -432,6 +432,10 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const particleIndex=emission*count+k;
     if(frames.length&&truth(pt.a.randomSpriteFrame))
       pick=truth(get(pt,"inSpecificOrder","false",seed))?particleIndex%frames.length:seed%frames.length;
+    // alternateSpriteFrameWithPunch [HYP]: frame parity follows the number of punches the item had when the particle was born.
+    // Precedence: particleIndexSpriteFrame > alternateSpriteFrameWithPunch > randomSpriteFrame.
+    if(frames.length&&truth(pt.a.alternateSpriteFrameWithPunch))
+      pick=(punchCountAt(entry,(entry.startMs??0)+(delay+emission*interval)*1000)%2)%frames.length;
     // particleIndexSpriteFrame: the frame IS the particle's emission index (wrapping), and outranks the random pick.
     if(frames.length&&truth(pt.a.particleIndexSpriteFrame))pick=particleIndex%frames.length;
     if(pick!==null) {
@@ -453,13 +457,23 @@ export function emitterPosAt(run,ms,fallback=[0,0]) {
   for(const point of trail){if(point[0]>ms)break;best=point;}
   return [best[1],best[2]];
 }
+// The punch count the item had when a given moment happened (last trail sample at or before it).
+export function punchCountAt(run,ms) {
+  const trail=run.trail??[];let best=trail[0];
+  for(const point of trail){if(point[0]>ms)break;best=point;}
+  return best?.[3]??0;
+}
 function resetEmitter(run,timeMs) {
   run.stopMs=timeMs;
   run.emitter={running:false,emitted:0,delayMs:0};
 }
 function particleRuns(renderer,rules,timeMs,motion,item,states) {
-  if(timeMs<(item.xmlParticleTime??0))item.xmlParticleRuns=[];
+  if(timeMs<(item.xmlParticleTime??0)){item.xmlParticleRuns=[];item.xmlPunchIds=new Set();item.xmlPunchCount=0;}
   item.xmlParticleTime=timeMs;
+  // The planner's motion has no punch counter, so the item counts the distinct punch events it has seen.
+  const punchIds=item.xmlPunchIds??=new Set();
+  for(const e of motion.events??[])if(e.type==="punch"&&!punchIds.has(e.id)){punchIds.add(e.id);item.xmlPunchCount=(item.xmlPunchCount??0)+1;}
+  const punchCount=motion.punchCount??item.xmlPunchCount??0;
   const current=new Map(rules.filter(e=>e.node.tag.startsWith("ParticleSystem")&&
     particleEntryActive(renderer,e,states,motion)).map(e=>[e.node.a.name,e]));
   // Systems with no Update/Render rule start from their own stage attributes. Systems governed by a rule keep the rule;
@@ -499,7 +513,7 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
   }
   for(const run of runs) {
     if(run.stopMs!==undefined&&run.stopMs<=timeMs&&run.trail.length)continue;
-    run.trail.push([timeMs,motion.x??0,motion.y??0]);
+    run.trail.push([timeMs,motion.x??0,motion.y??0,punchCount]);
     if(run.trail.length>TRAIL_LIMIT)run.trail.shift();
   }
   // Retain finite-life particles across action changes. Native world-position
