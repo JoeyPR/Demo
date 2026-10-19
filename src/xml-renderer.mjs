@@ -285,6 +285,10 @@ function emitterDelayMs(renderer,name) {
 }
 // [HYP] A particle with no relativeToEmitter property follows the emitter (the behaviour before this flag was read).
 export const RELATIVE_TO_EMITTER_DEFAULT=true;
+// 5.3 Facing. The whole player (every draw call) is already mirrored by the rig's facing matrix when facing<0, so a particle is
+// "player-facing" (mirrored once) by default. A flag set to false must therefore counter-mirror, which keeps the NET effect at
+// one mirror for true and none for false. Absent flags keep the existing behaviour (mirrored with the player). [HYP]
+export const USE_PLAYER_FACING_DEFAULT=true,OFFSET_FACING_DEFAULT=true;
 function particlesFor(renderer,entry,timeMs,motion,item,states) {
   const sys=renderer.particles.find(n=>n.a.name===entry.node.a.name);if(!sys)return [];
   const em=first(sys,"Emitter"),pt=first(sys,"Particle");if(!em||!pt)return [];
@@ -297,7 +301,10 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
   if(!count)return [];
   const lifetime=Math.max(.016,Number(get(pt,"lifeTime",[1])[0]));
   const delay=Math.max(0,Number(get(em,"delayTimer",[0])[0]));
-  const now=(timeMs-(entry.startMs??0))/1000-delay,offset=get(em,"offset",[0,0]);
+  const now=(timeMs-(entry.startMs??0))/1000-delay,facingLeft=motion.facing<0;
+  const authoredOffset=get(em,"offset",[0,0]);
+  // 5.3 Emitter.offsetFacing=false: the emitter offset does not follow the player's facing -> cancel the rig mirror on x.
+  const offset=facingLeft&&!truth(get(em,"offsetFacing",String(OFFSET_FACING_DEFAULT)))?[-authoredOffset[0],...authoredOffset.slice(1)]:authoredOffset;
   if(now<0)return [];
   const authoredTotal=Math.max(0,Math.trunc(Number(get(em,"particlesToEmit",[count])[0])));
   const total=truth(get(em,"infParticles","true"))?Infinity:
@@ -326,8 +333,11 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       item.xmlUnsupportedParticleExpressions??=new Set();item.xmlUnsupportedParticleExpressions.add(sys.a.name);
       (item.xmlUnsupportedReasons??={})[sys.a.name]=needed.map(u=>`${u.name}: ${u.reason}`);continue;
     }
-    const delta=pr.values.get("offset")??get(pt,"offset",[0,0],seed),velocity=pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed);
-    const gravity=truth(get(pt,"useGravity","false"))?get(pt,"gravityVector",[0,0],seed):[0,0];
+    // 5.3 usePlayerFacing=false: this particle ignores the player's facing -> cancel the rig mirror on its offset, velocity, gravity and sprite.
+    const unmirror=facingLeft&&!truth(pt.a.usePlayerFacing??String(USE_PLAYER_FACING_DEFAULT));
+    const fx=v=>unmirror?[-v[0],...v.slice(1)]:v;
+    const delta=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed)),velocity=fx(pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed));
+    const gravity=truth(get(pt,"useGravity","false"))?fx(get(pt,"gravityVector",[0,0],seed)):[0,0];
     // An unsupported expression is not a valid zero-valued emitter parameter.
     // Skip it instead of injecting NaN transforms into the entire player.
     if(![...offset,...delta,...velocity,...gravity,...(entry.offset??[])].every(Number.isFinite)){
@@ -346,7 +356,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const alpha=get(pt,"initialAlpha",[1],seed,age/life);
     const initial=get(pt,"initialScale",[1,1],seed,age/life);
     p.o=alpha[0];p.k=[initial[0],initial[1]??initial[0]];
-    if(truth(get(pt,"flipX","false",seed)))p.k[0]*=-1;
+    if(truth(get(pt,"flipX","false",seed))!==unmirror)p.k[0]*=-1;
     if(truth(get(pt,"flipY","false",seed)))p.k[1]*=-1;
     const final=get(pt,"finalScale",null,seed);
     if(final&&truth(get(pt,"interpolateScale","false")))p.k=p.k.map((v,i)=>v+((final[i]??final[0])-v)*age/life);

@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {fixture,n,set,upd,base} from "./xml-fixture.mjs";
-import {emitterPosAt} from "../src/xml-renderer.mjs";
+import {emitterPosAt,USE_PLAYER_FACING_DEFAULT,OFFSET_FACING_DEFAULT} from "../src/xml-renderer.mjs";
 import {SUPPORT} from "../src/xml-support.mjs";
 const scripts=JSON.parse(fs.readFileSync(new URL("../evidence/renderer-data.json",import.meta.url),"utf8")).scripts;
 const approx=(a,b,eps=1e-6)=>assert.ok(Math.abs(a-b)<=eps,`${a} != ${b}`);
@@ -70,4 +70,49 @@ test("5.2 rotateWithVelocity follows the instantaneous velocity when gravity ben
   const run=veloc("10,0",[set("rotateWithVelocity",true),set("useGravity",true),set("gravityVector","0,10")]);
   run(0,{});const [p]=run(1000,{});
   approx(p.r,Math.atan2(10,10)*180/Math.PI,1e-6);
+});
+
+// ---- 5.3 usePlayerFacing / Emitter.offsetFacing ------------------------------------------------------------------------
+// The rig mirrors every draw call for facing=-1, so "net mirrored once" is checked on the FINAL draw-list matrices.
+import {PlannerPlayer} from "../src/player.mjs";
+const catalog=JSON.parse(fs.readFileSync(new URL("../demo/catalog.json",import.meta.url),"utf8"));
+const finalCall=(run,facing,t=100)=>{
+  const p=new PlannerPlayer(catalog,[run.item]);
+  const m=ms=>({clockMs:ms,moveMs:ms,locomotion:"idle",ground:true,x:0,y:0,vx:0,vy:0,facing,events:[],punch:null});
+  p.step(m(0),16);return p.step(m(t),16).calls.find(c=>c.xmlParticle);
+};
+const facingFx=(particleAttrs,emitter=[],particle=[])=>fixture({particleAttrs,emitter:[set("emissionInterval",1),set("particlesToEmit",1),set("infParticles",false),...emitter],
+  particle:[set("lifeTime",10),...(particle.some(x=>x.a.name==="offset")?[]:[set("offset","10,0")]),...particle]});
+test("5.3 usePlayerFacing=true, facing=-1: the particle is mirrored with the player exactly once (offset x and sprite flip)", () => {
+  const c=finalCall(facingFx({usePlayerFacing:"true"}),-1);
+  approx(c.matrix[0],-1);approx(c.matrix[4],22);
+});
+test("5.3 usePlayerFacing=false, facing=-1: the particle ignores facing (same matrix as facing=+1)", () => {
+  const right=finalCall(facingFx({usePlayerFacing:"false"}),1),left=finalCall(facingFx({usePlayerFacing:"false"}),-1);
+  assert.deepEqual(left.matrix.map(v=>+v.toFixed(6)),right.matrix.map(v=>+v.toFixed(6)));
+});
+test("5.3 usePlayerFacing=false: velocity.x is not mirrored (moves the same screen direction at facing -1 and +1)", () => {
+  const fx=()=>facingFx({usePlayerFacing:"false"},[],[set("initialVelocity","20,0"),set("offset","0,0")]);
+  const r=finalCall(fx(),1,1000),l=finalCall(fx(),-1,1000);
+  approx(r.matrix[4],l.matrix[4]);approx(l.matrix[0],r.matrix[0]);
+});
+test("5.3 usePlayerFacing=true: velocity.x is mirrored with the player", () => {
+  const fx=()=>facingFx({usePlayerFacing:"true"},[],[set("initialVelocity","20,0"),set("offset","0,0")]);
+  const r=finalCall(fx(),1,1000),l=finalCall(fx(),-1,1000);
+  approx(r.matrix[4]+l.matrix[4],32,1e-6);   // reflected about the player centre x=16
+});
+test("5.3 usePlayerFacing=false composes with an authored flipX exactly once (no double flip)", () => {
+  const fx=f=>finalCall(facingFx({usePlayerFacing:"false"},[],[set("flipX",true)]),f);
+  approx(fx(1).matrix[0],-1);approx(fx(-1).matrix[0],-1);
+});
+test("5.3 Emitter.offsetFacing=false: the emitter offset does not mirror with facing; true does (sprite centre on screen)", () => {
+  const centre=c=>c.matrix[4]+16*c.matrix[0];
+  const mk=flag=>facingFx({},[set("offset","10,0"),set("offsetFacing",flag)],[set("offset","0,0")]);
+  approx(centre(finalCall(mk(false),1)),centre(finalCall(mk(false),-1)));
+  approx(centre(finalCall(mk(true),1))+centre(finalCall(mk(true),-1)),32,1e-6);
+});
+test("5.3 absent flags keep the old behaviour (mirrored with the player); constants record the [HYP] defaults", () => {
+  const f=finalCall(facingFx({}),-1);approx(f.matrix[0],-1);approx(f.matrix[4],22);
+  assert.equal(USE_PLAYER_FACING_DEFAULT,true);assert.equal(OFFSET_FACING_DEFAULT,true);
+  assert.equal(SUPPORT["Particle@usePlayerFacing"],"partial");assert.equal(SUPPORT["Emitter.offsetFacing"],"partial");
 });
