@@ -22,6 +22,10 @@ export function variable(name,motion) {
     onGround:!state.airborne,punchInProgress:!!motion.punch,punching:!!motion.punch,
     isFacingLeft:motion.facing<0}[name];
 }
+export const UNRESOLVED_ITEM_SYMBOL_WORN=false;
+export function unresolvedWearingSymbols(renderer) {
+  return [...new Set(walk(renderer.rules).filter(n=>n.tag==="IsWearing"&&!/^\d+$/.test(n.v)&&ITEM_SYMBOL_IDS[n.v]===undefined).map(n=>n.v))];
+}
 export function condition(n,motion,states={}) {
   if(!n)return false;
   const a=n.a??{},v=n.v;
@@ -55,7 +59,10 @@ export function condition(n,motion,states={}) {
   if(n.tag==="IsRenderObjectFlag")return (context.renderObjectFlags??[]).includes(v);
   if(n.tag==="IsWearing"){
     const id=/^\d+$/.test(v)?Number(v):ITEM_SYMBOL_IDS[v];
-    return id===undefined?undefined:(context.equippedIds??[]).includes(id);
+    // A symbolic id the table does not know (ITEM_ID_HAUNTED, ITEM_ID_ENCHANTED_ROBE) cannot be matched to an equipped item. Returning
+    // undefined used to halt the whole hook (StopIf treats undefined as "stop"), which silently removed every particle of a worn item.
+    // It now counts as "not worn" and is listed by unresolvedWearingSymbols() so the fidelity badge can say so. [HYP]
+    return id===undefined?UNRESOLVED_ITEM_SYMBOL_WORN:(context.equippedIds??[]).includes(id);
   }
   if(n.tag==="IsInState"){
     const [machine,state]=String(a.name).split(".");
@@ -152,6 +159,9 @@ export const PARTICLE_OFF={stopsEmission:true,resetsEmitterState:true,latches:fa
 // AddClothingParticles: continuous while the item is worn. Every frame the hook's own conditions (onState / onAction / StopIf)
 // are re-evaluated; a false condition ends the run (live particles finish) and a true one starts a fresh run.
 export const ADD_CLOTHING_PARTICLES={mode:"continuous-while-worn",conditionGatedPerFrame:true};
+// SwitchOffClothingParticles fires ONCE, when the item is unequipped (never while worn). It applies its ParticleSystemOff nodes with
+// PARTICLE_OFF semantics; live particles finish. Idempotent per equip: a second call is a no-op until the item is equipped again.
+export const SWITCH_OFF_CLOTHING={firesOn:"unequip",times:1};
 // OnPunchBegin / OnPunchStop are kept as evidence-backed aliases. DATA: ArcaneArmor punch_start_particle = Update@OnPunchBegin +
 // Off@OnPunchStop, punch_end_particle = Update@OnPunchStop + Off@OnPunchBegin (same pairs in BlackCrystalBallHead, CrystalBallHead,
 // UnhelpfulHand ...). Begin == the planner's punch event; Stop == the frame the punch ends.
@@ -172,7 +182,8 @@ export const EVENT_HOOKS={
   OnPunchStop:(m,ctx)=>ctx?.punchEnd??false,
   OnPunchUpdate:m=>!!m.punch,
   OnDamagedTile:()=>false,OnDestroyedTile:()=>false,OnKilled:()=>false,OnRespawned:()=>false,OnEnteredToWorld:()=>false,
-  SwitchOffClothingParticles:()=>false
+  // SwitchOffClothingParticles is the unequip side: live only on the unequip pass (unequipXmlItem), never while the item is worn.
+  SwitchOffClothingParticles:(m,ctx)=>ctx?.unequip===true
 };
 const PULSE_HOOKS=new Set(["OnPunchStart","OnPunchBegin","OnPunchStop"]);
 function visibleRules(renderer,motion,states,ctx={}) {
@@ -194,6 +205,7 @@ function visibleRules(renderer,motion,states,ctx={}) {
     }
   }
   for(const hook of children(renderer.rules)) {
+    if(ctx.onlyHook&&hook.tag!==ctx.onlyHook)continue;
     const live=hook.tag in EVENT_HOOKS?EVENT_HOOKS[hook.tag](motion,ctx):true;
     if(!live)continue;
     visit(children(hook),hook.tag,[0,0],hook.tag,PULSE_HOOKS.has(hook.tag)?live:undefined);
@@ -503,6 +515,20 @@ export function punchCountAt(run,ms) {
   const trail=run.trail??[];let best=trail[0];
   for(const point of trail){if(point[0]>ms)break;best=point;}
   return best?.[3]??0;
+}
+export function unequipXmlItem(item,timeMs,motion={}) {
+  const renderer=item.renderer;
+  if(!renderer?.particles?.length||item.xmlSwitchOffAt!==undefined)return false;
+  const states=item.xmlStates??{},rules=visibleRules(renderer,motion,states,{unequip:true,onlyHook:"SwitchOffClothingParticles"});
+  for(const stop of rules.stops??[])
+    for(const run of item.xmlParticleRuns??[])
+      if(run.node.a.name===stop.name&&(run.stopMs===undefined||run.stopMs>timeMs))resetEmitter(run,timeMs);
+  item.xmlSwitchOffAt=timeMs;item.xmlSwitchOffCount=(item.xmlSwitchOffCount??0)+1;
+  return true;
+}
+// Equipping (again) re-arms SwitchOff and starts the item's particles from scratch.
+export function equipXmlItem(item) {
+  delete item.xmlSwitchOffAt;item.xmlParticleRuns=[];item.xmlParticleTime=0;
 }
 function resetEmitter(run,timeMs) {
   run.stopMs=timeMs;

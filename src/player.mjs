@@ -5,11 +5,17 @@ import { resolveItemPose } from "./pose-resolver.mjs";
 import { resolvePlayerLift } from "./lift.mjs";
 import { advanceCatalogItem } from "./catalog-adapter.mjs";
 import {ItemEffects,punchEffectOwner} from "./item-fx.mjs";
+import {unequipXmlItem,equipXmlItem} from "./xml-renderer.mjs";
 
 // Integration entry point for Claude: supply catalog, items and MotionFrames.
 export class PlannerPlayer {
   constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();}
-  equip(items) {this.items=items;this.lastEvents.clear();this.effects.reset();}
+  equip(items,motion={}) {
+    // SwitchOffClothingParticles fires once per removed item; items that stay worn are untouched; a re-equipped item starts fresh.
+    for(const old of this.items)if(!items.includes(old))unequipXmlItem(old,motion.clockMs??old.xmlParticleTime??0,motion);
+    for(const item of items)if(!this.items.includes(item)&&item.xmlSwitchOffAt!==undefined)equipXmlItem(item);
+    this.items=items;this.lastEvents.clear();this.effects.reset();
+  }
   step(motion,dtMs,visual={}) {
     motion={...motion,renderContext:{equippedIds:this.items.map(i=>i.id),...visual.renderContext}};
     // One MotionFrame owns body, clothes and attachments, never separate clocks.
