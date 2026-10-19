@@ -195,3 +195,39 @@ test("5.6a interpolateAlpha: the shipped data has 40+ systems using it, and both
   assert.ok(sets.length>=40);
   assert.equal(SUPPORT["Particle.interpolateAlpha"],"partial");assert.equal(SUPPORT["Particle.finalAlpha"],"partial");
 });
+
+// ---- 5.6b interpolateVelocity + finalVelocity -------------------------------------------------------------------------
+const posAt=(extra,t,axis=4)=>{const run=withFlags([set("offset","0,0"),...extra]);run(0,{});return finalCall(run,1,t).matrix[axis];};
+test("5.6b interpolateVelocity=true: velocity goes linearly (0 -> 20) so travel = v0*a + (vF-v0)*a^2/(2*life)", () => {
+  const flags=[set("initialVelocity","0,0"),set("finalVelocity","20,0"),set("interpolateVelocity",true)];
+  const x0=posAt([set("initialVelocity","0,0")],0);
+  approx(posAt(flags,4000)-x0,20*16/(2*10),1e-6);   // a=4s, life=10s -> 20*4^2/(2*10)=16
+});
+test("5.6b interpolateVelocity=true: v0=10 slowing to 0 over life 10 stops after travelling 50", () => {
+  const flags=[set("initialVelocity","10,0"),set("finalVelocity","0,0"),set("interpolateVelocity",true)];
+  const x0=posAt([set("initialVelocity","0,0")],0);
+  approx(posAt(flags,9999)-x0,10*9.999-10*9.999*9.999/(2*10),1e-3);
+});
+test("5.6b interpolateVelocity=false/absent: finalVelocity is ignored (constant initialVelocity)", () => {
+  const x0=posAt([set("initialVelocity","0,0")],0);
+  approx(posAt([set("initialVelocity","10,0"),set("finalVelocity","0,0"),set("interpolateVelocity",false)],4000)-x0,40,1e-6);
+  approx(posAt([set("initialVelocity","10,0"),set("finalVelocity","0,0")],4000)-x0,40,1e-6);
+});
+test("5.6b interpolateVelocity=true with no finalVelocity: constant velocity, reported as ignored", () => {
+  const run=withFlags([set("offset","0,0"),set("initialVelocity","10,0"),set("interpolateVelocity",true)]);run(0,{});
+  const x0=finalCall(withFlags([set("offset","0,0")]),1,0).matrix[4];
+  approx(finalCall(run,1,4000).matrix[4]-x0,40,1e-6);assert.equal(run.item.xmlIgnoredValues["ps.finalVelocity"],"missing");
+});
+test("5.6b interpolateVelocity + rotateWithVelocity: the heading turns as the velocity vector turns", () => {
+  const run=withFlags([set("initialVelocity","10,0"),set("finalVelocity","0,10"),set("interpolateVelocity",true),set("rotateWithVelocity",true)]);
+  run(0,{});approx(run(0,{})[0].r,0);approx(run(5000,{})[0].r,Math.atan2(5,5)*180/Math.PI,1e-6);
+});
+test("5.6b interpolateVelocity=true with an unresolvable finalVelocity (VectorTo targetPos) skips the particle and names the reason", () => {
+  const vt=n("VectorTo",{name:"finalVelocity",source:"targetPos",duration:"lifeTime"});
+  const run=withFlags([set("initialVelocity","10,0"),set("interpolateVelocity",true),vt]);
+  assert.equal(run(0,{}).length,0,"no particle is drawn from an unknown path");
+  assert.match(run.item.xmlUnsupportedReasons.ps.join(),/finalVelocity: targetPos unavailable/);
+});
+test("5.6b both velocity entries are partial in xml-support", () => {
+  assert.equal(SUPPORT["Particle.finalVelocity"],"partial");assert.equal(SUPPORT["Particle.interpolateVelocity"],"partial");
+});

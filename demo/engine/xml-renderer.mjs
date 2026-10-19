@@ -339,7 +339,9 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const pr=resolveProperties(pt,{rng:makeRng(seed),t:0,
       inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:motion.punchCount??0,intervalMS:interval*1000},
       env:{lifeTime:life}});
-    const needed=pr.unsupported.filter(u=>["offset","initialVelocity"].includes(u.name));
+    const interpolateVelocity=truth(get(pt,"interpolateVelocity","false",seed));
+    // finalVelocity only changes the path when interpolateVelocity is on; then it is required like initialVelocity.
+    const needed=pr.unsupported.filter(u=>["offset","initialVelocity",...(interpolateVelocity?["finalVelocity"]:[])].includes(u.name));
     if(needed.length){
       item.xmlUnsupportedParticleExpressions??=new Set();item.xmlUnsupportedParticleExpressions.add(sys.a.name);
       (item.xmlUnsupportedReasons??={})[sys.a.name]=needed.map(u=>`${u.name}: ${u.reason}`);continue;
@@ -349,6 +351,13 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const fx=v=>unmirror?[-v[0],...v.slice(1)]:v;
     const delta=fx(pr.values.get("offset")??get(pt,"offset",[0,0],seed)),velocity=fx(pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed));
     const gravity=truth(get(pt,"useGravity","false"))?fx(get(pt,"gravityVector",[0,0],seed)):[0,0];
+    // 5.6 interpolateVelocity + finalVelocity: v(a)=lerp(v0,vF,a/life), so travel(a)=v0*a+(vF-v0)*a^2/(2*life) per axis.
+    const authoredFinal=interpolateVelocity?pr.values.get("finalVelocity")??get(pt,"finalVelocity",null,seed):null;
+    const finalVelocity=authoredFinal?finiteList(fx(authoredFinal)):null;
+    if(interpolateVelocity&&!finalVelocity)ignoreValue(item,sys.a.name,"finalVelocity",authoredFinal?"not numeric":"missing");
+    const accel=[0,1].map(i=>finalVelocity?((finalVelocity[i]??0)-(velocity[i]??0))/life:0);   // d(velocity)/d(age) from interpolation
+    const velocityAt=(i,a)=>(velocity[i]??0)+accel[i]*a+(gravity[i]??0)*a;
+    const travel=(i,a)=>(velocity[i]??0)*a+.5*accel[i]*a*a+.5*(gravity[i]??0)*a*a;
     // An unsupported expression is not a valid zero-valued emitter parameter.
     // Skip it instead of injecting NaN transforms into the entire player.
     if(![...offset,...delta,...velocity,...gravity,...(entry.offset??[])].every(Number.isFinite)){
@@ -362,8 +371,8 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
       anchor=[at[0]-(motion.x??0),at[1]-(motion.y??0)];
     }
     const p=spritePiece(renderer,spriteName,[
-      anchor[0]+(entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+(velocity[0]??0)*age+.5*(gravity[0]??0)*age*age,
-      anchor[1]+(entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+(velocity[1]??0)*age+.5*(gravity[1]??0)*age*age],entry.pass);if(!p)continue;
+      anchor[0]+(entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+travel(0,age),
+      anchor[1]+(entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+travel(1,age)],entry.pass);if(!p)continue;
     if(truth(get(pt,"isBackgroundParticle","false",seed)))p.pass=BACKGROUND_PARTICLE_PASS;
     const alignment=String(get(pt,"renderAlignment","CENTER",seed));
     if(RENDER_ALIGNMENT[alignment])[p.ax,p.ay]=RENDER_ALIGNMENT[alignment];
@@ -384,7 +393,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     p.r=Number(get(pt,"initialAngle",[0],seed)[0])+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
     // 5.2 rotateWithVelocity [HYP]: sprite art points along +x, so heading = atan2(vy,vx) in degrees, from the instantaneous velocity.
     if(truth(get(pt,"rotateWithVelocity","false",seed))) {
-      const vx=(velocity[0]??0)+(gravity[0]??0)*age,vy=(velocity[1]??0)+(gravity[1]??0)*age;
+      const vx=velocityAt(0,age),vy=velocityAt(1,age);
       if(vx||vy)p.r+=Math.atan2(vy,vx)*180/Math.PI;
     }
     p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;p.xmlSystem=sys.a.name;
