@@ -144,9 +144,22 @@ export function bindXmlRenderer(item,catalog) {
   item.warnings.push(`XML ${item.raw.script}: partial interpreter; native FX/complex rules may remain unsupported`);
   item.coverage=`XML loaded; ${item.xmlBoundCount} sprite bindings; partial rules`;
 }
-function visibleRules(renderer,motion,states) {
-  const output=[];
-  function visit(nodes,pass,offset=[0,0]) {
+// Event hooks fire on an event, not continuously. A predicate returns the event stamp (truthy) while the event is live.
+// The planner has a punch source only; tile damage/destruction, death, respawn and world entry have none, so those hooks are
+// never live (their content is not run as always-on). OnPunchBegin == OnPunchStart and OnPunchStop == the frame the punch ended
+// are [HYP] from the paired Update/Off usage in ArcaneArmor / CrystalBallHead. SwitchOffClothingParticles is the unequip side.
+export const EVENT_HOOKS={
+  OnPunchStart:m=>m.events?.find(e=>e.type==="punch")?.id??false,
+  OnPunchBegin:m=>m.events?.find(e=>e.type==="punch")?.id??false,
+  OnPunchStop:(m,ctx)=>ctx?.punchEnd??false,
+  OnPunchUpdate:m=>!!m.punch,
+  OnDamagedTile:()=>false,OnDestroyedTile:()=>false,OnKilled:()=>false,OnRespawned:()=>false,OnEnteredToWorld:()=>false,
+  SwitchOffClothingParticles:()=>false
+};
+const PULSE_HOOKS=new Set(["OnPunchStart","OnPunchBegin","OnPunchStop"]);
+function visibleRules(renderer,motion,states,ctx={}) {
+  const output=[],stops=[];
+  function visit(nodes,pass,offset=[0,0],hook,pulse) {
     let position=offset.slice();
     for(const n of nodes) {
       if(n.tag==="StopIf"){
@@ -154,13 +167,20 @@ function visibleRules(renderer,motion,states) {
         if(decision===true||decision===undefined)break;
       }
       if(n.a?.onState&&!n.a.onState.split("|").some(s=>{const [m,v]=s.split(".");return states[m]?.state===v;}))continue;
-      if(n.tag==="Group"){visit(children(n),pass,position);continue;}
+      if(n.tag==="Group"){visit(children(n),pass,position,hook,pulse);continue;}
       if(n.tag==="Translate"){const v=numbers(n.v);position=[position[0]+(v[0]??0),position[1]+(v[1]??0)];continue;}
+      // Off is a stop request, never drawn: the run stops emitting and live particles finish their life.
+      if(n.tag==="ParticleSystemOff"){stops.push({name:n.a.name,hook,onAction:n.a.onAction,onState:n.a.onState});continue;}
       if(["SpriteRender","ParticleSystemRender","ParticleSystemUpdate"].includes(n.tag))
-        output.push({node:n,pass:PLANNER_PROFILE.passOrder.includes(pass)?pass:"PARTICLES",offset:position.slice()});
+        output.push({node:n,pass:PLANNER_PROFILE.passOrder.includes(pass)?pass:"PARTICLES",offset:position.slice(),pulse});
     }
   }
-  for(const hook of children(renderer.rules))visit(children(hook),hook.tag);
+  for(const hook of children(renderer.rules)) {
+    const live=hook.tag in EVENT_HOOKS?EVENT_HOOKS[hook.tag](motion,ctx):true;
+    if(!live)continue;
+    visit(children(hook),hook.tag,[0,0],hook.tag,PULSE_HOOKS.has(hook.tag)?live:undefined);
+  }
+  output.stops=stops;
   return output;
 }
 // These aura render hooks are simple enough to replace their public stills.
@@ -214,6 +234,7 @@ export const STAGE_MAP={
   AddClothingParticles:()=>ON,
   SwitchOffClothingParticles:()=>OFF,           // the Off side; see ParticleSystemOff handling
   OnPunchStart:m=>({pulse:"punch",on:!!m.events?.some(e=>e.type==="punch")}),
+  OnPunchBegin:m=>({pulse:"punch",on:!!m.events?.some(e=>e.type==="punch")}),   // [HYP] == OnPunchStart
   OnPunchUpdate:m=>({on:!!m.punch}),
   OnDamagedTile:()=>worldEvent("OnDamagedTile"),
   OnDestroyedTile:()=>worldEvent("OnDestroyedTile"),
@@ -329,15 +350,23 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
     if(!s.stage.updateStage&&!s.stage.updateState&&!s.stage.renderStage)continue;
     const why=stageActive(s.stage,motion);
     if(why.unresolved){(item.xmlUnresolvedEvents??={})[s.name]=why.unresolved;continue;}
-    if(why.on)current.set(s.name,{node:{tag:"ParticleSystemUpdate",a:{name:s.name}},pass:passFor(s.stage.renderStage),offset:[0,0],pulse:why.pulse});
+    if(why.on)current.set(s.name,{node:{tag:"ParticleSystemUpdate",a:{name:s.name}},pass:passFor(s.stage.renderStage),offset:[0,0],
+      pulse:why.pulse?(motion.events??[]).find(e=>e.type===why.pulse)?.id:undefined});
   }
   const runs=item.xmlParticleRuns??=[];
+  // ParticleSystemOff: stop emitting now; existing particles keep their remaining life. The system may restart on a later frame.
+  for(const stop of rules.stops??[]) {
+    if(!actionActive(stop.onAction,motion))continue;
+    current.delete(stop.name);
+    for(const run of runs)
+      if(run.node.a.name===stop.name&&(run.stopMs===undefined||run.stopMs>timeMs))run.stopMs=timeMs;
+  }
   for(const run of runs)
     if(run.stopMs===undefined&&!current.has(run.node.a.name))run.stopMs=timeMs;
   for(const [name,entry] of current) {
     const ongoing=runs.find(r=>r.node.a.name===name&&r.stopMs===undefined);
     const trigger=walk(renderer.rules).some(n=>n.tag==="ParticleSystemUpdate"&&n.a.name===name&&n.a.onAction);
-    const stamp=entry.pulse?(motion.events??[]).find(e=>e.type===entry.pulse)?.id:
+    const stamp=entry.pulse?entry.pulse:
       trigger?(motion.events??[]).find(e=>["punch","jump","doubleJump"].includes(e.type))?.id:undefined;
     if(entry.pulse) {
       // One-shot start: the run lasts one frame plus the emitter's own delay, then existing particles finish their life.
@@ -356,8 +385,10 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
 export function advanceXmlRenderer(item,timeMs,motion) {
   const renderer=item.renderer;if(!renderer)return;
   const states=updateMachines(renderer,item,timeMs,motion);
+  const punching=!!motion.punch,ctx={punchEnd:item.xmlWasPunching&&!punching?`punchEnd:${timeMs}`:null};
+  item.xmlWasPunching=punching;
   if(AURA_RULES.has(item.raw.script)) {
-    const rules=visibleRules(renderer,motion,states);item.pieces=[];
+    const rules=visibleRules(renderer,motion,states,ctx);item.pieces=[];
     for(const e of rules) {
       if(e.node.tag.startsWith("ParticleSystem"))continue;
       const offset=numbers(e.node.a.offset??"0,0").map((v,i)=>v+(e.offset?.[i]??0));
@@ -372,7 +403,7 @@ export function advanceXmlRenderer(item,timeMs,motion) {
     if(noFacing)for(const p of item.pieces)p.noFacing=true;
   }
   if(renderer.particles?.length)
-    item.pieces.push(...particleRuns(renderer,visibleRules(renderer,motion,states),timeMs,motion,item,states));
+    item.pieces.push(...particleRuns(renderer,visibleRules(renderer,motion,states,ctx),timeMs,motion,item,states));
   for(const p of item.pieces) {
     if(!p.xmlSprite)continue;
     const spriteStates=p.xmlParticle?
