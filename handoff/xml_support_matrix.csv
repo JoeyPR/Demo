@@ -1,0 +1,290 @@
+category,xml_key,uses,files,runtime_status,notes
+Animation node,SpriteAnimation,1116,266,PARTIAL,frame cell sampling by playOnState/animTime/isLoop; playOnAction (44) ignored; autoPlay treated as always-on.
+Animation node,SpriteCurveAnimation,133,68,UNSUPPORTED,"133 uses, never executed."
+Animation node,InterpolationVec4Animation,57,9,UNSUPPORTED,
+Animation node,SpriteSinPulseAnimation,49,17,UNSUPPORTED,"49 uses (Parameter pos.y/period/scale floats e.g. AngelAndDevil), never executed."
+Animation node,InterpolationFloatAnimation,36,7,UNSUPPORTED,
+Animation node,InterpolationVec2Animation,20,4,UNSUPPORTED,
+Animation node,InterpolationVec3Animation,19,6,UNSUPPORTED,
+Animation node,SequenceAnimation,15,15,UNSUPPORTED,
+Animation node,DelayAnimation,14,7,UNSUPPORTED,
+Animation node,Animation,8,2,UNSUPPORTED,
+Animation node,VisibilityAnimation,5,1,UNSUPPORTED,
+AvatarTransform class,ArmAngle,328,153,UNSUPPORTED,
+AvatarTransform class,Face,138,134,UNSUPPORTED,
+AvatarTransform class,FootPosition,32,32,UNSUPPORTED,
+AvatarTransform class,RenderData,26,9,UNSUPPORTED,
+AvatarTransform class,Emotion,24,22,UNSUPPORTED,
+AvatarTransform class,Scale,14,7,UNSUPPORTED,
+AvatarTransform class,ActionUpdate,6,2,UNSUPPORTED,
+AvatarTransform class,NetAvatarAction,2,1,UNSUPPORTED,
+Condition node,IsVariableFloat,507,136,PARTIAL,"only speed.x, speed.y, speed.length known; others -> undefined -> rule treated as unknown."
+Condition node,IsVariableBool,341,102,PARTIAL,"only onGround, punchInProgress, punching, isFacingLeft known."
+Condition node,IsZombified,306,153,PARTIAL,context flag only.
+Condition node,IsRenderMod,242,79,PARTIAL,context list.
+Condition node,IsWearing,235,103,PARTIAL,only numeric IDs + 6 symbolic IDs in ITEM_SYMBOL_IDS; slot attribute ignored.
+Condition node,CompareCustomVariable,129,16,UNSUPPORTED,
+Condition node,IsSitting,98,59,PARTIAL,context flag; ItemID attribute (38 uses) ignored.
+Condition node,IsSleepingOnaBed,85,53,PARTIAL,context flag only.
+Condition node,IsTrnsformed,71,46,PARTIAL,"context flag only (note native spelling typo ""IsTrnsformed"" - keep)."
+Condition node,IsFacingLeft,70,34,SUPPORTED,uses motion.facing.
+Condition node,OnDamagedTile,62,62,UNSUPPORTED,
+Condition node,IsItemTransformed,58,11,PARTIAL,context flag.
+Condition node,IsAnimationFinished,23,9,UNSUPPORTED,
+Condition node,ItemHasTag,20,7,UNSUPPORTED,
+Condition node,IsDancing,18,7,PARTIAL,locomotion==dance only.
+Condition node,IsRenderObjectFlag,10,6,PARTIAL,context list.
+Condition node,SubCondition,6,6,UNSUPPORTED,
+Condition node,CheckRandomRangeNumber,5,3,UNSUPPORTED,
+Condition node,IsDarkTile,4,2,UNSUPPORTED,
+Condition node,IsHoldingJumpKey,4,2,UNSUPPORTED,
+Condition node,IsInState,1,1,SUPPORTED,machine.state compare.
+Emitter attribute,attachment,130,66,UNSUPPORTED,
+Emitter attribute,needsHandItemActive,24,8,UNSUPPORTED,
+Emitter attribute,onPunchCount,24,9,UNSUPPORTED,
+Emitter child/operator,Random:emissionInterval,93,46,PARTIAL,"operator form of a supported property (Random); seeded/approximate: seconds assumed; floor 0.016s; fixed-step replay, no jitter."
+Emitter child/operator,Random:offset,44,24,PARTIAL,sampled via seeded Random (not native RNG).
+Emitter child/operator,OrbitOffset,29,9,UNSUPPORTED,
+Emitter child/operator,Random:particlesPerEmission,12,8,PARTIAL,operator form of a supported property (Random); seeded/approximate: executes; truncated to int and clamped 0..32. Check native cap before keeping th
+Emitter child/operator,Select:rgbTint,3,2,UNSUPPORTED,operator form of an unsupported property (rgbTint)
+Emitter child/operator,Select:offset,2,1,PARTIAL,operator form of a supported property (Select); seeded/approximate: applied as raw pixel delta in sprite space; ignores offsetFacing mirroring and u
+Emitter child/operator,SetVar:arrow.target.offset,1,1,UNSUPPORTED,
+Emitter child/operator,Random:particlesToEmit,1,1,PARTIAL,operator form of a supported property (Random); seeded/approximate: read; interplay with checkParticleNumToEmit approximated.
+Emitter property (Set),particlesPerEmission,913,255,PARTIAL,executes; truncated to int and clamped 0..32. Check native cap before keeping the clamp.
+Emitter property (Set),offset,652,230,PARTIAL,applied as raw pixel delta in sprite space; ignores offsetFacing mirroring and useCharacterPos. Unit/space unverified.
+Emitter property (Set),infParticles,623,218,PARTIAL,"read, but default is ""true"" when absent (native default unknown)."
+Emitter property (Set),emissionInterval,462,199,PARTIAL,"seconds assumed; floor 0.016s; fixed-step replay, no jitter."
+Emitter property (Set),particlesToEmit,459,178,PARTIAL,read; interplay with checkParticleNumToEmit approximated.
+Emitter property (Set),lifeTime,425,171,PARTIAL,"emitter lifetime in seconds assumed; only honoured when infLifeTime is not ""true""."
+Emitter property (Set),infLifeTime,397,165,PARTIAL,"read; default ""true"" when absent."
+Emitter property (Set),checkParticleNumToEmit,237,111,PARTIAL,"read; NOTE data contains typo value ""fasle"" (2 uses) which truthy-check treats as false - keep that behaviour but log it."
+Emitter property (Set),offsetFacing,92,45,UNSUPPORTED,
+Emitter property (Set),delayTimer,89,57,PARTIAL,seconds assumed.
+Emitter property (Set),useCharacterPos,46,25,UNSUPPORTED,
+Emitter property (Set),randomizeInterval,26,11,UNSUPPORTED,
+Emitter property (Set),intervalMin,26,11,PARTIAL,runtime uses the MEAN of min/max as a constant; native almost certainly re-rolls per emission (randomizeInterval).
+Emitter property (Set),intervalMax,26,11,PARTIAL,see intervalMin.
+Emitter property (Set),enable,13,8,PARTIAL,evaluated once as a static boolean; if native drives it from variables it is wrong.
+Emitter property (Set),rgbTint,12,5,UNSUPPORTED,
+Emitter property (Set),useTargetTileColorForTint,4,4,UNSUPPORTED,
+Emitter property (Set),forceXScaling,2,1,UNSUPPORTED,
+IsAction value,PUNCH,566,172,PARTIAL,motion.punch; BUILD folded into PUNCH.
+IsAction value,BUILD,42,35,PARTIAL,folded into PUNCH (cannot distinguish build vs hit).
+IsAction value,DIE,37,14,UNSUPPORTED,
+IsAction value,FALL,29,18,PARTIAL,airborne-descending approximation.
+IsAction value,JUMP,28,22,PARTIAL,airborne-ascending approximation.
+IsAction value,SLEEP,20,10,UNSUPPORTED,
+IsAction value,IDLE,14,10,PARTIAL,
+IsAction value,DANCE,13,6,PARTIAL,in actionActive only; not in IsAction()
+IsAction value,DANCE_FLOSS,13,5,UNSUPPORTED,
+IsAction value,JUMPDOUBLE,12,9,PARTIAL,event-based in actionActive only.
+IsAction value,DANCE_DAB,3,1,UNSUPPORTED,
+IsAction value,WALK,3,3,PARTIAL,
+IsAction value,JUMPSTART,3,3,PARTIAL,event-based in actionActive only.
+OrbitOffset child,maxScale,29,9,UNSUPPORTED,
+OrbitOffset child,hasOrbit,29,9,UNSUPPORTED,
+OrbitOffset child,hOrbitPeriod,29,9,UNSUPPORTED,
+OrbitOffset child,hAmplitude,29,9,UNSUPPORTED,
+OrbitOffset child,hTimeOffset,29,9,UNSUPPORTED,
+OrbitOffset child,vAmplitude,29,9,UNSUPPORTED,
+OrbitOffset child,vOrbitPeriod,29,9,UNSUPPORTED,
+OrbitOffset child,vTimeOffset,29,9,UNSUPPORTED,
+OrbitOffset child,minScale,29,9,UNSUPPORTED,
+Other node,StateMachine,413,243,PARTIAL,transitions evaluated with the Condition subset above; ExitTime (52) and IsTemporary ignored.
+Other node,ArithmethicOperation,250,56,UNSUPPORTED,
+Other node,Translate,224,82,PARTIAL,"x,y only; forceValue/onState/incrementRotate ignored except onState gate."
+Other node,AddClothingParticles,102,102,UNSUPPORTED,
+Other node,ContextUpdate,82,42,UNSUPPORTED,
+Other node,Rotate,77,36,UNSUPPORTED,
+Other node,SwitchOffClothingParticles,42,42,UNSUPPORTED,
+Other node,TileStampData,31,31,UNSUPPORTED,
+Other node,OnFinish,25,19,UNSUPPORTED,
+Other node,Override,25,19,UNSUPPORTED,
+Other node,RenderPet,22,22,UNSUPPORTED,
+Other node,UpdatePet,14,14,UNSUPPORTED,
+Other node,SetVar,14,11,UNSUPPORTED,
+Other node,RenderTransform,13,13,UNSUPPORTED,
+Other node,LineRender,12,5,UNSUPPORTED,
+Other node,MusicSource,11,10,UNSUPPORTED,
+Other node,Scale,10,6,UNSUPPORTED,
+Other node,Colour,9,5,UNSUPPORTED,
+Other node,AvatarOutline,8,7,UNSUPPORTED,
+Other node,VisibilityAnimation,5,1,UNSUPPORTED,
+Other node,RandomValueOperation,3,1,UNSUPPORTED,
+Other node,Alpha,2,2,UNSUPPORTED,
+Other node,RenderAura,2,2,UNSUPPORTED,
+Other node,AvatarSilhouetteRender,2,2,UNSUPPORTED,
+Other node,PlayerSpriteRender,1,1,UNSUPPORTED,
+Other node,RenderClone,1,1,UNSUPPORTED,
+Particle attribute,randomSpriteFrame,298,134,PARTIAL,picks seed%frames from the FIRST SpriteAnimation of that sprite; native may use per-particle uniform random and may use SpriteCurveAnimation.
+Particle attribute,usePlayerFacing,89,46,UNSUPPORTED,
+Particle attribute,angleRelativeToPlayerSpeed,38,17,UNSUPPORTED,
+Particle attribute,particleIndexSpriteFrame,30,11,UNSUPPORTED,
+Particle attribute,autoLifeTimeToTarget,29,14,UNSUPPORTED,
+Particle attribute,velocityRelativeToPlayerSpeed,24,11,UNSUPPORTED,
+Particle attribute,alternateSpriteFrameWithPunch,24,13,UNSUPPORTED,
+Particle attribute,UseParentVariantId,22,8,UNSUPPORTED,
+Particle attribute,UseParentScale,17,5,UNSUPPORTED,
+Particle attribute,UseParentEmitterAngle,16,5,UNSUPPORTED,
+Particle attribute,VelocityRelativeToParticleAngle,2,1,UNSUPPORTED,
+Particle child/operator,Curve:initialAlpha,673,219,PARTIAL,operator form of a supported property (Curve); seeded/approximate: Curve sampled by normalised age (age/life) - correct idea; finalAlpha/interpolat
+Particle child/operator,Curve:initialScale,335,154,PARTIAL,operator form of a supported property (Curve); seeded/approximate: scalar or pair; Random/Curve ok.
+Particle child/operator,Random:offset,265,128,PARTIAL,operator form of a supported property (Random); seeded/approximate: added to emitter offset; Multiply form unsupported.
+Particle child/operator,Random:initialAngle,188,117,PARTIAL,operator form of a supported property (Random); seeded/approximate: treated as DEGREES (unverified; see unit test in section 9).
+Particle child/operator,RandomRadial:initialVelocity,159,105,UNSUPPORTED,
+Particle child/operator,VectorTo:initialVelocity,136,101,UNSUPPORTED,
+Particle child/operator,Random:initialScale,128,75,PARTIAL,seeded.
+Particle child/operator,Random:initialRotationRate,79,51,PARTIAL,operator form of a supported property (Random); seeded/approximate: degrees/second assumed (unverified).
+Particle child/operator,Random:initialVelocity,77,38,PARTIAL,operator form of a supported property (Random); seeded/approximate: constant velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomR
+Particle child/operator,Random:lifeTime,37,21,PARTIAL,seeded.
+Particle child/operator,VectorTo:finalVelocity,34,26,UNSUPPORTED,
+Particle child/operator,Random:finalScale,33,26,PARTIAL,operator form of a supported property (Random); seeded/approximate: only used if interpolateScale=true; linear lerp over life (native easing unknown
+Particle child/operator,Random:targetPosOffset,33,29,UNSUPPORTED,operator form of an unsupported property (targetPosOffset)
+Particle child/operator,OnFinish,25,19,UNSUPPORTED,
+Particle child/operator,Select:initialRotationRate,25,17,PARTIAL,operator form of a supported property (Select); seeded/approximate: degrees/second assumed (unverified).
+Particle child/operator,Select:sprite,24,12,PARTIAL,operator form of a supported property (Select); seeded/approximate: sprite name resolved; arrays collapse to element 0.
+Particle child/operator,Curve:initialRotationRate,19,12,PARTIAL,operator form of a supported property (Curve); seeded/approximate: degrees/second assumed (unverified).
+Particle child/operator,Select:offset,18,12,PARTIAL,operator form of a supported property (Select); seeded/approximate: added to emitter offset; Multiply form unsupported.
+Particle child/operator,Random:finalAngle,18,13,UNSUPPORTED,operator form of an unsupported property (finalAngle)
+Particle child/operator,Random:flipX,17,9,PARTIAL,operator form of a supported property (Random); seeded/approximate: multiplies scale.x by -1.
+Particle child/operator,Curve:initialVelocity,15,9,PARTIAL,operator form of a supported property (Curve); seeded/approximate: constant velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomR
+Particle child/operator,Random:variantId,15,10,UNSUPPORTED,operator form of an unsupported property (variantId)
+Particle child/operator,Increment:finalScale,14,8,UNSUPPORTED,
+Particle child/operator,Increment:initialScale,13,7,UNSUPPORTED,
+Particle child/operator,Increment:worldPos,13,7,UNSUPPORTED,
+Particle child/operator,Select:initalRGB,11,4,UNSUPPORTED,operator form of an unsupported property (initalRGB)
+Particle child/operator,Select:initialVelocity,11,7,PARTIAL,operator form of a supported property (Select); seeded/approximate: constant velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomR
+Particle child/operator,SetVar:projectile_offset,10,9,UNSUPPORTED,
+Particle child/operator,Random:posOffset,9,9,UNSUPPORTED,operator form of an unsupported property (posOffset)
+Particle child/operator,Select:finalAlpha,8,6,UNSUPPORTED,operator form of an unsupported property (finalAlpha)
+Particle child/operator,Random:gravityVector,8,7,PARTIAL,operator form of a supported property (Random); seeded/approximate: applied as 0.5*g*t^2.
+Particle child/operator,Select:initialAngle,7,5,PARTIAL,operator form of a supported property (Select); seeded/approximate: treated as DEGREES (unverified; see unit test in section 9).
+Particle child/operator,Select:finalAngle,7,5,UNSUPPORTED,operator form of an unsupported property (finalAngle)
+Particle child/operator,Select:finalVelocity,6,2,UNSUPPORTED,operator form of an unsupported property (finalVelocity)
+Particle child/operator,Select:flipX,5,5,PARTIAL,operator form of a supported property (Select); seeded/approximate: multiplies scale.x by -1.
+Particle child/operator,Curve:initialAngle,4,4,PARTIAL,operator form of a supported property (Curve); seeded/approximate: treated as DEGREES (unverified; see unit test in section 9).
+Particle child/operator,Select:lifeTime,4,2,PARTIAL,"operator form of a supported property (Select); seeded/approximate: seconds; per-particle, Random/Curve evaluated with the particle seed."
+Particle child/operator,Select:initialScale,4,3,PARTIAL,operator form of a supported property (Select); seeded/approximate: scalar or pair; Random/Curve ok.
+Particle child/operator,SetVar:variantIdVar,3,3,UNSUPPORTED,
+Particle child/operator,Curve:orbit,2,2,UNSUPPORTED,operator form of an unsupported property (orbit)
+Particle child/operator,Multiply:offset,1,1,UNSUPPORTED,
+Particle child/operator,Select:targetPosOffset,1,1,UNSUPPORTED,operator form of an unsupported property (targetPosOffset)
+Particle child/operator,Random:finalVelocity,1,1,UNSUPPORTED,operator form of an unsupported property (finalVelocity)
+Particle property (Set),sprite,901,254,PARTIAL,sprite name resolved; arrays collapse to element 0.
+Particle property (Set),lifeTime,871,247,SUPPORTED,"seconds; per-particle, Random/Curve evaluated with the particle seed."
+Particle property (Set),blendingMode,839,241,PARTIAL,"ONLY ""ADDITIVE"" is honoured (canvas lighter). PREMULTIPLIED_ALPHA (613 uses) and PREMULTIPLIED_NORMAL (1) fall to plain source-over."
+Particle property (Set),inSpecificOrder,342,126,UNSUPPORTED,
+Particle property (Set),initialScale,249,116,PARTIAL,scalar or pair; Random/Curve ok.
+Particle property (Set),relativeToEmitter,244,110,UNSUPPORTED,
+Particle property (Set),rotateWithVelocity,212,125,UNSUPPORTED,
+Particle property (Set),useGravity,149,84,PARTIAL,read.
+Particle property (Set),gravityVector,141,80,PARTIAL,applied as 0.5*g*t^2.
+Particle property (Set),renderAlignment,125,55,UNSUPPORTED,
+Particle property (Set),initialVelocity,90,52,PARTIAL,constant velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomRadial form unsupported -> NaN -> particle silently skipped.
+Particle property (Set),offset,90,36,PARTIAL,added to emitter offset; Multiply form unsupported.
+Particle property (Set),isBackgroundParticle,78,43,UNSUPPORTED,
+Particle property (Set),interpolateScale,70,43,PARTIAL,linear only.
+Particle property (Set),interpolateAlpha,68,38,UNSUPPORTED,
+Particle property (Set),initalRGB,68,36,UNSUPPORTED,
+Particle property (Set),initialAlpha,67,38,PARTIAL,Curve sampled by normalised age (age/life) - correct idea; finalAlpha/interpolateAlpha ignored.
+Particle property (Set),initialAngle,63,30,PARTIAL,treated as DEGREES (unverified; see unit test in section 9).
+Particle property (Set),finalAlpha,56,31,UNSUPPORTED,
+Particle property (Set),flipX,47,24,SUPPORTED,multiplies scale.x by -1.
+Particle property (Set),initialRotationRate,46,30,PARTIAL,degrees/second assumed (unverified).
+Particle property (Set),interpolateVelocity,44,32,UNSUPPORTED,
+Particle property (Set),finalScale,34,21,PARTIAL,only used if interpolateScale=true; linear lerp over life (native easing unknown).
+Particle property (Set),flipY,30,13,SUPPORTED,multiplies scale.y by -1.
+Particle property (Set),interpolateAngle,17,12,UNSUPPORTED,
+Particle property (Set),finalRGB,13,4,UNSUPPORTED,
+Particle property (Set),interpolateRGB,13,4,UNSUPPORTED,
+Particle property (Set),orbitStart,13,8,UNSUPPORTED,
+Particle property (Set),orbitPeriod,13,8,UNSUPPORTED,
+Particle property (Set),applyOrbit,13,8,UNSUPPORTED,
+Particle property (Set),orbitScaleVariation,13,8,UNSUPPORTED,
+Particle property (Set),orbit,11,6,UNSUPPORTED,
+Particle property (Set),orbitSkew,7,6,UNSUPPORTED,
+Particle property (Set),worldPos,6,4,UNSUPPORTED,
+Particle property (Set),targetPos,4,3,UNSUPPORTED,
+Particle property (Set),TintTargetTileColorVariable,3,1,UNSUPPORTED,
+Particle property (Set),variantId,3,3,UNSUPPORTED,
+Particle property (Set),finalVelocity,3,3,UNSUPPORTED,
+Particle property (Set),finalRotationRate,3,3,UNSUPPORTED,
+Particle property (Set),targetPosOffset,2,1,UNSUPPORTED,
+Particle property (Set),angRelativeToEmitter,2,1,UNSUPPORTED,
+Particle property (Set),rainbowShift,1,1,UNSUPPORTED,
+Particle property (Set),useAvatarShadow,1,1,UNSUPPORTED,
+Particle property (Set),isBeamParticle,1,1,UNSUPPORTED,
+Particle property (Set),finalAngle,1,1,UNSUPPORTED,
+Particle rule hook,ParticleSystemUpdate,559,185,PARTIAL,handled only when it appears under a rule hook that visibleRules() walks; onState and onAction approximated by actionActive().
+Particle rule hook,ParticleSystemRender,228,83,PARTIAL,"treated like Update, no separate render-stage semantics."
+Particle rule hook,ParticleSystemOff,205,45,UNSUPPORTED,visibleRules() filters it out; stop is inferred from rule inactivity instead.
+Particle rule hook,ParticleSystemUpdate@onState,169,75,UNSUPPORTED,
+Particle rule hook,ParticleSystemUpdate@onAction,85,35,UNSUPPORTED,
+Particle rule hook,ParticleSystemRender@onState,34,13,UNSUPPORTED,
+Particle rule hook,ParticleSystemRender@onAction,4,2,UNSUPPORTED,
+ParticleSystem attribute,updateStage,365,141,UNSUPPORTED,runtime never reads it (379 systems self-trigger this way).
+ParticleSystem attribute,updateState,178,81,UNSUPPORTED,
+ParticleSystem attribute,renderStage,101,55,UNSUPPORTED,
+ParticleSystem attribute,secondary,28,23,UNSUPPORTED,
+RenderRules hook,OnPunchUpdate,138,138,UNSUPPORTED,
+RenderRules hook,Update,113,113,PARTIAL,only state machines transitions use it; AvatarTransform blocks (570) not executed here.
+RenderRules hook,AddClothingParticles,102,102,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderHandItem,76,76,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderInFront,63,63,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,OnDamagedTile,62,62,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,RenderBehind,61,61,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderShoes,53,53,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderBackpack,53,53,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,OnDestroyedTile,53,53,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,OnPunchStart,52,52,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,RenderBackHandItem,47,47,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderChestItem,43,43,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,SwitchOffClothingParticles,42,42,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderPet,22,22,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderFrontpack,19,19,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderFrontArm,18,18,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderChestBackItem,17,17,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderHat,16,16,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,UpdatePet,14,14,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderBackArm,13,13,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderTransform,13,13,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderShirt,12,12,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderFaceItem,10,10,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderHair,9,9,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,OnPunchStop,8,8,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,OnDrawCustomOutline,7,7,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,OnPunchBegin,6,6,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,OnRespawned,6,6,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,RenderBackHat,5,5,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderPants,5,5,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderBackHair,4,4,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,OnKilled,3,3,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,OnEnteredToWorld,3,3,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,OnItemEquipped,3,3,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+RenderRules hook,RenderSittingInTheater,2,2,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,RenderAura,2,2,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,UpdatePunch,1,1,PARTIAL,walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not interpreted.
+RenderRules hook,OnDeath,1,1,PARTIAL,"WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its event, so its sprite/particle rules can appear as always-on."
+SpriteRender attribute,name,928,311,PARTIAL,"resolved to sprite; only applied to catalog pieces for 5 aura scripts (StarryAura, DirtAura, TwilightAura, InfinityAura, BeachAura)."
+SpriteRender attribute,offset,573,216,PARTIAL,5 aura scripts only.
+SpriteRender attribute,blend,531,200,PARTIAL,ADDITIVE only; 5 aura scripts only.
+SpriteRender attribute,alignment,492,221,PARTIAL,only DOWN_* -> ay=1; others ignored. 5 aura scripts only.
+SpriteRender attribute,drawShadow,285,119,UNSUPPORTED,
+SpriteRender attribute,onState,173,68,PARTIAL,honoured in visibleRules() via state machines.
+SpriteRender attribute,alignmentLeft,137,54,UNSUPPORTED,
+SpriteRender attribute,alignmentRight,137,54,UNSUPPORTED,
+SpriteRender attribute,rotateOffset,136,63,UNSUPPORTED,
+SpriteRender attribute,flip,123,54,UNSUPPORTED,
+SpriteRender attribute,rotationPoint,106,55,UNSUPPORTED,
+SpriteRender attribute,scale,77,31,PARTIAL,5 aura scripts only.
+SpriteRender attribute,tintOverride,51,28,UNSUPPORTED,
+SpriteRender attribute,useFixedRotation,46,19,UNSUPPORTED,
+SpriteRender attribute,fixedRotation,33,14,UNSUPPORTED,
+SpriteRender attribute,onAction,20,10,PARTIAL,honoured via actionActive() (approximate events).
+SpriteRender attribute,stretchToTarget,18,13,UNSUPPORTED,
+SpriteRender attribute,rotateToTarget,4,3,UNSUPPORTED,
+SpriteRender attribute,useFixedRodtation,1,1,UNSUPPORTED,
+Runtime-only (not in data),Sin,0,0,DEAD-CODE,property() evaluates <Sin> - tag never occurs in any shipped XML (0 uses).
+Runtime-only (not in data),Cos,0,0,DEAD-CODE,same as Sin (0 uses).
+Runtime-only (not in data),SpriteScaleAnimation,0,0,DEAD-CODE,handled in advanceXmlRenderer - tag never occurs (0 uses).
+Runtime-only (not in data),SpritePositionAnimation,0,0,DEAD-CODE,handled in advanceXmlRenderer - tag never occurs (0 uses).

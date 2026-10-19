@@ -1,0 +1,864 @@
+GROWTOPIA PLANNER - NATIVE PARTICLE / RENDERER-XML IMPLEMENTATION BRIEF
+Author: Claude (Anthropic).  Audience: Perplexity (owns the PlayerRenderingPROGRESS demo + source).
+Project roles: ChatGPT = first audit.  Claude = verification, corrections, new findings, this brief.
+               Perplexity = implementation.  User = owner, supplies captures / decisions.
+Snapshot date: 2026-10-18.  Companion files: xml_support_matrix.csv (section 8, machine-readable), PERPLEXITY_WORK_ORDER.txt (STEP-BY-STEP: START THERE),
+perplexity_patch_pack.zip (tested code: evaluator, trigger table, coverage tool, wiring patch, tests).
+This brief = the WHY and the evidence. The work order = the HOW. The matrix/section 8 describes the baseline BEFORE the patch pack.
+
+HOW TO READ THIS FILE
+Every statement carries one of these evidence tags. Do not upgrade a tag without new evidence.
+  [VERIFIED]    I opened the supplied files and counted / diffed / read the code myself.
+  [EVIDENCE]    Inferred from patterns in the shipped data (strong, but not tested against a live client).
+  [HYPOTHESIS]  A reasoned guess about native semantics. MUST be validated before it is called native.
+  [UNKNOWN]     No evidence available. Mark unresolved in the product; do not invent.
+What I did NOT do: run the demo, run the test suites, compare against a live Growtopia client, or find any
+public documentation of the ItemRenderer XML format (my web searches found only third-party items.dat parsers).
+So every XML SEMANTIC below is inferred from the data itself.
+
+====================================================================================================
+0. PRIORITY LIST (read this if nothing else)
+====================================================================================================
+1. DO NOT overwrite particles12.png, particles_large17.png, particles_large19.png in the demo with
+the copies from the assets archive. The archive copies are BLANK in exactly the cells that 7 sprites
+use; the demo copies contain the art. ChatGPT's advice to replace them was backwards (section 3.1).
+2. 379 of 924 particle systems trigger themselves through attributes on the <ParticleSystem> element
+(updateStage / updateState / renderStage). The current runtime never reads those attributes. Hook-
+counting (Update/Render/Off) understates the work (section 3.2).
+3. The runtime executes four things that never occur in the data (Sin, Cos, SpriteScaleAnimation,
+SpritePositionAnimation) and skips the animation tags that DO occur: SpriteCurveAnimation (133),
+SpriteSinPulseAnimation (49), CurveAnimation* (59), Interpolation* (132), SequenceAnimation (15)
+(section 4.3).
+4. visibleRules() walks every RenderRules hook with no event gating, so OnDamagedTile /
+OnDestroyedTile / OnPunchStart / OnKilled content can show up as always-on (section 4.4). Check this
+first; it may be producing phantom particles today.
+5. Native data you have not used yet: items.txt `punch_options` (58 items, numeric legacy particle
+IDs + arm/face/audio directives) and the XML <RenderOptions> flag vocabulary (ShoesHidesBodyLegs,
+RenderFrontArmInTheFront, IsToRenderPants, IsHorse ...). The runtime reads 1 of ~45 RenderOptions
+flags (ShouldHover). These are the native rules for layering / hiding / behavior (sections 5 and 6).
+6. Implement the interpreter in the usage-weighted order in section 9. Start with Dirt Aura (orbit)
+only as a test, not as the first feature: the highest-leverage fields are inSpecificOrder (342),
+relativeToEmitter (244), rotateWithVelocity (212), VectorTo (170), RandomRadial (159),
+renderAlignment (125), offsetFacing (92), usePlayerFacing (89).
+7. Keep the three labels: NATIVE (XML-driven, every field accounted for), APPROXIMATE (hand recipes,
+off by default, visibly labelled), UNRESOLVED (no source). Never show a hand recipe as native.
+
+====================================================================================================
+1. SOURCE INVENTORY (what exists, what each one can and cannot prove)
+====================================================================================================
+Uploaded bundle                                   Contents [VERIFIED]
+------------------------------------------------  ------------------------------------------------------------
+player_stuff.zip                                  314 ItemRenderers/*.xml, 33 WorldRenderers/*.xml, 533 atlas PNGs,
+                                                  items.json (Set Planner v26, 4,067 items), renderer_sprites.csv,
+                                                  renderer_index.csv, asset_manifest.csv, DATA_DICTIONARY.md
+growtopia_assets_part01..08-of-08.zip             assets/game/*.png (incl. all 31 particle atlases) and
+                                                  assets/GameData/ItemRenderers/*.xml
+planner_research_text_and_json.zip                items.txt (native items.dat text dump, v26, 16,434 add_item rows,
+                                                  57 columns) and setplanner_items_decoded.json (= items.json)
+items_v26_deep_dive_bundle.zip                    items.txt + CSV profiles of it (field dictionary, partitions)
+PlayerRenderingPROGRESS.zip                       your demo: src/*.mjs, demo/, tests, evidence/renderer-data.json
+                                                  (compiled inert XML), catalog.json (v27, 4,081 wearables)
+Join keys [VERIFIED]
+  * Native item ID (items.txt column 1) is the primary key. Set Planner IDs/names all match it (ChatGPT's claim; consistent with what I saw).
+  * The native items.txt dump contains NO renderer-file reference. The XML <-> item link is Set Planner's `script` field
+    (310 distinct script names in the v26 JSON; catalog v27 has 316). 285 of the 314 XML names also equal the normalized item name;
+    29 differ by spelling (AtomConstructs, LightningNunchucks, StarryAura, DiscoballPet, ...). Use `script`, not name-guessing.
+  * XML files not referenced by any v26 planner script: AtomConstructs, LightningNunchucks, WingedHair (all v27-era) and `Template`
+    (an unused template; ignore). Catalog v27 references 316 scripts; 3 have no XML: MechaTank, PariahsShawl, SuperStingers.
+
+====================================================================================================
+2. CHATGPT CLAIMS I RE-CHECKED
+====================================================================================================
+CONFIRMED [VERIFIED]: 314 ItemRenderer XMLs; 924 ParticleSystem (each exactly 1 Emitter + 1 Particle); 559 ParticleSystemUpdate,
+228 ParticleSystemRender, 205 ParticleSystemOff hooks; 29 emitters with OrbitOffset (in 9 files); particles12 / particles_large17 /
+particles_large19 differ from the archive and the other 28 atlases are pixel-identical; the 7 recipe items (IDs 138, 288, 366, 472, 1438,
+2048, 2064) have no renderer XML; the two failing demo tests read ../../research/{lift,sampler}-differential-fixtures.json but those files
+live in evidence/ (research/ only holds ability-wiki-pages.json) - a path bug.
+Blend modes across all particles: PREMULTIPLIED_ALPHA 613, ADDITIVE 225, PREMULTIPLIED_NORMAL 1. SpriteRender blend: PREMULTIPLIED_ALPHA 452,
+NORMAL 52, ADDITIVE 26 (+1 typo value "PREMULTIPLIED_ALPHAd").
+MINOR CORRECTION: ChatGPT says 105 files use "RandomRadial or Multiply". RandomRadial is in 105 files (159 uses); Multiply is in ONE
+ItemRenderer file (InfinityAura) plus 3 WorldRenderers. Multiply is rare; RandomRadial is the important one.
+NOT RE-VERIFIED: the 81/81 and 70/72 test counts, items.txt vs Set Planner ID equality, the 940 "FX flag but no emitter" figure.
+
+====================================================================================================
+3. CORRECTIONS TO THE CHATGPT AUDIT
+====================================================================================================
+3.1  ATLAS ADVICE IS BACKWARDS  [VERIFIED]
+  ChatGPT: 'Replace the three differing demo copies with the asset-archive version.' Do NOT. I
+  compared alpha channels of the three sheets and mapped XML sprites to cells (frame = column,row;
+  textureSize = cell size; pixel rect = (col*size, row*size, size, size)).
+    Cells that differ and the sprites that use them (archive opaque px -> demo opaque px):
+      particles12.png       AtomConstructs s_punch (480,704,32x32)     0 -> 173
+                            AtomConstructs s_punchFrag (544,704)       0 -> 92
+                            LightningNunchucks s_Slash (672,704)       0 -> 372
+                            LightningNunchucks s_Hit (832,704)         0 -> 153
+      particles_large17.png AtomConstructs s_godRays (640,192,64x64)   0 -> 3034
+                            LightningNunchucks s_Break (960,512)       0 -> 2622
+      particles_large19.png WingedHair s_back_hair (0,0,64x64)         0 -> 1070
+    In the archive those cells are fully transparent; the demo copies hold real art. All three renderers are the v27-era XMLs that no v26
+    planner script references (section 1), so the demo atlases are the NEWER revision and the archive atlases are the older one.
+    ACTION: keep the demo copies. Record in provenance that the archive atlas revision predates these sprites. Add a test that every XML
+    <Sprite> cell referenced by any renderer has >0 opaque pixels in the atlas you ship (this would have caught the problem).
+3.2  HOOK COUNTS UNDERSTATE THE PARTICLE WORK  [VERIFIED]
+    Of 924 systems (mutually exclusive): 500 hooked only; 81 hooked + self-staged; 16 hooked + secondary; 288 self-staged only (no hook);
+    10 self-staged + secondary; 27 no trigger found; 2 secondary only. (500+81+16+288+10+27+2 = 924.) Systems with no trigger found include
+    trail_particle, ps_discTrail, p_death.
+    The element-level attributes are the real trigger for ~41% of systems:
+      updateStage : AddClothingParticles 188 | OnDamagedTile 49 | OnPunchStart 36 | RenderHandItem 26 | RenderBackHandItem 21 |
+                    OnDestroyedTile 14 | OnKilled 8 | OnPunchUpdate 6 ...
+      renderStage : RenderHandItem 33 | RenderBehind 15 | RenderBackHandItem 12 | RenderBackpack 11 | RenderShoes 10 | RenderChestItem 7 |
+                    RenderInFront 6 ...
+      updateState : Action.Punch 32 | Punch.True 22 | IsTransformed.Transition 11 | Motion.Move 10 | Motion.Idle 8 | IsTransformed.Changing 6 ...
+      secondary   : 28 systems (e.g. trail_particle x7) - child systems spawned by another system, not started by a rule.
+    ParticleSystemName (30 uses, inside <OnFinish>) names sub-systems that spawn when a particle dies (ps_explosion, ps_punchFrag, ps_bubblePop,
+    ps_ProjectileHit ...). All 23 distinct referenced names ARE defined in the same file.
+    Hook resolution: 988 of 992 hook references resolve inside their own file. The 4 that do not: punch_particleTrail (AquaticVolcanicCrown,
+    VolcanicCrown; Off hook), p_mist (CuChulainnsMythicalLance; Render hook), s_shirt (GalaxySkin; Render hook). Treat as UNRESOLVED, log them.
+    ACTION: the system->trigger table must be built from BOTH hooks and element attributes, plus OnFinish/ParticleSystemName/secondary.
+3.3  ATTACHMENT VOCABULARY IS SMALL AND KNOWN  [VERIFIED]
+    ChatGPT guessed 'hand, arm, pet, vehicle, world position'. The only <Emitter attachment=...> values in the data (130 emitters) are:
+      targetPos (61), handspotRoot (56), contextRotation (11), targetPos2 (2).
+    All other emitters (794) have no attachment attribute (default = the item's own anchor / the player). Implement exactly these four
+    plus default. Also relevant: Particle <Set name="worldPos"> (6), <Set name="targetPos"> (4), VectorTo source="targetPos" (170, always).
+    [HYPOTHESIS] targetPos = the world position of a punch/hit target (VectorTo flies particles to it over lifeTime: projectiles and beams);
+    handspotRoot = the hand item's tip/root spot; contextRotation = rotation supplied by context (e.g. the aimed arm angle).
+    Validate each against one item before generalising (suggested: AtomConstructs for targetPos, any RenderHandItem staff for handspotRoot).
+3.4  THE 'RECIPE' ITEMS ARE NOT RECOVERABLE FROM FLAGS  [VERIFIED]
+    In the Set Planner JSON, fx is only True (536 items), punchFx is only 1 (532), airJumpFx is only 1 (78). They are booleans; they carry
+    no emitter data. None of the 7 recipe items has an XML, and none has native punch_options. ParticleSystemLegacy type="5" (DoggyLeash)
+    shows the client also has NUMBERED hard-coded legacy particle types. Those are not in any supplied XML. Keep the 7 recipes behind the
+    APPROXIMATE label (section 10) and everything else UNRESOLVED.
+
+====================================================================================================
+4. NEW FINDINGS FROM THE RUNTIME CODE REVIEW (src/xml-renderer.mjs, 328 lines)  [VERIFIED by reading]
+====================================================================================================
+4.1  Only 5 scripts get XML sprite rendering
+  advanceXmlRenderer replaces catalog pieces with SpriteRender rules ONLY for AURA_RULES =
+  StarryAura, DirtAura, TwilightAura, InfinityAura, BeachAura. The other ~309 scripts keep captured
+  stills and only add particle runs. So 928 SpriteRender nodes are essentially unexecuted outside
+  five items.
+4.2  Particle space is hard-wired to the body
+  spritePiece() always emits attachment 'body' at x=16+offset, y=32+offset with anchor (.5,.5).
+  There is no hand-spot, world-space, or target-space path, and renderAlignment (125 uses) is
+  ignored.
+4.3  Dead code vs missing code
+    Implemented but 0 uses in any XML:   <Sin>, <Cos> (property()), SpriteScaleAnimation, SpritePositionAnimation (advanceXmlRenderer).
+    Used in XML but not executed:        SpriteCurveAnimation 133 | SpriteSinPulseAnimation 49 (Parameter pos.y with Set period/scale, e.g.
+                                         AngelAndDevil float) | CurveAnimationFloat 23 / Vec2 2 / Vec3 16 / Vec4 18 | InterpolationFloat 36 /
+                                         Vec2 20 / Vec3 19 / Vec4 57 | SequenceAnimation 15 | DelayAnimation 14 | VisibilityAnimation 5 |
+                                         playOnAction (SpriteAnimation 44, SpriteCurveAnimation 4, SpriteSinPulseAnimation 4, SequenceAnimation 1, VisibilityAnimation 1) | useFacing on curve animations (10+6+6).
+    The sprite-motion side of the XML (floating angels, pulsing glows) is therefore not just a particle problem.
+4.4  Event hooks are not gated
+  visibleRules() iterates every child of <RenderRules> with no regard to which event the hook
+  represents. A ParticleSystem rule inside OnDamagedTile (62 hooks), OnDestroyedTile (53),
+  OnPunchStart (52), OnKilled (3), OnRespawned (6), OnEnteredToWorld (3) is therefore treated like a
+  steady-state rule and is only filtered by its own onState/onAction. [UNVERIFIED in the browser:
+  reproduce with one OnDamagedTile item and confirm; if it fires continuously it is a bug.]
+4.5  Silent failure path
+  When a particle property evaluates to NaN (e.g. RandomRadial initialVelocity, Multiply offset),
+  the particle is skipped and the system name is added to item.xmlUnsupportedParticleExpressions.
+  That is fail-closed, which is correct, but 159 RandomRadial uses means a large share of systems
+  are being dropped entirely. Surface this set in the UI/coverage report instead of leaving it
+  buried.
+4.6  Randomness and bounds
+  Seed = (emission*31 + k*17 + item.id); replay window 96 emissions, 256 particle calls per result,
+  128 runs / 10 s retained. Fine for deterministic tests; it cannot reproduce native emission
+  history and it truncates long-lived or infinite systems (infLifeTime is 'true' in 376 of 397
+  emitters that set it). Document this as a known deviation.
+4.7  Conditions and variables
+  condition() knows variables speed.x, speed.y, speed.length, onGround, punchInProgress, punching,
+  isFacingLeft only; ITEM_SYMBOL_IDS has 6 entries. Unknown things return undefined and visibleRules
+  treats StopIf(undefined) as 'stop'. Uses in data that are never evaluated: CompareCustomVariable
+  129, ArithmethicOperation 250, ItemHasTag 20, IsAnimationFinished 23, IsHoldingJumpKey 4,
+  IsDarkTile 4, CheckRandomRangeNumber 5, RandomValueOperation 3, SetVar 14, VariableMap 109,
+  Parameter 49. 'custom variables' drive LineRender (BalloonBackpack) and many state transitions;
+  expect silent wrong states.
+4.8  RenderOptions are almost entirely ignored
+  Only ShouldHover is consumed (motion-policy.mjs). See section 6 for the other ~45 flags, several
+  of which are native layering/hiding/behavior rules.
+
+====================================================================================================
+5. NATIVE DATA IN items.txt THAT IS NOT YET USED  [VERIFIED]
+====================================================================================================
+5.1  punch_options (column 40).  58 items. A semicolon-separated native script, e.g.
+        Heartstaff 7826: ONPUNCHSTART;op_particle2:190;op_params:0,20;op_audio:audio/swoosh.wav;UPDATEPUNCH;up_face:4;up_arm2:330
+        Dragon Knight's Spear 7736: ONPUNCHSTART;op_particle2:193;op_audio:audio/buster.wav;UPDATEPUNCH;up_face:4;UP_SPINARM2;RFA_HIDEITEM
+    Token counts: ONPUNCHSTART 58, UPDATEPUNCH 57, up_face 57 (face/emotion id during punch), op_audio 56, UP_SPINARM2 34, op_params 29,
+    op_particle1 20, op_particle2 18, op_punch_pattern 9, OP_EXTEND_FROM_EMITTER 8, up_arm2 6 (arm angle), OP_ARM2TARGET 5,
+    RFA_HIDEITEM 4 (hide the hand item during the punch), up_arm1 4, op_shoulder_offset 3, OP_P2FACING 2, UP_ARM1Angle / UP_ARM2Angle 1.
+    op_particleN:ID uses NUMERIC particle IDs (109 x10, 190, 191, 192, 193, 216, 217, 253, 276, 285, 304, 308, 358, 360, 387, 562, 603, 668 ...).
+    These are the hard-coded legacy particle types (same family as ParticleSystemLegacy type=5). The IDs are NOT defined in any supplied file.
+    ACTION: parse punch_options into a structured field. Implement the NON-particle directives natively (face, arm spin/angle, hide item,
+    shoulder offset, punch pattern, facing) because they have complete data. Record op_particleN as UNRESOLVED-LEGACY-ID with the number.
+    None of the 7 recipe items has punch_options; do not pretend they do.
+5.2  bodyPart / flags3 (column 'data_version_12', 13 bytes).  Layout per the grow-items parser (flags3 int32 + bodyPart[9] bytes).
+    16,433 items hold 00000000 + nine 0x09 bytes. ONE item differs: 10166 Haunted Jack O' Lantern = 02000000 04 07 09 09 09 09 09 09 09.
+    [HYPOTHESIS] 0x09 = 'no override' for each of 9 body parts; Haunted Jack O' Lantern overrides parts 0 and 1 (probably head/face composition
+    for a transform item). [UNKNOWN] part ordering and value meaning. Do not wire this into hiding until a capture explains it.
+5.3  data_position_80 (column 'data_position_80', 80 bytes).  13,721 all-zero; byte 10 is nonzero for ~2,500 items and is 0x04 for 2,030 clothing
+    items (also 5 x103, 1 x30, 8 x39). All 7 recipe items have byte10=0x04. [UNKNOWN] meaning. Cross-tab against clothing_type and observed
+    hiding/layering behavior before using; [HYPOTHESIS] byte 10 is a slot/category-style code, not an FX code (all 7 recipe items share 0x04 with ~2,000 other clothing items, so it cannot distinguish FX).
+5.4  Fields present in the grow-items schema (third-party parser, https://app.unpkg.com/grow-items) worth mapping: fxFlags, visualEffectType,
+    flags2, flags3, bodyPartType, extraOptions / extraOptions2, punchOptions, canSit + playerOffset + chair* fields (v15). Cross-reference these
+    names to items.txt columns 'extra_options', 'extra_options2', 'punch_options' and the int/str_version_* columns.
+5.5  WorldRenderers (33 XMLs in player_stuff.zip)  [VERIFIED]
+    Same schema as ItemRenderers: 57 ParticleSystems, 7 RandomRadial, 3 Multiply, plus CollisionFlag/CollisionType/OnHit/SpawnNPC. Names:
+    PlayerBaseProjectile, ProjectileExplosion, BladeSlash / PlayerBladeSlash(2/Small), SwordsmanSlash, JellySlash, ToxicBlast, FireballLevel2/3,
+    DragonsBreathProjectile, ViperProjectile, *TileStamp (Aquatic/Volcanic Cannon + Gauntlets, BurningPearlSpinner, MoonGreatsword), LifeSteal,
+    BleedingEffect, BandageCannonPlayerHitFx and boss/NPC projectiles. The same interpreter can run them. They are NOT mapped to Heartbow
+    or Tommygun; do not alias them to those items without evidence. Good second test corpus (smaller, self-contained, includes collisions).
+
+====================================================================================================
+6. XML SEMANTIC REFERENCE (what the data says)
+====================================================================================================
+6.1  Atlas / sprite addressing  [EVIDENCE - strong]
+    <Sprite name fileName textureSize frame> : fileName 'game/particles11.rttex' -> assets/game/particles11.png.
+    textureSize = ONE cell size ('32', '64') or 'w,h' ('64,64'). frame = 'col,row' CELL INDEX (not pixels); some frame values have spaces
+    ('10, 13'); some are empty (282 particles11 sprites) -> treat empty as 0,0 and log. Pixel rect = (col*w, row*h, w, h).
+    Proof: the seven differing sprites land exactly on 32/64-px cell boundaries (480=15*32, 704=22*32, 640=10*64, ...). SpriteAnimation <Frame>c,r</Frame>
+    uses the same cell indices. 8 Sprites use `fname`/`scale` instead of fileName/frame (parse them).
+6.2  Units  [EVIDENCE for degrees and normalised curves; HYPOTHESIS elsewhere]
+    * Particle <Curve> keyframes are x=NORMALISED AGE: 1,042 of 1,048 particle curves end at exactly 1.0. So Curve(time) -> age/lifeTime.
+    * Angles are DEGREES: initialAngle values are 0..360 (146), -360..360 (10), 90 (29), -75..75 (9); RandomRadial angleRange 0,360 / 230,310;
+      initialRotationRate 5..15, 360, -300..300 -> deg/s.
+    * lifeTime, emissionInterval, delayTimer, Emitter lifeTime: SECONDS (e.g. 0.05, 0.8, 1). OrbitOffset periods/time offsets: MILLISECONDS (6000, 4000, 500).
+      Particle-level orbitPeriod is SECONDS (3). Mixed units are real; do not 'normalise' them by assumption.
+    * Velocities / offsets / amplitudes: pixels in the item's authored 32-px-tile space [HYPOTHESIS: px/s and px; confirm one item].
+    * Angle origin and direction for RandomRadial (0 = +x? clockwise or counter-clockwise on a y-down screen?) [UNKNOWN] - InfinityAura angleRange
+      230..310 with velocity radius 150..200 looks like an upward fan on a y-down screen, which suggests 0 = +x, increasing clockwise-on-screen. Verify.
+6.3  Expression operators on properties
+    <Set name=X>v</Set>                       constant (numbers, 'a, b' vectors with spaces, booleans, strings, sprite names).
+    <Random name=X min max/>                  uniform per component (min/max may be vectors). Native RNG unknown.
+    <Curve name=X><KeyFrame>t,v...</KeyFrame>  piecewise-linear over t (normalised age for particles). Easing unknown -> linear.
+    <Select name=X input=I><Item>..</Item>    140 uses. input is one of: randomNumber 41 | variantId 36 | punchCount 35 | particleIndex 22 | intervalMS 3 |
+                                              particleCounter 1 [DATA]. Names switched: initialRotationRate 25, sprite 24, offset 20, initialVelocity 13, initalRGB 11 ...
+                                              [HYP] chosen Item = input mod itemCount (randomNumber = random). Implemented in xml-expr.mjs.
+                                              CORRECTION to my earlier guess: inSpecificOrder is NOT Select's switch. [HYP] inSpecificOrder (290 true / 52 false) makes
+                                              randomSpriteFrame (287 true) cycle the sprite's frames in particle order instead of picking randomly. Test on one item.
+    <RandomRadial name angleRange radiusRange [baseAnglePosition baseOffset]/>   vector from random angle (deg) and radius. 159 uses.
+    <Multiply name source scale/>             value = other property * scale (component-wise, 'scale="0.1,0"'). InfinityAura offset = initialVelocity*(0.1,0).
+    <Increment name source multiplier/>       value = other property * multiplier (AstralAuraBlackCat finalScale = initialScale*2.5,2.5). 40 uses.
+    <VectorTo name source="targetPos" duration="lifeTime" x="1" [angle offset angleOutVar upSpeed]/>   170 uses.
+                                              [HYPOTHESIS] velocity that makes the particle reach targetPos in `duration`; x=1 scale; angleOutVar writes angle.
+    <OnFinish><ParticleSystemName>..</..></OnFinish>   spawn the named system where the particle died.
+    <SetVar name source/>                     writes a custom variable.
+    ORDER-OF-EVALUATION: Multiply/Increment depend on another property of the SAME particle (resolve dependencies, same seed).
+6.4  Orbit mechanisms (two different ones)
+    (a) EMITTER <OrbitOffset> (29 emitters, 9 files). Keys: hasOrbit, hOrbitPeriod, hAmplitude, hTimeOffset, vOrbitPeriod, vAmplitude, vTimeOffset,
+        minScale, maxScale. Dirt Aura (exact data [VERIFIED]):
+          dirtOrbit1  h 6000ms amp 20 off 0     | v 4000ms amp 12 off 0    | scale 0.5..1
+          dirtOrbit2  h -6000   amp 20 off 500  | v 4000    amp 12 off 1500| scale 0.5..1
+          dirtOrbit3  h -6000   amp 20 off 3000 | v 6000    amp 6  off 0   | scale 0.5..1
+        emitter offset (0,-16), emissionInterval 0.8s, infinite, 1 particle per emission. NEGATIVE period = reverse direction [EVIDENCE].
+        [HYPOTHESIS] pos = emitterPos + (hAmp*sin(2pi*(t+hOff)/hPeriod), vAmp*sin(2pi*(t+vOff)/vPeriod)) ; scale = lerp(minScale,maxScale, depth)
+        where depth follows the horizontal (or a quarter-shifted) phase so the particle looks like it passes in front of and behind the body.
+        sin vs cos, phase origin and what drives the scale are UNKNOWN: they need one in-game recording of Dirt Aura.
+    (b) PARTICLE orbit (13 particles): applyOrbit, orbitStart, orbitPeriod (seconds), orbitScaleVariation, orbit (a Curve of keyframes 't, x, y',
+        e.g. CloakofChaos 0:(-24,24) 0.25:(-24,-24) 0.5:(-24,8) 1:(-24,-24)) and orbitSkew (7). [HYPOTHESIS] the particle's orbit phase =
+        orbitStart + age/orbitPeriod (wrapping 0..1); position = Curve('orbit', phase); scale varied by orbitScaleVariation. 'orbit' Set (11) is a
+        static x,y radius ('-24, 3').
+6.5  Emitter / particle flags with value vocabularies  [VERIFIED counts]
+    Emitter offsetFacing true 45 / false 47 (mirror offset.x with player facing). useCharacterPos true 27 / false 19. randomizeInterval true 26.
+    needsHandItemActive false 23 / true 1. onPunchCount odd 12 / even 12 (alternate emitters on odd/even punch number).
+    Particle renderAlignment: DOWN_CENTER 32, CENTER 30, UPPER_CENTER 26, LEFT_CENTER 21, RIGHT_CENTER 16 (which point of the sprite sits at the
+    particle position). SpriteRender alignment adds DOWN_RIGHT, DOWN_LEFT, UPPER_*; alignmentLeft is the mirrored variant used when facing left.
+    usePlayerFacing true 78 / false 11. relativeToEmitter true 208 / false 36 (particle position follows emitter vs stays where spawned).
+    rotateWithVelocity true 193 / false 19. isBackgroundParticle true 50 / false 28 (draw behind the player). inSpecificOrder true 290 / false 52.
+    particleIndexSpriteFrame 17 true (frame = particle index). alternateSpriteFrameWithPunch 10 true. autoLifeTimeToTarget 15 true.
+    angleRelativeToPlayerSpeed 24 true. velocityRelativeToPlayerSpeed 10 true. UseParentVariantId/Scale/EmitterAngle (child systems inherit).
+    rgbTint on emitters: '0.22, 0.62, 0.32, 1' (0..1 floats) vs SpriteRender tintOverride '111,217,45,255' (0..255) and keywords SKIN, PANTS,
+    SKINORPANTS (resolve from the player's skin/pants colors; do not hard-code). Data typos to tolerate and LOG: 'fasle', 'PREMULTIPLIED_ALPHAd',
+    'true>' (ShouldHover), 'useFixedRodtation', 'IsTrnsformed' (a real tag name), 'ArithmethicOperation'.
+6.6  Blend modes  [VERIFIED data / HYPOTHESIS meaning]
+    Counts: PREMULTIPLIED_ALPHA 613 particles (+452 SpriteRender), ADDITIVE 225 (+26), PREMULTIPLIED_NORMAL 1, NORMAL 52 (SpriteRender).
+    DATA FACT: the shipped atlas PNGs are STRAIGHT alpha, not premultiplied: in particles11/12/large17 and player_cosmetics4 only 8-24% of semi-transparent
+    pixels satisfy max(rgb) <= alpha (a premultiplied image would be ~100%); typical rgb/alpha ratio is 7-21x (bright color at low alpha).
+    So 'PREMULTIPLIED_ALPHA' is a draw-time choice and the engine either (A) premultiplies the texture at load, giving ordinary-looking soft edges, or
+    (B) blends ONE, ONE_MINUS_SRC_ALPHA with the straight RGB, giving brighter, glowier edges. [UNKNOWN which]. Implement BOTH behind one switch
+    (A: premultiply once into an offscreen canvas, then source-over; B: WebGL/emulated ONE,ONE_MINUS_SRC_ALPHA), default A, and let the user decide from the Dirt Aura /
+    Twilight Aura recording (Q1). ADDITIVE = ONE,ONE (canvas 'lighter'). Today's code treats all 614 premultiplied uses as plain source-over (= A without the premultiply step).
+
+====================================================================================================
+7. LAYERING / HIDING / BEHAVIOR RULES THE XML ALREADY ENCODES  (relevant to your original question)
+====================================================================================================
+7.1  RenderRules hooks are the native layer stages  [VERIFIED counts] :
+      OnPunchUpdate 138 | Update 113 | AddClothingParticles 102 | RenderHandItem 76 | RenderInFront 63 | OnDamagedTile 62 | RenderBehind 61 |
+      RenderShoes 53 | RenderBackpack 53 | OnDestroyedTile 53 | OnPunchStart 52 | RenderBackHandItem 47 | RenderChestItem 43 | SwitchOffClothingParticles 42
+      and rarer: RenderPet 22, RenderFrontpack 19, RenderFrontArm 18, RenderBackArm 13, RenderHat 16, RenderHair 9, RenderFaceItem 10, RenderShirt 12,
+      RenderPants 5, RenderBackHat 5, RenderBackHair 4, RenderChestBackItem 17, RenderTransform 13, RenderAura 2, RenderSittingInTheater 2.
+    Anchor values on these hooks (value attr): RenderBehind/RenderInFront = playerCenter (40) | playerGround (6); RenderHandItem = useWorldPos | '1.23,7.3' |
+    '0,16'; RenderBackHandItem = shoulder; RenderFrontArm / RenderBackArm / RenderShoes / RenderFrontpack = playerCenter.
+7.2  <RenderOptions><Default> flags (counts of items) [VERIFIED]. Layering / hiding / body:
+      ShoesHidesBodyLegs 27 | NeedRenderBareFeetWithShoesItem 8 | IsToRenderPants 38 | RenderFrontArmInTheFront 36 | RenderBackArmInTheFront 14 |
+      RenderBackArmAfterItem 12 | RenderFrontArmInfected 83 | RenderBackArmInfected 58 | RenderBackArmBuild 41 | ClothingOffsetFromShoes 52 |
+      AdditionalClothingOffset 7 | ShoesShouldIgnoreRaptorLegsOffset 39 | RenderShoesWithMermaidTail 28 | DefaultRenderMannequinHandItem 83 |
+      HideAvatarOnDeath 13 | HideAngelOnDeath 10 | HideParticlesOnTransform 47 | HideParticlesOnTheaterSeat 18 | IsToRenderParticlesWhenShrunken 13
+    Movement / behavior: ShouldHover 38 (true 29 / false 6) | DisableWalkAnimation 9 | EnableBobbingOffset 7 | IsFacingChangeDisabled 14 | IsNightVision 8 |
+      IsVehicle 24, IsRidingBird 24, IsCar 19, IsRv 13, IsSurfboard 14, IsHorse 11 | NeedRenderPet 27, PetOffsetDuplication 25, UsePetForceFaceTime 19
+    Punch behavior: IncludeAllActions 95 | IgnorePunchTypeCheck 84 | AllowChangePunchType 18 | PlayDefaultPunchAudio 81 | PunchSoundOverride 66 |
+      DefaultPunchSound 15 | IgnoreDefaultDamagedTileEffect 87 | IgnoreDefaultDestroyedTileEffect 27 | HasDeathParticles 12 | UserNameOffset 79
+    Runtime consumes ONE of these (ShouldHover). The rest are native, per-item rules that Set Planner heuristics cannot see.
+7.3  <IsRenderMod> values (242 uses): RENDER_MOD_MINI_YOU 122, SPIRIT_GUIDE 40, RAINBOW_GUY 36, PLAYER_SHADOW 28, MANNEQUIN 7, RENDER_TARGET 4,
+    COLORED_SHADOW 3, PORTRAIT 2. These select rendering contexts (mini-you pets, mannequins, portraits, shadows); your renderer needs a context flag per
+    mod and should pick matching rule branches (renderContext.renderMods already exists in condition()).
+7.4  AvatarTransform (570 uses): class ArmAngle 328 | Face 138 | FootPosition 32 | RenderData 26 | Emotion 24 | Scale 14 | ActionUpdate 6 | NetAvatarAction 2.
+    These drive arm angle, face expression, foot position and player scale from items (e.g. punch pose and 'MAD' face on punch). Not executed by the
+    runtime. Combined with punch_options up_face / up_arm2 / UP_SPINARM2 they define native punch posing; keep your Set Planner punch curve as the
+    labelled fallback only where native data is absent.
+7.5  Other nodes with real usage and zero execution: LineRender 12 (BalloonBackpack strings; color + Start/EndPointVariableName), AvatarOutline 8,
+    AvatarSilhouetteRender 2, PlayerSpriteRender 1 (hiddenParts attribute), RenderClone 1, MusicSource 11, Translate 224, Rotate 77, Scale 10, Colour 9,
+    ContextUpdate 82, Override 25, UpdatePet 14, SpawnNPC (world), TileStampData 31 (world).
+
+====================================================================================================
+8. FULL FIELD-BY-FIELD SUPPORT MATRIX (generated from the XML census x my reading of xml-renderer.mjs)
+====================================================================================================
+Status key:  SUPPORTED = executes with plausible native semantics.  PARTIAL = executes but approximated / incomplete / unverified.
+             UNSUPPORTED = never referenced by the runtime (silently ignored or the system is dropped).  DEAD-CODE = implemented but 0 uses in data.
+A 'referenced' check is a presence test plus a read of the code path; it is NOT a correctness certificate. 'uses' = occurrences in the 314 ItemRenderers;
+'files' = distinct XML files. Sorted by category then usage. The same rows are in xml_support_matrix.csv.
+
+
+[Animation node]
+  STATUS       uses files  key / note
+  PARTIAL      1116   266  SpriteAnimation  -- frame cell sampling by playOnState/animTime/isLoop; playOnAction (44) ignored;
+                                  autoPlay treated as always-on.
+  UNSUPPORTED   133    68  SpriteCurveAnimation  -- 133 uses, never executed.
+  UNSUPPORTED    57     9  InterpolationVec4Animation
+  UNSUPPORTED    49    17  SpriteSinPulseAnimation  -- 49 uses (Parameter pos.y/period/scale floats e.g. AngelAndDevil), never
+                                  executed.
+  UNSUPPORTED    36     7  InterpolationFloatAnimation
+  UNSUPPORTED    20     4  InterpolationVec2Animation
+  UNSUPPORTED    19     6  InterpolationVec3Animation
+  UNSUPPORTED    15    15  SequenceAnimation
+  UNSUPPORTED    14     7  DelayAnimation
+  UNSUPPORTED     8     2  Animation
+  UNSUPPORTED     5     1  VisibilityAnimation
+
+[AvatarTransform class]
+  STATUS       uses files  key / note
+  UNSUPPORTED   328   153  ArmAngle
+  UNSUPPORTED   138   134  Face
+  UNSUPPORTED    32    32  FootPosition
+  UNSUPPORTED    26     9  RenderData
+  UNSUPPORTED    24    22  Emotion
+  UNSUPPORTED    14     7  Scale
+  UNSUPPORTED     6     2  ActionUpdate
+  UNSUPPORTED     2     1  NetAvatarAction
+
+[Condition node]
+  STATUS       uses files  key / note
+  PARTIAL       507   136  IsVariableFloat  -- only speed.x, speed.y, speed.length known; others -> undefined -> rule treated as
+                                  unknown.
+  PARTIAL       341   102  IsVariableBool  -- only onGround, punchInProgress, punching, isFacingLeft known.
+  PARTIAL       306   153  IsZombified  -- context flag only.
+  PARTIAL       242    79  IsRenderMod  -- context list.
+  PARTIAL       235   103  IsWearing  -- only numeric IDs + 6 symbolic IDs in ITEM_SYMBOL_IDS; slot attribute ignored.
+  UNSUPPORTED   129    16  CompareCustomVariable
+  PARTIAL        98    59  IsSitting  -- context flag; ItemID attribute (38 uses) ignored.
+  PARTIAL        85    53  IsSleepingOnaBed  -- context flag only.
+  PARTIAL        71    46  IsTrnsformed  -- context flag only (note native spelling typo "IsTrnsformed" - keep).
+  SUPPORTED      70    34  IsFacingLeft  -- uses motion.facing.
+  UNSUPPORTED    62    62  OnDamagedTile
+  PARTIAL        58    11  IsItemTransformed  -- context flag.
+  UNSUPPORTED    23     9  IsAnimationFinished
+  UNSUPPORTED    20     7  ItemHasTag
+  PARTIAL        18     7  IsDancing  -- locomotion==dance only.
+  PARTIAL        10     6  IsRenderObjectFlag  -- context list.
+  UNSUPPORTED     6     6  SubCondition
+  UNSUPPORTED     5     3  CheckRandomRangeNumber
+  UNSUPPORTED     4     2  IsDarkTile
+  UNSUPPORTED     4     2  IsHoldingJumpKey
+  SUPPORTED       1     1  IsInState  -- machine.state compare.
+
+[Emitter attribute]
+  STATUS       uses files  key / note
+  UNSUPPORTED   130    66  attachment
+  UNSUPPORTED    24     8  needsHandItemActive
+  UNSUPPORTED    24     9  onPunchCount
+
+[Emitter child/operator]
+  STATUS       uses files  key / note
+  PARTIAL        93    46  Random:emissionInterval  -- operator form of a supported property (Random); seeded/approximate: seconds
+                                  assumed; floor 0.016s; fixed-step replay, no jitter.
+  PARTIAL        44    24  Random:offset  -- sampled via seeded Random (not native RNG).
+  UNSUPPORTED    29     9  OrbitOffset
+  PARTIAL        12     8  Random:particlesPerEmission  -- operator form of a supported property (Random); seeded/approximate:
+                                  executes; truncated to int and clamped 0..32. Check native cap before keeping th
+  UNSUPPORTED     3     2  Select:rgbTint  -- operator form of an unsupported property (rgbTint)
+  PARTIAL         2     1  Select:offset  -- operator form of a supported property (Select); seeded/approximate: applied as raw
+                                  pixel delta in sprite space; ignores offsetFacing mirroring and u
+  UNSUPPORTED     1     1  SetVar:arrow.target.offset
+  PARTIAL         1     1  Random:particlesToEmit  -- operator form of a supported property (Random); seeded/approximate: read;
+                                  interplay with checkParticleNumToEmit approximated.
+
+[Emitter property (Set)]
+  STATUS       uses files  key / note
+  PARTIAL       913   255  particlesPerEmission  -- executes; truncated to int and clamped 0..32. Check native cap before keeping
+                                  the clamp.
+  PARTIAL       652   230  offset  -- applied as raw pixel delta in sprite space; ignores offsetFacing mirroring and
+                                  useCharacterPos. Unit/space unverified.
+  PARTIAL       623   218  infParticles  -- read, but default is "true" when absent (native default unknown).
+  PARTIAL       462   199  emissionInterval  -- seconds assumed; floor 0.016s; fixed-step replay, no jitter.
+  PARTIAL       459   178  particlesToEmit  -- read; interplay with checkParticleNumToEmit approximated.
+  PARTIAL       425   171  lifeTime  -- emitter lifetime in seconds assumed; only honoured when infLifeTime is not "true".
+  PARTIAL       397   165  infLifeTime  -- read; default "true" when absent.
+  PARTIAL       237   111  checkParticleNumToEmit  -- read; NOTE data contains typo value "fasle" (2 uses) which truthy-check
+                                  treats as false - keep that behaviour but log it.
+  UNSUPPORTED    92    45  offsetFacing
+  PARTIAL        89    57  delayTimer  -- seconds assumed.
+  UNSUPPORTED    46    25  useCharacterPos
+  UNSUPPORTED    26    11  randomizeInterval
+  PARTIAL        26    11  intervalMin  -- runtime uses the MEAN of min/max as a constant; native almost certainly re-rolls per
+                                  emission (randomizeInterval).
+  PARTIAL        26    11  intervalMax  -- see intervalMin.
+  PARTIAL        13     8  enable  -- evaluated once as a static boolean; if native drives it from variables it is wrong.
+  UNSUPPORTED    12     5  rgbTint
+  UNSUPPORTED     4     4  useTargetTileColorForTint
+  UNSUPPORTED     2     1  forceXScaling
+
+[IsAction value]
+  STATUS       uses files  key / note
+  PARTIAL       566   172  PUNCH  -- motion.punch; BUILD folded into PUNCH.
+  PARTIAL        42    35  BUILD  -- folded into PUNCH (cannot distinguish build vs hit).
+  UNSUPPORTED    37    14  DIE
+  PARTIAL        29    18  FALL  -- airborne-descending approximation.
+  PARTIAL        28    22  JUMP  -- airborne-ascending approximation.
+  UNSUPPORTED    20    10  SLEEP
+  PARTIAL        14    10  IDLE
+  PARTIAL        13     6  DANCE  -- in actionActive only; not in IsAction()
+  UNSUPPORTED    13     5  DANCE_FLOSS
+  PARTIAL        12     9  JUMPDOUBLE  -- event-based in actionActive only.
+  UNSUPPORTED     3     1  DANCE_DAB
+  PARTIAL         3     3  WALK
+  PARTIAL         3     3  JUMPSTART  -- event-based in actionActive only.
+
+[OrbitOffset child]
+  STATUS       uses files  key / note
+  UNSUPPORTED    29     9  maxScale
+  UNSUPPORTED    29     9  hasOrbit
+  UNSUPPORTED    29     9  hOrbitPeriod
+  UNSUPPORTED    29     9  hAmplitude
+  UNSUPPORTED    29     9  hTimeOffset
+  UNSUPPORTED    29     9  vAmplitude
+  UNSUPPORTED    29     9  vOrbitPeriod
+  UNSUPPORTED    29     9  vTimeOffset
+  UNSUPPORTED    29     9  minScale
+
+[Other node]
+  STATUS       uses files  key / note
+  PARTIAL       413   243  StateMachine  -- transitions evaluated with the Condition subset above; ExitTime (52) and IsTemporary
+                                  ignored.
+  UNSUPPORTED   250    56  ArithmethicOperation
+  PARTIAL       224    82  Translate  -- x,y only; forceValue/onState/incrementRotate ignored except onState gate.
+  UNSUPPORTED   102   102  AddClothingParticles
+  UNSUPPORTED    82    42  ContextUpdate
+  UNSUPPORTED    77    36  Rotate
+  UNSUPPORTED    42    42  SwitchOffClothingParticles
+  UNSUPPORTED    31    31  TileStampData
+  UNSUPPORTED    25    19  OnFinish
+  UNSUPPORTED    25    19  Override
+  UNSUPPORTED    22    22  RenderPet
+  UNSUPPORTED    14    14  UpdatePet
+  UNSUPPORTED    14    11  SetVar
+  UNSUPPORTED    13    13  RenderTransform
+  UNSUPPORTED    12     5  LineRender
+  UNSUPPORTED    11    10  MusicSource
+  UNSUPPORTED    10     6  Scale
+  UNSUPPORTED     9     5  Colour
+  UNSUPPORTED     8     7  AvatarOutline
+  UNSUPPORTED     5     1  VisibilityAnimation
+  UNSUPPORTED     3     1  RandomValueOperation
+  UNSUPPORTED     2     2  Alpha
+  UNSUPPORTED     2     2  RenderAura
+  UNSUPPORTED     2     2  AvatarSilhouetteRender
+  UNSUPPORTED     1     1  PlayerSpriteRender
+  UNSUPPORTED     1     1  RenderClone
+
+[Particle attribute]
+  STATUS       uses files  key / note
+  PARTIAL       298   134  randomSpriteFrame  -- picks seed%frames from the FIRST SpriteAnimation of that sprite; native may use
+                                  per-particle uniform random and may use SpriteCurveAnimation.
+  UNSUPPORTED    89    46  usePlayerFacing
+  UNSUPPORTED    38    17  angleRelativeToPlayerSpeed
+  UNSUPPORTED    30    11  particleIndexSpriteFrame
+  UNSUPPORTED    29    14  autoLifeTimeToTarget
+  UNSUPPORTED    24    11  velocityRelativeToPlayerSpeed
+  UNSUPPORTED    24    13  alternateSpriteFrameWithPunch
+  UNSUPPORTED    22     8  UseParentVariantId
+  UNSUPPORTED    17     5  UseParentScale
+  UNSUPPORTED    16     5  UseParentEmitterAngle
+  UNSUPPORTED     2     1  VelocityRelativeToParticleAngle
+
+[Particle child/operator]
+  STATUS       uses files  key / note
+  PARTIAL       673   219  Curve:initialAlpha  -- operator form of a supported property (Curve); seeded/approximate: Curve sampled
+                                  by normalised age (age/life) - correct idea; finalAlpha/interpolat
+  PARTIAL       335   154  Curve:initialScale  -- operator form of a supported property (Curve); seeded/approximate: scalar or
+                                  pair; Random/Curve ok.
+  PARTIAL       265   128  Random:offset  -- operator form of a supported property (Random); seeded/approximate: added to emitter
+                                  offset; Multiply form unsupported.
+  PARTIAL       188   117  Random:initialAngle  -- operator form of a supported property (Random); seeded/approximate: treated as
+                                  DEGREES (unverified; see unit test in section 9).
+  UNSUPPORTED   159   105  RandomRadial:initialVelocity
+  UNSUPPORTED   136   101  VectorTo:initialVelocity
+  PARTIAL       128    75  Random:initialScale  -- seeded.
+  PARTIAL        79    51  Random:initialRotationRate  -- operator form of a supported property (Random); seeded/approximate:
+                                  degrees/second assumed (unverified).
+  PARTIAL        77    38  Random:initialVelocity  -- operator form of a supported property (Random); seeded/approximate: constant
+                                  velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomR
+  PARTIAL        37    21  Random:lifeTime  -- seeded.
+  UNSUPPORTED    34    26  VectorTo:finalVelocity
+  PARTIAL        33    26  Random:finalScale  -- operator form of a supported property (Random); seeded/approximate: only used if
+                                  interpolateScale=true; linear lerp over life (native easing unknown
+  UNSUPPORTED    33    29  Random:targetPosOffset  -- operator form of an unsupported property (targetPosOffset)
+  UNSUPPORTED    25    19  OnFinish
+  PARTIAL        25    17  Select:initialRotationRate  -- operator form of a supported property (Select); seeded/approximate:
+                                  degrees/second assumed (unverified).
+  PARTIAL        24    12  Select:sprite  -- operator form of a supported property (Select); seeded/approximate: sprite name
+                                  resolved; arrays collapse to element 0.
+  PARTIAL        19    12  Curve:initialRotationRate  -- operator form of a supported property (Curve); seeded/approximate:
+                                  degrees/second assumed (unverified).
+  PARTIAL        18    12  Select:offset  -- operator form of a supported property (Select); seeded/approximate: added to emitter
+                                  offset; Multiply form unsupported.
+  UNSUPPORTED    18    13  Random:finalAngle  -- operator form of an unsupported property (finalAngle)
+  PARTIAL        17     9  Random:flipX  -- operator form of a supported property (Random); seeded/approximate: multiplies scale.x
+                                  by -1.
+  PARTIAL        15     9  Curve:initialVelocity  -- operator form of a supported property (Curve); seeded/approximate: constant
+                                  velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomR
+  UNSUPPORTED    15    10  Random:variantId  -- operator form of an unsupported property (variantId)
+  UNSUPPORTED    14     8  Increment:finalScale
+  UNSUPPORTED    13     7  Increment:initialScale
+  UNSUPPORTED    13     7  Increment:worldPos
+  UNSUPPORTED    11     4  Select:initalRGB  -- operator form of an unsupported property (initalRGB)
+  PARTIAL        11     7  Select:initialVelocity  -- operator form of a supported property (Select); seeded/approximate: constant
+                                  velocity px/s * age; interpolateVelocity/finalVelocity ignored; RandomR
+  UNSUPPORTED    10     9  SetVar:projectile_offset
+  UNSUPPORTED     9     9  Random:posOffset  -- operator form of an unsupported property (posOffset)
+  UNSUPPORTED     8     6  Select:finalAlpha  -- operator form of an unsupported property (finalAlpha)
+  PARTIAL         8     7  Random:gravityVector  -- operator form of a supported property (Random); seeded/approximate: applied as
+                                  0.5*g*t^2.
+  PARTIAL         7     5  Select:initialAngle  -- operator form of a supported property (Select); seeded/approximate: treated as
+                                  DEGREES (unverified; see unit test in section 9).
+  UNSUPPORTED     7     5  Select:finalAngle  -- operator form of an unsupported property (finalAngle)
+  UNSUPPORTED     6     2  Select:finalVelocity  -- operator form of an unsupported property (finalVelocity)
+  PARTIAL         5     5  Select:flipX  -- operator form of a supported property (Select); seeded/approximate: multiplies scale.x
+                                  by -1.
+  PARTIAL         4     4  Curve:initialAngle  -- operator form of a supported property (Curve); seeded/approximate: treated as
+                                  DEGREES (unverified; see unit test in section 9).
+  PARTIAL         4     2  Select:lifeTime  -- operator form of a supported property (Select); seeded/approximate: seconds; per-
+                                  particle, Random/Curve evaluated with the particle seed.
+  PARTIAL         4     3  Select:initialScale  -- operator form of a supported property (Select); seeded/approximate: scalar or
+                                  pair; Random/Curve ok.
+  UNSUPPORTED     3     3  SetVar:variantIdVar
+  UNSUPPORTED     2     2  Curve:orbit  -- operator form of an unsupported property (orbit)
+  UNSUPPORTED     1     1  Multiply:offset
+  UNSUPPORTED     1     1  Select:targetPosOffset  -- operator form of an unsupported property (targetPosOffset)
+  UNSUPPORTED     1     1  Random:finalVelocity  -- operator form of an unsupported property (finalVelocity)
+
+[Particle property (Set)]
+  STATUS       uses files  key / note
+  PARTIAL       901   254  sprite  -- sprite name resolved; arrays collapse to element 0.
+  SUPPORTED     871   247  lifeTime  -- seconds; per-particle, Random/Curve evaluated with the particle seed.
+  PARTIAL       839   241  blendingMode  -- ONLY "ADDITIVE" is honoured (canvas lighter). PREMULTIPLIED_ALPHA (613 uses) and
+                                  PREMULTIPLIED_NORMAL (1) fall to plain source-over.
+  UNSUPPORTED   342   126  inSpecificOrder
+  PARTIAL       249   116  initialScale  -- scalar or pair; Random/Curve ok.
+  UNSUPPORTED   244   110  relativeToEmitter
+  UNSUPPORTED   212   125  rotateWithVelocity
+  PARTIAL       149    84  useGravity  -- read.
+  PARTIAL       141    80  gravityVector  -- applied as 0.5*g*t^2.
+  UNSUPPORTED   125    55  renderAlignment
+  PARTIAL        90    52  initialVelocity  -- constant velocity px/s * age; interpolateVelocity/finalVelocity ignored;
+                                  RandomRadial form unsupported -> NaN -> particle silently skipped.
+  PARTIAL        90    36  offset  -- added to emitter offset; Multiply form unsupported.
+  UNSUPPORTED    78    43  isBackgroundParticle
+  PARTIAL        70    43  interpolateScale  -- linear only.
+  UNSUPPORTED    68    38  interpolateAlpha
+  UNSUPPORTED    68    36  initalRGB
+  PARTIAL        67    38  initialAlpha  -- Curve sampled by normalised age (age/life) - correct idea; finalAlpha/interpolateAlpha
+                                  ignored.
+  PARTIAL        63    30  initialAngle  -- treated as DEGREES (unverified; see unit test in section 9).
+  UNSUPPORTED    56    31  finalAlpha
+  SUPPORTED      47    24  flipX  -- multiplies scale.x by -1.
+  PARTIAL        46    30  initialRotationRate  -- degrees/second assumed (unverified).
+  UNSUPPORTED    44    32  interpolateVelocity
+  PARTIAL        34    21  finalScale  -- only used if interpolateScale=true; linear lerp over life (native easing unknown).
+  SUPPORTED      30    13  flipY  -- multiplies scale.y by -1.
+  UNSUPPORTED    17    12  interpolateAngle
+  UNSUPPORTED    13     4  finalRGB
+  UNSUPPORTED    13     4  interpolateRGB
+  UNSUPPORTED    13     8  orbitStart
+  UNSUPPORTED    13     8  orbitPeriod
+  UNSUPPORTED    13     8  applyOrbit
+  UNSUPPORTED    13     8  orbitScaleVariation
+  UNSUPPORTED    11     6  orbit
+  UNSUPPORTED     7     6  orbitSkew
+  UNSUPPORTED     6     4  worldPos
+  UNSUPPORTED     4     3  targetPos
+  UNSUPPORTED     3     1  TintTargetTileColorVariable
+  UNSUPPORTED     3     3  variantId
+  UNSUPPORTED     3     3  finalVelocity
+  UNSUPPORTED     3     3  finalRotationRate
+  UNSUPPORTED     2     1  targetPosOffset
+  UNSUPPORTED     2     1  angRelativeToEmitter
+  UNSUPPORTED     1     1  rainbowShift
+  UNSUPPORTED     1     1  useAvatarShadow
+  UNSUPPORTED     1     1  isBeamParticle
+  UNSUPPORTED     1     1  finalAngle
+
+[Particle rule hook]
+  STATUS       uses files  key / note
+  PARTIAL       559   185  ParticleSystemUpdate  -- handled only when it appears under a rule hook that visibleRules() walks;
+                                  onState and onAction approximated by actionActive().
+  PARTIAL       228    83  ParticleSystemRender  -- treated like Update, no separate render-stage semantics.
+  UNSUPPORTED   205    45  ParticleSystemOff  -- visibleRules() filters it out; stop is inferred from rule inactivity instead.
+  UNSUPPORTED   169    75  ParticleSystemUpdate@onState
+  UNSUPPORTED    85    35  ParticleSystemUpdate@onAction
+  UNSUPPORTED    34    13  ParticleSystemRender@onState
+  UNSUPPORTED     4     2  ParticleSystemRender@onAction
+
+[ParticleSystem attribute]
+  STATUS       uses files  key / note
+  UNSUPPORTED   365   141  updateStage  -- runtime never reads it (379 systems self-trigger this way).
+  UNSUPPORTED   178    81  updateState
+  UNSUPPORTED   101    55  renderStage
+  UNSUPPORTED    28    23  secondary
+
+[RenderRules hook]
+  STATUS       uses files  key / note
+  UNSUPPORTED   138   138  OnPunchUpdate
+  PARTIAL       113   113  Update  -- only state machines transitions use it; AvatarTransform blocks (570) not executed here.
+  PARTIAL       102   102  AddClothingParticles  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back
+                                  to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        76    76  RenderHandItem  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        63    63  RenderInFront  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        62    62  OnDamagedTile  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated
+                                  by its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL        61    61  RenderBehind  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        53    53  RenderShoes  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        53    53  RenderBackpack  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        53    53  OnDestroyedTile  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not
+                                  gated by its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL        52    52  OnPunchStart  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated
+                                  by its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL        47    47  RenderBackHandItem  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back
+                                  to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        43    43  RenderChestItem  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        42    42  SwitchOffClothingParticles  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name
+                                  falls back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat
+                                  etc.) not interpreted.
+  PARTIAL        22    22  RenderPet  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        19    19  RenderFrontpack  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        18    18  RenderFrontArm  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        17    17  RenderChestBackItem  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back
+                                  to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        16    16  RenderHat  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        14    14  UpdatePet  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        13    13  RenderBackArm  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        13    13  RenderTransform  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        12    12  RenderShirt  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL        10    10  RenderFaceItem  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         9     9  RenderHair  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         8     8  OnPunchStop  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by
+                                  its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL         7     7  OnDrawCustomOutline  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back
+                                  to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         6     6  OnPunchBegin  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated
+                                  by its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL         6     6  OnRespawned  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by
+                                  its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL         5     5  RenderBackHat  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         5     5  RenderPants  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         4     4  RenderBackHair  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         3     3  OnKilled  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by
+                                  its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL         3     3  OnEnteredToWorld  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not
+                                  gated by its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL         3     3  OnItemEquipped  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated
+                                  by its event, so its sprite/particle rules can appear as always-on.
+  PARTIAL         2     2  RenderSittingInTheater  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls
+                                  back to PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         2     2  RenderAura  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         1     1  UpdatePunch  -- walked for SpriteRender/ParticleSystemRender/Update only; pass name falls back to
+                                  PARTICLES when not in PLANNER_PROFILE.passOrder; render-stage flags (RenderHat etc.) not
+                                  interpreted.
+  PARTIAL         1     1  OnDeath  -- WARNING: visibleRules() walks every hook unconditionally; an EVENT hook is not gated by its
+                                  event, so its sprite/particle rules can appear as always-on.
+
+[SpriteRender attribute]
+  STATUS       uses files  key / note
+  PARTIAL       928   311  name  -- resolved to sprite; only applied to catalog pieces for 5 aura scripts (StarryAura, DirtAura,
+                                  TwilightAura, InfinityAura, BeachAura).
+  PARTIAL       573   216  offset  -- 5 aura scripts only.
+  PARTIAL       531   200  blend  -- ADDITIVE only; 5 aura scripts only.
+  PARTIAL       492   221  alignment  -- only DOWN_* -> ay=1; others ignored. 5 aura scripts only.
+  UNSUPPORTED   285   119  drawShadow
+  PARTIAL       173    68  onState  -- honoured in visibleRules() via state machines.
+  UNSUPPORTED   137    54  alignmentLeft
+  UNSUPPORTED   137    54  alignmentRight
+  UNSUPPORTED   136    63  rotateOffset
+  UNSUPPORTED   123    54  flip
+  UNSUPPORTED   106    55  rotationPoint
+  PARTIAL        77    31  scale  -- 5 aura scripts only.
+  UNSUPPORTED    51    28  tintOverride
+  UNSUPPORTED    46    19  useFixedRotation
+  UNSUPPORTED    33    14  fixedRotation
+  PARTIAL        20    10  onAction  -- honoured via actionActive() (approximate events).
+  UNSUPPORTED    18    13  stretchToTarget
+  UNSUPPORTED     4     3  rotateToTarget
+  UNSUPPORTED     1     1  useFixedRodtation
+
+[Runtime-only (not in data)]
+  STATUS       uses files  key / note
+  DEAD-CODE       0     0  Sin  -- property() evaluates <Sin> - tag never occurs in any shipped XML (0 uses).
+  DEAD-CODE       0     0  Cos  -- same as Sin (0 uses).
+  DEAD-CODE       0     0  SpriteScaleAnimation  -- handled in advanceXmlRenderer - tag never occurs (0 uses).
+  DEAD-CODE       0     0  SpritePositionAnimation  -- handled in advanceXmlRenderer - tag never occurs (0 uses).
+
+TOTALS: 289 distinct keys -> DEAD-CODE 4, PARTIAL 122, SUPPORTED 5, UNSUPPORTED 158
+Note: SUPPORTED is rare on purpose. I did not mark anything SUPPORTED that depends on an unverified unit, a native RNG, or an unverified default.
+
+====================================================================================================
+9. IMPLEMENTATION PLAN FOR PERPLEXITY (ordered by usage x unblocking power)
+====================================================================================================
+PHASE 0  Housekeeping (small, do first)
+  0.1 Fix demo/test/animation-fx-float.test.mjs lines 67 and 76: ../../research/ -> ../../evidence/ (or ship fixtures under research/). Re-run 72/72.
+  0.2 Do NOT copy atlas files from the archive over demo copies (section 3.1). Add the 'every referenced cell is non-empty' atlas test.
+  0.3 Write a build-time coverage script that outputs per script: systems total, triggered (by hook / by attribute / secondary / none), fields used,
+      fields UNSUPPORTED. Emit JSON + a UI panel. 'Unknown operator' = coverage warning, never a silent zero.
+  0.4 Reproduce the event-hook gating question (section 4.4) with an OnDamagedTile item; fix before adding features.
+PHASE 1  Build the trigger table (replaces visibleRules for particles)
+  Inputs: RenderRules hooks, ParticleSystemUpdate/Render/Off, ParticleSystem@updateStage/updateState/renderStage/secondary, OnFinish/ParticleSystemName.
+  Model a system lifecycle: IDLE -> RUNNING (on start trigger) -> STOPPING (Off hook / stop condition; existing particles finish) -> IDLE.
+  Event stages (OnPunchStart, OnPunchUpdate, OnDamagedTile, OnDestroyedTile, OnKilled, OnRespawned, AddClothingParticles / SwitchOffClothingParticles)
+  need real event sources from the motion layer; where the demo cannot raise an event, mark that system UNRESOLVED-EVENT instead of always-on.
+PHASE 2  Property evaluator (pure, data-driven, no eval)
+  Evaluate in dependency order with ONE seeded RNG per particle: Set, Random, Curve (normalised age), Select (+inSpecificOrder), RandomRadial, Multiply,
+  Increment, VectorTo, SetVar. Return {value | UNSUPPORTED(reason)}; never NaN. Property-level unit tests with hand-computed values.
+PHASE 3  Emitter semantics
+  attachment (targetPos, handspotRoot, contextRotation, targetPos2, default), offsetFacing, useCharacterPos, randomizeInterval (re-roll per emission from
+  intervalMin/Max), onPunchCount odd/even, needsHandItemActive, enable, rgbTint, delayTimer, finite/infinite particle and life logic, secondary systems.
+PHASE 4  Particle semantics (usage order)
+  inSpecificOrder -> relativeToEmitter -> rotateWithVelocity -> usePlayerFacing -> renderAlignment -> isBackgroundParticle -> interpolateAlpha / finalAlpha ->
+  interpolateVelocity/finalVelocity -> interpolateAngle/RGB (+initalRGB/finalRGB) -> particleIndexSpriteFrame -> alternateSpriteFrameWithPunch ->
+  angleRelativeToPlayerSpeed / velocityRelativeToPlayerSpeed -> autoLifeTimeToTarget -> worldPos/targetPos -> UseParent* -> OnFinish chaining ->
+  rainbowShift / useAvatarShadow / isBeamParticle (1 use each: defer, mark UNRESOLVED).
+PHASE 5  Orbit (emitter OrbitOffset, then particle orbit) using the hypotheses in 6.4, behind a feature flag until validated by a capture.
+PHASE 6  Blend + draw contract
+  Real premultiplied alpha, additive, normal. Draw stage per hook (RenderBehind / RenderInFront / RenderHandItem / ...), anchors playerCenter / playerGround /
+  shoulder / handspotRoot. Preserve the main renderer's authored-pixel (32 px) -> 16x nearest-neighbour -> camera boundary; do not scale simulation by export size.
+PHASE 7  Sprite-side animation: SpriteCurveAnimation, SpriteSinPulseAnimation (period, scale on pos.y), CurveAnimation*, Interpolation*, SequenceAnimation,
+  DelayAnimation, VisibilityAnimation, playOnAction, useFacing. Replace the dead SpriteScale/PositionAnimation branches.
+PHASE 8  Render-side rules: RenderOptions flags (section 7.2), IsRenderMod contexts, AvatarTransform (ArmAngle / Face / FootPosition / Scale),
+  punch_options directives (section 5.1), then extend SpriteRender replacement beyond the 5 aura scripts item by item as each is validated.
+PHASE 9  WorldRenderers (projectiles, slashes) on the same interpreter; collisions and SpawnNPC explicitly out of scope until requested.
+UNIT / SEMANTIC VALIDATION PROTOCOL (needed because there is no public spec)
+  For each [HYPOTHESIS] in section 6, pick ONE item, implement it behind a flag, render a short filmstrip (frames at fixed ms), and ask the user to compare
+  with an in-game screen recording. Record result + client build in evidence/. Suggested single-item probes:
+    orbit (emitter) = DirtAura | orbit (particle) = CloakofChaos MistParticle | RandomRadial direction = InfinityAura | VectorTo/targetPos = AtomConstructs |
+    Select/inSpecificOrder = any item with <Select> and inSpecificOrder=true | handspotRoot = a RenderHandItem staff | premultiplied glow = Dirt/Twilight Aura.
+
+====================================================================================================
+10. LABELLING AND HONESTY RULES (non-negotiable)
+====================================================================================================
+  NATIVE       every field the system uses is implemented (matrix shows no UNSUPPORTED for that system) and any [HYPOTHESIS] it relies on has a recorded capture.
+  APPROXIMATE  the 7 ITEM_FX_RECIPES (and any later hand recipes). Off by default. Drawn from reference-fx.png or generic shapes. UI badge 'approximate'.
+               Never counted in native coverage statistics.
+  UNRESOLVED   fx/punchFx/airJumpFx flag but no XML and no legacy-ID data; or a system with an UNSUPPORTED field; or an op_particleN legacy ID; or an event the
+               demo cannot raise. Show the item, the reason and the missing source. Do not substitute art.
+  Do not call a particle 'native' because its sprite comes from a game atlas. Do not use eval/Function. Do not overwrite the v27 catalog with v26 data.
+  Keep each source (items.txt, Set Planner JSON, renderer-data.json, atlases) separate with provenance on merged fields. Do not map native clothing_type to Set Planner
+  slot numbers without a validated table.
+
+====================================================================================================
+11. TESTS TO ADD (assert exact things, not effectCount > 0)
+====================================================================================================
+  T1  Atlas: every <Sprite> cell referenced by any renderer is non-empty in the shipped atlas (catches section 3.1). Expect 7 sprites to need the demo copies.
+  T2  Trigger table: DirtAura -> 3 systems RUNNING from idle, each with the exact OrbitOffset numbers of section 6.4.
+  T3  Self-staged system: an AddClothingParticles item starts its system without any Update hook (e.g. AquaticVolcanicCannon, ps_ember).
+  T4  Event gating: an OnDamagedTile system emits nothing until a damaged-tile event is raised.
+  T5  RandomRadial: 10,000 samples stay inside angleRange x radiusRange; same seed -> same value.
+  T6  Multiply/Increment: InfinityAura offset == initialVelocity * (0.1, 0); AstralAuraBlackCat finalScale == initialScale * 2.5.
+  T7  VectorTo: particle reaches targetPos at t = lifeTime (AtomConstructs).
+  T8  Curve: values at normalised age 0, 0.25, 0.5, 1.0 for a real particle Curve (hand-computed fixture).
+  T9  Blend: PREMULTIPLIED_ALPHA over white and black produces no dark fringe; ADDITIVE brightens; counts per mode match section 2.
+  T10 offsetFacing / usePlayerFacing: mirror once, at the player level, not per particle.
+  T11 onPunchCount: odd and even emitters alternate on consecutive punches.
+  T12 Coverage report: 924 systems = 500 hooked-only + 81 hooked&staged + 16 hooked&secondary + 288 staged-only + 10 staged&secondary + 27 no-trigger + 2 secondary-only; unresolved hooks 4 (punch_particleTrail x2, p_mist, s_shirt).
+  T13 Parser tolerance: duplicate-attribute repairs (HealingAntennae, MaverickArmor, Nix, RoyalMaverickArmor), typos 'fasle', 'PREMULTIPLIED_ALPHAd', 'true>' are logged, not fatal.
+  T14 punch_options: Heartstaff 7826 parses to particle2=190, params (0,20), audio, face 4, arm2 330.
+
+====================================================================================================
+12. OPEN QUESTIONS THAT NEED THE USER (capture or decision)
+====================================================================================================
+  Q1  Short in-game screen recordings (any client build; state the build) of: Dirt Aura idle; Cloak of Chaos mist; Infinity Aura jump; one Atom Constructs punch;
+      one OnDamagedTile item hitting a block. These settle sin/cos phase, orbit scale, RandomRadial direction, VectorTo and event semantics.
+  Q2  Which client build should native mode target? (Atlases here are partly newer than the archive; the build decides which sprites exist.)
+  Q3  Should event-driven effects (damaged / destroyed tile) be simulated in the planner, or listed as unresolved? The planner has no world blocks.
+  Q4  Priority: particle accuracy first, or sprite-side animations (floating angels, pulsing glows) and RenderOptions layering rules first?
+  Q5  Does the user have any other source of the numbered legacy particle table (IDs 109, 190-193, 216 ... and ParticleSystemLegacy types)? Without it those stay unresolved.
+
+====================================================================================================
+13. WHAT I COULD NOT DETERMINE (so nobody builds on it)
+====================================================================================================
+  * Native RNG, easing for interpolate*, emission replay order, per-frame emission timing, particle draw order inside a system.
+  * The exact meaning of items.txt data_position_80 bytes and the bodyPart[9] values (section 5.2 / 5.3).
+  * The legacy numeric particle definitions (op_particleN, ParticleSystemLegacy type).
+  * Whether flags such as secondary systems start on the parent's first particle or on its death (data shows 28 secondaries and 25 OnFinish; link them by reading each pair).
+  * Whether mounts (IsCar/IsHorse/...) change particle anchors. The data flags exist; the behavior is not in the XML.
+  * My web search found only third-party items.dat parsers (e.g. grow-items, GrowHax/Items.dat-decoder) - useful for the item binary schema, silent on renderer XML.
+  Sources cited: items.dat schema fields via grow-items (https://app.unpkg.com/grow-items@1.3.2/files/dist/index.d.ts) and GrowHax/Items.dat-decoder
+  (https://github.com/GrowHax/Items.dat-decoder). Everything else above is from the uploaded files.
+
+====================================================================================================
+14. FILES / COMMANDS I USED (reproducible)
+====================================================================================================
+  Census: parse every ItemRenderers/*.xml (lenient: drop duplicate attributes), count tags/attributes/Set names per Emitter/Particle/OrbitOffset/SpriteRender.
+  Atlas diff: PIL RGBA compare of assets/game/particles*.png vs demo/assets; map renderer_sprites.csv (frame*textureSize) to cells; compare alpha>0 counts.
+  Joins: items.txt (split on '\\' after the //Format header, 57 columns) vs setplanner_items_decoded.json `script` vs renderer file names vs demo/catalog.json.
+  Runtime audit: read src/xml-renderer.mjs end to end; grep src/ for each RenderOptions flag (only ShouldHover is consumed, in motion-policy.mjs).

@@ -1,0 +1,20 @@
+--- a/demo/test/animation-fx-float.test.mjs	2026-10-18 19:47:25.000000000 +0000
++++ b/demo/test/animation-fx-float.test.mjs	2026-10-19 10:32:57.807002742 +0000
+@@ -64,7 +64,7 @@
+   assert.equal(rows.length,2);assert.ok(rows.every(r=>r.sh===32));assert.notEqual(rows[0].sy,rows[1].sy);
+ });
+ test("all eligible default-state profiles agree with changed-input source fixtures",()=>{
+-  const {fixtures}=JSON.parse(fs.readFileSync(new URL("../../research/lift-differential-fixtures.json",import.meta.url)));
++  const {fixtures}=JSON.parse(fs.readFileSync(new URL("../../evidence/lift-differential-fixtures.json",import.meta.url)));
+   let samples=0;
+   for(const f of fixtures) {
+     const p=catalog.liftProfiles[f.id];if(!p.publicStillAgrees)continue;
+@@ -73,7 +73,7 @@
+   assert.ok(samples>2000);console.log(`${samples} changed-input lift comparisons`);
+ });
+ test("texture edge clamping and pet wrapping match isolated source pixels",()=>{
+-  const d=JSON.parse(fs.readFileSync(new URL("../../research/sampler-differential-fixtures.json",import.meta.url)));
++  const d=JSON.parse(fs.readFileSync(new URL("../../evidence/sampler-differential-fixtures.json",import.meta.url)));
+   for(const f of d.fixtures)assert.deepEqual(Array.from(extractSpritePixels(
+     new Uint8ClampedArray(d.pixels),d.width,d.height,f.rect)),f.expected);
+ });

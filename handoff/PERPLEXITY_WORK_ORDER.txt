@@ -1,0 +1,179 @@
+PERPLEXITY WORK ORDER - START HERE  (the HOW; the WHY and evidence are in PERPLEXITY_BRIEF_native_particles_and_renderer_xml.txt)
+From: Claude.  To: Perplexity.  Repo: growtopia-rendering-handoff (PlayerRenderingPROGRESS.zip).  Node 22.
+
+RULES OF THE ROAD
+ R1  Work in order. One step = one commit. Run the test commands after EVERY step. Never leave a step half done.
+ R2  src/ and demo/engine/ are byte-identical mirrors. Edit src/, then run:  cp src/*.mjs demo/engine/
+ R3  Tests: root  `npm test`   and demo  `cd demo && node --test test/*.test.mjs`   (both must be green).
+ R4  Never use eval/Function. Never invent effects. If a rule needs data you do not have, record it as UNRESOLVED with a reason (see step 4).
+ R5  src/xml-support.mjs is the live "what is implemented" table. Raise an entry ONLY in the same commit that adds the test proving it.
+     Levels: none < evaluator < partial < full.  'full' needs a test AND (for [HYP] items) a user capture.
+ R6  Do NOT copy particles12.png / particles_large17.png / particles_large19.png from the assets archive (they are blank where 7 sprites live).
+ R7  Hypotheses marked [HYP] go behind a named constant/flag, so one edit flips them after the user's capture.
+
+====================================================================================================
+STEP 0 - Apply the tested patch pack (already verified here: 94/94 root, 72/72 demo)
+====================================================================================================
+ 1. Unzip perplexity_patch_pack.zip into the repo root so you have ./perplexity_patch_pack/.
+ 2. From the repo root run:   bash perplexity_patch_pack/APPLY.sh
+ 3. Expected tail of output:  "# tests 94 / # pass 94 / # fail 0", then "# tests 72 / # pass 72 / # fail 0", then the coverage report
+    ("scripts with particles: 256  systems: 924", trigger categories 500/81/16/288/10/2/27).
+ What the pack does:
+   src/xml-expr.mjs      pure evaluator: Set, Random, Curve, Select(input), RandomRadial, Multiply, Increment, VectorTo, SetVar. Returns {value}|{unsupported}.
+   src/xml-triggers.mjs  buildTriggerTable(renderer): hooks + element stage attributes + OnFinish + secondary -> per-system category.
+   src/xml-support.mjs   status table read by the coverage tool.
+   tools/xml-coverage.mjs  `node tools/xml-coverage.mjs evidence/renderer-data.json --json evidence/xml-coverage.json`
+   xml-renderer.patch    particlesFor() now resolves offset/initialVelocity through xml-expr (RandomRadial/Multiply/... work; failures are reported with a reason).
+   demo-test-paths.patch fixes the 2 failing demo tests (research/ -> evidence/).
+   tests: xml-expr (9), xml-triggers (2), xml-radial-wiring (2).
+ Commit message: "Apply xml-expr evaluator, trigger table, coverage tool; fix demo test paths".
+ Done when: both suites green and the coverage tool runs. If APPLY.sh fails, STOP and report the exact error; do not hand-edit around it.
+
+====================================================================================================
+STEP 1 - Use the coverage report as your to-do list (no code)
+====================================================================================================
+ Run the coverage tool. It prints "Top UNSUPPORTED fields by number of systems blocked". That ranking is your order of work for steps 5-6.
+ Current top of the list (systems blocked): inSpecificOrder 340 | relativeToEmitter 244 | rotateWithVelocity 212 | Emitter@attachment 130 |
+ renderAlignment 125 | offsetFacing 92 | usePlayerFacing 89 | initalRGB 79 | isBackgroundParticle 78 | interpolateAlpha 68 | finalAlpha 64 | useCharacterPos 46 ...
+ Also note: the data spells it `initalRGB` (typo). Use the data's spelling. Other real typos to tolerate and log: 'fasle', 'PREMULTIPLIED_ALPHAd'.
+ Expose the report in the demo UI later (step 9); for now the JSON in evidence/xml-coverage.json is enough.
+
+====================================================================================================
+STEP 2 - Make the trigger table drive particle starts (fixes 379 self-staged systems)
+====================================================================================================
+ Problem: particleRuns()/visibleRules() only start systems named by <ParticleSystemUpdate> rules. 298 systems have NO rule; they start from attributes
+ on <ParticleSystem> (updateStage / updateState / renderStage).
+ Edit src/xml-renderer.mjs:
+   import {buildTriggerTable} from "./xml-triggers.mjs";
+   // cache per renderer (the IR is immutable)
+   const TRIGGERS=new WeakMap();
+   const triggersOf=r=>TRIGGERS.get(r)??(TRIGGERS.set(r,buildTriggerTable(r)),TRIGGERS.get(r));
+ Then in particleRuns(), after `current` is built from rules, ADD stage-driven entries:
+   for(const s of triggersOf(renderer).systems){
+     if(current.has(s.name))continue;
+     const why=stageActive(s.stage,motion,states);   // returns {on:true|false, unresolved?:"reason"}
+     if(why.unresolved){(item.xmlUnresolvedEvents??={})[s.name]=why.unresolved;continue;}
+     if(why.on)current.set(s.name,{node:{tag:"ParticleSystemUpdate",a:{name:s.name}},pass:passFor(s.stage.renderStage),offset:[0,0]});
+   }
+ Write stageActive(stage,motion,states) with THIS table (data vocabulary [DATA], mapping [HYP] -> keep it in one exported const STAGE_MAP):
+   updateStage AddClothingParticles      -> on while the item is worn          (item present => on)
+   updateStage SwitchOffClothingParticles-> stop (see step 3)
+   updateStage OnPunchStart              -> on only in the frame a 'punch' event exists in motion.events (restart the run)
+   updateStage OnPunchUpdate             -> on while motion.punch is truthy
+   updateStage OnDamagedTile | OnDestroyedTile | OnKilled | OnRespawned | OnEnteredToWorld | OnItemEquipped(if any) ->
+        no event source in the planner => return {unresolved:"needs world event: <name>"}   (DO NOT run it as always-on)
+   updateStage RenderHandItem | RenderBackHandItem | RenderBehind | RenderBackpack | RenderShoes | RenderChestItem | RenderInFront -> treated like Update in that draw pass
+   updateState "Action.Punch" | "Punch.True"  -> on while motion.punch
+   updateState "Motion.Move" -> on when locomotion is walk/run (use locomotionState(motion).moving); "Motion.Idle" -> on when idle
+   updateState "IsTransformed.Transition" | "IsTransformed.Changing" | any other value -> {unresolved:"unmapped updateState: <value>"}
+   renderStage -> only picks the draw pass (passFor): map the hook name to PLANNER_PROFILE.passOrder, else "PARTICLES".
+ Also honour `secondary`: a system with secondary="X" must NOT start from a rule; start it only from its parent's <OnFinish> (step 6) -> skip it here.
+ Tests to add (test/xml-stage-triggers.test.mjs), using real data from evidence/renderer-data.json via normalizeCatalogItem like test/xml-radial-wiring.test.mjs:
+   a) an AddClothingParticles-staged system emits with no Update hook present.
+   b) an OnDamagedTile-staged system emits NOTHING and shows up in item.xmlUnresolvedEvents.
+   c) an OnPunchStart-staged system emits only after a punch event, not before.
+ Commit: "Start particle systems from stage attributes; unresolved events are reported, not run".  Done when new tests + both suites are green and the
+ coverage tool's no-trigger count is still 27 (this step must not change trigger classification).
+
+====================================================================================================
+STEP 3 - Honour ParticleSystemOff and event-hook gating
+====================================================================================================
+ 3a. ParticleSystemOff: in visibleRules() add "ParticleSystemOff" to the tag list, but DO NOT draw it. Instead record a stop request:
+       if(n.tag==="ParticleSystemOff") stops.push({name:n.a.name,hook:hook-tag,onAction:n.a.onAction,onState:n.a.onState});
+     In particleRuns(): when an Off rule's action/state conditions hold, set run.stopMs=timeMs for the running system (existing particles finish their life).
+     SwitchOffClothingParticles hook = the Off side of AddClothingParticles (42 hooks).
+ 3b. Event gating (fixes always-on phantom particles): in visibleRules() the loop `for(const hook of children(renderer.rules)) visit(...)` must skip event hooks
+     unless their event is live:
+       const EVENT_HOOKS={OnPunchStart:m=>m.events?.some(e=>e.type==="punch"), OnPunchUpdate:m=>!!m.punch,
+                          OnDamagedTile:()=>false, OnDestroyedTile:()=>false, OnKilled:()=>false, OnRespawned:()=>false, OnEnteredToWorld:()=>false};
+       if(hook.tag in EVENT_HOOKS && !EVENT_HOOKS[hook.tag](motion)) continue;
+     (Tiles/death have no planner source today. When the user answers Q3 these predicates are the only place to change.)
+     FIRST reproduce the bug: build a fixture with a ParticleSystemUpdate inside <OnDamagedTile>; it currently emits continuously. Write that test, watch it fail,
+     then fix.
+ Tests: Off stops emission but live particles finish; OnDamagedTile content never appears; OnPunchStart content appears on a punch event.
+ Commit: "Handle ParticleSystemOff; gate event hooks".
+
+====================================================================================================
+STEP 4 - Surface honesty in the product (small, high value)
+====================================================================================================
+ After steps 2-3, every item exposes: item.xmlUnsupportedReasons (per system: why it was skipped), item.xmlUnresolvedEvents, item.xmlUnsupportedParticleExpressions.
+ Put them on item.coverage / item.warnings (existing fields) and show a badge in demo/app.js:  NATIVE | PARTIAL | UNRESOLVED.
+   NATIVE      every system's every field is 'full' in xml-support.mjs AND no unresolved events.   (expect ~0 for a long time; that is honest)
+   PARTIAL     runs, but some field is 'partial'/'evaluator'.
+   UNRESOLVED  any skipped system / unresolved event / fx flag with no XML. Show the reason text.
+ Keep ITEM_FX_RECIPES behind a visible 'APPROXIMATE' switch, default OFF. Never count them as native.
+
+====================================================================================================
+STEP 5 - Particle flags, in the coverage report's order (one flag per commit, each with a test)
+====================================================================================================
+ Where: particlesFor() in src/xml-renderer.mjs. All values come from `pr.values` (resolved) and `pr.curves` (sample with sampleCurves(pr.curves, age/life)).
+ For EVERY flag below: add the flag name to the per-particle read, implement, add a test, then set xml-support.mjs entry to "partial" (or "full" if no [HYP]).
+ 5.1 relativeToEmitter (244). true: particle position = emitterPos(now) + local offset/velocity*age, so it FOLLOWS the player. false: position is frozen at spawn
+     (record the player's x,y at spawn in the run and subtract the player's current x,y when drawing in player space).
+     Test: move the player after spawn; relative=true particle moves with the player, false stays put.
+ 5.2 rotateWithVelocity (212). rotation += atan2(vy,vx) in degrees when true (sprite art points along +x [HYP]). Test: velocity (0,1) -> +90 deg.
+ 5.3 usePlayerFacing (89) and Emitter.offsetFacing (92). When facing is -1: mirror offset.x, velocity.x, and sprite flipX ONCE. Test both flags with facing=-1.
+ 5.4 renderAlignment (125). Anchor point of the sprite at the particle position: CENTER (.5,.5), DOWN_CENTER (.5,1), UPPER_CENTER (.5,0), LEFT_CENTER (0,.5),
+     RIGHT_CENTER (1,.5). Map to p.ax/p.ay (currently hard-coded .5,.5 in spritePiece).
+ 5.5 isBackgroundParticle (78). true -> draw behind the player: assign the BEHIND pass instead of the item's pass.
+ 5.6 Alpha/velocity/angle/RGB interpolation: interpolateAlpha+finalAlpha (68/64), interpolateVelocity+finalVelocity (44), interpolateAngle+finalAngle (26),
+     interpolateRGB + initalRGB (79; note typo) + finalRGB. Linear lerp initial->final over age/life [HYP easing]. RGB is 0..1 floats; convert to 0..255 for tint.
+ 5.7 inSpecificOrder + randomSpriteFrame: [HYP] inSpecificOrder=true -> frame index = particleIndex % frameCount (cycle), false -> random (current behaviour).
+     particleIndexSpriteFrame (30): frame = particle index. alternateSpriteFrameWithPunch (10): frame parity follows punch count.
+ 5.8 Emitter randomizeInterval (26): re-roll interval from intervalMin/intervalMax per emission with the run's RNG (replace the current mean).
+ 5.9 angleRelativeToPlayerSpeed (38) / velocityRelativeToPlayerSpeed (24): add the player's velocity vector to the particle's initial velocity / base angle.
+ 5.10 Emitter attachment (130): targetPos (61), handspotRoot (56), contextRotation (11), targetPos2 (2) - see step 7.
+
+====================================================================================================
+STEP 6 - Sub-systems and secondaries
+====================================================================================================
+ <OnFinish><ParticleSystemName>X</ParticleSystemName></OnFinish> (25 particles): when a particle dies, start system X at the particle's last position (once).
+ Because the engine replays particles from a seed, compute the death position analytically (offset + velocity*life + gravity). Test: AtomConstructs ps_Punch -> ps_punchFrag appears
+ after lifeTime. UseParentVariantId / UseParentScale / UseParentEmitterAngle: copy that value from the parent particle into the child.
+
+====================================================================================================
+STEP 7 - Attachments and targets
+====================================================================================================
+ The demo motion layer HAS a hit target: motion.punch.target (set from input.punchTarget). CHECK ITS UNITS (tiles or pixels) first, then provide
+ env.targetPos = target relative to the player, in the same px space as particle offsets, to resolveProperties() (env:{targetPos,targetPosOffset,lifeTime}).
+ With a real targetPos: VectorTo and RandomRadial(baseAnglePosition=targetPos) start working (170 VectorTo uses). Without a target they stay UNRESOLVED (correct).
+ Emitter attachment meanings [HYP, validate with one item each]:
+   targetPos      emitter sits at the punch target;  targetPos2: a second target spot
+   handspotRoot   emitter sits at the hand item's root spot (use the rig's hand matrix, rig.mjs armMatrix)
+   contextRotation emitter rotation comes from the context (e.g. aimed arm angle)
+ Tests: AtomConstructs punch with a target -> particles end at the target after lifeTime (tolerance 1px); no target -> reported unresolved.
+
+====================================================================================================
+STEP 8 - Blend modes (do after the user's capture, behind a switch)
+====================================================================================================
+ DATA FACT: the atlas PNGs are straight alpha (not premultiplied). Add `BLEND_PREMULT_MODE = "A"|"B"` in one place:
+   A: premultiply once into an offscreen canvas (cache per atlas), then source-over.
+   B: emulate ONE,ONE_MINUS_SRC_ALPHA on straight RGB (WebGL, or canvas via per-sprite premultiply WITHOUT dividing).
+ ADDITIVE stays 'lighter'. NORMAL/PREMULTIPLIED_NORMAL = source-over. Files: src/render.mjs line ~178 (`call.add?"lighter":"source-over"`) and the p.add computation
+ in particlesFor (p.add currently = blendingMode==="ADDITIVE"). Replace the boolean with p.blend = "additive"|"premult"|"normal" and keep p.add for compatibility.
+
+====================================================================================================
+STEP 9 - Orbits, then sprite animations, then render options (biggest remaining blocks)
+====================================================================================================
+ 9.1 Emitter OrbitOffset (29): implement as flagged [HYP]:
+       x = hAmp * sin(2*pi*(tMs + hTimeOffset)/hOrbitPeriod),  y = vAmp * sin(2*pi*(tMs + vTimeOffset)/vOrbitPeriod)    (negative period = reverse)
+       scale = lerp(minScale, maxScale, 0.5 + 0.5*cos-or-sin phase)    <- which phase drives scale is UNKNOWN: make it a constant to flip.
+     Add to the emitter position each frame. DirtAura numbers are in the brief section 6.4. Test: the three DirtAura emitters have the documented phases.
+ 9.2 Particle orbit (13 particles): phase = frac(orbitStart + age/orbitPeriod); position = Curve 'orbit' sampled at phase; scale varies by orbitScaleVariation. [HYP]
+ 9.3 Sprite-side animations that never run today: SpriteCurveAnimation 133, SpriteSinPulseAnimation 49 (pos.y: period ms, scale), CurveAnimation* 59,
+     Interpolation* 132, SequenceAnimation 15, DelayAnimation 14, VisibilityAnimation 5, playOnAction. Delete the dead SpriteScaleAnimation/SpritePositionAnimation branches.
+ 9.4 RenderOptions flags (brief section 7.2) - runtime reads only ShouldHover. Start with layering/hiding: ShoesHidesBodyLegs, IsToRenderPants,
+     RenderFrontArmInTheFront, RenderBackArmInTheFront, RenderBackArmAfterItem, NeedRenderBareFeetWithShoesItem, HideAvatarOnDeath, DisableWalkAnimation,
+     IsFacingChangeDisabled. One flag per commit with a test.
+ 9.5 punch_options (items.txt column 40, 58 items): parse tokens (up_face, up_arm2, UP_SPINARM2, RFA_HIDEITEM, op_shoulder_offset, op_punch_pattern, OP_P2FACING).
+     op_particleN legacy IDs -> UNRESOLVED-LEGACY-ID with the number. Test: Heartstaff 7826 => particle2=190, params 0,20, face 4, arm2 330, audio swoosh.
+
+====================================================================================================
+WHAT TO SEND BACK TO THE USER AFTER EACH STEP
+====================================================================================================
+ 1. The two test summaries (root and demo), 2. the coverage tool's summary lines, 3. the list of xml-support.mjs entries you changed and the test that justifies each,
+ 4. anything you marked UNRESOLVED and why. Do not say "native" about anything whose xml-support level is below 'full'.
+
+STOP AND ASK THE USER (do not guess) WHEN:
+ - a step needs a capture (orbit phase/scale, RandomRadial direction, premultiply mode, handspotRoot position) -> implement behind the flag, ship, and ask for the recording;
+ - the data contradicts this document (tell the user what you found; do not "fix" the data).

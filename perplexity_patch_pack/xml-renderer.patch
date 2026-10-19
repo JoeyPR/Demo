@@ -1,0 +1,29 @@
+--- a/src/xml-renderer.mjs	2026-10-18 19:46:39.000000000 +0000
++++ b/src/xml-renderer.mjs	2026-10-19 10:32:56.666961264 +0000
+@@ -2,6 +2,7 @@
+ // Unknown conditions fail closed. Parsing a script is NOT complete support.
+ import {locomotionState} from "./motion-policy.mjs";
+ import {PLANNER_PROFILE} from "./planner-profile.mjs";
++import {resolveProperties,makeRng} from "./xml-expr.mjs";
+ const children=(n,tag)=>(n?.c??[]).filter(c=>!tag||c.tag===tag);
+ const walk=n=>n?[n,...children(n).flatMap(walk)]:[];
+ export const numbers=s=>String(s??"").split(",").map(Number);
+@@ -231,7 +232,17 @@
+     const life=Math.max(.016,Number(get(pt,"lifeTime",[1],seed)[0]));
+     if(age<0||age>=life)continue;
+     const name=get(pt,"sprite","",seed),spriteName=Array.isArray(name)?name[0]:name;
+-    const delta=get(pt,"offset",[0,0],seed),velocity=get(pt,"initialVelocity",[0,0],seed);
++    // Native operators (RandomRadial, Multiply, Increment, Select-by-input, ...) come from xml-expr.mjs. A property it cannot
++    // resolve is reported in item.xmlUnsupportedParticleExpressions (with reason) and the particle is skipped - never zeroed.
++    const pr=resolveProperties(pt,{rng:makeRng(seed),t:0,
++      inputs:{particleIndex:emission*count+k,particleCounter:emission*count+k,punchCount:motion.punchCount??0,intervalMS:interval*1000},
++      env:{lifeTime:life}});
++    const needed=pr.unsupported.filter(u=>["offset","initialVelocity"].includes(u.name));
++    if(needed.length){
++      item.xmlUnsupportedParticleExpressions??=new Set();item.xmlUnsupportedParticleExpressions.add(sys.a.name);
++      (item.xmlUnsupportedReasons??={})[sys.a.name]=needed.map(u=>`${u.name}: ${u.reason}`);continue;
++    }
++    const delta=pr.values.get("offset")??get(pt,"offset",[0,0],seed),velocity=pr.values.get("initialVelocity")??get(pt,"initialVelocity",[0,0],seed);
+     const gravity=truth(get(pt,"useGravity","false"))?get(pt,"gravityVector",[0,0],seed):[0,0];
+     // An unsupported expression is not a valid zero-valued emitter parameter.
+     // Skip it instead of injecting NaN transforms into the entire player.

@@ -64,7 +64,7 @@ test("public fallback keeps top-left origin, full cell size and stacked rows sep
   assert.equal(rows.length,2);assert.ok(rows.every(r=>r.sh===32));assert.notEqual(rows[0].sy,rows[1].sy);
 });
 test("all eligible default-state profiles agree with changed-input source fixtures",()=>{
-  const {fixtures}=JSON.parse(fs.readFileSync(new URL("../../research/lift-differential-fixtures.json",import.meta.url)));
+  const {fixtures}=JSON.parse(fs.readFileSync(new URL("../../evidence/lift-differential-fixtures.json",import.meta.url)));
   let samples=0;
   for(const f of fixtures) {
     const p=catalog.liftProfiles[f.id];if(!p.publicStillAgrees)continue;
@@ -73,7 +73,7 @@ test("all eligible default-state profiles agree with changed-input source fixtur
   assert.ok(samples>2000);console.log(`${samples} changed-input lift comparisons`);
 });
 test("texture edge clamping and pet wrapping match isolated source pixels",()=>{
-  const d=JSON.parse(fs.readFileSync(new URL("../../research/sampler-differential-fixtures.json",import.meta.url)));
+  const d=JSON.parse(fs.readFileSync(new URL("../../evidence/sampler-differential-fixtures.json",import.meta.url)));
   for(const f of d.fixtures)assert.deepEqual(Array.from(extractSpritePixels(
     new Uint8ClampedArray(d.pixels),d.width,d.height,f.rect)),f.expected);
 });
