@@ -3,6 +3,7 @@
 import {locomotionState} from "./motion-policy.mjs";
 import {PLANNER_PROFILE} from "./planner-profile.mjs";
 import {resolveProperties,makeRng} from "./xml-expr.mjs";
+import {buildTriggerTable} from "./xml-triggers.mjs";
 const children=(n,tag)=>(n?.c??[]).filter(c=>!tag||c.tag===tag);
 const walk=n=>n?[n,...children(n).flatMap(walk)]:[];
 export const numbers=s=>String(s??"").split(",").map(Number);
@@ -201,6 +202,48 @@ function particleEntryActive(renderer,entry,states,motion) {
     const [machine,state]=s.split(".");return states[machine]?.state===state;
   }))));
 }
+// ---- Stage-driven particle starts (work order step 2) ----------------------------------------------------------------
+// 298 systems have no <ParticleSystemUpdate> rule; they start from attributes ON the <ParticleSystem> element.
+// The vocabulary is [DATA]; every mapping below is [HYP] until a user capture confirms it. ONE place to change them.
+const TRIGGERS=new WeakMap();
+const triggersOf=r=>TRIGGERS.get(r)??(TRIGGERS.set(r,buildTriggerTable(r)),TRIGGERS.get(r));
+const ON={on:true},OFF={on:false};
+const worldEvent=name=>({unresolved:`needs world event: ${name}`});
+export const STAGE_MAP={
+  // updateStage -> (motion)=>{on}|{unresolved}|{pulse:eventType, on}
+  AddClothingParticles:()=>ON,
+  SwitchOffClothingParticles:()=>OFF,           // the Off side; see ParticleSystemOff handling
+  OnPunchStart:m=>({pulse:"punch",on:!!m.events?.some(e=>e.type==="punch")}),
+  OnPunchUpdate:m=>({on:!!m.punch}),
+  OnDamagedTile:()=>worldEvent("OnDamagedTile"),
+  OnDestroyedTile:()=>worldEvent("OnDestroyedTile"),
+  OnKilled:()=>worldEvent("OnKilled"),
+  OnRespawned:()=>worldEvent("OnRespawned"),
+  OnEnteredToWorld:()=>worldEvent("OnEnteredToWorld"),
+  OnItemEquipped:()=>worldEvent("OnItemEquipped"),
+  // render hooks used as updateStage are treated like Update in that draw pass
+  ...Object.fromEntries(["RenderHandItem","RenderBackHandItem","RenderBehind","RenderBackpack","RenderShoes","RenderChestItem","RenderInFront"]
+    .map(k=>[k,()=>ON]))
+};
+export const STATE_MAP={
+  "Action.Punch":m=>({on:!!m.punch}),
+  "Punch.True":m=>({on:!!m.punch}),
+  "Motion.Move":m=>({on:locomotionState(m).moving}),
+  "Motion.Idle":m=>({on:!locomotionState(m).moving&&!locomotionState(m).airborne})
+};
+export function stageActive(stage,motion) {
+  const parts=[];
+  if(stage.updateStage)parts.push(STAGE_MAP[stage.updateStage]?.(motion)??{unresolved:`unmapped updateStage: ${stage.updateStage}`});
+  if(stage.updateState)parts.push(STATE_MAP[stage.updateState]?.(motion)??{unresolved:`unmapped updateState: ${stage.updateState}`});
+  if(parts.some(x=>!x.unresolved&&!x.on))return {on:false};
+  const bad=parts.find(x=>x.unresolved);if(bad)return {unresolved:bad.unresolved};
+  return {on:true,pulse:parts.find(x=>x.pulse)?.pulse};
+}
+const passFor=renderStage=>PLANNER_PROFILE.passOrder.includes(renderStage)?renderStage:"PARTICLES";
+function emitterDelayMs(renderer,name) {
+  const em=first(renderer.particles.find(n=>n.a.name===name),"Emitter");
+  return Math.max(0,Number(property(value(em,"delayTimer"),{},0)?.[0]??0))*1000;
+}
 function particlesFor(renderer,entry,timeMs,motion,item,states) {
   const sys=renderer.particles.find(n=>n.a.name===entry.node.a.name);if(!sys)return [];
   const em=first(sys,"Emitter"),pt=first(sys,"Particle");if(!em||!pt)return [];
@@ -261,7 +304,7 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const final=get(pt,"finalScale",null,seed);
     if(final&&truth(get(pt,"interpolateScale","false")))p.k=p.k.map((v,i)=>v+((final[i]??final[0])-v)*age/life);
     p.r=Number(get(pt,"initialAngle",[0],seed)[0])+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
-    p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;
+    p.xmlSprite=spriteName;p.xmlParticle=true;p.xmlParticleAge=age*1000;p.xmlSystem=sys.a.name;
     p.add=get(pt,"blendingMode","")==="ADDITIVE";
     const track=renderer.animations.find(n=>n.tag==="SpriteAnimation"&&n.a.sprite===spriteName);
     if(truth(pt.a.randomSpriteFrame)&&track) {
@@ -279,13 +322,28 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
   item.xmlParticleTime=timeMs;
   const current=new Map(rules.filter(e=>e.node.tag.startsWith("ParticleSystem")&&
     particleEntryActive(renderer,e,states,motion)).map(e=>[e.node.a.name,e]));
+  // Systems with no Update/Render rule start from their own stage attributes. Systems governed by a rule keep the rule;
+  // secondary systems and OnFinish children are started only by their parent (step 6), never from here.
+  for(const s of triggersOf(renderer).systems) {
+    if(current.has(s.name)||s.secondary||s.onFinish.length||s.rule.some(r=>r.kind!=="Off"))continue;
+    if(!s.stage.updateStage&&!s.stage.updateState&&!s.stage.renderStage)continue;
+    const why=stageActive(s.stage,motion);
+    if(why.unresolved){(item.xmlUnresolvedEvents??={})[s.name]=why.unresolved;continue;}
+    if(why.on)current.set(s.name,{node:{tag:"ParticleSystemUpdate",a:{name:s.name}},pass:passFor(s.stage.renderStage),offset:[0,0],pulse:why.pulse});
+  }
   const runs=item.xmlParticleRuns??=[];
   for(const run of runs)
     if(run.stopMs===undefined&&!current.has(run.node.a.name))run.stopMs=timeMs;
   for(const [name,entry] of current) {
     const ongoing=runs.find(r=>r.node.a.name===name&&r.stopMs===undefined);
     const trigger=walk(renderer.rules).some(n=>n.tag==="ParticleSystemUpdate"&&n.a.name===name&&n.a.onAction);
-    const stamp=trigger?(motion.events??[]).find(e=>["punch","jump","doubleJump"].includes(e.type))?.id:undefined;
+    const stamp=entry.pulse?(motion.events??[]).find(e=>e.type===entry.pulse)?.id:
+      trigger?(motion.events??[]).find(e=>["punch","jump","doubleJump"].includes(e.type))?.id:undefined;
+    if(entry.pulse) {
+      // One-shot start: the run lasts one frame plus the emitter's own delay, then existing particles finish their life.
+      if(runs.some(r=>r.node.a.name===name&&r.pulseStamp===stamp))continue;
+      runs.push({...entry,startMs:timeMs,stamp,pulseStamp:stamp,stopMs:timeMs+16+emitterDelayMs(renderer,name)});continue;
+    }
     if(ongoing&&stamp!==undefined&&ongoing.stamp!==stamp)ongoing.stopMs=timeMs;
     if(!ongoing||ongoing.stopMs!==undefined)runs.push({...entry,startMs:timeMs,stamp});
     else {ongoing.offset=entry.offset;ongoing.pass=entry.pass;}
