@@ -365,13 +365,13 @@ test("5.7c particles keep the frame they were born with when later punches happe
 test("5.7c the item counts each distinct punch event once, however many frames it stays in motion.events", () => {
   const run=fixture();
   const ev=punchEvent(100);run(0,{});run(100,ev);run(116,ev);run(132,ev);
-  assert.equal(run.item.xmlPunchCount,1);
+  assert.equal(run.punches.count,1);
   assert.equal(punchCountAt(run.item.xmlParticleRuns[0],200),1);
-  run(500,punchEvent(500));assert.equal(run.item.xmlPunchCount,2);
+  run(500,punchEvent(500));assert.equal(run.punches.count,2);
 });
 test("5.7c scrubbing time backwards resets the punch counter with the runs", () => {
-  const run=fixture();run(0,{});run(500,punchEvent(500));assert.equal(run.item.xmlPunchCount,1);
-  run(100,{});assert.equal(run.item.xmlPunchCount,0);
+  const run=fixture();run(0,{});run(500,punchEvent(500));assert.equal(run.punches.count,1);
+  run(100,{});assert.equal(run.punches.count,0);
 });
 test("5.7c alternateSpriteFrameWithPunch=false/absent leaves frames alone; entry is partial", () => {
   const mk=a=>fixture({particleAttrs:a,animations:[frameTrack(cells)],emitter:[set("emissionInterval",.5)],particle:[set("lifeTime",100)]});

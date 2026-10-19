@@ -530,19 +530,25 @@ export function unequipXmlItem(item,timeMs,motion={}) {
 export function equipXmlItem(item) {
   delete item.xmlSwitchOffAt;item.xmlParticleRuns=[];item.xmlParticleTime=0;
 }
+// <Emitter onPunchCount="odd|even">: alternate emitters on consecutive punches. The count already includes the current punch, so the
+// first punch is odd. Any other value is not understood and does not gate. [HYP]
+export const ON_PUNCH_COUNT={odd:n=>n%2===1,even:n=>n%2===0};
+function onPunchCountOk(renderer,name,punchCount) {
+  const attr=renderer.particles?.find(p=>p.a.name===name)?.c.find(c=>c.tag==="Emitter")?.a.onPunchCount;
+  return attr===undefined||!(attr in ON_PUNCH_COUNT)||ON_PUNCH_COUNT[attr](punchCount);
+}
 function resetEmitter(run,timeMs) {
   run.stopMs=timeMs;
   run.emitter={running:false,emitted:0,delayMs:0};
 }
 function particleRuns(renderer,rules,timeMs,motion,item,states) {
-  if(timeMs<(item.xmlParticleTime??0)){item.xmlParticleRuns=[];item.xmlPunchIds=new Set();item.xmlPunchCount=0;}
+  if(timeMs<(item.xmlParticleTime??0))item.xmlParticleRuns=[];
   item.xmlParticleTime=timeMs;
-  // The planner's motion has no punch counter, so the item counts the distinct punch events it has seen.
-  const punchIds=item.xmlPunchIds??=new Set();
-  for(const e of motion.events??[])if(e.type==="punch"&&!punchIds.has(e.id)){punchIds.add(e.id);item.xmlPunchCount=(item.xmlPunchCount??0)+1;}
-  const punchCount=motion.punchCount??item.xmlPunchCount??0;
+  // The item keeps NO counter: motion.punchCount (PunchCounter, owned by the player) feeds Select input punchCount and the
+  // Emitter onPunchCount gate below. Without a player it is 0.
+  const punchCount=motion.punchCount??0;
   const current=new Map(rules.filter(e=>e.node.tag.startsWith("ParticleSystem")&&
-    particleEntryActive(renderer,e,states,motion)).map(e=>[e.node.a.name,e]));
+    particleEntryActive(renderer,e,states,motion)&&onPunchCountOk(renderer,e.node.a.name,punchCount)).map(e=>[e.node.a.name,e]));
   // Systems with no Update/Render rule start from their own stage attributes. Systems governed by a rule keep the rule;
   // secondary systems and OnFinish children are started only by their parent (step 6), never from here.
   for(const s of triggersOf(renderer).systems) {

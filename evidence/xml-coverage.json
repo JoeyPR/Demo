@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 552,
-   "blocked": 372
+   "partial-only": 560,
+   "blocked": 364
   }
  },
  "blockedBy": [
@@ -78,10 +78,6 @@
   ],
   [
    "Emitter@needsHandItemActive",
-   24
-  ],
-  [
-   "Emitter@onPunchCount",
    24
   ],
   [
@@ -4459,11 +4455,10 @@
    {
     "system": "ps_punchCurved",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -4485,11 +4480,10 @@
    {
     "system": "ps_punchStraight",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -5319,11 +5313,10 @@
    {
     "system": "ps_punchCurved",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -5345,11 +5338,10 @@
    {
     "system": "ps_punchStraight",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -5394,11 +5386,10 @@
    {
     "system": "yellow_slash_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -5420,11 +5411,10 @@
    {
     "system": "red_slash_particle",
     "category": "hooked-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -6358,10 +6348,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -6385,10 +6375,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -6413,10 +6403,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -6440,10 +6430,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -6645,11 +6635,11 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter@onPunchCount",
      "Particle.targetPosOffset",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -6673,10 +6663,10 @@
     "status": "blocked",
     "missing": [
      "Emitter@attachment",
-     "Emitter@onPunchCount",
      "Particle.projectile_offset"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -8156,10 +8146,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -8180,10 +8170,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -8203,10 +8193,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -8227,10 +8217,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -12007,11 +11997,10 @@
    {
     "system": "ps_punchCurved",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -12033,11 +12022,10 @@
    {
     "system": "ps_punchStraight",
     "category": "staged-only",
-    "status": "blocked",
-    "missing": [
-     "Emitter@onPunchCount"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.emissionInterval",
      "Emitter.lifeTime",
@@ -19437,10 +19425,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -19489,10 +19477,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -19517,10 +19505,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.particlesPerEmission",
      "Emitter.particlesToEmit",
@@ -19544,10 +19532,10 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.lifeTime",
      "Emitter.emissionInterval",
@@ -20058,10 +20046,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",
@@ -20081,10 +20069,10 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Emitter@attachment",
-     "Emitter@onPunchCount"
+     "Emitter@attachment"
     ],
     "notFull": [
+     "Emitter@onPunchCount",
      "Emitter.offset",
      "Emitter.checkParticleNumToEmit",
      "Emitter.particlesPerEmission",

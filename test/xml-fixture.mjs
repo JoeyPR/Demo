@@ -1,4 +1,5 @@
 // Synthetic one-system renderer for particle tests. Real-data tests use evidence/renderer-data.json directly.
+import {PunchCounter} from "../src/punch-counter.mjs";
 import {normalizeCatalogItem,advanceCatalogItem} from "../src/catalog-adapter.mjs";
 export const n=(tag,a={},v="",c=[])=>({tag,a,v,c});
 export const set=(name,v)=>n("Set",{name},String(v));
@@ -13,8 +14,9 @@ export function fixture({emitter=[],particle=[],particleAttrs={},emitterAttrs={}
   const renderer={sprites:{p:{atlas:"fx.png",textureSize:"32",frame:"0,0"}},animations,machines:[],options:{},
     particles:[n("ParticleSystem",{name:"ps",...systemAttrs},"",[em,pt])],rules:n("RenderRules",{},"",hooks)};
   const item=normalizeCatalogItem({id:1,name:"T",slot:9,script:"T",gameIcon:[]},{renderers:{T:renderer}});
-  const run=(t,m={})=>{advanceCatalogItem(item,t,base({clockMs:t,...m}));return item.pieces.filter(p=>p.xmlParticle);};
-  run.item=item;
+  const punches=new PunchCounter();
+  const run=(t,m={})=>{const frame=base({clockMs:t,...m});advanceCatalogItem(item,t,{punchCount:punches.observe(frame),...frame});return item.pieces.filter(p=>p.xmlParticle);};
+  run.item=item;run.punches=punches;
   // Drive the item through a time range at a fixed step; returns the last frame's particles.
   run.until=(from,to,step=50,m=()=>({}))=>{let out=[];for(let t=from;t<=to;t+=step)out=run(t,m(t));return out;};
   return run;
