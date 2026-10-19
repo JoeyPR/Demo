@@ -8,6 +8,7 @@ import {armMatrix,playerRoot} from "./engine/rig.mjs";
 import {normalizeCatalogItem,advanceCatalogItem} from "./engine/catalog-adapter.mjs";
 import {drawBounds} from "./engine/draw-bounds.mjs";
 import {resolveAbilities} from "./engine/abilities.mjs";
+import {fidelityOf} from "./engine/xml-badge.mjs";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const world=$("#world"),ctx=world.getContext("2d"),avatar=document.createElement("canvas");
@@ -16,7 +17,7 @@ const atlasLoads=new Map(),failedAtlases=new Set();
 const state={
   catalog:null,equipped:new Map(),slot:0,skin:[255,206,180,255],
   mode:"preview",baseAction:"idle",resolution:128,paused:matchMedia("(prefers-reduced-motion: reduce)").matches,
-  speed:1,rig:false,grid:false,fx:true,hover:false,environment:"day",
+  speed:1,rig:false,grid:false,fx:true,approxFx:false,hover:false,environment:"day",
   hiddenPasses:new Set(),clock:0,actionStart:0,keys:{},touch:{},
   jumpUntil:0,punchUntil:0,doubleAt:null,width:800,height:420,aim:null,previewPunch:false,
   lastFrame:null,lastResult:null,layerSignature:"",ready:false,jumpQueued:false,punchQueued:false,page:0,pageSize:36
@@ -180,7 +181,27 @@ function reset() {
 function updateRig(dt) {
   const f={...state.lastFrame,worldX:state.lastFrame.x,worldY:state.lastFrame.y,x:0,y:0};
   state.lastResult=player.step(f,dt,{skin:state.skin,
-    forceFloat:state.hover,effects:state.fx});
+    forceFloat:state.hover,effects:state.fx,approximateFx:state.approxFx});
+  updateFidelity();
+}
+let fidelitySignature="";
+function updateFidelity() {
+  const rows=[...state.equipped.values()].sort((a,b)=>a.slot-b.slot).map(item=>({item,...fidelityOf(item)}));
+  const signature=rows.map(r=>`${r.item.id}|${r.level}|${r.reasons.join("~")}`).join("\n");
+  if(signature===fidelitySignature)return;
+  fidelitySignature=signature;
+  const root=$("#fidelity");root.replaceChildren();
+  if(!rows.length){const p=document.createElement("p");p.className="fidelity-empty";p.textContent="Equip a piece to see how faithfully it renders.";root.append(p);return;}
+  for(const row of rows) {
+    const d=document.createElement("details");d.className="fid-item";
+    const sum=document.createElement("summary");
+    const name=document.createElement("span");name.className="fid-name";name.textContent=row.item.raw?.name??"Item";
+    const badge=document.createElement("span");badge.className="fid-badge";badge.dataset.level=row.level;badge.textContent=row.level;
+    sum.append(name,badge);d.append(sum);
+    const ul=document.createElement("ul");ul.className="fid-reasons";
+    for(const r of row.reasons){const li=document.createElement("li");li.textContent=r;ul.append(li);}
+    d.append(ul);root.append(d);
+  }
 }
 function step(dt) {
   state.clock+=dt;
@@ -448,7 +469,7 @@ function setupControls() {
     if(state.mode==="play")world.focus({preventScroll:true});
   });
   $$("[data-resolution]").forEach(b=>b.onclick=()=>{state.resolution=Number(b.dataset.resolution);setSelected("[data-resolution]","data-resolution",state.resolution);});
-  for(const key of ["rig","grid","fx","hover"])$("#"+key).onchange=e=>{state[key]=e.target.checked;updateRig(0);};
+  for(const key of ["rig","grid","fx","hover","approxFx"])$("#"+(key==="approxFx"?"approxfx":key)).onchange=e=>{state[key]=e.target.checked;updateRig(0);};
   $("#environment").onchange=e=>state.environment=e.target.value;
   $("#pause").onclick=()=>{state.paused=!state.paused;updatePause();};
   $("#step").onclick=()=>{state.paused=true;step(1000/60);updatePause();updateTelemetry(renderAvatar());};

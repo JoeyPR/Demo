@@ -53,7 +53,8 @@ export class PlannerPlayer {
     const gait=this.items.find(i=>i.gait?.active)?.gait;
     if(gait&&!lift.floating){lift.y+=gait.bodyY;lift.gait=gait;}
     const calls=buildDrawList({motion,pose,items,catalog:this.catalog,visual:{...visual,playerLift:lift},extraPieces});
-    if(visual.effects!==false)calls.push(...this.effects.step(this.items,motion,calls,lift));
+    // ITEM_FX_RECIPES are procedural look-alikes, not extracted native effects: opt-in only (visual.approximateFx).
+    if(visual.effects!==false&&visual.approximateFx===true)calls.push(...this.effects.step(this.items,motion,calls,lift));
     return {pose,emits,poseResolution:resolution,lift,warnings:this.items.flatMap(i=>i.warnings??[]),calls};
   }
 }

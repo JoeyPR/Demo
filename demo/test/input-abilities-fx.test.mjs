@@ -90,7 +90,11 @@ test("brooms/meteor/comet float without animal-half gait; Stick Horse has slower
 test("named passive and punch effects render through the shared draw list",()=>{
   for(const id of [1438,288,138,366,472]) {
     const p=new PlannerPlayer(catalog,[item(id)]);
-    const result=p.step(frame(100,{punch:{ageMs:100,target:[170,10]},events:[{id:"hit1",type:"punch"}]}),16);
+    const motion=()=>frame(100,{punch:{ageMs:100,target:[170,10]},events:[{id:"hit1",type:"punch"}]});
+    // Procedural look-alikes are opt-in: the default draw list contains none of them.
+    const off=new PlannerPlayer(catalog,[item(id)]).step(motion(),16);
+    assert.equal(off.calls.filter(c=>c.atlas==="reference-fx.png").length,0,`default OFF ${id}`);
+    const result=p.step(motion(),16,{approximateFx:true});
     const fx=result.calls.filter(c=>c.atlas==="reference-fx.png");
     assert.ok(fx.length,id);assert.ok(fx.every(c=>c.matrix.every(Number.isFinite)));
     if([138,366,472].includes(id))assert.equal(result.pose.punch,null);

@@ -92,6 +92,7 @@
           <label class="switch-row"><span><i data-lucide="bone"></i>Show rig & joints</span><input id="rig" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
           <label class="switch-row"><span><i data-lucide="grid-2x2"></i>World grid</span><input id="grid" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
           <label class="switch-row"><span><i data-lucide="sparkles"></i>Item & jump FX</span><input id="fx" type="checkbox" checked><span class="switch" aria-hidden="true"></span></label>
+          <label class="switch-row" title="Procedural look-alike effects for seven items. They are NOT extracted native effects and never count as native. Off by default."><span><i data-lucide="wand-sparkles"></i>Approximate item FX <em class="approx-tag">not native</em></span><input id="approxfx" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
           <label class="switch-row" title="Manual reference override. Known item float profiles apply automatically without this toggle."><span><i data-lucide="wind"></i>Force generic float</span><input id="hover" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
         </div>
         <div class="setting-section">
@@ -101,6 +102,10 @@
         <div class="setting-section layers-section">
           <div class="subheading"><h3>Draw stack</h3><span class="count">back → front</span></div>
           <div id="layers" class="layers"></div>
+        </div>
+        <div class="setting-section fidelity-section">
+          <div class="subheading"><h3>Fidelity</h3><span class="count">per worn item</span></div>
+          <div id="fidelity" class="fidelity" aria-live="polite"></div>
         </div>
         <div class="reference-footnote"><span class="reference-mark">REFERENCE BUILD</span><p id="coverage-status">Public sprite reference. Per-item native motion is not verified.</p><button id="details" class="text-button">See what's verified <span>↗</span></button></div>
       </aside>
