@@ -391,6 +391,12 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const final=get(pt,"finalScale",null,seed);
     if(final&&truth(get(pt,"interpolateScale","false")))p.k=p.k.map((v,i)=>v+((final[i]??final[0])-v)*age/life);
     p.r=Number(get(pt,"initialAngle",[0],seed)[0])+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
+    // 5.6 interpolateAngle + finalAngle: [HYP] angle = lerp(initialAngle, finalAngle, age/life), still plus the constant rotation rate.
+    if(truth(get(pt,"interpolateAngle","false",seed))) {
+      const end=finiteList(pr.values.get("finalAngle")??get(pt,"finalAngle",null,seed)),start=Number(get(pt,"initialAngle",[0],seed)[0]);
+      if(end&&Number.isFinite(start))p.r=lerp(start,end[0],age/life)+Number(get(pt,"initialRotationRate",[0],seed)[0])*age;
+      else ignoreValue(item,sys.a.name,"finalAngle",end?"initialAngle unresolved":"finalAngle missing or unresolved");
+    }
     // 5.2 rotateWithVelocity [HYP]: sprite art points along +x, so heading = atan2(vy,vx) in degrees, from the instantaneous velocity.
     if(truth(get(pt,"rotateWithVelocity","false",seed))) {
       const vx=velocityAt(0,age),vy=velocityAt(1,age);

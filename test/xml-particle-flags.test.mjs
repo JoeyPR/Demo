@@ -231,3 +231,33 @@ test("5.6b interpolateVelocity=true with an unresolvable finalVelocity (VectorTo
 test("5.6b both velocity entries are partial in xml-support", () => {
   assert.equal(SUPPORT["Particle.finalVelocity"],"partial");assert.equal(SUPPORT["Particle.interpolateVelocity"],"partial");
 });
+
+// ---- 5.6c interpolateAngle + finalAngle -------------------------------------------------------------------------------
+const angleAt=(extra,t)=>{const run=withFlags(extra);run(0,{});return run(t,{})[0].r;};
+test("5.6c interpolateAngle=true: angle goes linearly from initialAngle to finalAngle over the lifetime", () => {
+  const flags=[set("initialAngle",-30),set("finalAngle",30),set("interpolateAngle",true)];
+  approx(angleAt(flags,0),-30);approx(angleAt(flags,5000),0);approx(angleAt(flags,10000-1),29.994,1e-3);
+});
+test("5.6c interpolateAngle=false/absent: finalAngle is ignored", () => {
+  approx(angleAt([set("initialAngle",10),set("finalAngle",90),set("interpolateAngle",false)],5000),10);
+  approx(angleAt([set("initialAngle",10),set("finalAngle",90)],5000),10);
+});
+test("5.6c interpolateAngle keeps the constant rotation rate on top, and rotateWithVelocity still adds the heading", () => {
+  approx(angleAt([set("initialAngle",0),set("finalAngle",90),set("interpolateAngle",true),set("initialRotationRate",2)],5000),45+10);
+  approx(angleAt([set("initialAngle",0),set("finalAngle",90),set("interpolateAngle",true),set("initialVelocity","0,1"),set("rotateWithVelocity",true)],5000),45+90);
+});
+test("5.6c interpolateAngle=true with no usable finalAngle: angle unchanged and reported", () => {
+  const run=withFlags([set("initialAngle",15),set("interpolateAngle",true)]);run(0,{});
+  approx(run(5000,{})[0].r,15);assert.match(run.item.xmlIgnoredValues["ps.finalAngle"],/missing/);
+});
+test("5.6c a Random-valued finalAngle (shape from CloakofChaos: min 0, max 360) resolves per particle and differs between particles", () => {
+  const fa=n("Random",{name:"finalAngle",min:"0",max:"360"});
+  const run=fixture({emitter:[set("emissionInterval",.1)],particle:[set("lifeTime",10),set("initialAngle",0),set("interpolateAngle",true),fa]});
+  const angles=run.until(0,1000,50).map(p=>p.r);
+  assert.ok(angles.length>=8&&angles.every(Number.isFinite),"finite");
+  assert.ok(new Set(angles.map(a=>a.toFixed(3))).size>3,"particles use different random finals");
+  assert.equal(run.item.xmlIgnoredValues?.["ps.finalAngle"],undefined);
+});
+test("5.6c both angle entries are partial in xml-support", () => {
+  assert.equal(SUPPORT["Particle.finalAngle"],"partial");assert.equal(SUPPORT["Particle.interpolateAngle"],"partial");
+});

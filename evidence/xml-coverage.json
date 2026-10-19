@@ -47,8 +47,8 @@
   ],
   "status": {
    "native-ready": 0,
-   "partial-only": 309,
-   "blocked": 615
+   "partial-only": 310,
+   "blocked": 614
   }
  },
  "blockedBy": [
@@ -89,10 +89,6 @@
    29
   ],
   [
-   "Particle.finalAngle",
-   26
-  ],
-  [
    "Emitter.randomizeInterval",
    26
   ],
@@ -130,10 +126,6 @@
   ],
   [
    "Particle@UseParentScale",
-   17
-  ],
-  [
-   "Particle.interpolateAngle",
    17
   ],
   [
@@ -977,8 +969,7 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -993,6 +984,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -1535,10 +1527,8 @@
    {
     "system": "ps_Punch",
     "category": "hooked+secondary",
-    "status": "blocked",
-    "missing": [
-     "Particle.finalAngle"
-    ],
+    "status": "partial-only",
+    "missing": [],
     "notFull": [
      "Emitter.offset",
      "op:Random",
@@ -1550,6 +1540,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.initialScale",
      "Particle.initialVelocity",
@@ -3792,7 +3783,6 @@
      "Particle.orbitScaleVariation",
      "Particle.inSpecificOrder",
      "Particle.orbit",
-     "Particle.finalAngle",
      "Particle.initalRGB"
     ],
     "notFull": [
@@ -3810,6 +3800,7 @@
      "op:Curve",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
      "Particle.initialScale",
      "Particle.interpolateScale"
     ]
@@ -4028,9 +4019,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4053,7 +4042,9 @@
      "op:Curve",
      "Particle.gravityVector",
      "Particle.useGravity",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle"
     ]
    }
   ],
@@ -4382,9 +4373,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.variantId",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.variantId"
     ],
     "notFull": [
      "Emitter.infParticles",
@@ -4401,6 +4390,8 @@
      "Particle.blendingMode",
      "Particle.offset",
      "Particle.initialAngle",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -4516,9 +4507,7 @@
     "category": "hooked-only",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -4534,6 +4523,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -6113,8 +6104,6 @@
     "missing": [
      "Particle.initalRGB",
      "Particle.finalRotationRate",
-     "Particle.interpolateAngle",
-     "Particle.finalAngle",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -6136,7 +6125,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "op:Random",
+     "Particle.interpolateAngle",
      "Particle.initialAngle",
+     "Particle.finalAngle",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -6374,8 +6365,6 @@
     "category": "staged-only",
     "status": "blocked",
     "missing": [
-     "Particle.finalAngle",
-     "Particle.interpolateAngle",
      "Particle.inSpecificOrder"
     ],
     "notFull": [
@@ -6392,6 +6381,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -9283,9 +9274,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -9300,6 +9289,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -9524,8 +9515,6 @@
     "missing": [
      "Particle.initalRGB",
      "Particle.finalRotationRate",
-     "Particle.interpolateAngle",
-     "Particle.finalAngle",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -9547,7 +9536,9 @@
      "Particle.initialScale",
      "Particle.finalScale",
      "op:Random",
+     "Particle.interpolateAngle",
      "Particle.initialAngle",
+     "Particle.finalAngle",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -9946,8 +9937,6 @@
     "status": "blocked",
     "missing": [
      "Particle.finalRotationRate",
-     "Particle.interpolateAngle",
-     "Particle.finalAngle",
      "Particle.posOffset"
     ],
     "notFull": [
@@ -9966,7 +9955,9 @@
      "Particle.interpolateScale",
      "Particle.initialScale",
      "Particle.finalScale",
+     "Particle.interpolateAngle",
      "Particle.initialAngle",
+     "Particle.finalAngle",
      "Particle.initialVelocity",
      "op:RandomRadial"
     ]
@@ -11124,7 +11115,6 @@
     "status": "blocked",
     "missing": [
      "Particle.targetPosOffset",
-     "Particle.finalAngle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -11149,7 +11139,8 @@
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.finalVelocity",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.finalAngle"
     ]
    },
    {
@@ -11158,7 +11149,6 @@
     "status": "blocked",
     "missing": [
      "Particle.targetPosOffset",
-     "Particle.finalAngle",
      "Particle.OnFinish"
     ],
     "notFull": [
@@ -11183,7 +11173,8 @@
      "Particle.initialVelocity",
      "op:VectorTo",
      "Particle.finalVelocity",
-     "Particle.initialAngle"
+     "Particle.initialAngle",
+     "Particle.finalAngle"
     ]
    },
    {
@@ -11281,9 +11272,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -11298,6 +11287,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -11330,9 +11321,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -11347,6 +11336,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -14425,9 +14416,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -14442,6 +14431,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -14454,9 +14445,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -14472,6 +14461,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -16191,8 +16182,7 @@
     "category": "hooked+secondary",
     "status": "blocked",
     "missing": [
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -16207,6 +16197,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -16515,8 +16506,7 @@
      "Particle.applyOrbit",
      "Particle.orbitScaleVariation",
      "Particle.inSpecificOrder",
-     "Particle.orbit",
-     "Particle.finalAngle"
+     "Particle.orbit"
     ],
     "notFull": [
      "Emitter.offset",
@@ -16533,6 +16523,7 @@
      "Particle.initialAlpha",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
      "Particle.initialScale",
      "Particle.interpolateScale"
     ]
@@ -17650,7 +17641,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle.finalAngle",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
@@ -17669,6 +17659,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -17684,7 +17675,6 @@
     "status": "blocked",
     "missing": [
      "Emitter@needsHandItemActive",
-     "Particle.finalAngle",
      "Particle.targetPosOffset",
      "Particle.OnFinish"
     ],
@@ -17703,6 +17693,7 @@
      "Particle.rotateWithVelocity",
      "Particle.initialAngle",
      "op:Select",
+     "Particle.finalAngle",
      "Particle.finalAlpha",
      "Particle.initialVelocity",
      "op:VectorTo",
@@ -19619,9 +19610,7 @@
     "status": "blocked",
     "missing": [
      "Particle@UseParentEmitterAngle",
-     "Particle.initalRGB",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.initalRGB"
     ],
     "notFull": [
      "Emitter.lifeTime",
@@ -19635,7 +19624,9 @@
      "Particle.useGravity",
      "Particle.gravityVector",
      "Particle.initialScale",
+     "Particle.finalAngle",
      "Particle.renderAlignment",
+     "Particle.interpolateAngle",
      "Particle.initialVelocity",
      "op:Curve",
      "Particle.interpolateAlpha",
@@ -21545,9 +21536,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21564,6 +21553,8 @@
      "Particle.relativeToEmitter",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -21576,9 +21567,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21595,6 +21584,8 @@
      "Particle.relativeToEmitter",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -21607,9 +21598,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21624,6 +21613,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
@@ -21636,9 +21627,7 @@
     "status": "blocked",
     "missing": [
      "Emitter.OrbitOffset",
-     "Particle.inSpecificOrder",
-     "Particle.finalAngle",
-     "Particle.interpolateAngle"
+     "Particle.inSpecificOrder"
     ],
     "notFull": [
      "Emitter.offset",
@@ -21653,6 +21642,8 @@
      "Particle.initialRotationRate",
      "Particle.initialAngle",
      "op:Random",
+     "Particle.finalAngle",
+     "Particle.interpolateAngle",
      "Particle.initialScale",
      "Particle.finalScale",
      "Particle.interpolateScale",
