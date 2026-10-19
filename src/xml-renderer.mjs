@@ -144,11 +144,29 @@ export function bindXmlRenderer(item,catalog) {
   item.warnings.push(`XML ${item.raw.script}: partial interpreter; native FX/complex rules may remain unsupported`);
   item.coverage=`XML loaded; ${item.xmlBoundCount} sprite bindings; partial rules`;
 }
+// ---- Owner decisions, each in ONE place (work order step 3 follow-up) -----------------------------------------------
+// ParticleSystemOff: stop emitting, reset the emitter, let live particles finish. NOT a latch: a later Update starts it again.
+//   running -> false; emitted count -> 0 and delay timer -> cleared (the next run is a fresh emitter); live particles keep their life.
+//   If an Off and an Update name the same system on the same frame the Off wins (it is applied after the frame's Updates).
+export const PARTICLE_OFF={stopsEmission:true,resetsEmitterState:true,latches:false,liveParticlesFinish:true,winsSameFrame:true};
+// AddClothingParticles: continuous while the item is worn. Every frame the hook's own conditions (onState / onAction / StopIf)
+// are re-evaluated; a false condition ends the run (live particles finish) and a true one starts a fresh run.
+export const ADD_CLOTHING_PARTICLES={mode:"continuous-while-worn",conditionGatedPerFrame:true};
+// OnPunchBegin / OnPunchStop are kept as evidence-backed aliases. DATA: ArcaneArmor punch_start_particle = Update@OnPunchBegin +
+// Off@OnPunchStop, punch_end_particle = Update@OnPunchStop + Off@OnPunchBegin (same pairs in BlackCrystalBallHead, CrystalBallHead,
+// UnhelpfulHand ...). Begin == the planner's punch event; Stop == the frame the punch ends.
+export const PUNCH_HOOK_EVIDENCE={
+  OnPunchBegin:{alias:"OnPunchStart",source:"punch event"},
+  OnPunchStop:{alias:"punch end",source:"frame motion.punch goes from set to null"},
+  pairs:[{script:"ArcaneArmor",system:"punch_start_particle",update:"OnPunchBegin",off:"OnPunchStop"},
+         {script:"ArcaneArmor",system:"punch_end_particle",update:"OnPunchStop",off:"OnPunchBegin"}]
+};
 // Event hooks fire on an event, not continuously. A predicate returns the event stamp (truthy) while the event is live.
 // The planner has a punch source only; tile damage/destruction, death, respawn and world entry have none, so those hooks are
 // never live (their content is not run as always-on). OnPunchBegin == OnPunchStart and OnPunchStop == the frame the punch ended
 // are [HYP] from the paired Update/Off usage in ArcaneArmor / CrystalBallHead. SwitchOffClothingParticles is the unequip side.
 export const EVENT_HOOKS={
+  AddClothingParticles:()=>ADD_CLOTHING_PARTICLES.mode==="continuous-while-worn",
   OnPunchStart:m=>m.events?.find(e=>e.type==="punch")?.id??false,
   OnPunchBegin:m=>m.events?.find(e=>e.type==="punch")?.id??false,
   OnPunchStop:(m,ctx)=>ctx?.punchEnd??false,
@@ -231,7 +249,7 @@ const ON={on:true},OFF={on:false};
 const worldEvent=name=>({unresolved:`needs world event: ${name}`});
 export const STAGE_MAP={
   // updateStage -> (motion)=>{on}|{unresolved}|{pulse:eventType, on}
-  AddClothingParticles:()=>ON,
+  AddClothingParticles:()=>({on:ADD_CLOTHING_PARTICLES.mode==="continuous-while-worn"}),
   SwitchOffClothingParticles:()=>OFF,           // the Off side; see ParticleSystemOff handling
   OnPunchStart:m=>({pulse:"punch",on:!!m.events?.some(e=>e.type==="punch")}),
   OnPunchBegin:m=>({pulse:"punch",on:!!m.events?.some(e=>e.type==="punch")}),   // [HYP] == OnPunchStart
@@ -338,6 +356,10 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
   }
   return out;
 }
+function resetEmitter(run,timeMs) {
+  run.stopMs=timeMs;
+  run.emitter={running:false,emitted:0,delayMs:0};
+}
 function particleRuns(renderer,rules,timeMs,motion,item,states) {
   if(timeMs<(item.xmlParticleTime??0))item.xmlParticleRuns=[];
   item.xmlParticleTime=timeMs;
@@ -354,12 +376,13 @@ function particleRuns(renderer,rules,timeMs,motion,item,states) {
       pulse:why.pulse?(motion.events??[]).find(e=>e.type===why.pulse)?.id:undefined});
   }
   const runs=item.xmlParticleRuns??=[];
-  // ParticleSystemOff: stop emitting now; existing particles keep their remaining life. The system may restart on a later frame.
+  // ParticleSystemOff (PARTICLE_OFF): end the running emitter now and clear its state. The next Update opens a fresh run, so its
+  // emitted count starts at 0 and its delay timer restarts. Particles already alive finish their own lifetime.
   for(const stop of rules.stops??[]) {
-    if(!actionActive(stop.onAction,motion))continue;
-    current.delete(stop.name);
+    if(!PARTICLE_OFF.stopsEmission||!actionActive(stop.onAction,motion))continue;
+    if(PARTICLE_OFF.winsSameFrame)current.delete(stop.name);
     for(const run of runs)
-      if(run.node.a.name===stop.name&&(run.stopMs===undefined||run.stopMs>timeMs))run.stopMs=timeMs;
+      if(run.node.a.name===stop.name&&(run.stopMs===undefined||run.stopMs>timeMs))resetEmitter(run,timeMs);
   }
   for(const run of runs)
     if(run.stopMs===undefined&&!current.has(run.node.a.name))run.stopMs=timeMs;
