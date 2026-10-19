@@ -116,3 +116,35 @@ test("5.3 absent flags keep the old behaviour (mirrored with the player); consta
   assert.equal(USE_PLAYER_FACING_DEFAULT,true);assert.equal(OFFSET_FACING_DEFAULT,true);
   assert.equal(SUPPORT["Particle@usePlayerFacing"],"partial");assert.equal(SUPPORT["Emitter.offsetFacing"],"partial");
 });
+
+// ---- 5.4 renderAlignment ----------------------------------------------------------------------------------------------
+import {RENDER_ALIGNMENT} from "../src/xml-renderer.mjs";
+test("5.4 renderAlignment maps every value in the data set to its anchor (ax,ay)", () => {
+  const expected={CENTER:[.5,.5],DOWN_CENTER:[.5,1],UPPER_CENTER:[.5,0],LEFT_CENTER:[0,.5],RIGHT_CENTER:[1,.5]};
+  for(const [name,anchor] of Object.entries(expected)) {
+    const [p]=withFlags([set("renderAlignment",name)])(0,{});
+    assert.deepEqual([p.ax,p.ay],anchor,name);
+  }
+  assert.deepEqual(RENDER_ALIGNMENT,expected);
+});
+test("5.4 renderAlignment: every value used in the shipped XML is a known alignment", () => {
+  const used=new Set();
+  for(const r of Object.values(scripts))for(const sys of r.particles??[])for(const side of sys.c)for(const c of side.c)
+    if(c.a?.name==="renderAlignment"&&c.tag==="Set")used.add(c.v);
+  assert.deepEqual([...used].sort(),Object.keys(RENDER_ALIGNMENT).sort());
+});
+test("5.4 renderAlignment DOWN_CENTER draws the sprite above the particle point; UPPER_CENTER below it (final matrices)", () => {
+  const ty=name=>finalCall(withFlags([set("renderAlignment",name),set("offset","0,0")]),1).matrix[5];
+  const centre=ty("CENTER"),down=ty("DOWN_CENTER"),up=ty("UPPER_CENTER");
+  approx(centre-down,16);approx(up-centre,16);        // 32px sprite: half a sprite either way
+});
+test("5.4 renderAlignment LEFT_CENTER / RIGHT_CENTER shift the sprite horizontally by half its width", () => {
+  const tx=name=>finalCall(withFlags([set("renderAlignment",name),set("offset","0,0")]),1).matrix[4];
+  approx(tx("CENTER")-tx("LEFT_CENTER"),-16);approx(tx("RIGHT_CENTER")-tx("CENTER"),-16);
+});
+test("5.4 renderAlignment: absent keeps CENTER; an unknown value falls back to CENTER and is reported on the item", () => {
+  const [a]=withFlags([])(0,{});assert.deepEqual([a.ax,a.ay],[.5,.5]);
+  const run=withFlags([set("renderAlignment","NOT_A_REAL_ONE")]);const [b]=run(0,{});
+  assert.deepEqual([b.ax,b.ay],[.5,.5]);assert.equal(run.item.xmlUnsupportedValues["ps.renderAlignment"],"NOT_A_REAL_ONE");
+  assert.equal(SUPPORT["Particle.renderAlignment"],"partial");
+});

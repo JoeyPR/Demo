@@ -48,6 +48,7 @@ export function fidelityOf(item) {
   const dead=deadHooks(),present=kids(renderer.rules).map(h=>h.tag).filter(t=>dead.includes(t));
   for(const h of new Set(present))reasons.push(`Hook ${h} has no source in the planner, so its content never runs`);
   for(const [name,why] of Object.entries(item.xmlUnsupportedReasons??{}))reasons.push(`${name} skipped: ${why.join("; ")}`);
+  for(const [name,value] of Object.entries(item.xmlUnsupportedValues??{}))reasons.push(`${name}: unknown value "${value}"`);
   for(const [name,why] of Object.entries(item.xmlUnresolvedEvents??{}))reasons.push(`${name}: ${why}`);
   if(ignored.size)notes.push(`Ignored fields: ${[...ignored].join(", ")}`);
   if(partial.size)notes.push(`Approximate fields: ${[...partial].join(", ")}`);

@@ -29,6 +29,7 @@ export const SUPPORT = {
   "Particle.lifeTime": "full",
   "Particle.offset": "partial",
   "Particle.relativeToEmitter": "partial",
+  "Particle.renderAlignment": "partial",
   "Particle.rotateWithVelocity": "partial",
   "Particle.sprite": "partial",
   "Particle.useGravity": "partial",

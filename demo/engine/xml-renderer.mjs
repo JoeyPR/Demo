@@ -285,6 +285,9 @@ function emitterDelayMs(renderer,name) {
 }
 // [HYP] A particle with no relativeToEmitter property follows the emitter (the behaviour before this flag was read).
 export const RELATIVE_TO_EMITTER_DEFAULT=true;
+// 5.4 renderAlignment: which point of the sprite sits on the particle position. (ax,ay) are fractions of the sprite size, y down.
+// Rotation and scale pivot on that point (spriteMatrix). Absent -> CENTER, the previous behaviour. Unknown values -> CENTER, reported.
+export const RENDER_ALIGNMENT={CENTER:[.5,.5],DOWN_CENTER:[.5,1],UPPER_CENTER:[.5,0],LEFT_CENTER:[0,.5],RIGHT_CENTER:[1,.5]};
 // 5.3 Facing. The whole player (every draw call) is already mirrored by the rig's facing matrix when facing<0, so a particle is
 // "player-facing" (mirrored once) by default. A flag set to false must therefore counter-mirror, which keeps the NET effect at
 // one mirror for true and none for false. Absent flags keep the existing behaviour (mirrored with the player). [HYP]
@@ -353,6 +356,9 @@ function particlesFor(renderer,entry,timeMs,motion,item,states) {
     const p=spritePiece(renderer,spriteName,[
       anchor[0]+(entry.offset?.[0]??0)+(offset[0]??0)+(delta[0]??0)+(velocity[0]??0)*age+.5*(gravity[0]??0)*age*age,
       anchor[1]+(entry.offset?.[1]??0)+(offset[1]??0)+(delta[1]??0)+(velocity[1]??0)*age+.5*(gravity[1]??0)*age*age],entry.pass);if(!p)continue;
+    const alignment=String(get(pt,"renderAlignment","CENTER",seed));
+    if(RENDER_ALIGNMENT[alignment])[p.ax,p.ay]=RENDER_ALIGNMENT[alignment];
+    else (item.xmlUnsupportedValues??={})[`${sys.a.name}.renderAlignment`]=alignment;
     const alpha=get(pt,"initialAlpha",[1],seed,age/life);
     const initial=get(pt,"initialScale",[1,1],seed,age/life);
     p.o=alpha[0];p.k=[initial[0],initial[1]??initial[0]];
