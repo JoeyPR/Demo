@@ -1,0 +1,13 @@
+{
+  "provenance": "User-supplied items.txt, parsed as delimited data; no code execution",
+  "sha256": "e00e0f9d7b3caf63adb62494f455108bbe601b36c3397b1671a2f7ad6f6f8860",
+  "nativeVersion": 26,
+  "nativeRows": 16434,
+  "uploadedWearables": 4067,
+  "activeWearables": 4081,
+  "matched": 4081,
+  "slotWarning": "Native clothing type IDs are not assumed equal to planner slot IDs.",
+  "limitations": [
+    "Renderer filenames and punch options are references, not script payloads or emitter timelines."
+  ]
+}

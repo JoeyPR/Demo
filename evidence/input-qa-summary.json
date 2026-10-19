@@ -1,0 +1,74 @@
+{
+  "revision": "input-abilities-fx",
+  "officialClientParity": false,
+  "automated": {
+    "demoTestsPassed": 72,
+    "handoffTestsPassed": 81,
+    "catalogStateTimeCases": 48972,
+    "particleAgeStateAnimationRegression": true,
+    "plannerPunchCurveRestored": true
+  },
+  "coverage": {
+    "catalogItems": 4081,
+    "nativeFieldRows": 4081,
+    "abilityRegistry": {
+      "matchedItems": 735,
+      "doubleJump": 395,
+      "highJump": 77,
+      "slowFall": 70,
+      "speedy": 309,
+      "unmatchedRows": 0,
+      "conditionalRows": 2
+    },
+    "animalReferenceGaits": 78,
+    "nativeXmlParticleItemsObserved": 176,
+    "itemsWithSkippedParticleExpressions": 6,
+    "explicitReferenceFxRecipes": 7,
+    "flaggedItemsWithoutObservedXmlOrReferenceRecipe": 940
+  },
+  "phone": {
+    "width": 375,
+    "heights": [
+      540,
+      667,
+      812
+    ],
+    "minimumItemListHeight": 102,
+    "overflow": false,
+    "padsAlwaysVisible": true
+  },
+  "artifacts": [
+    "evidence/input-browser-qa.json",
+    "evidence/input-demo-tests.tap",
+    "evidence/input-package-tests.tap"
+  ],
+  "adaptiveExports": [
+    {
+      "resolution": 32,
+      "width": 179,
+      "height": 128
+    },
+    {
+      "resolution": 64,
+      "width": 358,
+      "height": 256
+    },
+    {
+      "resolution": 128,
+      "width": 716,
+      "height": 512
+    },
+    {
+      "resolution": 256,
+      "width": 1432,
+      "height": 1024
+    }
+  ],
+  "punch": {
+    "heldRepeatMs": 200,
+    "releasedLifetimeMs": 260,
+    "curve": "planner-linear-expansion",
+    "frontArm": "continuous-90-to-20",
+    "clippingFixPreserved": true
+  }
+}

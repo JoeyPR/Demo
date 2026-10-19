@@ -1,0 +1,34 @@
+{
+  "revision": "state-routing-and-shared-float-root",
+  "date": "2026-10-18",
+  "officialClientParity": false,
+  "automated": {
+    "demoTestsPassed": 38,
+    "handoffTestsPassed": 55,
+    "catalogStateCases": 16324,
+    "mountTravelSequencesChecked": 50,
+    "mortyVariantsChecked": [7836, 7838, 7840, 7842]
+  },
+  "browser": {
+    "floatingArmsBothFacings": true,
+    "floatingArmsReturnNeutral": true,
+    "ridingIdleTravelIdle": true,
+    "mortyNeutralGroundAndAirFrameChange": true,
+    "ridingCloudCoupledRootInspected": true,
+    "mobileViewportWidth": 375,
+    "mobileDocumentWidth": 375,
+    "uncaughtPageErrors": [],
+    "pngExports": [
+      {"pixelsPerTile": 32, "width": 128, "height": 128},
+      {"pixelsPerTile": 64, "width": 256, "height": 256},
+      {"pixelsPerTile": 128, "width": 512, "height": 512},
+      {"pixelsPerTile": 256, "width": 1024, "height": 1024}
+    ]
+  },
+  "limitations": [
+    "45-degree travel arms follow user observations; transition speed is reference tuning.",
+    "First listed mount frame is a neutral fallback, not a recovered per-item idle clip.",
+    "Missing native script bodies and item-specific float curves remain incomplete.",
+    "Structural catalog coverage does not establish visual correctness for every item."
+  ]
+}

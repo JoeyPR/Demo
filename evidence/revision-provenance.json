@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-18",
+  "revision": "full-public-catalog-and-mount-pose-resolution",
+  "publicCatalog": "https://setplannergt.com/items.17c8f97f87.dat",
+  "publicRenderer": "https://setplannergt.com/app.d5e8585e60.js",
+  "additionalSourceSnapshots": {
+    "https://github.com/StileDevs/GrowServer": "3d3fdd2c8763f0a6686ded49ab7bf7827d8c95e7",
+    "https://github.com/keichira/GTopia": "cd3d11a81f3a7a44e070c94914ed10246a162ed2",
+    "https://github.com/LucarioGamer/GrowtopiaServer": "6b913eb3a668eabed9c44c3e1baa7265b2ada3ad"
+  },
+  "catalog": {
+    "publicWearables": 4081,
+    "slots": 10,
+    "externalScriptReferencesWithoutDefinitions": 317
+  },
+  "scope": {
+    "fullPublicWearableSnapshot": true,
+    "allOfficialCurrentItemsVerified": false,
+    "nativeRidingstillClipRecovered": false,
+    "nativePerItemMovementParity": false,
+    "externalScriptPayloadsAcquired": false,
+    "privateLoaderBypassed": false
+  },
+  "testCoverage": {
+    "packageTests": 44,
+    "demoTests": 13,
+    "catalogStateCases": 16324,
+    "catalogDrawCalls": 197512,
+    "invalidGeometryCases": 0,
+    "missingItemDrawCases": 0,
+    "missingNormalizedAtlasDependencies": 0,
+    "officialPixelComparison": false
+  },
+  "nativeSchemaCorrection": "Inspected TypeScript parser gates itemRenderer at >=16 and itemRendererHash at >=18, not >=20/>=25. GTopia supplies additional differently named version-gated fields; do not mix parser layouts without testing a pinned binary fixture.",
+  "redistributionBoundary": "Reference-code archive does not bundle third-party application JS, the full decoded catalog or texture assets. The separately deployed demo uses public catalog metadata and atlas PNGs."
+}

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#1b201c">
+  <title>Growtopia · Player Render Lab</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body data-mobile-tab="wardrobe">
+  <a class="skip" href="#stage">Skip to player preview</a>
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="Player Render Lab home">growtopia<span>/</span><strong>render lab</strong></a>
+    <div class="top-right"><button class="quiet mobile-export" id="mobile-export" aria-label="Export player PNG"><i data-lucide="download"></i></button><span class="prototype"><span class="dot"></span> Interactive prototype</span><button class="quiet" id="about"><i data-lucide="info"></i><span>Reference notes</span></button></div>
+  </header>
+  <main>
+    <section class="workspace-title" aria-labelledby="page-title">
+      <div><div class="eyebrow">PLAYER SYSTEM / SANDBOX 01</div><h1 id="page-title">A little world. Every moving part.</h1></div>
+      <button class="primary" id="export"><i data-lucide="download"></i> Export frame <span class="shortcut">PNG</span></button>
+    </section>
+    <section class="workbench" aria-label="Player rendering workspace">
+      <nav class="mobile-tabs" aria-label="Planner panels">
+        <button class="selected" data-mobile-tab="wardrobe" aria-pressed="true">Clothes</button>
+        <button data-mobile-tab="motion" aria-pressed="false">Motion</button>
+        <button data-mobile-tab="settings" aria-pressed="false">Settings</button>
+        <button id="mobile-unequip" aria-label="Unequip selected clothing slot">Unequip</button>
+      </nav>
+      <aside class="wardrobe panel">
+        <div class="panel-heading"><h2>Wardrobe</h2><span class="count" id="catalog-count">Loading catalog</span></div>
+        <label class="field-label" for="preset">Start with a set</label>
+        <select id="preset"><option value="bare" selected>Just the player</option><option value="explorer">The everyday explorer</option><option value="formal">A rather formal affair</option><option value="wizard">A little bit of magic</option><option value="rider">Back in the saddle</option><option value="custom" disabled>Custom set</option></select>
+        <div class="divider"></div>
+        <div class="wardrobe-heading"><h3>Pick a piece</h3><button class="text-button" id="clear-slot">Unequip</button></div>
+        <div class="slot-tabs" role="group" aria-label="Clothing slot">
+          <button data-slot="-1" aria-pressed="false" aria-label="All items"><i data-lucide="grid-2x2"></i><span>All</span></button>
+          <button data-slot="0" class="selected" aria-pressed="true" aria-label="Hats"><i data-lucide="hard-hat"></i><span>Hat</span></button>
+          <button data-slot="1" aria-pressed="false" aria-label="Shirts"><i data-lucide="shirt"></i><span>Top</span></button>
+          <button data-slot="2" aria-pressed="false" aria-label="Pants"><i data-lucide="columns-2"></i><span>Legs</span></button>
+          <button data-slot="3" aria-pressed="false" aria-label="Shoes and mount"><i data-lucide="footprints"></i><span>Feet</span></button>
+          <button data-slot="5" aria-pressed="false" aria-label="Hand items"><i data-lucide="pickaxe"></i><span>Hand</span></button>
+          <button data-slot="6" aria-pressed="false" aria-label="Back items"><i data-lucide="backpack"></i><span>Back</span></button>
+          <button data-slot="7" aria-pressed="false" aria-label="Hair"><i data-lucide="scissors"></i><span>Hair</span></button>
+          <button data-slot="4" aria-pressed="false" aria-label="Face items"><i data-lucide="glasses"></i><span>Face</span></button>
+          <button data-slot="8" aria-pressed="false" aria-label="Chest items"><i data-lucide="shield"></i><span>Chest</span></button>
+          <button data-slot="9" aria-pressed="false" aria-label="Ancestral items"><i data-lucide="gem"></i><span>Aura</span></button>
+        </div>
+        <label class="search"><i data-lucide="search"></i><input id="search" type="search" placeholder="Search all names or IDs…" aria-label="Search wardrobe"></label>
+        <p id="result-count" class="micro"></p>
+        <div id="items" class="items" aria-live="polite"></div>
+        <nav class="catalog-pages" aria-label="Catalog pages"><button id="page-prev" aria-label="Previous item page">Previous</button><span id="page-info">1 / 1</span><button id="page-next" aria-label="Next item page">Next</button></nav>
+        <div class="skin-section">
+          <label class="field-label">Player skin tint</label>
+          <div id="skins" class="swatches" role="group" aria-label="Player skin color"></div>
+          <p class="micro">Tint applies to the body, not your whole set.</p>
+        </div>
+      </aside>
+      <section class="stage-panel panel" id="stage" aria-label="Animated player preview">
+        <div class="stage-toolbar">
+          <div class="segmented" role="group" aria-label="Interaction mode"><button data-mode="preview" class="selected" aria-pressed="true">Preview</button><button data-mode="play" aria-pressed="false">Play mode</button></div>
+          <label class="environment"><i data-lucide="sun"></i><select id="environment" aria-label="Scene environment"><option value="day">Daylight</option><option value="sunset">Golden hour</option><option value="night">Nightfall</option><option value="rain">Rainy day</option></select></label>
+        </div>
+        <div class="viewport" id="viewport">
+          <canvas id="world" tabindex="0" aria-label="Animated Growtopia player. In play mode use A and D to walk, Space to jump, and F to punch."></canvas>
+          <div class="canvas-label"><span class="live-dot"></span><span id="stage-state">IDLE POSE</span></div>
+          <div class="canvas-coordinate" id="coordinate">X 0.0 / Y 0.0</div>
+          <div class="load-screen" id="loading"><span class="loading-pixel"></span>Loading sprite atlases…</div>
+          <div class="scene-caption">Your set, in motion.</div>
+        </div>
+        <div class="touch-controls" aria-label="Movement and action controls"><button data-control="left" aria-label="Walk left">←</button><button data-control="right" aria-label="Walk right">→</button><span id="ability-status" aria-live="polite">Single jump</span><button data-control="jump">Jump</button><button data-control="punch">Punch</button></div>
+        <div class="equipped-bar"><span>WEARING</span><div id="equipped"></div><span id="piece-count"></span></div>
+        <div class="transport">
+          <div class="transport-top">
+            <div class="playback-controls"><button id="pause" class="icon-button" aria-label="Pause animation" title="Pause animation"><i data-lucide="pause"></i></button><button id="step" class="icon-button" aria-label="Advance one frame" title="Advance one frame"><i data-lucide="step-forward"></i></button><button id="reset" class="icon-button" aria-label="Reset player" title="Reset player"><i data-lucide="rotate-ccw"></i></button><span class="timecode" id="timecode">00:00.000</span></div>
+            <div class="speed-control"><label for="speed">Speed</label><select id="speed"><option value=".25">0.25×</option><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></div>
+          </div>
+          <div class="timeline" aria-label="1320 millisecond walk cycle"><div class="ticks"><span>0.00s</span><span>0.33s</span><span>0.66s</span><span>0.99s</span><span>1.32s</span></div><div class="track"><div class="waveform"></div><span id="playhead"></span></div></div>
+          <div class="action-buttons" role="group" aria-label="Player animation"><button data-action="idle" class="selected" aria-pressed="true">Idle</button><button data-action="walk">Walk</button><button data-action="jump">Jump</button><button data-action="double">Double jump</button><button data-action="fall">Fall</button><button data-action="punch">Punch</button></div>
+        </div>
+      </section>
+      <aside class="inspector panel">
+        <div class="panel-heading"><h2>Render settings</h2><i data-lucide="sliders-horizontal"></i></div>
+        <div class="setting-section">
+          <span class="field-label">Output pixels / tile</span>
+          <div class="resolution" role="group" aria-label="Output resolution"><button data-resolution="32">32</button><button data-resolution="64">64</button><button data-resolution="128" class="selected" aria-pressed="true">128</button><button data-resolution="256">256</button></div>
+          <p class="micro">Same rig. Independent render resolution.</p>
+        </div>
+        <div class="setting-section switches">
+          <label class="switch-row"><span><i data-lucide="bone"></i>Show rig & joints</span><input id="rig" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
+          <label class="switch-row"><span><i data-lucide="grid-2x2"></i>World grid</span><input id="grid" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
+          <label class="switch-row"><span><i data-lucide="sparkles"></i>Item & jump FX</span><input id="fx" type="checkbox" checked><span class="switch" aria-hidden="true"></span></label>
+          <label class="switch-row" title="Manual reference override. Known item float profiles apply automatically without this toggle."><span><i data-lucide="wind"></i>Force generic float</span><input id="hover" type="checkbox"><span class="switch" aria-hidden="true"></span></label>
+        </div>
+        <div class="setting-section">
+          <div class="subheading"><h3>Under the hood</h3><span class="tiny-dot"></span></div>
+          <dl class="telemetry"><div><dt>Locomotion</dt><dd id="stat-state">Walk</dd></div><div><dt>Back arm</dt><dd id="stat-back">0.0°</dd></div><div><dt>Front arm</dt><dd id="stat-front">0.0°</dd></div><div><dt>Draw calls</dt><dd id="stat-calls">0</dd></div><div><dt>Rider lift</dt><dd id="stat-lift">0 px</dd></div><div><dt>Float cycle</dt><dd id="stat-float">Static / none</dd></div></dl>
+        </div>
+        <div class="setting-section layers-section">
+          <div class="subheading"><h3>Draw stack</h3><span class="count">back → front</span></div>
+          <div id="layers" class="layers"></div>
+        </div>
+        <div class="reference-footnote"><span class="reference-mark">REFERENCE BUILD</span><p id="coverage-status">Public sprite reference. Per-item native motion is not verified.</p><button id="details" class="text-button">See what's verified <span>↗</span></button></div>
+      </aside>
+    </section>
+  </main>
+  <footer class="footer"><span><span class="dot"></span> All changes stay in this session</span><span id="help">Try Jump, Punch, or inspect the rig.</span><span class="footer-credit">Unofficial Growtopia rendering study</span></footer>
+  <div class="notice" id="notice" role="status"></div>
+  <dialog id="reference-dialog">
+    <button id="close-dialog" class="dialog-close icon-button" aria-label="Close reference notes"><i data-lucide="x"></i></button>
+    <div class="eyebrow">READING THE DEMO</div><h2>A reference, not a recovered client.</h2>
+    <p>This demo uses real player and clothing sprite pieces served by Set Planner GT, plus the source-derived walk tables, affine rig, arm pivots, layering and tint pipeline from the research handoff.</p>
+    <p>The complete public catalog snapshot contains 4,081 wearables across ten slots. This is not a claim that every item released in the official game is present. All entries can be searched and equipped; missing scripts and FX remain explicitly unsupported.</p>
+    <p>Riding retains seat sprites, uses a shared root for floating mounts, and resolves idle versus moving versus punching poses. Split horse-sit mounts have a movement-only reference hop with opposing halves. One-piece 64px mounts are excluded. The hop amplitudes and timing are reference tuning, not recovered official constants.</p>
+    <p>Known item-driven lift profiles apply automatically. Fifty dynamic profiles agree with public still offsets and use source-derived one-second cycles. These are default-state source comparisons, not proof of every outfit combination or of missing native scripts. Large frames, clock sequences, additive blending and public flicker/pulse effects have separate handling.</p>
+    <p>The supplied player archive adds 314 parsed XML renderer definitions. Matched sprite tracks, selected aura render rules and public pet-cell clocks now run. Parsed definitions do not imply full native support: complex state rules, particle behavior and pet AI remain partial.</p>
+    <ul><li><strong>Numerically compared:</strong> selected planner walk-arm sampling and transform functions.</li><li><strong>Preview only:</strong> flat-floor movement, generic punch, follower motion and outfit combinations.</li><li><strong>Illustrative:</strong> weather scenery, hover override and generic jump particles. These are not per-item official FX.</li><li><strong>Not included:</strong> every native XML operation, full world collision or an official-client pixel comparison.</li></ul>
+    <p>Output buttons change the avatar render buffer, not the physics. The PNG export is a transparent 4 × 4-tile viewport at the selected pixels per tile.</p>
+    <p class="source-links">Reference: <a href="https://setplannergt.com/" target="_blank" rel="noopener">Set Planner GT</a> · <a href="https://setplannergt.com/app.d5e8585e60.js" target="_blank" rel="noopener">Inspected bundle</a> · <a href="https://setplannergt.com/items.17c8f97f87.dat" target="_blank" rel="noopener">Public item catalog</a></p>
+    <p class="micro">Growtopia and its game art belong to their respective owners. This is an unofficial interactive research preview, not an affiliated or complete game client.</p>
+  </dialog>
+</body>
+</html>

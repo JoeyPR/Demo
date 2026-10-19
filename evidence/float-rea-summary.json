@@ -1,0 +1,58 @@
+{
+  "toolVersion": "rea-agents@6.5.0",
+  "evidence_id": "ev_f04f95373e7468a6f546f66c8619477b47f0af63dbda5bf1073411cbce4171d9",
+  "subject": {
+    "name": "float-source-snapshot",
+    "digest": {
+      "sha256": "207e8ba8136d8dc0365f3b47ecc2f2f18b5d486a9dc07719fe8d57d3f3a23781"
+    },
+    "local_path": "/home/user/workspace/research/float-source-snapshot",
+    "format": "directory",
+    "architecture": null
+  },
+  "confidence": "derived",
+  "analysis_profile": null,
+  "statistics": {
+    "relevant_files": 1,
+    "nested_asar_containers": 0,
+    "text_bytes_read": 33844,
+    "invalid_utf8_files": 0,
+    "parsed_javascript_files": 1,
+    "visited_ast_nodes": 5860,
+    "findings": 0,
+    "modules": 0,
+    "parse_failures": 0
+  },
+  "summary": {
+    "browser_windows": 0,
+    "explicit_web_preferences": 0,
+    "preload_entrypoints": 0,
+    "context_bridge_apis": 0,
+    "exposed_api_members": 0,
+    "ipc": {
+      "operations": 0,
+      "literal_channels": 0,
+      "dynamic_channel_operations": 0,
+      "renderer_transmissions": 0,
+      "renderer_listeners": 0,
+      "main_handlers": 0,
+      "paired_renderer_transmissions": 0,
+      "ambiguous_renderer_transmissions": 0,
+      "unpaired_literal_renderer_transmissions": 0
+    },
+    "sender_validation_observations": 0,
+    "utility_processes": 0,
+    "resolved_utility_entrypoints": 0,
+    "native_addon_bindings": 0,
+    "resolved_native_addon_bindings": 0
+  },
+  "limitations": [
+    "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+    "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+    "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+    "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+    "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+    "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+  ],
+  "scope": "Static, source-assisted analysis of reviewed isolated default-state lift function; full evidence retained separately; not native binary or whole-client verification."
+}

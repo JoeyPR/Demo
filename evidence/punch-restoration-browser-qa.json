@@ -1,0 +1,753 @@
+{
+  "checks": {
+    "startup": {
+      "ready": true,
+      "mode": "preview",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": 1,
+        "clockMs": 0,
+        "moveMs": 0,
+        "punch": null,
+        "events": [],
+        "locomotion": "idle"
+      },
+      "pose": {
+        "backAngle": 0,
+        "frontAngle": 0,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          0,
+          0
+        ],
+        "punch": null
+      },
+      "drawCalls": 10,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 381,
+        "rootY": 226.90000000000003,
+        "s": 4
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "idle",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": []
+    },
+    "pad": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": 1,
+        "clockMs": 266.66666666666663,
+        "moveMs": 266.66666666666663,
+        "punch": {
+          "ageMs": 150
+        },
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 267.1375947738882,
+        "frontAngle": 20,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          4,
+          0
+        ],
+        "punch": {
+          "angle": 267.1375947738882,
+          "stretch": 0.636794503745125,
+          "width": 1.1144999999999998
+        }
+      },
+      "drawCalls": 10,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 381,
+        "rootY": 226.90000000000003,
+        "s": 4
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "punch",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": []
+    },
+    "held": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": 1,
+        "clockMs": 999.9999999999991,
+        "moveMs": 999.9999999999991,
+        "punch": {
+          "ageMs": 83.33333333333334
+        },
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 267.1375947738882,
+        "frontAngle": 20,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          4,
+          0
+        ],
+        "punch": {
+          "angle": 267.1375947738882,
+          "stretch": 0.3537747243028473,
+          "width": 0.6191666666666668
+        }
+      },
+      "drawCalls": 10,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 381,
+        "rootY": 226.90000000000003,
+        "s": 4
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "punch",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": []
+    },
+    "released": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": 1,
+        "clockMs": 1183.333333333333,
+        "moveMs": 1183.333333333333,
+        "punch": null,
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 0,
+        "frontAngle": 0,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          0,
+          0
+        ],
+        "punch": null
+      },
+      "drawCalls": 10,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 381,
+        "rootY": 226.90000000000003,
+        "s": 4
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "idle",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": []
+    },
+    "far": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": 1,
+        "clockMs": 1383.333333333334,
+        "moveMs": 1383.333333333334,
+        "punch": {
+          "ageMs": 183.33333333333331,
+          "target": [
+            124.75,
+            0.14999999999999147
+          ]
+        },
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 259.95309423760216,
+        "frontAngle": 20,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          4,
+          0
+        ],
+        "punch": {
+          "angle": 259.95309423760216,
+          "stretch": 1.9883999207808045,
+          "width": 1.3621666666666665
+        }
+      },
+      "drawCalls": 10,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 173,
+        "height": 128
+      },
+      "view": {
+        "rootX": 381,
+        "rootY": 226.90000000000003,
+        "s": 4
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "punch",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": []
+    },
+    "reverse": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": -1,
+        "clockMs": 1483.3333333333344,
+        "moveMs": 1483.3333333333344,
+        "punch": {
+          "ageMs": 83.33333333333334,
+          "target": [
+            123.5,
+            0.14999999999999147
+          ]
+        },
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 259.8294957162144,
+        "frontAngle": 20,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          4,
+          0
+        ],
+        "punch": {
+          "angle": 259.8294957162144,
+          "stretch": 0.8929478778570697,
+          "width": 0.6191666666666668
+        }
+      },
+      "drawCalls": 10,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 381,
+        "rootY": 226.90000000000003,
+        "s": 4
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "punch",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": []
+    },
+    "mobileSleeve": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [
+        {
+          "id": 38,
+          "name": "Tuxedo",
+          "slot": 1
+        }
+      ],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": -1,
+        "clockMs": 41016.666666666424,
+        "moveMs": 41016.666666666424,
+        "punch": {
+          "ageMs": 150
+        },
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 267.1375947738882,
+        "frontAngle": 20,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          4,
+          0
+        ],
+        "punch": {
+          "angle": 267.1375947738882,
+          "stretch": 0.636794503745125,
+          "width": 1.1144999999999998
+        }
+      },
+      "drawCalls": 15,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 158.508,
+        "rootY": 57.856,
+        "s": 1.312
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "punch",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": [
+        {
+          "id": 38,
+          "animationState": {
+            "airborne": false,
+            "moving": false,
+            "state": "idle",
+            "elapsedMs": 233.33333333329938,
+            "policies": []
+          },
+          "gait": {
+            "active": false,
+            "bodyY": 0,
+            "slide": 0
+          },
+          "pieces": [
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 0,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 32,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_shirt.png",
+              "sx": 64,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 0,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 32,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            }
+          ]
+        }
+      ]
+    },
+    "mobile": {
+      "overflow": false,
+      "pads": true
+    },
+    "near": {
+      "ready": true,
+      "mode": "play",
+      "resolution": 128,
+      "paused": false,
+      "equipped": [
+        {
+          "id": 38,
+          "name": "Tuxedo",
+          "slot": 1
+        }
+      ],
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "vx": 0,
+        "vy": 0,
+        "ground": true,
+        "facing": 1,
+        "clockMs": 41249.99999999972,
+        "moveMs": 41249.99999999972,
+        "punch": {
+          "ageMs": 100.00000000000001,
+          "target": [
+            28.000002512117703,
+            18.000000093041393
+          ]
+        },
+        "events": [],
+        "locomotion": "idle",
+        "jumpHeld": false
+      },
+      "pose": {
+        "backAngle": 270.00000133271897,
+        "frontAngle": 20,
+        "backFoot": 0,
+        "frontFoot": 0,
+        "face": [
+          4,
+          0
+        ],
+        "punch": {
+          "angle": 270.00000133271897,
+          "stretch": 0.04240002662844767,
+          "width": 0.7430000000000001
+        }
+      },
+      "drawCalls": 15,
+      "effectCount": 0,
+      "hiddenPasses": [],
+      "abilities": {
+        "doubleJump": false,
+        "highJump": false,
+        "slowFall": false,
+        "speedy": false,
+        "sources": []
+      },
+      "avatarBounds": {
+        "x": -48,
+        "y": -48,
+        "width": 128,
+        "height": 128
+      },
+      "view": {
+        "rootX": 158.508,
+        "rootY": 57.856,
+        "s": 1.312
+      },
+      "catalogItems": 4081,
+      "poseResolution": {
+        "override": {},
+        "state": "punch",
+        "evidence": "base-planner-rig",
+        "owner": null,
+        "floating": false
+      },
+      "failedAtlases": [],
+      "lift": {
+        "x": 0,
+        "y": 0,
+        "owner": null,
+        "evidence": "none",
+        "profile": null,
+        "floating": false
+      },
+      "itemFrames": [
+        {
+          "id": 38,
+          "animationState": {
+            "airborne": false,
+            "moving": false,
+            "state": "idle",
+            "elapsedMs": 466.66666666659876,
+            "policies": []
+          },
+          "gait": {
+            "active": false,
+            "bodyY": 0,
+            "slide": 0
+          },
+          "pieces": [
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 0,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 32,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_shirt.png",
+              "sx": 64,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 0,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            },
+            {
+              "atlas": "player_sleeve.png",
+              "sx": 32,
+              "sy": 0,
+              "sw": 32,
+              "sh": 32,
+              "add": false
+            }
+          ]
+        }
+      ]
+    },
+    "outsideReleased": null
+  },
+  "errors": []
+}

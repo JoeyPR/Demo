@@ -1,0 +1,11 @@
+{
+  "status": "structural-only; not visual or official-client verification",
+  "wearables": 4081,
+  "stateCases": 16324,
+  "drawCalls": 197516,
+  "invalidGeometryCases": 0,
+  "missingItemDrawCases": 0,
+  "missingItemIds": [],
+  "missing": [],
+  "failures": []
+}

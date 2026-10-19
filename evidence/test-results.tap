@@ -1,0 +1,264 @@
+
+> growtopia-player-rendering-reference@0.1.0 test
+> node --test test/*.test.mjs
+
+TAP version 13
+# Subtest: catalog adapter keeps captured seat and legacy lift
+ok 1 - catalog adapter keeps captured seat and legacy lift
+  ---
+  duration_ms: 1.767294
+  ...
+# Subtest: public part animation does not overwrite seat or split-row coordinates
+ok 2 - public part animation does not overwrite seat or split-row coordinates
+  ---
+  duration_ms: 0.45868
+  ...
+# Subtest: static ordinary item pose only participates in neutral state
+ok 3 - static ordinary item pose only participates in neutral state
+  ---
+  duration_ms: 0.316313
+  ...
+# Subtest: undefined neutral angles cannot clear previous authored pose
+ok 4 - undefined neutral angles cannot clear previous authored pose
+  ---
+  duration_ms: 0.18084
+  ...
+# Subtest: mount states distinguish neutral, travel, air and punching
+ok 5 - mount states distinguish neutral, travel, air and punching
+  ---
+  duration_ms: 0.309921
+  ...
+# Subtest: explicit feet descriptor outranks held-item descriptor
+ok 6 - explicit feet descriptor outranks held-item descriptor
+  ---
+  duration_ms: 0.229035
+  ...
+# Subtest: floating face is not a seated mount and cannot replace explicit zero vehicle lift
+ok 7 - floating face is not a seated mount and cannot replace explicit zero vehicle lift
+  ---
+  duration_ms: 0.482574
+  ...
+# Subtest: captured arms become one pose instead of duplicate body arm sprites
+ok 8 - captured arms become one pose instead of duplicate body arm sprites
+  ---
+  duration_ms: 0.83063
+  ...
+# Subtest: affine multiplication applies local before parent
+ok 9 - affine multiplication applies local before parent
+  ---
+  duration_ms: 1.534211
+  ...
+# Subtest: arm pivot remains fixed through all rotations
+ok 10 - arm pivot remains fixed through all rotations
+  ---
+  duration_ms: 1.496455
+  ...
+# Subtest: held hand uses distinct y+1 pivot
+ok 11 - held hand uses distinct y+1 pivot
+  ---
+  duration_ms: 0.164571
+  ...
+# Subtest: mirror once about logical tile, then root position
+ok 12 - mirror once about logical tile, then root position
+  ---
+  duration_ms: 0.17316
+  ...
+# Subtest: angles use shortest wrapping
+ok 13 - angles use shortest wrapping
+  ---
+  duration_ms: 0.207071
+  ...
+# Subtest: recovered walk arm knots match exact numeric profile
+ok 14 - recovered walk arm knots match exact numeric profile
+  ---
+  duration_ms: 0.602972
+  ...
+# Subtest: walk period wraps and interpolates
+ok 15 - walk period wraps and interpolates
+  ---
+  duration_ms: 0.149365
+  ...
+# Subtest: foot channels interpolate independently from step channels
+ok 16 - foot channels interpolate independently from step channels
+  ---
+  duration_ms: 0.132551
+  ...
+# Subtest: rig uses same walk phase for both limbs
+ok 17 - rig uses same walk phase for both limbs
+  ---
+  duration_ms: 0.265418
+  ...
+# Subtest: air arms approach targets rather than snapping
+ok 18 - air arms approach targets rather than snapping
+  ---
+  duration_ms: 0.275901
+  ...
+# Subtest: punch overlays air locomotion
+ok 19 - punch overlays air locomotion
+  ---
+  duration_ms: 0.195742
+  ...
+# Subtest: idle resets air offsets; no fabricated landing squash
+ok 20 - idle resets air offsets; no fabricated landing squash
+  ---
+  duration_ms: 0.169631
+  ...
+# Subtest: discrete frame sequence supports unequal durations and hold last
+ok 21 - discrete frame sequence supports unequal durations and hold last
+  ---
+  duration_ms: 0.420834
+  ...
+# Subtest: intentional empty clip frame stays hidden instead of using icon fallback
+ok 22 - intentional empty clip frame stays hidden instead of using icon fallback
+  ---
+  duration_ms: 1.089177
+  ...
+# Subtest: loop events use interval crossings and do not duplicate boundaries
+ok 23 - loop events use interval crossings and do not duplicate boundaries
+  ---
+  duration_ms: 0.253201
+  ...
+# Subtest: fixed stepping independent of display-frame batching
+ok 24 - fixed stepping independent of display-frame batching
+  ---
+  duration_ms: 2.028333
+  ...
+# Subtest: jump is edge triggered, lands and refreshes air jump
+ok 25 - jump is edge triggered, lands and refreshes air jump
+  ---
+  duration_ms: 2.298455
+  ...
+# Subtest: native data is never accepted as planner JSON
+ok 26 - native data is never accepted as planner JSON
+  ---
+  duration_ms: 0.262264
+  ...
+# Subtest: unknown item renderer remains flagged incomplete
+ok 27 - unknown item renderer remains flagged incomplete
+  ---
+  duration_ms: 0.176803
+  ...
+# Subtest: render order puts body before shirt before front arm before hat
+ok 28 - render order puts body before shirt before front arm before hat
+  ---
+  duration_ms: 0.673977
+  ...
+# Subtest: slot conflicts fail loudly
+ok 29 - slot conflicts fail loudly
+  ---
+  duration_ms: 0.167117
+  ...
+# Subtest: slot hiding differs from semantic body-part hiding
+ok 30 - slot hiding differs from semantic body-part hiding
+  ---
+  duration_ms: 0.426854
+  ...
+# Subtest: headless hides head and eyes, not all clothes
+ok 31 - headless hides head and eyes, not all clothes
+  ---
+  duration_ms: 0.322115
+  ...
+# Subtest: body skin alpha and color are resolved separately
+ok 32 - body skin alpha and color are resolved separately
+  ---
+  duration_ms: 0.220281
+  ...
+# Subtest: front face overHat changes pass order
+ok 33 - front face overHat changes pass order
+  ---
+  duration_ms: 0.523456
+  ...
+# Subtest: rider lift moves player but not mount pieces
+ok 34 - rider lift moves player but not mount pieces
+  ---
+  duration_ms: 0.548904
+  ...
+# Subtest: sleeve replacement uses per-item punch column
+ok 35 - sleeve replacement uses per-item punch column
+  ---
+  duration_ms: 0.955757
+  ...
+# Subtest: source density is independent from output pixels per tile
+ok 36 - source density is independent from output pixels per tile
+  ---
+  duration_ms: 0.386374
+  ...
+# Subtest: dense piece anchors normalize to logical source dimensions
+ok 37 - dense piece anchors normalize to logical source dimensions
+  ---
+  duration_ms: 0.252685
+  ...
+# Subtest: RGBA tint preserves source alpha bytes
+ok 38 - RGBA tint preserves source alpha bytes
+  ---
+  duration_ms: 0.438143
+  ...
+# Subtest: supersampling is explicit and separately resolved
+ok 39 - supersampling is explicit and separately resolved
+  ---
+  duration_ms: 0.270543
+  ...
+# Subtest: world particles stay at birth; local particles follow root
+ok 40 - world particles stay at birth; local particles follow root
+  ---
+  duration_ms: 0.431222
+  ...
+# Subtest: FX duplicate event does not spawn twice; seeded repeat is reproducible
+ok 41 - FX duplicate event does not spawn twice; seeded repeat is reproducible
+  ---
+  duration_ms: 0.382309
+  ...
+# Subtest: declarative VM honors conditions and rejects arbitrary instructions
+ok 42 - declarative VM honors conditions and rejects arbitrary instructions
+  ---
+  duration_ms: 0.383001
+  ...
+# Subtest: integration runs motion hook, pose, and draw list
+ok 43 - integration runs motion hook, pose, and draw list
+  ---
+  duration_ms: 1.004562
+  ...
+# Subtest: differential fixtures match extracted target pure functions
+ok 44 - differential fixtures match extracted target pure functions
+  ---
+  duration_ms: 10.284567
+  ...
+# Subtest: 148 eligible profiles match 2072 changed-input source results
+ok 45 - 148 eligible profiles match 2072 changed-input source results
+  ---
+  duration_ms: 4.960063
+  ...
+# Subtest: disputed float profile stays disabled
+ok 46 - disputed float profile stays disabled
+  ---
+  duration_ms: 0.670959
+  ...
+# Subtest: vehicle and seat keep their shared dynamic float delta
+ok 47 - vehicle and seat keep their shared dynamic float delta
+  ---
+  duration_ms: 0.41032
+  ...
+# Subtest: pixel sampler matches five isolated source crop fixtures
+ok 48 - pixel sampler matches five isolated source crop fixtures
+  ---
+  duration_ms: 0.91792
+  ...
+# Subtest: a captured later frame normalizes to a local offset, not a permanent phase
+ok 49 - a captured later frame normalizes to a local offset, not a permanent phase
+  ---
+  duration_ms: 0.905609
+  ...
+# Subtest: sprite clock, pulse and additive flag survive independent sampling
+ok 50 - sprite clock, pulse and additive flag survive independent sampling
+  ---
+  duration_ms: 0.218177
+  ...
+1..50
+# tests 50
+# suites 0
+# pass 50
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 378.939683

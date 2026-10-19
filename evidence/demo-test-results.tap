@@ -1,0 +1,253 @@
+TAP version 13
+# 2072 changed-input lift comparisons
+# Subtest: 64x64 Morty airborne sequences move both rows without changing pixel size
+ok 1 - 64x64 Morty airborne sequences move both rows without changing pixel size
+  ---
+  duration_ms: 2.823038
+  ...
+# Subtest: clockFrames changes 32px Golden Aura sprites from source cell sequence
+ok 2 - clockFrames changes 32px Golden Aura sprites from source cell sequence
+  ---
+  duration_ms: 0.927164
+  ...
+# Subtest: Golden Aura additive blending and flicker reach normalized draw calls
+ok 3 - Golden Aura additive blending and flicker reach normalized draw calls
+  ---
+  duration_ms: 2.552446
+  ...
+# Subtest: dark aura uses normal blend even when its scale flickers
+ok 4 - dark aura uses normal blend even when its scale flickers
+  ---
+  duration_ms: 0.304094
+  ...
+# Subtest: public pulse uses independent x and y periods
+ok 5 - public pulse uses independent x and y periods
+  ---
+  duration_ms: 0.644597
+  ...
+# Subtest: known floating items bob automatically without the generic float override
+ok 6 - known floating items bob automatically without the generic float override
+  ---
+  duration_ms: 2.75372
+  ...
+# Subtest: floating vehicle and seated pixels share the oscillatory delta
+ok 7 - floating vehicle and seated pixels share the oscillatory delta
+  ---
+  duration_ms: 1.318447
+  ...
+# Subtest: disagreeing still versus source profiles are not silently enabled
+ok 8 - disagreeing still versus source profiles are not silently enabled
+  ---
+  duration_ms: 0.141482
+  ...
+# Subtest: public fallback keeps top-left origin, full cell size and stacked rows separate
+ok 9 - public fallback keeps top-left origin, full cell size and stacked rows separate
+  ---
+  duration_ms: 0.385711
+  ...
+# Subtest: all eligible default-state profiles agree with changed-input source fixtures
+ok 10 - all eligible default-state profiles agree with changed-input source fixtures
+  ---
+  duration_ms: 7.965696
+  ...
+# Subtest: texture edge clamping and pet wrapping match isolated source pixels
+ok 11 - texture edge clamping and pet wrapping match isolated source pixels
+  ---
+  duration_ms: 0.675651
+  ...
+# Subtest: Mage's Orb starts from its actual frame cell instead of adding the capture-phase offset
+ok 12 - Mage's Orb starts from its actual frame cell instead of adding the capture-phase offset
+  ---
+  duration_ms: 0.415137
+  ...
+# Subtest: Pineapple Chakram particles orbit in body space and change occlusion pass
+ok 13 - Pineapple Chakram particles orbit in body space and change occlusion pass
+  ---
+  duration_ms: 0.736155
+  ...
+# Subtest: archive compiles all 314 renderer files with only identical-attribute repairs
+ok 14 - archive compiles all 314 renderer files with only identical-attribute repairs
+  ---
+  duration_ms: 32.062825
+  ...
+# Subtest: Riding Cloud floats at idle, blinks on an ambient clock, and is not horse-gait driven
+ok 15 - Riding Cloud floats at idle, blinks on an ambient clock, and is not horse-gait driven
+  ---
+  duration_ms: 4.86362
+  ...
+# Subtest: split horse-sit mounts move rider and opposing halves, stop idle, and skip air
+ok 16 - split horse-sit mounts move rider and opposing halves, stop idle, and skip air
+  ---
+  duration_ms: 20.177697
+  ...
+# Subtest: one-piece mounts never receive inferred opposing halves
+ok 17 - one-piece mounts never receive inferred opposing halves
+  ---
+  duration_ms: 115.887526
+  ...
+# Subtest: Cumulus and Royal Cumulus use authored 1200ms idle and 600ms movement clips
+ok 18 - Cumulus and Royal Cumulus use authored 1200ms idle and 600ms movement clips
+  ---
+  duration_ms: 3.293456
+  ...
+# Subtest: Riding Bilby resolves XML Idle/Walk/Jump/Fall, retaining both sides
+ok 19 - Riding Bilby resolves XML Idle/Walk/Jump/Fall, retaining both sides
+  ---
+  duration_ms: 0.965209
+  ...
+# Subtest: Starry Night Aura uses six 64px frames over 1200ms
+ok 20 - Starry Night Aura uses six 64px frames over 1200ms
+  ---
+  duration_ms: 1.178228
+  ...
+# Subtest: Dirt, Twilight and Infinity aura particle-backed paths produce finite sprites
+ok 21 - Dirt, Twilight and Infinity aura particle-backed paths produce finite sprites
+  ---
+  duration_ms: 11.324673
+  ...
+# Subtest: petCells use total duration, switch motion row, and follower lags reversal
+ok 22 - petCells use total duration, switch motion row, and follower lags reversal
+  ---
+  duration_ms: 0.548763
+  ...
+# Subtest: all catalog items remain finite with XML, pet and mount motion in twelve states/times
+ok 23 - all catalog items remain finite with XML, pet and mount motion in twelve states/times
+  ---
+  duration_ms: 723.511324
+  ...
+# Catalog structural audit: 16324 cases; 197516 calls
+# Subtest: full public catalog: 4081 unique items in all ten slots
+ok 24 - full public catalog: 4081 unique items in all ten slots
+  ---
+  duration_ms: 1.881668
+  ...
+# Subtest: all public seated items retain every seat sprite
+ok 25 - all public seated items retain every seat sprite
+  ---
+  duration_ms: 6.776879
+  ...
+# Subtest: all catalog records have finite rendering geometry in four movement states
+ok 26 - all catalog records have finite rendering geometry in four movement states
+  ---
+  duration_ms: 3945.029439
+  ...
+# Subtest: static hand pose does not override walking, airborne or punch arms
+ok 27 - static hand pose does not override walking, airborne or punch arms
+  ---
+  duration_ms: 0.638856
+  ...
+# Subtest: items without authored angles do not erase an earlier neutral pose
+ok 28 - items without authored angles do not erase an earlier neutral pose
+  ---
+  duration_ms: 0.175082
+  ...
+# Subtest: ridingstill is explicit, public arm pose held, punch is not overwritten
+ok 29 - ridingstill is explicit, public arm pose held, punch is not overwritten
+  ---
+  duration_ms: 1.263481
+  ...
+# Subtest: mount state descriptor wins over held-item descriptor independent of equip order
+ok 30 - mount state descriptor wins over held-item descriptor independent of equip order
+  ---
+  duration_ms: 0.311483
+  ...
+# Subtest: zero lift is retained and not replaced by unrelated floating face item
+ok 31 - zero lift is retained and not replaced by unrelated floating face item
+  ---
+  duration_ms: 1.137858
+  ...
+# Subtest: a floating face item is not a seated vehicle; scooter is not seated
+ok 32 - a floating face item is not a seated vehicle; scooter is not seated
+  ---
+  duration_ms: 0.563657
+  ...
+# Subtest: CyberCycle arm still is resolved once, not duplicated as body sprites
+ok 33 - CyberCycle arm still is resolved once, not duplicated as body sprites
+  ---
+  duration_ms: 0.293589
+  ...
+# Subtest: held item reference angle and sleeve transform survive normalization
+ok 34 - held item reference angle and sleeve transform survive normalization
+  ---
+  duration_ms: 2.977111
+  ...
+# Subtest: mount sequences preserve row offsets, seat pixels and authored positions
+ok 35 - mount sequences preserve row offsets, seat pixels and authored positions
+  ---
+  duration_ms: 0.95275
+  ...
+# Subtest: representative mounts and floaters do not collapse into the same configuration
+ok 36 - representative mounts and floaters do not collapse into the same configuration
+  ---
+  duration_ms: 20.207964
+  ...
+# 50 state-gated mount sequences checked
+# Subtest: floating travel eases to opposite 45 degree arms and holds in either facing
+ok 37 - floating travel eases to opposite 45 degree arms and holds in either facing
+  ---
+  duration_ms: 14.58091
+  ...
+# Subtest: stopping eases floating arms back to neutral instead of snapping or keeping spread
+ok 38 - stopping eases floating arms back to neutral instead of snapping or keeping spread
+  ---
+  duration_ms: 3.691281
+  ...
+# Subtest: floating arm spread never suppresses a punch or an airborne pose
+ok 39 - floating arm spread never suppresses a punch or an airborne pose
+  ---
+  duration_ms: 2.411779
+  ...
+# Subtest: ordinary nonfloating clothing does not receive the floating travel arm pose
+ok 40 - ordinary nonfloating clothing does not receive the floating travel arm pose
+  ---
+  duration_ms: 4.037254
+  ...
+# Subtest: all four Morty variants hold a neutral ground cell and flap only airborne
+ok 41 - all four Morty variants hold a neutral ground cell and flap only airborne
+  ---
+  duration_ms: 2.828637
+  ...
+# Subtest: mounts have distinct stationary and moving clips, including raw still mounts
+ok 42 - mounts have distinct stationary and moving clips, including raw still mounts
+  ---
+  duration_ms: 2.016797
+  ...
+# Subtest: travel gating applies catalog-wide to every available mount travel sequence
+ok 43 - travel gating applies catalog-wide to every available mount travel sequence
+  ---
+  duration_ms: 84.850095
+  ...
+# Subtest: body and floating owner share total lift, not just the sine delta
+ok 44 - body and floating owner share total lift, not just the sine delta
+  ---
+  duration_ms: 3.339789
+  ...
+# Subtest: the player entry point routes item frames and rig from the same motion frame
+ok 45 - the player entry point routes item frames and rig from the same motion frame
+  ---
+  duration_ms: 1.829959
+  ...
+# Subtest: ambient FX clocks continue while grounded; idle is not a global freeze
+ok 46 - ambient FX clocks continue while grounded; idle is not a global freeze
+  ---
+  duration_ms: 3.302005
+  ...
+# Subtest: changing travel direction does not restart a mount cycle
+ok 47 - changing travel direction does not restart a mount cycle
+  ---
+  duration_ms: 1.188368
+  ...
+# Subtest: manual generic float replaces the item float instead of stacking a second lift
+ok 48 - manual generic float replaces the item float instead of stacking a second lift
+  ---
+  duration_ms: 0.315226
+  ...
+1..48
+# tests 48
+# suites 0
+# pass 48
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5819.595583

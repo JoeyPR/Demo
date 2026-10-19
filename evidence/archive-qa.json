@@ -1,0 +1,49 @@
+{
+  "revision": "archive-mount-pet-mobile",
+  "officialClientParity": false,
+  "archive": {
+    "url": "https://www.mediafire.com/file/r8ik69x40n43hzv/player+stuff.zip/file",
+    "sha256": "36d809873a73db0e479339f238a0e481e8e7ff33ea446fcb223cbdd58d0aa256",
+    "parsedRendererFiles": 314,
+    "mappedCatalogItems": 314,
+    "matchedCapturedSpritePieces": 664,
+    "itemsWithBoundAnimationTracks": 198,
+    "inferredSplitSeatedGaitItems": 104,
+    "petCellMetadataRecords": 360,
+    "linkedPetCellFollowers": 352,
+    "meaning": "Structural and reference-runtime coverage, not official visual correctness"
+  },
+  "automated": {
+    "demoTestsPassed": 48,
+    "handoffTestsPassed": 61,
+    "archiveCatalogStateTimeCases": 48972
+  },
+  "browser": {
+    "startupIdle": true,
+    "ridingCloudIdleBobAndMovingArms": true,
+    "stickHorseMoveStopGait": true,
+    "xmlIdleTracksObserved": [15934, 15936, 15398],
+    "auraRenderPathsObserved": [15654, 14420, 14800, 14086],
+    "calfLeashWalkAndReverse": true,
+    "mobilePanelsSearchEmptyRecoveryUnequipAndTint": true,
+    "mobilePngExport": true,
+    "mobilePaginationForwardAndBack": true,
+    "desktopToMobileAndBack": true,
+    "phone": {"viewportWidth": 375, "documentWidth": 375, "height": 812},
+    "shortPhone": {"viewportWidth": 375, "documentWidth": 375, "height": 540, "itemViewportHeight": 108},
+    "uncaughtPageErrors": [],
+    "pngExports": [
+      {"pixelsPerTile": 32, "width": 128, "height": 128},
+      {"pixelsPerTile": 64, "width": 256, "height": 256},
+      {"pixelsPerTile": 128, "width": 512, "height": 512},
+      {"pixelsPerTile": 256, "width": 1024, "height": 1024}
+    ]
+  },
+  "limitations": [
+    "Split seated gait and follower motion use reference tuning, not native timing constants.",
+    "XML frame tracks are source-assisted; generalized render rules and particle semantics are partial.",
+    "Pet AI, perching, terrain, combat, world trails and leash strings are incomplete.",
+    "Cumulus native float curve remains unresolved even though idle/move XML frame clips are now sourced.",
+    "Three catalog renderer references have no XML in the archive."
+  ]
+}
