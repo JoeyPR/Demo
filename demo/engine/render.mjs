@@ -105,7 +105,7 @@ function sampleItem(item,motion,pose,catalog,profile) {
     const call=rawCall(record,record.pass??fallbackPiecePass(record,item),local);
     if(record.skin) call.tint="SKIN";
     call.owner=item.id;
-    call.xmlParticle=!!record.xmlParticle;
+    call.xmlParticle=!!record.xmlParticle;call.fxEngine=!!record.fxEngine;
     call.attachment=attachment;
     call.world=attachment==="world";
     call.unlifted=attachment==="mount"||attachment==="world";

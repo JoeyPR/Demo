@@ -302,7 +302,7 @@ export function advanceXmlRenderer(item,timeMs,motion) {
       children(n,"Set").some(c=>c.a.name==="flip"&&c.v==="false"));
     if(noFacing)for(const p of item.pieces)p.noFacing=true;
   }
-  if(renderer.particles?.length)
+  if(renderer.particles?.length&&!item.skipLegacyParticles)
     item.pieces.push(...particleRuns(renderer,visibleRules(renderer,motion,states),timeMs,motion,item,states));
   for(const p of item.pieces) {
     if(!p.xmlSprite)continue;
