@@ -9,7 +9,8 @@ import {normalizeCatalogItem,advanceCatalogItem} from "./engine/catalog-adapter.
 import {drawBounds} from "./engine/draw-bounds.mjs";
 import {resolveAbilities} from "./engine/abilities.mjs";
 
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s), $=s=>[...document.querySelectorAll(s)];
+const moduleURL=path=>new URL(path,import.meta.url);
 const world=$("#world"),ctx=world.getContext("2d"),avatar=document.createElement("canvas");
 const avatarCtx=avatar.getContext("2d"),atlases=new Map(),images=new Map();
 const atlasLoads=new Map(),failedAtlases=new Set();
@@ -61,7 +62,7 @@ function loadAtlas(name) {
   if(atlasLoads.has(name))return atlasLoads.get(name);
   const load=(async()=>{
     try {
-      const image=new Image();image.crossOrigin="anonymous";image.src=`./assets/${name}`;await image.decode();
+      const image=new Image();image.crossOrigin="anonymous";image.src=moduleURL(`./assets/${name}`).href;await image.decode();
       images.set(name,image);
       const atlas=registerAtlas(image),tint=atlas.tintedCrop;
       atlas.tintedCrop=call=>{
@@ -510,17 +511,17 @@ function setupControls() {
 }
 async function init() {
   try{
-    const response=await fetch("./catalog.json");if(!response.ok)throw Error("Catalog did not load");
+    const response=await fetch(moduleURL("./catalog.json"));if(!response.ok)throw Error("Catalog did not load");
     state.catalog=await response.json();
-    const liftData=await (await fetch("./lift-profiles.json")).json();
+    const liftData=await (await fetch(moduleURL("./lift-profiles.json"))).json();
     state.catalog.liftProfiles=Object.fromEntries(liftData.profiles.map(p=>[p.id,p]));
-    const rendererResponse=await fetch("./renderer-data.json");
+    const rendererResponse=await fetch(moduleURL("./renderer-data.json"));
     if(!rendererResponse.ok)throw Error("Renderer XML data failed to load");
     state.catalog.renderers=(await rendererResponse.json()).scripts;
-    try{const fx=await fetch("./fx-data.json");if(fx.ok){const d=await fx.json();state.catalog.fxRenderers=d.scripts??d;}}catch{}
-    try{const pd=await fetch("./punch-data.json");if(pd.ok)state.catalog.punchData=await pd.json();}catch{}
-    state.nativeMetadata=await (await fetch("./native-metadata.json")).json();
-    state.abilityRegistry=await (await fetch("./ability-registry.json")).json();
+    try{const fx=await fetch(moduleURL("./fx-data.json"));if(fx.ok){const d=await fx.json();state.catalog.fxRenderers=d.scripts??d;}}catch{}
+    try{const pd=await fetch(moduleURL("./punch-data.json"));if(pd.ok)state.catalog.punchData=await pd.json();}catch{}
+    state.nativeMetadata=await (await fetch(moduleURL("./native-metadata.json"))).json();
+    state.abilityRegistry=await (await fetch(moduleURL("./ability-registry.json"))).json();
     // Original procedural reference art; native sprite art is not fabricated.
     const sheet=document.createElement("canvas");sheet.width=192;sheet.height=32;
     const g=sheet.getContext("2d");g.fillStyle="white";g.strokeStyle="white";g.lineWidth=2;
