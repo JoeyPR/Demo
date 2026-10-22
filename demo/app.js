@@ -9,7 +9,7 @@ import {normalizeCatalogItem,advanceCatalogItem} from "./engine/catalog-adapter.
 import {drawBounds} from "./engine/draw-bounds.mjs";
 import {resolveAbilities} from "./engine/abilities.mjs";
 
-const $=s=>document.querySelector(s), $=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const moduleURL=path=>new URL(path,import.meta.url);
 const world=$("#world"),ctx=world.getContext("2d"),avatar=document.createElement("canvas");
 const avatarCtx=avatar.getContext("2d"),atlases=new Map(),images=new Map();
