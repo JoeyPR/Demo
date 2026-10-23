@@ -42,9 +42,8 @@
 .sbtn:nth-of-type(3){top:calc(362*var(--u))}
 .sbtn:nth-of-type(4){top:calc(469*var(--u))}
 .sbtn:nth-of-type(5){top:calc(576*var(--u))}
-}
 
 /* categorical options + custom panel sit in the grid area, below the search row */
 #optsrow{top:calc(110*var(--u))}
 #custom-tools{top:calc(110*var(--u))}
-.tab{font-size:calc(19*var(--u));padding:calc(8*var(--u)) calc(2*var(--u))}
+}

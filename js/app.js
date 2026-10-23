@@ -151,6 +151,10 @@ function drawGround(w, h, ground, s, scroll) {
   }
 }
 function renderAvatar() {
+  /* dynamically load any atlas a draw call references but we have not
+     registered yet (same as the Demo boot) — pieces appear next frame */
+  const missing = [...new Set(state.lastResult.calls.filter(c => !atlases.has(c.atlas)).map(c => c.atlas))];
+  for (const name of missing) loadAtlas(name);
   const calls = state.lastResult.calls.filter(c => !state.hiddenPasses.has(c.pass) && atlases.has(c.atlas));
   const bounds = drawBounds(calls), scale = state.resolution / 32;
   const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
@@ -192,8 +196,8 @@ async function loadAncestrals() {
     state.ancestralMap = map;
   } catch { state.ancestralMap = new Map(); }
 }
-const { drawAncestral } = await import("../docs/ancestral/renderer.js");
-const ANCESTRAL_SHEETS = { "particles.png": true, "particles2.png": true, "tiles_page1.png": true };
+const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
+const ancestralTint = new TintCache();
 function drawAncestralAura(s, rootX, ground, cameraY, frame) {
   const item = state.equipped.get(9);
   if (!item || !state.ancestralMap) return;
@@ -202,7 +206,10 @@ function drawAncestralAura(s, rootX, ground, cameraY, frame) {
   const lift = state.lastResult.lift?.y ?? 0;
   /* the character's current position in the fx-local world frame */
   const charX = 16 + frame.x, charY = 32 + frame.y + lift;
-  const base = [s, 0, 0, s, rootX + 16 * s - charX * s, ground - 32 * s - cameraY];
+  /* base must map the fx anchor (16,32) onto the character's CURRENT canvas
+     position — fxEntries already offsets world-anchored entries by their birth
+     positions, so the base itself carries no character motion */
+  const base = [s, 0, 0, s, rootX, ground - 32 * s + (frame.y + lift) * s - cameraY];
   const motionState = {
     x: charX, y: charY,
     facing: motion.facing,
@@ -211,7 +218,11 @@ function drawAncestralAura(s, rootX, ground, cameraY, frame) {
   state.ancestralPath.push([state.clock, charX, charY, motion.facing]);
   while (state.ancestralPath.length > 240) state.ancestralPath.shift();
   drawAncestral(ctx, info.level, state.clock, {
-    facing: motion.facing, sheets: images, base, motion: motionState
+    facing: motion.facing,
+    /* the ancestral renderer reads sheets as a plain object keyed by name */
+    sheets: Object.fromEntries(images),
+    tint: ancestralTint,
+    base, motion: motionState
   });
 }
 
@@ -263,10 +274,10 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
   /* ancestral aura */
   drawAncestralAura(s, rootX, ground, cameraY, frame);
-  /* name plate above the head */
+  /* name plate above the head (Website plate system, drawn at world scale) */
   if (P.plate) {
     const t = state.clock / 1000;
-    P.plate.draw(c, w / 2, rootY + (result.lift?.y ?? 0) * s - 6 * s, Math.max(1, s * 0.42), t);
+    P.plate.draw(c, w / 2, rootY + (result.lift?.y ?? 0) * s - 6 * s, s, t);
   }
   /* weather foreground layer (rain, snow, particles in front) */
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
@@ -290,6 +301,47 @@ document.querySelector('[data-a="export"]')?.addEventListener("click", () => {
     P.toast(`Exported ${avatar.width} × ${avatar.height} PNG`);
   } catch { P.toast("Export blocked by image security."); }
 });
+
+/* ---------------- dyes (Makeup tab) ------------------------------------- */
+P.dyes = { hair: [255, 255, 255], whites: [255, 255, 255], pupils: [0, 0, 0] };
+P.applyDyes = function () {
+  tintSheets(["player_hair.png", "player_hairhair.png"], P.dyes.hair);
+  tintEyes();
+};
+function tintSheets(names, rgb) {
+  const t = rgb.map(v => v / 255);
+  for (const name of names) {
+    const src = images.get(name);
+    if (!src || !src.complete || !src.naturalWidth) continue;
+    const c = document.createElement("canvas");
+    c.width = src.naturalWidth; c.height = src.naturalHeight;
+    const g = c.getContext("2d", { willReadFrequently: true });
+    g.drawImage(src, 0, 0);
+    const id = g.getImageData(0, 0, c.width, c.height);
+    for (let i = 0; i < id.data.length; i += 4) {
+      id.data[i] *= t[0]; id.data[i + 1] *= t[1]; id.data[i + 2] *= t[2];
+    }
+    g.putImageData(id, 0, 0);
+    atlases.set(name, registerAtlas(c));
+  }
+}
+function tintEyes() {
+  const name = "player_eyes.png", src = images.get(name);
+  if (!src || !src.complete || !src.naturalWidth) return;
+  const wT = P.dyes.whites.map(v => v / 255), pT = P.dyes.pupils.map(v => v / 255);
+  const c = document.createElement("canvas");
+  c.width = src.naturalWidth; c.height = src.naturalHeight;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(src, 0, 0);
+  const id = g.getImageData(0, 0, c.width, c.height);
+  for (let i = 0; i < id.data.length; i += 4) {
+    const lum = (id.data[i] + id.data[i + 1] + id.data[i + 2]) / 3;
+    const t = lum < 60 ? pT : wT;   /* dark pixels are the pupils, light the sclera */
+    id.data[i] *= t[0]; id.data[i + 1] *= t[1]; id.data[i + 2] *= t[2];
+  }
+  g.putImageData(id, 0, 0);
+  atlases.set(name, registerAtlas(c));
+}
 
 /* ---------------- thumbnails for the grid ------------------------------- */
 P.thumb = function (raw, size = 64) {
@@ -341,6 +393,20 @@ window.plannerApp = state;   /* debug/QA hook */
       "player_shirt.png", "player_pants.png", "player_handitem.png", "player_back.png", "player_horsepants.png",
       "particles.png", "particles2.png", "tiles_page1.png"];
     await Promise.all(names.map(loadAtlas));
+
+    /* procedural reference FX sheet (same as the Demo boot): plain shapes
+       the fx renderers reference when an item has no dedicated particles */
+    {
+      const c = document.createElement("canvas");
+      c.width = c.height = 32;
+      const g = c.getContext("2d");
+      g.fillStyle = "#fff";
+      g.beginPath(); g.arc(10, 10, 7, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.moveTo(6, 24); g.lineTo(16, 14); g.lineTo(26, 24); g.closePath(); g.fill();
+      g.beginPath(); g.arc(18, 6, 3, 0, Math.PI * 2); g.fill();
+      images.set("reference-fx.png", c);
+      atlases.set("reference-fx.png", registerAtlas(c));
+    }
 
     motion = new PreviewMotion();
     player = new PlannerPlayer(state.catalog);

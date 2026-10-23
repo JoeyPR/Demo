@@ -87,11 +87,36 @@
     }
   }
 
+  P.on('tab', tab => {
+    if (tab !== 'wrench') return;
+    renderWrenchCat();
+  });
   P.on('wrench-cat', which => render(which));
   P.on('wrench-data', () => { if (!P.$('#optsrow').hidden) render(P.store.get('wrenchCat', 'styles')); });
+
+  function renderWrenchCat() {
+    const cat = P.$('#category');
+    cat.replaceChildren();
+    cat.hidden = false;
+    for (const label of ['Styles', 'Decorations']) {
+      const op = document.createElement('option');
+      op.value = label.toLowerCase(); op.textContent = label;
+      cat.append(op);
+    }
+    const saved = P.store.get('wrenchCat', 'styles');
+    if ([...cat.options].some(x => x.value === saved)) cat.value = saved;
+    render(saved);
+  }
+
+  P.$('#category').addEventListener('change', () => {
+    if (P.tabs.cur !== 'wrench') return;
+    P.store.set('wrenchCat', P.$('#category').value);
+    P.emit('wrench-cat', P.$('#category').value);
+  });
 
   fetch('data/wrench.json').then(r => r.json()).then(d => {
     data = d; P.wrenchData = d;
     P.emit('wrench-data');
+    if (P.tabs.cur === 'wrench') renderWrenchCat();
   }).catch(() => P.toast('Wrench data unavailable'));
 })();

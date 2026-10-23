@@ -85,27 +85,54 @@ The old "render lab" UI (demo/style.css + demo/app.js) was replaced by the
 NewPlanner UI shell (branch planner-ui2). The Demo rendering engine is
 untouched and still boots from demo/engine/.
 
-- index.html — NewPlanner shell: pads, handle-driven bottom drawer, tabs
-  (CUSTOM / ALL / WEATHER / WRENCH), side panel, preview canvas (1920x1080).
-- js/ — NewPlanner's P-bus systems adapted to the Demo catalog:
-  - js/app.js (module) — boots the Demo engine (PlannerPlayer, PreviewMotion,
-    drawCanvas, atlas tinting) and draws on P.on("frame"): weather scene ->
-    ground -> avatar -> ancestral aura -> name plate -> weather foreground.
-    Exposes window.plannerApp as a QA hook.
-  - js/grid.js — catalog grid with Demo atlas thumbnails; click equips via
-    P.emit("equip", {id}).
-  - js/weather.js + weather-engine/ + data/variants/base/ + sheets/ — the
-    growtopia-weather package; the WEATHER tab is a categorical selector
-    listing all 81 weathers.
-  - js/plate.js — the Website repo's name-plate system: GrowID, player titles,
-    badges, role icons, flags, guild role tags, wrench icon with
-    styles/decorations (wobble, green base tint).
-  - js/naming-ui.js — the CUSTOM tab panel driving the plate state.
-  - js/wrench-ui.js — the WRENCH tab (styles/decorations menus, canvas
-    previews) from the Website wrench system.
+- index.html — NewPlanner shell: pads, handle-driven bottom drawer, side
+  panel, preview canvas (1920x1080), scripts core -> pads -> tabs -> grid ->
+  side -> weather -> plate -> customization -> wrench-ui -> handle -> preview
+  -> js/app.js (module).
+- Tabs (js/tabs.js): the planner's six image tabs — Equipped / Favorites /
+  Clothing / Custom / Player Customization / Makeup — plus two generated
+  image tabs, Weather and Wrench (img/tab-weather*.png, img/tab-wrench*.png
+  from tools/make-tabs.mjs). Tab state lives in #main[data-t].
+- js/grid.js — donor visibility rules (equip -> it.eq, fav -> it.fav, else
+  it.tab === tab) over the Demo catalog (tab 'cloth') + the planner's eight
+  non-wearable custom placeholders (ids 200001-200008, tab 'custom'). FAV
+  quick-drawer + "No items found" empty state like the donor.
+- js/customization.js (replaces naming-ui.js) — the donor's two panels:
+  - Player Customization tab: GrowID (typed live, no panel rebuild), role
+    icons, country flag (img/flags/index.json + Intl.DisplayNames), guild
+    (flag item id + elder/co/leader role), skin swatches, and the Website
+    title grid (Name / Badges / Title icons categories).
+  - Makeup tab: the donor's dye cards (Hair Dye / Eye Drops / Contact
+    Lenses with RGB-shifting actions + uses history + reset), applied to
+    the Demo engine's player sheets via P.applyDyes (per-pixel multiply;
+    eyes sheet separates pupils (dark px) from sclera (light px)).
+- js/plate.js — a faithful port of the Website repo's plate system:
+  buildParts + draw with its exact layout math (icon sizing, guild banner,
+  badge priority guild > title badge > flag, small-caps guild tags, mirror
+  title icons), name styles (legend code-shadow, l125/mentor/dr rgba fills,
+  party/g4g per-letter rainbow with swell scaling), g4g badge glow,
+  l125/mentor pulse, and the wrench (green-tinted base, styles from
+  data/wrench.json, centered vs offset decoration placement, wobble).
+  State: P.store 'plate' (growId, flag, role, titles, guildRole,
+  guildFlag, wrenchStyle, wrenchDecoration). setGrowId is silent (no UI
+  rebuild while typing). Style 0 = no wrench, 32 = base green wrench.
+- js/weather.js + weather-engine/ + data/variants/base/ + sheets/ — the
+  growtopia-weather package; the WEATHER tab is a categorical selector
+  (category dropdown + one button per weather) listing all 81 weathers.
+- js/wrench-ui.js — the WRENCH tab (styles/decorations menus with canvas
+  previews) from the Website wrench system.
+- js/app.js (module) — boots the Demo engine and draws on P.on("frame"):
+  weather scene -> ground -> shadow -> avatar -> ancestral aura -> name
+  plate -> weather foreground. Also: reference-fx.png procedural sheet
+  registration (like the Demo boot), dynamic loading of atlases referenced
+  by draw calls but not yet registered, and the dye tint plumbing
+  (P.dyes / P.applyDyes). Exposes window.plannerApp as a QA hook.
 - docs/ancestral/ — the Planner-ANCESTRAL system (renderer.js + data.json);
   all 30 leveled ancestrals (5 families x 6 levels) render their per-level
-  aura when equipped in slot 9.
+  aura when equipped in slot 9. The renderer takes sheets as a plain object
+  (Object.fromEntries of the atlas Map) and a shared TintCache; the base
+  transform maps the fx anchor (16,32) to the character's current canvas
+  position (no double motion subtraction; fxEntries handles world anchors).
 - docs/XML-RENDERER-ANALYSIS.md + docs/xml-renderer-library/ — analysis of
   the growtopia-xml-renderer-library and a reference copy (manifests,
   runtime, source XML).
