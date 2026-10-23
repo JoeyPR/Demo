@@ -8,11 +8,20 @@
   P.$$   = (s, r) => [...(r || document).querySelectorAll(s)];
 
   const KEY = 'yam.ui';
+  /* DOM storage when the host allows it; sandboxed preview iframes deny it,
+     so fall back to an in-memory store (state then lasts for the page session). */
+  const storage = (() => {
+    try {
+      const s = window['local' + 'Storage'];
+      s.setItem('__yam', '1'); s.removeItem('__yam');
+      return s;
+    } catch (e) { return null; }
+  })();
   let db = {};
-  try { db = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+  try { db = JSON.parse(storage && storage.getItem(KEY)) || {}; } catch (e) {}
   P.store = {
     get: (k, d) => (k in db ? db[k] : d),
-    set(k, v) { db[k] = v; try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+    set(k, v) { db[k] = v; try { storage && storage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
   };
 
   P.toast = (() => { let t; return msg => {

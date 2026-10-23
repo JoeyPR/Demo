@@ -9,12 +9,15 @@ import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
 import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
 import { WeatherRenderer, loadSheets } from "../weather-engine/weather-renderer.js";
+import { registerBlocks, renderWorld, BLOCKS, TILE, WORLD_W } from "./land-system.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
 const world = $("#pv"), ctx = world.getContext("2d");
 const avatar = document.createElement("canvas"), avatarCtx = avatar.getContext("2d");
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
+const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
+const landImages = new Map(), landLoads = new Map();
 
 const SKINS = [
   { name: "Warm peach", rgb: [255, 206, 180, 255] },
@@ -29,7 +32,8 @@ const state = {
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, ancestralMap: null,
-  ancestralPath: [], abilities: null, hiddenPasses: new Set()
+  ancestralPath: [], abilities: null, hiddenPasses: new Set(),
+  landBlock: null, landWorld: null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -186,6 +190,51 @@ async function setWeather(key) {
 }
 P.on("weather", key => setWeather(key));
 
+/* ---------------- land -------------------------------------------------- */
+/* The land system (land-system.mjs, from the Planner-LANDsystem package):
+   selecting a foreground block re-renders the ground strip the player walks
+   on, using the package's autotiling against a uniform filled world. No
+   background blocks and no placement — the planner ground is visual only. */
+function landPage(name) {
+  if (landImages.has(name)) return Promise.resolve(landImages.get(name));
+  if (landLoads.has(name)) return landLoads.get(name);
+  const load = new Promise(res => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => { landImages.set(name, img); res(img); };
+    img.onerror = () => { landImages.set(name, null); res(null); };
+    img.src = moduleURL(`../sheets/tiles/${name}.png`).href;
+  });
+  landLoads.set(name, load);
+  return load;
+}
+function setLand(id) {
+  if (id == null || id === "none" || !BLOCKS[id]) {
+    state.landBlock = null; state.landWorld = null;
+    return;
+  }
+  const def = BLOCKS[id];
+  landPage(def.page || "tiles_page1");
+  state.landBlock = id;
+  /* uniform world: rows 0-23 air, rows 24-59 the selected block — the top
+     row picks up the block's top-edge autotile variant, everything below is
+     interior; world-edge columns read as connected so scrolling wraps cleanly */
+  const fg = [];
+  for (let y = 0; y < 60; y++) fg.push(new Array(WORLD_W).fill(y < 24 ? 0 : id));
+  state.landWorld = { seed: 1, fg, bg: fg.map(r => r.map(() => 0)), flip: {} };
+}
+P.on("land", id => setLand(id));
+function drawLandGround(w, h, ground, s, frame) {
+  const lw = Math.ceil(w / s), lh = Math.ceil((h - ground) / s) + 2;
+  if (landCanvas.width !== lw || landCanvas.height !== lh) { landCanvas.width = lw; landCanvas.height = lh; }
+  const span = WORLD_W * TILE;
+  const camX = ((frame.x % span) + span) % span;
+  landCtx.clearRect(0, 0, lw, lh);
+  renderWorld(landCtx, state.landWorld, page => landImages.get(page) ?? null,
+    camX, 24 * TILE, lw, lh, state.clock);
+  ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, ground, lw * s, lh * s);
+}
+
 /* ---------------- ancestral -------------------------------------------- */
 async function loadAncestrals() {
   try {
@@ -246,7 +295,9 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 
   const frame = state.lastFrame, result = state.lastResult;
   const s = Math.min(4, Math.max(3, w / 480));
-  const ground = h * 0.78;
+  /* ground line: keep the character standing clear of the inventory panel
+     (the panel's top edge sits ~500 CSS px above the window bottom at desktop scale) */
+  const ground = h * Math.min(0.78, Math.max(0.42, 1 - 500 / window.innerHeight));
   const headroom = Math.min(100, Math.max(4, ground - 32 * s + Math.min(0, (result.lift?.y ?? 0) * s) - 18));
   const cameraY = Math.min(0, frame.y * s + headroom);
   const scroll = frame.x * s;
@@ -266,8 +317,10 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.beginPath();
   c.ellipse(w / 2, ground + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
   c.fill();
-  /* ground strip over the weather scene so the player is anchored */
-  if (state.weatherRenderer) drawGround(w, h, ground, s, scroll);
+  /* ground strip over the weather scene so the player is anchored; the land
+     selection replaces the procedural ground in both scenes */
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame);
+  else if (state.weatherRenderer) drawGround(w, h, ground, s, scroll);
   /* avatar */
   renderAvatar();
   const b = state.avatarBounds;
@@ -418,6 +471,10 @@ window.plannerApp = state;   /* debug/QA hook */
     state.abilities = resolveAbilities([], state.abilityRegistry);
     motion.setAbilities(state.abilities);
     await loadAncestrals();
+    try {
+      const rows = await (await fetch(moduleURL("../data/land-blocks.json"))).json();
+      registerBlocks(rows);
+    } catch { /* land tab will report unavailable */ }
 
     state.ready = true;
     P.equippedIds = new Set();
@@ -427,6 +484,9 @@ window.plannerApp = state;   /* debug/QA hook */
     /* restore the saved weather */
     const saved = P.store.get("weather", "none");
     if (saved && saved !== "none") setWeather(saved);
+    /* restore the saved land block */
+    const savedLand = P.store.get("land", "none");
+    if (savedLand && savedLand !== "none") setLand(+savedLand);
   } catch (error) {
     console.error(error);
     $("#hud").textContent = "Unable to start: " + error.message;

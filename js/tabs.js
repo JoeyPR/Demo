@@ -1,6 +1,6 @@
-/* TABS: the six planner tabs (Equipped / Favorites / Clothing / Custom /
-   Player Customization / Makeup) + Weather and Wrench. Image tabs exactly
-   like the donor; weather + wrench reuse the same chrome. */
+/* TABS: the planner tabs (Equipped / Favorites / Clothing / Custom /
+   Player Customization / Makeup) + Weather, Land and Wrench. Image tabs exactly
+   like the donor; weather + land + wrench reuse the same chrome. */
 (function(){
   const TABS = [
     { id: 'equip',   label: 'Equipped' },
@@ -10,6 +10,7 @@
     { id: 'player',  label: 'Player Customization' },
     { id: 'makeup',  label: 'Makeup' },
     { id: 'weather', label: 'Weather' },
+    { id: 'land',    label: 'Land' },
     { id: 'wrench',  label: 'Wrench' }
   ];
   P.tabs = {

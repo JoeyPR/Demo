@@ -20,7 +20,7 @@
 
 /* tabs flush left */
 #tabs{left:calc(6*var(--u));top:calc(145*var(--u));width:calc(94*var(--u));height:calc(585*var(--u))}
-.tab{width:calc(94*var(--u));height:calc(97.5*var(--u))}
+.tab{width:calc(94*var(--u));height:calc(65*var(--u))}
 .tab img{height:100%}
 
 /* main drawer: search row + 5-column grid */

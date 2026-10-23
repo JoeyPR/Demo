@@ -10,7 +10,7 @@
     pv.mobile = mq.matches;
     pv.w = pv.mobile ? 1280 : 1920; pv.h = pv.mobile ? 720 : 1080;
     if (cv.width !== pv.w) { cv.width = pv.w; cv.height = pv.h; }
-    pv.scale = pv.mobile ? innerWidth * (907 / 923) / pv.w : Math.min(1, (innerWidth - 16) / pv.w, (innerHeight * .72) / pv.h);   // phone: fills the width
+    pv.scale = pv.mobile ? innerWidth * (907 / 923) / pv.w : Math.max(innerWidth / pv.w, innerHeight / pv.h);   // desktop: cover the window (world fills the screen, HUD overlays it) — phone: fills the width
     root.style.setProperty('--ps', pv.scale);
     P.emit('preview', pv);
   }

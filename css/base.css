@@ -56,4 +56,5 @@ img{display:block;pointer-events:none}
   background:var(--fill);border:2px solid var(--line);border-radius:var(--radius);
   box-shadow:2px 2px 0 #000;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.on{opacity:1}
-#hud{font-family:var(--font-rt);position:fixed;left:10px;top:8px;font-size:14px;color:#9fc4d4;z-index:9;pointer-events:none}
+#hud{font-family:var(--font-rt);position:fixed;left:10px;top:8px;font-size:14px;color:#cfe6f0;z-index:9;pointer-events:none;
+  background:rgba(5,18,27,.55);padding:4px 10px;border-radius:6px;text-shadow:0 1px 2px #000}

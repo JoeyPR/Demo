@@ -36,7 +36,7 @@ export function mountedGaitProfile(item) {
   if(!horseSeat||halves.some(p=>p.sw>32||p.sh>32)||new Set(halves.map(p=>p.sy)).size<2)return null;
   // Rider bob tuning: the moving-hop cycle runs slower than the original
   // reference tuning so mounted movement sways gently (see lift.mjs).
-  return {periodMs:805,hop:1.5,slide:1.25,evidence:"user-observed-split-animal-reference"};
+  return {periodMs:950,hop:1.5,slide:1.25,evidence:"user-observed-split-animal-reference"};
 }
 export function sampleMountedGait(item,motion) {
   const profile=mountedGaitProfile(item),state=locomotionState(motion);

@@ -11,9 +11,9 @@
     const [lo, hi] = range(); dy = Math.min(hi, Math.max(lo, v));
     root.style.setProperty('--dy', dy + 'px');
   };
-  /* first visit: start fully peeked so the player preview owns the screen;
-     drag the handle up to open the inventory */
-  if (Number.isNaN(dy)) { const [, hi] = range(); dy = hi; }
+  /* default: neutral position — inventory open with the search bar and a few
+     rows visible, pads sitting over the game view like the in-game HUD */
+  if (Number.isNaN(dy)) { dy = 0; }
   P.drawer = { get dy() { return dy; }, set: apply };
   apply(dy);
   addEventListener('resize', () => apply(dy));

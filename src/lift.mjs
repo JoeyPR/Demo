@@ -4,7 +4,7 @@ import {isFloatingItem,FLOATING_MOUNT_IDS} from "./motion-policy.mjs";
 // Rider bob tuning: mount up/down cycles run slower than the raw source
 // default-state constants so riding reads as a gentle sway instead of a
 // fast bounce. Amplitudes and base offsets are untouched.
-const RIDE_BOB_PERIOD_SCALE=1.75;
+const RIDE_BOB_PERIOD_SCALE=2.2;
 function rideProfile(profile) {
   return {...profile,periodMs:Math.max(1,Math.round(profile.periodMs*RIDE_BOB_PERIOD_SCALE))};
 }
