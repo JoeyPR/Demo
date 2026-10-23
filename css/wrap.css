@@ -1,10 +1,10 @@
-/* WRAP: the page background outside the Preview (Growtopia-style dark cyan-blue), plus the floating GrowTool logo above the Preview. */
+/* WRAP: the page background outside the Preview (Growtopia-style dark cyan-blue), plus the floating GrowTool logo pinned top-right. */
 #wrap{position:fixed;inset:0;z-index:-2;
   background:
     radial-gradient(ellipse 80% 60% at 50% 38%,rgba(40,150,190,.30),transparent 70%),
     repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 2px,transparent 2px 28px),
     linear-gradient(180deg,#0c2b3c 0%,#081c29 55%,#05121b 100%)}
-#logo{position:absolute;left:50%;bottom:100%;width:var(--logo-w,400px);margin-bottom:14px;
-  transform:translateX(-50%);animation:float 4.5s ease-in-out infinite;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));pointer-events:none}
-@keyframes float{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-16px)}}
+#logo{position:fixed;top:12px;right:14px;width:calc(var(--logo-w,400px)*.45);z-index:3;
+  animation:float 4.5s ease-in-out infinite;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));pointer-events:none}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}}
 @media (prefers-reduced-motion:reduce){#logo{animation:none}}

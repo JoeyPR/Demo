@@ -230,8 +230,12 @@ function drawLandGround(w, h, ground, s, frame) {
   const span = WORLD_W * TILE;
   const camX = ((frame.x % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
-  renderWorld(landCtx, state.landWorld, page => landImages.get(page) ?? null,
-    camX, 24 * TILE, lw, lh, state.clock);
+  const atlasFn = page => landImages.get(page) ?? null;
+  renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * TILE, lw, lh, state.clock);
+  /* the world is only WORLD_W tiles wide — when the viewport runs past its
+     right edge, draw the wrapped columns again on the right (the ground is a
+     uniform fill, so the seam is invisible) */
+  if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * TILE, lw, lh, state.clock);
   ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, ground, lw * s, lh * s);
 }
 

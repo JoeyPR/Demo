@@ -100,3 +100,7 @@
 /* empty states span the full grid row so they never wrap mid-word */
 #grid .empty{grid-column:1/-1}
 #quick .quick-hint{grid-column:1/-1;text-align:center}
+
+/* system-option tabs own the drawer body — the (empty) item grid is hidden
+   so its placeholder text can't show through behind the options */
+#main[data-t=weather] #grid,#main[data-t=land] #grid,#main[data-t=wrench] #grid{display:none}

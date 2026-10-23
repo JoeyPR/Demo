@@ -3,7 +3,8 @@
 @media (max-width:900px),(hover:none) and (pointer:coarse){
 :root{--u:calc(100vw / 923);--sh:calc(3*var(--u))}
 #ui{width:calc(923*var(--u));height:calc(885*var(--u));margin-left:calc(-461.5*var(--u))}
-#preview{top:calc(430*var(--u));--logo-w:460px}
+#preview{top:calc(430*var(--u))}
+#logo{--logo-w:250px;top:8px;right:8px}
 #hud{top:calc(8*var(--u));font-size:calc(22*var(--u))}
 
 /* pads: big, fixed inside the bottom of the preview box, side to side (do not move with the drawer) */
@@ -20,7 +21,7 @@
 
 /* tabs flush left */
 #tabs{left:calc(6*var(--u));top:calc(145*var(--u));width:calc(94*var(--u));height:calc(585*var(--u))}
-.tab{width:calc(94*var(--u));height:calc(65*var(--u))}
+.tab{width:calc(64*var(--u));height:calc(65*var(--u))}
 .tab img{height:100%}
 
 /* main drawer: search row + 5-column grid */
@@ -38,10 +39,11 @@
 #sw{height:calc(62*var(--u))}
 .sbtn{width:calc(128*var(--u));height:calc(73*var(--u));font-size:calc(26*var(--u))}
 .sbtn:nth-of-type(1){top:calc(148*var(--u))}
-.sbtn:nth-of-type(2){top:calc(255*var(--u))}
-.sbtn:nth-of-type(3){top:calc(362*var(--u))}
-.sbtn:nth-of-type(4){top:calc(469*var(--u))}
-.sbtn:nth-of-type(5){top:calc(576*var(--u))}
+.sbtn:nth-of-type(2){top:calc(248*var(--u))}
+.sbtn:nth-of-type(3){top:calc(348*var(--u))}
+.sbtn:nth-of-type(4){top:calc(448*var(--u))}
+.sbtn:nth-of-type(5){top:calc(548*var(--u))}
+.sbtn:nth-of-type(6){top:calc(648*var(--u))}
 
 /* categorical options + custom panel sit in the grid area, below the search row */
 #optsrow{top:calc(110*var(--u))}
