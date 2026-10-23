@@ -15,21 +15,33 @@
   color: #7c8f6d;
 }
 
-/* ---------- options row (category select + option buttons) ---------- */
+/* ---------- options row (category select + option buttons) ----------
+   Lives in the drawer's grid area, below the search bar. */
 #optsrow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(95 * var(--u));
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 8px 12px 14px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  z-index: 3;
+}
+#optsrow[hidden] { display: none; }
+.opts-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
   background: rgba(16, 20, 24, 0.72);
   border: 1px solid #ffffff22;
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  margin: -6px 10px 6px;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  border-radius: 8px;
+  padding: 4px 8px;
 }
-#optsrow[hidden] { display: none; }
 #category {
   flex: 0 0 auto;
   background: #14181c;
@@ -44,6 +56,7 @@
 #opts {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
   flex: 1 1 auto;
   min-width: 0;
@@ -76,10 +89,15 @@
 
 /* ---------- customization panel (CUSTOM tab) ---------- */
 #custom-tools {
-  padding: 4px 2px 10px;
-  max-height: 46vh;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(95 * var(--u));
+  bottom: 0;
+  padding: 4px 14px 10px;
   overflow-y: auto;
   scrollbar-width: thin;
+  z-index: 3;
 }
 .c-sections {
   display: flex;
@@ -153,17 +171,20 @@
 #tabs { display: flex; flex-direction: column; gap: 4px; }
 .tab {
   pointer-events: auto;
-  background: rgba(20, 25, 29, 0.9);
+  background: rgba(20, 25, 29, 0.92);
   color: #cfe3c0;
   border: 1px solid #ffffff1e;
   border-radius: 8px 0 0 8px;
-  font: 700 11px/1.1 "Century Gothic", system-ui, sans-serif;
-  letter-spacing: .04em;
-  padding: 10px 8px;
-  width: 84px;
+  font: 700 calc(17 * var(--u)) / 1.1 "Century Gothic", system-ui, sans-serif;
+  letter-spacing: 0;
+  padding: 9px 1px;
+  width: 100%;
   cursor: pointer;
   transition: background .12s, color .12s;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .tab:hover { background: #2a333a; color: #fff; }
 .tab.sel { background: #7fb64a; color: #10200c; border-color: #b3e37e; }
@@ -183,7 +204,8 @@
 
 /* ---------- quick drawer hint ---------- */
 .quick-hint {
-  font: 600 10px/1 "Century Gothic", system-ui, sans-serif;
-  color: #7c8f6d;
+  font: 700 11px/1 "Century Gothic", system-ui, sans-serif;
+  color: #eaf3dd;
+  text-shadow: 0 1px 2px #000c;
   padding: 10px 6px;
 }

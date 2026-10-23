@@ -2,7 +2,7 @@
    focused item. WRENCH jumps to the wrench tab; EXPORT saves a player PNG. */
 (function(){
   const side = P.$('#side'), sw = P.$('#sw'), main = P.$('#main'), q = P.$('#q');
-  const nonSearchableTabs = new Set(['custom']);
+  const nonSearchableTabs = new Set(['custom', 'weather', 'wrench']);
 
   const setSw = on => {
     on = !!on && !nonSearchableTabs.has(P.tabs.cur);

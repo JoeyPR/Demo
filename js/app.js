@@ -130,12 +130,12 @@ function drawScene(w, h, ground, s, scroll) {
   cloud(w * .58 - scroll * .04, h * .12, .75, PALETTE.cloud);
   cloud(w * .89 - scroll * .03, h * .37, .65, PALETTE.cloud);
   ctx.fillStyle = PALETTE.far;
-  for (let i = -1; i < 12; i++) {
+  for (let i = -1; i < Math.ceil(w / 110) + 2; i++) {
     const x = i * 110 - ((scroll * .13) % 110), top = ground - 55 - (i % 3) * 18;
     ctx.fillRect(x, top, 110, h); ctx.fillRect(x + 20, top - 18, 70, 20);
   }
   ctx.fillStyle = PALETTE.hill;
-  for (let i = -1; i < 8; i++) {
+  for (let i = -1; i < Math.ceil(w / 160) + 2; i++) {
     const x = i * 160 - ((scroll * .23) % 160), top = ground - 22 - (i % 3) * 11;
     ctx.fillRect(x, top, 160, h); ctx.fillRect(x + 24, top - 16, 95, 20);
   }

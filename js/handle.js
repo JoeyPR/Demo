@@ -11,9 +11,9 @@
     const [lo, hi] = range(); dy = Math.min(hi, Math.max(lo, v));
     root.style.setProperty('--dy', dy + 'px');
   };
-  /* first visit: start peeked so the player preview owns the screen;
+  /* first visit: start fully peeked so the player preview owns the screen;
      drag the handle up to open the inventory */
-  if (Number.isNaN(dy)) { const [, hi] = range(); dy = Math.round(hi * 0.85); }
+  if (Number.isNaN(dy)) { const [, hi] = range(); dy = hi; }
   P.drawer = { get dy() { return dy; }, set: apply };
   apply(dy);
   addEventListener('resize', () => apply(dy));

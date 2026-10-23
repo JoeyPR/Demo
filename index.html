@@ -50,17 +50,15 @@
     <!-- 3. TABS -->
     <div id="tabs" role="tablist"></div>
 
-    <!-- categorical selector row (weather / wrench / custom sections) -->
-    <div id="optsrow" hidden>
-      <select id="category" aria-label="Category"></select>
-      <div id="opts" role="group" aria-label="Options"></div>
-    </div>
-
     <!-- 1. MAIN DRAWER -->
     <div id="main" class="panel">
       <img id="s-icon" src="img/search.png" alt="" draggable="false">
       <input id="q" type="text" placeholder="Enter Item Name" autocomplete="off" spellcheck="false" aria-label="Search items">
       <div id="custom-tools" hidden aria-live="polite"></div>
+      <div id="optsrow" hidden>
+        <div class="opts-head"><select id="category" aria-label="Category"></select></div>
+        <div id="opts" role="group" aria-label="Options"></div>
+      </div>
       <div id="grid"></div>
     </div>
 
