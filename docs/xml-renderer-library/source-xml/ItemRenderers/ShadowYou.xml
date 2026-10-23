@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<ItemRenderer>
+	<Data>
+		<RenderOptions>
+			<Default>
+				<Set name="NeedRenderPet">true</Set>
+				<Set name="PetOffsetDuplication">-32,0</Set>
+				<Set name="UsePetForceFaceTime">false</Set>
+				<Set name="NeedRenderShadow">false</Set>
+				<Set name="IsPetBehind">true</Set>
+				<Set name="DisableDefaultAncestralParticleEffects">true</Set>
+			</Default>
+		</RenderOptions>
+	</Data>
+	<RenderRules>
+		<RenderPet>
+			<StopIf type="or">
+				<IsSleepingOnaBed>true</IsSleepingOnaBed>
+			</StopIf>
+			<ContextUpdate type="SetTint">
+				<Set name="tint">0,0,0,128</Set>
+				<Set name="forceTint">true</Set>
+			</ContextUpdate>
+			<RenderClone offset="-32,0"/>
+		</RenderPet>
+		<UpdatePet>
+			<ContextUpdate type="SetPetWalkRunJump">
+				<Set name="PetWalkRunJump.minSpeed">500</Set>
+				<Set name="PetWalkRunJump.distSpeedMult">10</Set>
+			</ContextUpdate>
+			<StopIf>
+				<IsTrnsformed>true</IsTrnsformed>
+			</StopIf>
+		</UpdatePet>
+	</RenderRules>
+</ItemRenderer>

@@ -1,0 +1,553 @@
+{
+  "renderer": "EclipseWings",
+  "family": "wings",
+  "source": "ItemRenderers/EclipseWings.xml",
+  "sprites": [
+    {
+      "name": "s_wings",
+      "sourceTexture": "game/particles_large17.rttex",
+      "atlas": "particles_large17.png",
+      "textureSize": "64",
+      "frame": "4,6"
+    },
+    {
+      "name": "s_flare",
+      "sourceTexture": "game/particles_large17.rttex",
+      "atlas": "particles_large17.png",
+      "textureSize": "64",
+      "frame": "8,6"
+    },
+    {
+      "name": "s_bokeh",
+      "sourceTexture": "game/particles_large17.rttex",
+      "atlas": "particles_large17.png",
+      "textureSize": "64",
+      "frame": "9,6"
+    }
+  ],
+  "timeline": [
+    {
+      "name": "a_wings",
+      "tag": "SpriteAnimation",
+      "sprite": "s_wings",
+      "durationMs": 700,
+      "durationSource": "frameMsDefault",
+      "loop": null,
+      "playOnState": null,
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_wings",
+        "sprite": "s_wings"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            4,
+            6
+          ],
+          "startMs": 0.0,
+          "endMs": 175.0,
+          "durationMs": 175.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            5,
+            6
+          ],
+          "startMs": 175.0,
+          "endMs": 350.0,
+          "durationMs": 175.0
+        },
+        {
+          "index": 2,
+          "cell": [
+            6,
+            6
+          ],
+          "startMs": 350.0,
+          "endMs": 525.0,
+          "durationMs": 175.0
+        },
+        {
+          "index": 3,
+          "cell": [
+            7,
+            6
+          ],
+          "startMs": 525.0,
+          "endMs": 700.0,
+          "durationMs": 175.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "flash_sequence",
+      "tag": "SequenceAnimation",
+      "sprite": null,
+      "durationMs": null,
+      "durationSource": "unspecified",
+      "loop": null,
+      "playOnState": "SelfieTake.Max",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "flash_sequence",
+        "playOnState": "SelfieTake.Max"
+      },
+      "frames": [],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "saturationValueFrom",
+      "tag": "InterpolationFloatAnimation",
+      "sprite": null,
+      "durationMs": 600.0,
+      "durationSource": "animTime",
+      "loop": null,
+      "playOnState": "SelfieTake.Default",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "saturationValueFrom",
+        "variableName": "saturationValue",
+        "playOnState": "SelfieTake.Default",
+        "targetVariableName": "saturationValueDefault",
+        "animTime": "600"
+      },
+      "frames": [],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "contrastValueFrom",
+      "tag": "InterpolationFloatAnimation",
+      "sprite": null,
+      "durationMs": 600.0,
+      "durationSource": "animTime",
+      "loop": null,
+      "playOnState": "SelfieTake.Default",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "contrastValueFrom",
+        "variableName": "contrastValue",
+        "playOnState": "SelfieTake.Default",
+        "targetVariableName": "contrastValueDefault",
+        "animTime": "600"
+      },
+      "frames": [],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "brightnessValueFrom",
+      "tag": "InterpolationFloatAnimation",
+      "sprite": null,
+      "durationMs": 600.0,
+      "durationSource": "animTime",
+      "loop": null,
+      "playOnState": "SelfieTake.Default",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "brightnessValueFrom",
+        "variableName": "brightnessValue",
+        "playOnState": "SelfieTake.Default",
+        "targetVariableName": "brightnessValueDefault",
+        "animTime": "600"
+      },
+      "frames": [],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    }
+  ],
+  "states": [
+    {
+      "name": "SelfieTake",
+      "attributes": {
+        "name": "SelfieTake"
+      },
+      "states": [
+        {
+          "name": "Default",
+          "attributes": {
+            "name": "Default"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Max",
+          "attributes": {
+            "name": "Max",
+            "ExitTime": "0.6"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "Default",
+      "transitions": [
+        {
+          "from": [
+            "Max"
+          ],
+          "to": "Default",
+          "condition": null,
+          "attributes": {
+            "to": "Default",
+            "from": "Max"
+          }
+        },
+        {
+          "from": [
+            "Default"
+          ],
+          "to": "Max",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsAction",
+                "v": "JUMPDOUBLE"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Max",
+            "from": "Default"
+          }
+        }
+      ]
+    }
+  ],
+  "particleSystems": [
+    {
+      "name": "ps_wingsLeft",
+      "attributes": {
+        "name": "ps_wingsLeft",
+        "updateStage": "AddClothingParticles"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "offset": "0,-16",
+        "emissionInterval": "0.2",
+        "infParticles": "true",
+        "infLifeTime": "true",
+        "particlesPerEmission": "1"
+      },
+      "particleAttributes": {
+        "particleIndexSpriteFrame": "true"
+      },
+      "particleSets": {
+        "sprite": "s_wings",
+        "relativeToEmitter": "true",
+        "blendingMode": "ADDITIVE",
+        "lifeTime": "1.0",
+        "inSpecificOrder": "true",
+        "renderAlignment": "RIGHT_CENTER"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "0.45, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        },
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialScale"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 0.3, 0.3"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 1.1, 1.1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ps_wingsRight",
+      "attributes": {
+        "name": "ps_wingsRight",
+        "updateStage": "AddClothingParticles"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "offset": "0,-16",
+        "emissionInterval": "0.2",
+        "infParticles": "true",
+        "infLifeTime": "true",
+        "particlesPerEmission": "1"
+      },
+      "particleAttributes": {
+        "particleIndexSpriteFrame": "true"
+      },
+      "particleSets": {
+        "sprite": "s_wings",
+        "relativeToEmitter": "true",
+        "blendingMode": "ADDITIVE",
+        "lifeTime": "1.0",
+        "inSpecificOrder": "true",
+        "flipX": "true",
+        "renderAlignment": "LEFT_CENTER"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "0.45, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        },
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialScale"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 0.3, 0.3"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 1.1, 1.1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ps_flare",
+      "attributes": {
+        "name": "ps_flare"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "particlesPerEmission": "3",
+        "offset": "0,-16"
+      },
+      "particleAttributes": {},
+      "particleSets": {
+        "sprite": "s_flare",
+        "inSpecificOrder": "true",
+        "blendingMode": "ADDITIVE",
+        "relativeToEmitter": "true",
+        "lifeTime": "0.5"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        },
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialScale"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 0.5,0.5"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 2.6,2.6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ps_bokeh",
+      "attributes": {
+        "name": "ps_bokeh",
+        "renderStage": "RenderInFront"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "particlesPerEmission": "1",
+        "offset": "0,-16"
+      },
+      "particleAttributes": {},
+      "particleSets": {
+        "sprite": "s_bokeh",
+        "inSpecificOrder": "true",
+        "blendingMode": "ADDITIVE",
+        "relativeToEmitter": "true"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        },
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialScale"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 0.5,0.5"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 1.5,1.5"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "renderPasses": [
+    {
+      "hook": "AddClothingParticles",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [
+        {
+          "name": "ps_flare",
+          "onAction": "JUMPDOUBLE"
+        },
+        {
+          "name": "ps_bokeh",
+          "onAction": "JUMPDOUBLE"
+        }
+      ],
+      "tagCounts": {
+        "AddClothingParticles": 1,
+        "StopIf": 1,
+        "IsRenderMod": 4,
+        "ParticleSystemUpdate": 2
+      }
+    },
+    {
+      "hook": "OnDrawCustomOutline",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [],
+      "tagCounts": {
+        "OnDrawCustomOutline": 1,
+        "StopIf": 1,
+        "IsRenderMod": 4,
+        "AvatarTransform": 5,
+        "Set": 11,
+        "AvatarOutline": 1,
+        "Colours": 1,
+        "Colour": 1
+      }
+    },
+    {
+      "hook": "RenderBackpack",
+      "attributes": {},
+      "spriteRenders": [
+        {
+          "name": "s_wings",
+          "offset": "0,-16",
+          "alignmentLeft": "LEFT_CENTER",
+          "alignmentRight": "RIGHT_CENTER",
+          "blend": "ADDITIVE"
+        },
+        {
+          "name": "s_wings",
+          "offset": "0,-16",
+          "flip": "1,0",
+          "alignmentLeft": "RIGHT_CENTER",
+          "alignmentRight": "LEFT_CENTER",
+          "blend": "ADDITIVE"
+        }
+      ],
+      "particleOperations": [
+        {
+          "name": "ps_wingsLeft"
+        },
+        {
+          "name": "ps_wingsRight"
+        },
+        {
+          "name": "ps_flare"
+        }
+      ],
+      "tagCounts": {
+        "RenderBackpack": 1,
+        "StopIf": 2,
+        "IsRenderMod": 4,
+        "ParticleSystemRender": 3,
+        "AvatarTransform": 1,
+        "Set": 3,
+        "IsVariableBool": 1,
+        "SpriteRender": 2
+      }
+    }
+  ]
+}

@@ -78,3 +78,40 @@ Keep the planner profile's recovered numeric values until evidence justifies a c
 The package does not implement the official native renderer, every item script, full world collision, every per-item punch owner, pet AI, or all transformation/hover interactions. Public reference playback is deliberately approximate for those cases, and the official client's images and trajectories were not available in this research session.
 
 Ask the user for their current planner source tree, authorized atlas pack, native items.dat version, target client build, and short official-client movement recordings when these become necessary. Continue independent implementation while keeping blocked item IDs in a manifest.
+
+## Planner UI integration (2026-10)
+
+The old "render lab" UI (demo/style.css + demo/app.js) was replaced by the
+NewPlanner UI shell (branch planner-ui2). The Demo rendering engine is
+untouched and still boots from demo/engine/.
+
+- index.html — NewPlanner shell: pads, handle-driven bottom drawer, tabs
+  (CUSTOM / ALL / WEATHER / WRENCH), side panel, preview canvas (1920x1080).
+- js/ — NewPlanner's P-bus systems adapted to the Demo catalog:
+  - js/app.js (module) — boots the Demo engine (PlannerPlayer, PreviewMotion,
+    drawCanvas, atlas tinting) and draws on P.on("frame"): weather scene ->
+    ground -> avatar -> ancestral aura -> name plate -> weather foreground.
+    Exposes window.plannerApp as a QA hook.
+  - js/grid.js — catalog grid with Demo atlas thumbnails; click equips via
+    P.emit("equip", {id}).
+  - js/weather.js + weather-engine/ + data/variants/base/ + sheets/ — the
+    growtopia-weather package; the WEATHER tab is a categorical selector
+    listing all 81 weathers.
+  - js/plate.js — the Website repo's name-plate system: GrowID, player titles,
+    badges, role icons, flags, guild role tags, wrench icon with
+    styles/decorations (wobble, green base tint).
+  - js/naming-ui.js — the CUSTOM tab panel driving the plate state.
+  - js/wrench-ui.js — the WRENCH tab (styles/decorations menus, canvas
+    previews) from the Website wrench system.
+- docs/ancestral/ — the Planner-ANCESTRAL system (renderer.js + data.json);
+  all 30 leveled ancestrals (5 families x 6 levels) render their per-level
+  aura when equipped in slot 9.
+- docs/XML-RENDERER-ANALYSIS.md + docs/xml-renderer-library/ — analysis of
+  the growtopia-xml-renderer-library and a reference copy (manifests,
+  runtime, source XML).
+- Ride bob: mounted up/down cycles run 1.75x slower (lift.mjs
+  RIDE_BOB_PERIOD_SCALE; mounted-gait hop 460 -> 805 ms) per user request.
+- NewPlanner's own player renderer and its simple title function were NOT
+  used; the Website title system replaced it.
+- The old demo/app.js + demo/style.css are kept in the repo for reference
+  but no longer loaded by index.html.

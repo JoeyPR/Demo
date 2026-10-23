@@ -1,0 +1,3071 @@
+[
+  {
+    "key": "ancestral",
+    "name": "Ancestral Plane",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 18,
+      "sheets": [
+        "bg_acwm_laye01.webp",
+        "bg_acwm_laye02.webp",
+        "bg_acwm_laye03.webp",
+        "bg_acwm_laye04.webp",
+        "bg_acwm_laye05.webp"
+      ],
+      "file": "variants/base/ancestral.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 27,
+      "sheets": [
+        "bg_acwm_laye01.webp",
+        "bg_acwm_laye02.webp",
+        "bg_acwm_laye03.webp",
+        "bg_acwm_laye04.webp",
+        "bg_acwm_laye05.webp"
+      ],
+      "file": "variants/wide-3072/ancestral.json"
+    }
+  },
+  {
+    "key": "apocalypse",
+    "name": "Apocalypse",
+    "itemId": 4486,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 133,
+      "sheets": [
+        "city2_skyline.webp",
+        "haze.webp",
+        "sunset.webp"
+      ],
+      "file": "variants/base/apocalypse.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 131,
+      "sheets": [
+        "city2_skyline.webp",
+        "haze.webp",
+        "sunset.webp"
+      ],
+      "file": "variants/wide-3072/apocalypse.json"
+    }
+  },
+  {
+    "key": "arid",
+    "name": "Arid",
+    "itemId": 946,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "desert_hills.webp",
+        "desert_hills2.webp",
+        "desert_sky.webp",
+        "desert_wobbly.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/arid.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "desert_hills.webp",
+        "desert_hills2.webp",
+        "desert_sky.webp",
+        "desert_wobbly.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/arid.json"
+    }
+  },
+  {
+    "key": "atlantis",
+    "name": "Atlantis",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 20,
+      "sheets": [
+        "bg_NWM_RaysBack.webp",
+        "bg_NWM_RaysFront.webp",
+        "bg_NWM_bg.webp",
+        "bg_NWM_castle.webp",
+        "bg_NWM_frontLayer.webp",
+        "bg_NWM_frontRock.webp",
+        "bg_NWM_shadow.webp"
+      ],
+      "file": "variants/base/atlantis.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 30,
+      "sheets": [
+        "bg_NWM_RaysBack.webp",
+        "bg_NWM_RaysFront.webp",
+        "bg_NWM_bg.webp",
+        "bg_NWM_castle.webp",
+        "bg_NWM_frontLayer.webp",
+        "bg_NWM_frontRock.webp",
+        "bg_NWM_shadow.webp"
+      ],
+      "file": "variants/wide-3072/atlantis.json"
+    }
+  },
+  {
+    "key": "autumn",
+    "name": "Autumn",
+    "itemId": 5112,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 71,
+      "sheets": [
+        "autumn_front.webp",
+        "autumnsunset.webp",
+        "cloud_red.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "particles.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/autumn.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 85,
+      "sheets": [
+        "autumn_front.webp",
+        "autumnsunset.webp",
+        "cloud_red.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "particles.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/autumn.json"
+    }
+  },
+  {
+    "key": "balloon",
+    "name": "Balloon Warz",
+    "itemId": 4892,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 102,
+      "sheets": [
+        "Balloon_01.webp",
+        "Balloon_02.webp",
+        "Balloon_03.webp",
+        "Balloon_04.webp",
+        "Balloon_05.webp",
+        "Balloon_06.webp",
+        "cloud.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/balloon.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 145,
+      "sheets": [
+        "Balloon_01.webp",
+        "Balloon_02.webp",
+        "Balloon_03.webp",
+        "Balloon_04.webp",
+        "Balloon_05.webp",
+        "Balloon_06.webp",
+        "cloud.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/balloon.json"
+    }
+  },
+  {
+    "key": "bn",
+    "name": "Bedawang Nala",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 18,
+      "sheets": [
+        "bg_BN_layer1.webp",
+        "bg_BN_layer2.webp",
+        "bg_BN_layer3.webp",
+        "bg_BN_sky.webp"
+      ],
+      "file": "variants/base/bn.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 32,
+      "sheets": [
+        "bg_BN_layer1.webp",
+        "bg_BN_layer2.webp",
+        "bg_BN_layer3.webp",
+        "bg_BN_sky.webp"
+      ],
+      "file": "variants/wide-3072/bn.json"
+    }
+  },
+  {
+    "key": "bdr",
+    "name": "Black Digital Rain",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 3615,
+      "sheets": [
+        "font_century_gothic.webp",
+        "bg_black_digital_rain.webp"
+      ],
+      "file": "variants/base/bdr.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 8713,
+      "sheets": [
+        "font_century_gothic.webp",
+        "bg_black_digital_rain.webp"
+      ],
+      "file": "variants/wide-3072/bdr.json"
+    }
+  },
+  {
+    "key": "bh",
+    "name": "Black Hole",
+    "itemId": 13690,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_bh_fx.webp",
+        "bg_bh_hal.webp",
+        "bg_bh_pivot.webp",
+        "bg_bh_ring1.webp",
+        "bg_bh_ring2-4.webp",
+        "bg_bh_ring3.webp",
+        "bg_bh_sky.webp",
+        "bg_bh_sta.webp"
+      ],
+      "file": "variants/base/bh.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_bh_fx.webp",
+        "bg_bh_hal.webp",
+        "bg_bh_pivot.webp",
+        "bg_bh_ring1.webp",
+        "bg_bh_ring2-4.webp",
+        "bg_bh_ring3.webp",
+        "bg_bh_sky.webp",
+        "bg_bh_sta.webp"
+      ],
+      "file": "variants/wide-3072/bh.json"
+    }
+  },
+  {
+    "key": "celebrity",
+    "name": "Celebrity Hills",
+    "itemId": 10286,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud.webp",
+        "hills1_growtopia.webp",
+        "hills2_growtopia.webp",
+        "hills3_growtopia.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/celebrity.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud.webp",
+        "hills1_growtopia.webp",
+        "hills2_growtopia.webp",
+        "hills3_growtopia.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/celebrity.json"
+    }
+  },
+  {
+    "key": "comet",
+    "name": "Comet",
+    "itemId": 2046,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1339,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp"
+      ],
+      "file": "variants/base/comet.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 942,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp"
+      ],
+      "file": "variants/wide-3072/comet.json"
+    }
+  },
+  {
+    "key": "concert",
+    "name": "Concert Lights",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 45,
+      "sheets": [
+        "bg_cl_dots1.webp",
+        "bg_cl_dots2.webp",
+        "bg_cl_lights.webp",
+        "bg_cl_rays1.webp",
+        "bg_cl_rays2.webp",
+        "bg_cl_sky1.webp"
+      ],
+      "file": "variants/base/concert.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 69,
+      "sheets": [
+        "bg_cl_dots1.webp",
+        "bg_cl_dots2.webp",
+        "bg_cl_lights.webp",
+        "bg_cl_rays1.webp",
+        "bg_cl_rays2.webp",
+        "bg_cl_sky1.webp"
+      ],
+      "file": "variants/wide-3072/concert.json"
+    }
+  },
+  {
+    "key": "crack",
+    "name": "Crack in Reality",
+    "itemId": 13004,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 49,
+      "sheets": [
+        "bg_cir_layer1.webp",
+        "bg_cir_layer2.webp",
+        "bg_cir_layer3.webp",
+        "bg_cir_layer4.webp",
+        "bg_cir_layer5.webp",
+        "bg_cir_layer6.webp",
+        "bg_cir_layer7.webp",
+        "bg_cir_layer8.webp"
+      ],
+      "file": "variants/base/crack.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 49,
+      "sheets": [
+        "bg_cir_layer1.webp",
+        "bg_cir_layer2.webp",
+        "bg_cir_layer3.webp",
+        "bg_cir_layer4.webp",
+        "bg_cir_layer5.webp",
+        "bg_cir_layer6.webp",
+        "bg_cir_layer7.webp",
+        "bg_cir_layer8.webp"
+      ],
+      "file": "variants/wide-3072/crack.json"
+    }
+  },
+  {
+    "key": "dm",
+    "name": "Dark Mountains",
+    "itemId": 12408,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_dm_layer1.webp",
+        "bg_dm_layer2.webp",
+        "bg_dm_layer3.webp",
+        "bg_dm_layer4.webp",
+        "bg_dm_sky.webp"
+      ],
+      "file": "variants/base/dm.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_dm_layer1.webp",
+        "bg_dm_layer2.webp",
+        "bg_dm_layer3.webp",
+        "bg_dm_layer4.webp",
+        "bg_dm_sky.webp"
+      ],
+      "file": "variants/wide-3072/dm.json"
+    }
+  },
+  {
+    "key": "black",
+    "name": "Digital Rain",
+    "itemId": 6854,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 3615,
+      "sheets": [
+        "font_century_gothic.webp",
+        "drain_skybg.webp"
+      ],
+      "file": "variants/base/black.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 8713,
+      "sheets": [
+        "font_century_gothic.webp",
+        "drain_skybg.webp"
+      ],
+      "file": "variants/wide-3072/black.json"
+    }
+  },
+  {
+    "key": "dragonskeep",
+    "name": "Dragon's Keep",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 14,
+      "sheets": [
+        "WM-Draconic_Layer1.webp",
+        "WM-Draconic_Layer3.webp",
+        "WM-Draconic_Layer4.webp",
+        "WM-Draconic_Layer5.webp",
+        "WM-Draconic_Layer6.webp",
+        "WM-Draconic_Layer8.webp"
+      ],
+      "file": "variants/base/dragonskeep.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 19,
+      "sheets": [
+        "WM-Draconic_Layer1.webp",
+        "WM-Draconic_Layer3.webp",
+        "WM-Draconic_Layer4.webp",
+        "WM-Draconic_Layer5.webp",
+        "WM-Draconic_Layer6.webp",
+        "WM-Draconic_Layer8.webp"
+      ],
+      "file": "variants/wide-3072/dragonskeep.json"
+    }
+  },
+  {
+    "key": "ec",
+    "name": "Emerald City",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_EC_castle.webp",
+        "bg_EC_cloud.webp",
+        "bg_EC_foreground.webp",
+        "bg_EC_mountain.webp",
+        "bg_EC_sky.webp"
+      ],
+      "file": "variants/base/ec.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 18,
+      "sheets": [
+        "bg_EC_castle.webp",
+        "bg_EC_cloud.webp",
+        "bg_EC_foreground.webp",
+        "bg_EC_mountain.webp",
+        "bg_EC_sky.webp"
+      ],
+      "file": "variants/wide-3072/ec.json"
+    }
+  },
+  {
+    "key": "floating",
+    "name": "Floating Islands",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 18,
+      "sheets": [
+        "float_clouds1.webp",
+        "float_clouds10.webp",
+        "float_clouds11.webp",
+        "float_clouds12.webp",
+        "float_clouds2.webp",
+        "float_clouds3.webp",
+        "float_clouds4.webp",
+        "float_clouds5.webp",
+        "float_clouds6.webp",
+        "float_clouds7.webp",
+        "float_clouds8.webp",
+        "float_clouds9.webp",
+        "float_land1.webp",
+        "float_land2.webp",
+        "float_land3.webp",
+        "float_land4.webp",
+        "float_skybg.webp"
+      ],
+      "file": "variants/base/floating.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 18,
+      "sheets": [
+        "float_clouds1.webp",
+        "float_clouds10.webp",
+        "float_clouds11.webp",
+        "float_clouds12.webp",
+        "float_clouds2.webp",
+        "float_clouds3.webp",
+        "float_clouds4.webp",
+        "float_clouds5.webp",
+        "float_clouds6.webp",
+        "float_clouds7.webp",
+        "float_clouds8.webp",
+        "float_clouds9.webp",
+        "float_land1.webp",
+        "float_land2.webp",
+        "float_land3.webp",
+        "float_land4.webp",
+        "float_skybg.webp"
+      ],
+      "file": "variants/wide-3072/floating.json"
+    }
+  },
+  {
+    "key": "frozen",
+    "name": "Frozen Cliffs",
+    "itemId": 7644,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 184,
+      "sheets": [
+        "cloud.webp",
+        "haze.webp",
+        "mtn_1.webp",
+        "mtn_2.webp",
+        "mtn_3.webp",
+        "mtn_sky.webp"
+      ],
+      "file": "variants/base/frozen.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 181,
+      "sheets": [
+        "cloud.webp",
+        "haze.webp",
+        "mtn_1.webp",
+        "mtn_2.webp",
+        "mtn_3.webp",
+        "mtn_sky.webp"
+      ],
+      "file": "variants/wide-3072/frozen.json"
+    }
+  },
+  {
+    "key": "hhvn",
+    "name": "Holiday Haven",
+    "itemId": 14094,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 21,
+      "sheets": [
+        "bg_hhvn_car_a.webp",
+        "bg_hhvn_car_b.webp",
+        "bg_hhvn_layer1.webp",
+        "bg_hhvn_layer2.webp",
+        "bg_hhvn_layer3.webp",
+        "bg_hhvn_layer4.webp",
+        "bg_hhvn_sky.webp"
+      ],
+      "file": "variants/base/hhvn.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 21,
+      "sheets": [
+        "bg_hhvn_car_a.webp",
+        "bg_hhvn_car_b.webp",
+        "bg_hhvn_layer1.webp",
+        "bg_hhvn_layer2.webp",
+        "bg_hhvn_layer3.webp",
+        "bg_hhvn_layer4.webp",
+        "bg_hhvn_sky.webp"
+      ],
+      "file": "variants/wide-3072/hhvn.json"
+    }
+  },
+  {
+    "key": "howling",
+    "name": "Howling Sky",
+    "itemId": 3534,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 190,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "new_sky.webp",
+        "sky_wlf.webp",
+        "stars.webp"
+      ],
+      "file": "variants/base/howling.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 190,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "new_sky.webp",
+        "sky_wlf.webp",
+        "stars.webp"
+      ],
+      "file": "variants/wide-3072/howling.json"
+    }
+  },
+  {
+    "key": "iceage",
+    "name": "Ice Age",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 65,
+      "sheets": [
+        "icebg_1.webp",
+        "icebg_2.webp",
+        "icebg_3.webp",
+        "icebg_aora.webp",
+        "icebg_skybg.webp"
+      ],
+      "file": "variants/base/iceage.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 65,
+      "sheets": [
+        "icebg_1.webp",
+        "icebg_2.webp",
+        "icebg_3.webp",
+        "icebg_aora.webp",
+        "icebg_skybg.webp"
+      ],
+      "file": "variants/wide-3072/iceage.json"
+    }
+  },
+  {
+    "key": "jungle",
+    "name": "Jungle",
+    "itemId": 4776,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 359,
+      "sheets": [
+        "haze.webp",
+        "jungle_fern.webp",
+        "jungle_hills.webp",
+        "jungle_hills2.webp",
+        "jungle_tree.webp",
+        "jungle_tree02.webp",
+        "jungle_zigarat.webp"
+      ],
+      "file": "variants/base/jungle.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 359,
+      "sheets": [
+        "haze.webp",
+        "jungle_fern.webp",
+        "jungle_hills.webp",
+        "jungle_hills2.webp",
+        "jungle_tree.webp",
+        "jungle_tree02.webp",
+        "jungle_zigarat.webp"
+      ],
+      "file": "variants/wide-3072/jungle.json"
+    }
+  },
+  {
+    "key": "meteor",
+    "name": "Meteor Shower",
+    "itemId": 8896,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 194,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp",
+        "w_cmt.webp"
+      ],
+      "file": "variants/base/meteor.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 217,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp",
+        "w_cmt.webp"
+      ],
+      "file": "variants/wide-3072/meteor.json"
+    }
+  },
+  {
+    "key": "growmore",
+    "name": "Mt. Growmore",
+    "itemId": 12844,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 8,
+      "sheets": [
+        "bg_mg_layer1.webp",
+        "bg_mg_layer2_1.webp",
+        "bg_mg_layer2_2.webp",
+        "bg_mg_layer3.webp",
+        "bg_mg_sky.webp"
+      ],
+      "file": "variants/base/growmore.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 8,
+      "sheets": [
+        "bg_mg_layer1.webp",
+        "bg_mg_layer2_1.webp",
+        "bg_mg_layer2_2.webp",
+        "bg_mg_layer3.webp",
+        "bg_mg_sky.webp"
+      ],
+      "file": "variants/wide-3072/growmore.json"
+    }
+  },
+  {
+    "key": "nb",
+    "name": "Nebula",
+    "itemId": 12054,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 5,
+      "sheets": [
+        "bg_nb_layer1.webp",
+        "bg_nb_layer2.webp",
+        "bg_nb_layer3.webp",
+        "bg_nb_sky.webp"
+      ],
+      "file": "variants/base/nb.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 5,
+      "sheets": [
+        "bg_nb_layer1.webp",
+        "bg_nb_layer2.webp",
+        "bg_nb_layer3.webp",
+        "bg_nb_sky.webp"
+      ],
+      "file": "variants/wide-3072/nb.json"
+    }
+  },
+  {
+    "key": "lnynn",
+    "name": "Nian's Mountains",
+    "itemId": 13070,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 15,
+      "sheets": [
+        "bg_lnynn_cloud1.webp",
+        "bg_lnynn_cloud2.webp",
+        "bg_lnynn_cloud3.webp",
+        "bg_lnynn_layer1.webp",
+        "bg_lnynn_layer2.webp",
+        "bg_lnynn_layer3.webp",
+        "bg_lnynn_sky.webp"
+      ],
+      "file": "variants/base/lnynn.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 15,
+      "sheets": [
+        "bg_lnynn_cloud1.webp",
+        "bg_lnynn_cloud2.webp",
+        "bg_lnynn_cloud3.webp",
+        "bg_lnynn_layer1.webp",
+        "bg_lnynn_layer2.webp",
+        "bg_lnynn_layer3.webp",
+        "bg_lnynn_sky.webp"
+      ],
+      "file": "variants/wide-3072/lnynn.json"
+    }
+  },
+  {
+    "key": "night",
+    "name": "Night",
+    "itemId": 934,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 174,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp"
+      ],
+      "file": "variants/base/night.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 174,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp"
+      ],
+      "file": "variants/wide-3072/night.json"
+    }
+  },
+  {
+    "key": "pp",
+    "name": "Pagoda",
+    "itemId": 4242,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 175,
+      "sheets": [
+        "hills1_pg.webp",
+        "hills2_pg.webp",
+        "hills3_pg.webp",
+        "moon.webp",
+        "sky_pg.webp",
+        "stars.webp"
+      ],
+      "file": "variants/base/pp.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 175,
+      "sheets": [
+        "hills1_pg.webp",
+        "hills2_pg.webp",
+        "hills3_pg.webp",
+        "moon.webp",
+        "sky_pg.webp",
+        "stars.webp"
+      ],
+      "file": "variants/wide-3072/pp.json"
+    }
+  },
+  {
+    "key": "party",
+    "name": "Party",
+    "itemId": 2284,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 71,
+      "sheets": [],
+      "file": "variants/base/party.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 31,
+      "sheets": [],
+      "file": "variants/wide-3072/party.json"
+    }
+  },
+  {
+    "key": "pineapples",
+    "name": "Pineapples",
+    "itemId": 2744,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 499,
+      "sheets": [
+        "tiles_page4.webp"
+      ],
+      "file": "variants/base/pineapples.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 434,
+      "sheets": [
+        "tiles_page4.webp"
+      ],
+      "file": "variants/wide-3072/pineapples.json"
+    }
+  },
+  {
+    "key": "pph",
+    "name": "Pinuski's Petal Purrfect Haven",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 17,
+      "sheets": [
+        "bg_PPH_BT.webp",
+        "bg_PPH_Cat1-Tail.webp",
+        "bg_PPH_Cat2-Tail.webp",
+        "bg_PPH_Cat3-Tail.webp",
+        "bg_PPH_bg.webp",
+        "bg_PPH_frontLayer01.webp",
+        "bg_PPH_frontLayer02.webp",
+        "bg_PPH_frontRiver01.webp",
+        "bg_PPH_frontRiver02.webp"
+      ],
+      "file": "variants/base/pph.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 25,
+      "sheets": [
+        "bg_PPH_BT.webp",
+        "bg_PPH_Cat1-Tail.webp",
+        "bg_PPH_Cat2-Tail.webp",
+        "bg_PPH_Cat3-Tail.webp",
+        "bg_PPH_bg.webp",
+        "bg_PPH_frontLayer01.webp",
+        "bg_PPH_frontLayer02.webp",
+        "bg_PPH_frontRiver01.webp",
+        "bg_PPH_frontRiver02.webp"
+      ],
+      "file": "variants/wide-3072/pph.json"
+    }
+  },
+  {
+    "key": "plaza",
+    "name": "Plaza",
+    "itemId": 11880,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 7,
+      "sheets": [
+        "bg_cin_houses1.webp",
+        "bg_cin_houses2.webp",
+        "bg_cin_sky.webp",
+        "bg_cin_sunhouses3.webp"
+      ],
+      "file": "variants/base/plaza.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 7,
+      "sheets": [
+        "bg_cin_houses1.webp",
+        "bg_cin_houses2.webp",
+        "bg_cin_sky.webp",
+        "bg_cin_sunhouses3.webp"
+      ],
+      "file": "variants/wide-3072/plaza.json"
+    }
+  },
+  {
+    "key": "protostar",
+    "name": "Protostar Landing",
+    "itemId": 12056,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 9,
+      "sheets": [
+        "bg_stp_layer1.webp",
+        "bg_stp_layer2_1.webp",
+        "bg_stp_layer2_2.webp",
+        "bg_stp_layer3.webp",
+        "bg_stp_layer4.webp",
+        "bg_stp_sky.webp"
+      ],
+      "file": "variants/base/protostar.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 9,
+      "sheets": [
+        "bg_stp_layer1.webp",
+        "bg_stp_layer2_1.webp",
+        "bg_stp_layer2_2.webp",
+        "bg_stp_layer3.webp",
+        "bg_stp_layer4.webp",
+        "bg_stp_sky.webp"
+      ],
+      "file": "variants/wide-3072/protostar.json"
+    }
+  },
+  {
+    "key": "gems",
+    "name": "Rainin' Gems",
+    "itemId": 14032,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 339,
+      "sheets": [
+        "particles11.webp"
+      ],
+      "file": "variants/base/gems.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 313,
+      "sheets": [
+        "particles11.webp"
+      ],
+      "file": "variants/wide-3072/gems.json"
+    }
+  },
+  {
+    "key": "city",
+    "name": "Rainy City",
+    "itemId": 984,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 2387,
+      "sheets": [
+        "city_clouds1.webp",
+        "city_clouds2.webp",
+        "city_clouds3.webp",
+        "city_sky.webp",
+        "city_skyline.webp",
+        "particles.webp"
+      ],
+      "file": "variants/base/city.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 2158,
+      "sheets": [
+        "city_clouds1.webp",
+        "city_clouds2.webp",
+        "city_clouds3.webp",
+        "city_sky.webp",
+        "city_skyline.webp",
+        "particles.webp"
+      ],
+      "file": "variants/wide-3072/city.json"
+    }
+  },
+  {
+    "key": "rlm",
+    "name": "Realm of Spirits",
+    "itemId": 13640,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 95,
+      "sheets": [
+        "bg_rlm_layer1.webp",
+        "bg_rlm_layer2.webp",
+        "bg_rlm_layer3.webp",
+        "bg_rlm_layer4.webp",
+        "bg_rlm_layer5.webp",
+        "bg_rlm_layer6.webp",
+        "bg_rlm_layer7.webp",
+        "bg_rlm_layer8.webp",
+        "bg_rlm_sky.webp",
+        "bg_rlm_sparkle.webp"
+      ],
+      "file": "variants/base/rlm.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 95,
+      "sheets": [
+        "bg_rlm_layer1.webp",
+        "bg_rlm_layer2.webp",
+        "bg_rlm_layer3.webp",
+        "bg_rlm_layer4.webp",
+        "bg_rlm_layer5.webp",
+        "bg_rlm_layer6.webp",
+        "bg_rlm_layer7.webp",
+        "bg_rlm_layer8.webp",
+        "bg_rlm_sky.webp",
+        "bg_rlm_sparkle.webp"
+      ],
+      "file": "variants/wide-3072/rlm.json"
+    }
+  },
+  {
+    "key": "snowy",
+    "name": "Snowy",
+    "itemId": 1364,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 626,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snow_clouds1.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/base/snowy.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 594,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snow_clouds1.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/wide-3072/snowy.json"
+    }
+  },
+  {
+    "key": "snowynight",
+    "name": "Snowy Night",
+    "itemId": 3252,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 625,
+      "sheets": [
+        "city_clouds2.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/base/snowynight.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 595,
+      "sheets": [
+        "city_clouds2.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/wide-3072/snowynight.json"
+    }
+  },
+  {
+    "key": "southpole",
+    "name": "South Pole WinterFest",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 4,
+      "sheets": [
+        "bg_SP_globe.webp",
+        "bg_SP_sky.webp"
+      ],
+      "file": "variants/base/southpole.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 6,
+      "sheets": [
+        "bg_SP_globe.webp",
+        "bg_SP_sky.webp"
+      ],
+      "file": "variants/wide-3072/southpole.json"
+    }
+  },
+  {
+    "key": "spring",
+    "name": "Spring",
+    "itemId": 3446,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/spring.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/spring.json"
+    }
+  },
+  {
+    "key": "paddys",
+    "name": "St. Paddy's Day",
+    "itemId": 5716,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 103,
+      "sheets": [
+        "b_skybg.webp",
+        "cloud.webp",
+        "green_hills1.webp",
+        "green_hills2.webp",
+        "green_hills3.webp",
+        "shamrock_1.webp",
+        "shamrock_2.webp",
+        "shamrock_3.webp",
+        "shamrock_4.webp",
+        "shamrock_5.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/paddys.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 129,
+      "sheets": [
+        "b_skybg.webp",
+        "cloud.webp",
+        "green_hills1.webp",
+        "green_hills2.webp",
+        "green_hills3.webp",
+        "shamrock_1.webp",
+        "shamrock_2.webp",
+        "shamrock_3.webp",
+        "shamrock_4.webp",
+        "shamrock_5.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/paddys.json"
+    }
+  },
+  {
+    "key": "vd",
+    "name": "Valentine's",
+    "itemId": 5654,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 120,
+      "sheets": [
+        "a_heartbg.webp",
+        "cloud_red.webp",
+        "sun.webp",
+        "w_heart_01.webp",
+        "w_heart_02.webp",
+        "w_heart_03.webp",
+        "w_heart_04.webp",
+        "w_heart_05.webp",
+        "w_heart_06.webp"
+      ],
+      "file": "variants/base/vd.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 164,
+      "sheets": [
+        "a_heartbg.webp",
+        "cloud_red.webp",
+        "sun.webp",
+        "w_heart_01.webp",
+        "w_heart_02.webp",
+        "w_heart_03.webp",
+        "w_heart_04.webp",
+        "w_heart_05.webp",
+        "w_heart_06.webp"
+      ],
+      "file": "variants/wide-3072/vd.json"
+    }
+  },
+  {
+    "key": "volcano",
+    "name": "Volcano",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 623,
+      "sheets": [
+        "mtn_cloud_01.webp",
+        "mtn_clouds1.webp",
+        "mtn_skybg.webp",
+        "mtn_vulbg1.webp",
+        "mtn_vulbg2.webp",
+        "mtn_vulbg3.webp",
+        "mtn_vulbg4.webp",
+        "particles2.webp"
+      ],
+      "file": "variants/base/volcano.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 884,
+      "sheets": [
+        "mtn_cloud_01.webp",
+        "mtn_clouds1.webp",
+        "mtn_skybg.webp",
+        "mtn_vulbg1.webp",
+        "mtn_vulbg2.webp",
+        "mtn_vulbg3.webp",
+        "mtn_vulbg4.webp",
+        "particles2.webp"
+      ],
+      "file": "variants/wide-3072/volcano.json"
+    }
+  },
+  {
+    "key": "warp",
+    "name": "Warp Speed",
+    "itemId": 1750,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 455,
+      "sheets": [
+        "stars.webp",
+        "warp_back.webp"
+      ],
+      "file": "variants/base/warp.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 479,
+      "sheets": [
+        "stars.webp",
+        "warp_back.webp"
+      ],
+      "file": "variants/wide-3072/warp.json"
+    }
+  },
+  {
+    "key": "sunset",
+    "name": "Sunset",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 34,
+      "sheets": [
+        "cloud_red.webp",
+        "sun.webp",
+        "sunset.webp",
+        "sunset_water.webp"
+      ],
+      "file": "variants/base/sunset.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 34,
+      "sheets": [
+        "cloud_red.webp",
+        "sun.webp",
+        "sunset.webp",
+        "sunset_water.webp"
+      ],
+      "file": "variants/wide-3072/sunset.json"
+    }
+  },
+  {
+    "key": "sunny",
+    "name": "Sunny",
+    "itemId": 932,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/sunny.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/sunny.json"
+    }
+  },
+  {
+    "key": "harvest",
+    "name": "Harvest",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 9,
+      "sheets": [
+        "field_back.webp",
+        "field_front.webp",
+        "moon2.webp",
+        "sunset.webp"
+      ],
+      "file": "variants/base/harvest.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 9,
+      "sheets": [
+        "field_back.webp",
+        "field_front.webp",
+        "moon2.webp",
+        "sunset.webp"
+      ],
+      "file": "variants/wide-3072/harvest.json"
+    }
+  },
+  {
+    "key": "mars",
+    "name": "Mars",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 210,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "mars_back.webp",
+        "moon.webp",
+        "stars.webp"
+      ],
+      "file": "variants/base/mars.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 210,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "mars_back.webp",
+        "moon.webp",
+        "stars.webp"
+      ],
+      "file": "variants/wide-3072/mars.json"
+    }
+  },
+  {
+    "key": "spooky",
+    "name": "Spooky",
+    "itemId": 1210,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 45,
+      "sheets": [
+        "city_clouds1.webp",
+        "city_clouds2.webp",
+        "city_clouds3.webp",
+        "evil_sky.webp",
+        "field2_back.webp",
+        "field2_front.webp",
+        "moon3.webp",
+        "particles.webp",
+        "spook_house.webp"
+      ],
+      "file": "variants/base/spooky.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 41,
+      "sheets": [
+        "city_clouds1.webp",
+        "city_clouds2.webp",
+        "city_clouds3.webp",
+        "evil_sky.webp",
+        "field2_back.webp",
+        "field2_front.webp",
+        "moon3.webp",
+        "particles.webp",
+        "spook_house.webp"
+      ],
+      "file": "variants/wide-3072/spooky.json"
+    }
+  },
+  {
+    "key": "maw",
+    "name": "Maw",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1,
+      "sheets": [
+        "sky_twirl.webp"
+      ],
+      "file": "variants/base/maw.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1,
+      "sheets": [
+        "sky_twirl.webp"
+      ],
+      "file": "variants/wide-3072/maw.json"
+    }
+  },
+  {
+    "key": "blank",
+    "name": "Nothingness",
+    "itemId": 1490,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1,
+      "sheets": [],
+      "file": "variants/base/blank.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1,
+      "sheets": [],
+      "file": "variants/wide-3072/blank.json"
+    }
+  },
+  {
+    "key": "growch",
+    "name": "Growch",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 820,
+      "sheets": [
+        "city_clouds1.webp",
+        "city_clouds2.webp",
+        "city_clouds3.webp",
+        "city_sky.webp",
+        "groch_a.webp",
+        "groch_b.webp",
+        "groch_h.webp",
+        "groch_l.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/base/growch.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 670,
+      "sheets": [
+        "city_clouds1.webp",
+        "city_clouds2.webp",
+        "city_clouds3.webp",
+        "city_sky.webp",
+        "groch_a.webp",
+        "groch_b.webp",
+        "groch_h.webp",
+        "groch_l.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/wide-3072/growch.json"
+    }
+  },
+  {
+    "key": "growch-happy",
+    "name": "Growch Happy",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 632,
+      "sheets": [
+        "groch_a.webp",
+        "groch_b.webp",
+        "groch_h.webp",
+        "groch_l.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snow_clouds1.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/base/growch-happy.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 600,
+      "sheets": [
+        "groch_a.webp",
+        "groch_b.webp",
+        "groch_h.webp",
+        "groch_l.webp",
+        "hills1.webp",
+        "hills2.webp",
+        "particles.webp",
+        "snow_clouds1.webp",
+        "snowy_hill.webp"
+      ],
+      "file": "variants/wide-3072/growch-happy.json"
+    }
+  },
+  {
+    "key": "undersea",
+    "name": "Undersea",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 56,
+      "sheets": [
+        "under_back.webp",
+        "water_ray.webp"
+      ],
+      "file": "variants/base/undersea.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 56,
+      "sheets": [
+        "under_back.webp",
+        "water_ray.webp"
+      ],
+      "file": "variants/wide-3072/undersea.json"
+    }
+  },
+  {
+    "key": "comet2",
+    "name": "Comet 2",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1295,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp"
+      ],
+      "file": "variants/base/comet2.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 1153,
+      "sheets": [
+        "hills1.webp",
+        "hills2.webp",
+        "hills3.webp",
+        "moon.webp",
+        "night_back.webp",
+        "stars.webp"
+      ],
+      "file": "variants/wide-3072/comet2.json"
+    }
+  },
+  {
+    "key": "purple-haze",
+    "name": "Purple Haze",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 130,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/base/purple-haze.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 128,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/wide-3072/purple-haze.json"
+    }
+  },
+  {
+    "key": "fire-haze",
+    "name": "Fire Haze",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 130,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/base/fire-haze.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 128,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/wide-3072/fire-haze.json"
+    }
+  },
+  {
+    "key": "green-haze",
+    "name": "Green Haze",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 130,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/base/green-haze.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 128,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/wide-3072/green-haze.json"
+    }
+  },
+  {
+    "key": "aqua-haze",
+    "name": "Aqua Haze",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 130,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/base/aqua-haze.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 128,
+      "sheets": [
+        "haze.webp"
+      ],
+      "file": "variants/wide-3072/aqua-haze.json"
+    }
+  },
+  {
+    "key": "monochrome",
+    "name": "Monochrome",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud_monochrome.webp",
+        "hills1_monochrome.webp",
+        "hills2_monochrome.webp",
+        "hills3_monochrome.webp",
+        "sun_monochrome.webp"
+      ],
+      "file": "variants/base/monochrome.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "cloud_monochrome.webp",
+        "hills1_monochrome.webp",
+        "hills2_monochrome.webp",
+        "hills3_monochrome.webp",
+        "sun_monochrome.webp"
+      ],
+      "file": "variants/wide-3072/monochrome.json"
+    }
+  },
+  {
+    "key": "surgery",
+    "name": "Surgery",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 29,
+      "sheets": [
+        "cloud.webp",
+        "su_hill1.webp",
+        "su_hill2.webp",
+        "su_hill3.webp",
+        "su_skyline1.webp",
+        "su_skyline2.webp"
+      ],
+      "file": "variants/base/surgery.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 29,
+      "sheets": [
+        "cloud.webp",
+        "su_hill1.webp",
+        "su_hill2.webp",
+        "su_hill3.webp",
+        "su_skyline1.webp",
+        "su_skyline2.webp"
+      ],
+      "file": "variants/wide-3072/surgery.json"
+    }
+  },
+  {
+    "key": "bountiful",
+    "name": "Bountiful",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "b_hills1.webp",
+        "b_hills2.webp",
+        "b_hills3.webp",
+        "cloud.webp",
+        "sun.webp"
+      ],
+      "file": "variants/base/bountiful.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 61,
+      "sheets": [
+        "b_hills1.webp",
+        "b_hills2.webp",
+        "b_hills3.webp",
+        "cloud.webp",
+        "sun.webp"
+      ],
+      "file": "variants/wide-3072/bountiful.json"
+    }
+  },
+  {
+    "key": "stars",
+    "name": "Stars",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 201,
+      "sheets": [
+        "stars.webp",
+        "warp_back.webp"
+      ],
+      "file": "variants/base/stars.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 201,
+      "sheets": [
+        "stars.webp",
+        "warp_back.webp"
+      ],
+      "file": "variants/wide-3072/stars.json"
+    }
+  },
+  {
+    "key": "ascended",
+    "name": "Ascended",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "st_asec_back.webp",
+        "st_asec_backsky.webp",
+        "st_asec_bg.webp",
+        "st_asec_front.webp",
+        "st_asec_mid1.webp",
+        "st_asec_mid2.webp"
+      ],
+      "file": "variants/base/ascended.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "st_asec_back.webp",
+        "st_asec_backsky.webp",
+        "st_asec_bg.webp",
+        "st_asec_front.webp",
+        "st_asec_mid1.webp",
+        "st_asec_mid2.webp"
+      ],
+      "file": "variants/wide-3072/ascended.json"
+    }
+  },
+  {
+    "key": "destroyed",
+    "name": "Destroyed",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "mtn_skybg.webp",
+        "st_dsec_back.webp",
+        "st_dsec_backsky.webp",
+        "st_dsec_front.webp",
+        "st_dsec_mid1.webp",
+        "st_dsec_mid2.webp"
+      ],
+      "file": "variants/base/destroyed.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "mtn_skybg.webp",
+        "st_dsec_back.webp",
+        "st_dsec_backsky.webp",
+        "st_dsec_front.webp",
+        "st_dsec_mid1.webp",
+        "st_dsec_mid2.webp"
+      ],
+      "file": "variants/wide-3072/destroyed.json"
+    }
+  },
+  {
+    "key": "dungeon",
+    "name": "Dungeon",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 322,
+      "sheets": [
+        "water_ray.webp"
+      ],
+      "file": "variants/base/dungeon.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 316,
+      "sheets": [
+        "water_ray.webp"
+      ],
+      "file": "variants/wide-3072/dungeon.json"
+    }
+  },
+  {
+    "key": "legendary-city",
+    "name": "Legendary City",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 9,
+      "sheets": [
+        "ld_ctybg.webp",
+        "ld_ctydogn.webp",
+        "ld_ctyfro.webp",
+        "ld_ctymid.webp",
+        "ld_ctymid2.webp",
+        "ld_ctyrer.webp",
+        "ld_ctywisp1.webp",
+        "ld_ctywisp2.webp"
+      ],
+      "file": "variants/base/legendary-city.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 9,
+      "sheets": [
+        "ld_ctybg.webp",
+        "ld_ctydogn.webp",
+        "ld_ctyfro.webp",
+        "ld_ctymid.webp",
+        "ld_ctymid2.webp",
+        "ld_ctyrer.webp",
+        "ld_ctywisp1.webp",
+        "ld_ctywisp2.webp"
+      ],
+      "file": "variants/wide-3072/legendary-city.json"
+    }
+  },
+  {
+    "key": "blood-dragon",
+    "name": "Blood Dragon",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 8,
+      "sheets": [
+        "bg_bdfc_gradient_sky.webp",
+        "bg_bdfc_grid.webp",
+        "bg_bdfc_mountain1.webp",
+        "bg_bdfc_mountain3.webp",
+        "bg_bdfc_sun.webp"
+      ],
+      "file": "variants/base/blood-dragon.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 8,
+      "sheets": [
+        "bg_bdfc_gradient_sky.webp",
+        "bg_bdfc_grid.webp",
+        "bg_bdfc_mountain1.webp",
+        "bg_bdfc_mountain3.webp",
+        "bg_bdfc_sun.webp"
+      ],
+      "file": "variants/wide-3072/blood-dragon.json"
+    }
+  },
+  {
+    "key": "pop-city",
+    "name": "Pop City",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 6,
+      "sheets": [
+        "bg_pp_cityfront1.webp",
+        "bg_pp_cloudsmoonstars.webp",
+        "bg_pp_mountains2.webp",
+        "bg_pp_sky.webp"
+      ],
+      "file": "variants/base/pop-city.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 6,
+      "sheets": [
+        "bg_pp_cityfront1.webp",
+        "bg_pp_cloudsmoonstars.webp",
+        "bg_pp_mountains2.webp",
+        "bg_pp_sky.webp"
+      ],
+      "file": "variants/wide-3072/pop-city.json"
+    }
+  },
+  {
+    "key": "rad-city",
+    "name": "Rad City",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 7,
+      "sheets": [
+        "bg_vd_radrow1a.webp",
+        "bg_vd_radrow1b.webp",
+        "bg_vd_radrow2.webp",
+        "bg_vd_radrow3.webp",
+        "bg_vd_radsky.webp"
+      ],
+      "file": "variants/base/rad-city.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 7,
+      "sheets": [
+        "bg_vd_radrow1a.webp",
+        "bg_vd_radrow1b.webp",
+        "bg_vd_radrow2.webp",
+        "bg_vd_radrow3.webp",
+        "bg_vd_radsky.webp"
+      ],
+      "file": "variants/wide-3072/rad-city.json"
+    }
+  },
+  {
+    "key": "ac15",
+    "name": "AC15",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "bg_a1c5_layer1.webp",
+        "bg_a1c5_layer2_1.webp",
+        "bg_a1c5_layer2_2.webp",
+        "bg_a1c5_layer3.webp",
+        "bg_a1c5_layer4.webp",
+        "bg_a1c5_sky.webp"
+      ],
+      "file": "variants/base/ac15.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 11,
+      "sheets": [
+        "bg_a1c5_layer1.webp",
+        "bg_a1c5_layer2_1.webp",
+        "bg_a1c5_layer2_2.webp",
+        "bg_a1c5_layer3.webp",
+        "bg_a1c5_layer4.webp",
+        "bg_a1c5_sky.webp"
+      ],
+      "file": "variants/wide-3072/ac15.json"
+    }
+  },
+  {
+    "key": "rayman",
+    "name": "Rayman Lock",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_rm_layer1.webp",
+        "bg_rm_layer2.webp",
+        "bg_rm_layer3.webp",
+        "bg_rm_layer4.webp",
+        "bg_rm_sky.webp"
+      ],
+      "file": "variants/base/rayman.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 12,
+      "sheets": [
+        "bg_rm_layer1.webp",
+        "bg_rm_layer2.webp",
+        "bg_rm_layer3.webp",
+        "bg_rm_layer4.webp",
+        "bg_rm_sky.webp"
+      ],
+      "file": "variants/wide-3072/rayman.json"
+    }
+  },
+  {
+    "key": "steampunk",
+    "name": "Steampunk",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 14,
+      "sheets": [
+        "bg_vd_stpk_layer1.webp",
+        "bg_vd_stpk_layer2a.webp",
+        "bg_vd_stpk_layer2b.webp",
+        "bg_vd_stpk_layer3.webp",
+        "bg_vd_stpk_layer4a.webp",
+        "bg_vd_stpk_layer4b.webp",
+        "bg_vd_stpk_layer5.webp",
+        "bg_vd_stpk_layer6.webp",
+        "bg_vd_stpk_layer7.webp"
+      ],
+      "file": "variants/base/steampunk.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 15,
+      "sheets": [
+        "bg_vd_stpk_layer1.webp",
+        "bg_vd_stpk_layer2a.webp",
+        "bg_vd_stpk_layer2b.webp",
+        "bg_vd_stpk_layer3.webp",
+        "bg_vd_stpk_layer4a.webp",
+        "bg_vd_stpk_layer4b.webp",
+        "bg_vd_stpk_layer5.webp",
+        "bg_vd_stpk_layer6.webp",
+        "bg_vd_stpk_layer7.webp"
+      ],
+      "file": "variants/wide-3072/steampunk.json"
+    }
+  },
+  {
+    "key": "fenyx",
+    "name": "Fenyx Lock",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 17,
+      "sheets": [
+        "bg_im_cloud01.webp",
+        "bg_im_cloud02.webp",
+        "bg_im_cornerleft.webp",
+        "bg_im_cornerright.webp",
+        "bg_im_fog.webp",
+        "bg_im_foreground2.webp",
+        "bg_im_foreground3.webp",
+        "bg_im_hill.webp",
+        "bg_im_sky.webp",
+        "bg_im_smalltemple.webp"
+      ],
+      "file": "variants/base/fenyx.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 26,
+      "sheets": [
+        "bg_im_cloud01.webp",
+        "bg_im_cloud02.webp",
+        "bg_im_cornerleft.webp",
+        "bg_im_cornerright.webp",
+        "bg_im_fog.webp",
+        "bg_im_foreground2.webp",
+        "bg_im_foreground3.webp",
+        "bg_im_hill.webp",
+        "bg_im_sky.webp",
+        "bg_im_smalltemple.webp"
+      ],
+      "file": "variants/wide-3072/fenyx.json"
+    }
+  },
+  {
+    "key": "enchanted",
+    "name": "Enchanted Lock",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 21,
+      "sheets": [
+        "bg_EL_regula_frontBuilding.webp",
+        "bg_EL_regularl_backGradient.webp",
+        "bg_EL_regularl_backgroundBuilding.webp",
+        "bg_EL_regularl_cloud1.webp",
+        "bg_EL_regularl_cloud2.webp",
+        "bg_EL_regularl_middleBuilding.webp",
+        "bg_EL_regularl_silhouette.webp"
+      ],
+      "file": "variants/base/enchanted.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 32,
+      "sheets": [
+        "bg_EL_regula_frontBuilding.webp",
+        "bg_EL_regularl_backGradient.webp",
+        "bg_EL_regularl_backgroundBuilding.webp",
+        "bg_EL_regularl_cloud1.webp",
+        "bg_EL_regularl_cloud2.webp",
+        "bg_EL_regularl_middleBuilding.webp",
+        "bg_EL_regularl_silhouette.webp"
+      ],
+      "file": "variants/wide-3072/enchanted.json"
+    }
+  },
+  {
+    "key": "royal-enchanted",
+    "name": "Royal Enchanted Lock",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 38,
+      "sheets": [
+        "bg_EL_royal_Crystal-Glow-L.webp",
+        "bg_EL_royal_Crystal-Glow-R.webp",
+        "bg_EL_royal_backgroundBuilding.webp",
+        "bg_EL_royal_buildingLight01.webp",
+        "bg_EL_royal_buildingLight02.webp",
+        "bg_EL_royal_fog.webp",
+        "bg_EL_royal_fog_forground.webp",
+        "bg_EL_royal_middleBuilding.webp",
+        "bg_EL_royal_middleBuilding_Glow.webp",
+        "bg_EL_royal_pinkCrystalGLow.webp",
+        "bg_EL_royal_silhouette.webp",
+        "bg_EL_royal_sky.webp"
+      ],
+      "file": "variants/base/royal-enchanted.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 59,
+      "sheets": [
+        "bg_EL_royal_Crystal-Glow-L.webp",
+        "bg_EL_royal_Crystal-Glow-R.webp",
+        "bg_EL_royal_backgroundBuilding.webp",
+        "bg_EL_royal_buildingLight01.webp",
+        "bg_EL_royal_buildingLight02.webp",
+        "bg_EL_royal_fog.webp",
+        "bg_EL_royal_fog_forground.webp",
+        "bg_EL_royal_middleBuilding.webp",
+        "bg_EL_royal_middleBuilding_Glow.webp",
+        "bg_EL_royal_pinkCrystalGLow.webp",
+        "bg_EL_royal_silhouette.webp",
+        "bg_EL_royal_sky.webp"
+      ],
+      "file": "variants/wide-3072/royal-enchanted.json"
+    }
+  },
+  {
+    "key": "candy-land",
+    "name": "Candy Land",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 15,
+      "sheets": [
+        "bg_vd_cndy_layer1.webp",
+        "bg_vd_cndy_layer2.webp",
+        "bg_vd_cndy_layer3.webp",
+        "bg_vd_cndy_layer4.webp",
+        "bg_vd_cndy_sky.webp"
+      ],
+      "file": "variants/base/candy-land.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 25,
+      "sheets": [
+        "bg_vd_cndy_layer1.webp",
+        "bg_vd_cndy_layer2.webp",
+        "bg_vd_cndy_layer3.webp",
+        "bg_vd_cndy_layer4.webp",
+        "bg_vd_cndy_sky.webp"
+      ],
+      "file": "variants/wide-3072/candy-land.json"
+    }
+  },
+  {
+    "key": "latium",
+    "name": "Latium and Albion",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 17,
+      "sheets": [
+        "bg_PR_background.webp",
+        "bg_PR_background_right.webp",
+        "bg_PR_clouds.webp",
+        "bg_PR_foregound.webp",
+        "bg_PR_foregound_left.webp",
+        "bg_PR_foregound_right.webp",
+        "bg_PR_midground.webp",
+        "bg_PR_midground_left.webp",
+        "bg_PR_midground_right.webp",
+        "bg_PR_sky.webp",
+        "bg_PR_sunshine.webp"
+      ],
+      "file": "variants/base/latium.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 17,
+      "sheets": [
+        "bg_PR_background.webp",
+        "bg_PR_background_right.webp",
+        "bg_PR_clouds.webp",
+        "bg_PR_foregound.webp",
+        "bg_PR_foregound_left.webp",
+        "bg_PR_foregound_right.webp",
+        "bg_PR_midground.webp",
+        "bg_PR_midground_left.webp",
+        "bg_PR_midground_right.webp",
+        "bg_PR_sky.webp",
+        "bg_PR_sunshine.webp"
+      ],
+      "file": "variants/wide-3072/latium.json"
+    }
+  },
+  {
+    "key": "fruit-kingdom",
+    "name": "Fruit Kingdom",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 13,
+      "sheets": [
+        "bg_FK_bg.webp",
+        "bg_FK_fg.webp",
+        "bg_FK_mg.webp",
+        "bg_fk_sky.webp"
+      ],
+      "file": "variants/base/fruit-kingdom.json"
+    },
+    "wide-3072": {
+      "w": 3072,
+      "h": 768,
+      "step": 50,
+      "n": 260,
+      "loop": 240,
+      "tracks": 21,
+      "sheets": [
+        "bg_FK_bg.webp",
+        "bg_FK_fg.webp",
+        "bg_FK_mg.webp",
+        "bg_fk_sky.webp"
+      ],
+      "file": "variants/wide-3072/fruit-kingdom.json"
+    }
+  },
+  {
+    "key": "paradise-city",
+    "name": "Paradise City",
+    "itemId": null,
+    "base": {
+      "w": 1200,
+      "h": 768,
+      "step": 50,
+      "n": 320,
+      "loop": 300,
+      "tracks": 19,
+      "sheets": [
+        "bg_pc_city.webp",
+        "bg_pc_island.webp",
+        "bg_pc_sky.webp",
+        "bg_pc_waves1.webp",
+        "bg_pc_waves2.webp",
+        "bg_pc_waves3.webp"
+      ],
+      "file": "variants/base/paradise-city.json"
+    },
+    "wide-3072": null
+  }
+]

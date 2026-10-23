@@ -1,0 +1,31 @@
+{
+  "archive": "player stuff.zip",
+  "sourceBytes": 20282902,
+  "xmlFiles": 347,
+  "itemRendererFiles": 314,
+  "worldRendererFiles": 33,
+  "itemUniqueSpriteNames": 1467,
+  "itemSpriteDefinitionNodes": 1475,
+  "itemAnimationTracks": 1426,
+  "itemExplicitSpriteFrames": 4095,
+  "itemKeyFrameNodes": 3520,
+  "itemParticleSystems": 921,
+  "moduleFiles": 347,
+  "families": {
+    "leash-or-companion-control": 2,
+    "body-clothing": 8,
+    "wings": 30,
+    "specialized-item": 37,
+    "headwear-or-hair": 20,
+    "aura": 12,
+    "held-weapon-or-tool": 60,
+    "particle-heavy-special-effect": 101,
+    "back-or-accessory": 3,
+    "mount-or-vehicle": 23,
+    "cape-cloak-mantle": 11,
+    "footwear": 2,
+    "pet-or-companion": 5
+  },
+  "weatherRendererXmlFilesActuallyPresent": 0,
+  "xmlParseIssues": 0
+}

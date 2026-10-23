@@ -1,0 +1,9 @@
+/* PADS: left/right (left side), jump/punch (right side). 75% idle -> 100% while held. */
+#pads{position:absolute;inset:0;transform:translateY(var(--dy))}
+.pad{position:absolute;opacity:.75;transition:opacity .12s linear;touch-action:none;outline:0}
+.pad.down{opacity:1}
+.pad img{width:100%;height:auto}
+#pad-left {left:calc(52*var(--u));  top:calc(103*var(--u)); width:calc(248*var(--u))}
+#pad-right{left:calc(363*var(--u)); top:calc(103*var(--u)); width:calc(246*var(--u))}
+#pad-jump {left:calc(1383*var(--u));top:calc(97*var(--u));  width:calc(185*var(--u))}
+#pad-punch{left:calc(1623*var(--u));top:calc(97*var(--u));  width:calc(185*var(--u))}

@@ -1,0 +1,59 @@
+/* BASE: tokens, font, stage, panel look. Nothing else lives here. */
+/* Generic page text uses Century Gothic when the local webfont is available.
+   The bundled RTFont is used across the planner UI. */
+@font-face{
+  font-family:"Webfont CenturyGothic";
+  src:local("Century Gothic"),local("CenturyGothic");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+@font-face{
+  font-family:"RTFont CenturyGothic";
+  src:url(../font/cg.ttf) format("truetype");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+:root{
+  --font-web:"Webfont CenturyGothic","Century Gothic",sans-serif;
+  --font-rt:"RTFont CenturyGothic","Webfont CenturyGothic","Century Gothic",sans-serif;
+}
+
+:root{
+  --u:min(calc(100vw / 2000), .5px);       /* 1 design unit; reference art is 2000 wide */
+  --line:#7BBAD2;                           /* panel border */
+  --fill:rgba(39,125,159,.75);              /* panel fill #277D9F @ 75% */
+  --radius:3px;                             /* corner radius, all buttons/panels */
+  --bd:calc(4*var(--u));                    /* border thickness (2px at desktop scale) */
+  --sh:calc(2.5*var(--u));                  /* inner + drop shadow size */
+  --back:#505B83;                           /* side back panel, search off */
+  --back-on:#409067;                        /* side back panel, search on */
+  --txt:#93c7da;
+  --dy:0px;                                 /* inventory drag offset (set by handle.js) */
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:#000;font:400 calc(28*var(--u))/1 var(--font-web);font-synthesis:none;
+  color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
+button,input,select{font-synthesis:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block;pointer-events:none}
+
+/* Stage: 2000 design units wide, anchored bottom-centre. */
+#ui{font-family:var(--font-rt);position:fixed;left:50%;bottom:0;width:calc(2000*var(--u));height:calc(894*var(--u));
+  margin-left:calc(-1000*var(--u));pointer-events:none}
+#ui>*,#ui button,#ui input,#ui .panel{pointer-events:auto}
+#ui>nav,#ui>section{pointer-events:none}
+
+/* Panel look: fill sits behind the border; border + solid inner shadow (top-left) and drop shadow (bottom-right). No outline. */
+.panel{position:absolute;background:var(--fill);background-clip:border-box;border:var(--bd) solid var(--edge,var(--line));
+  border-radius:var(--radius);box-shadow:var(--sh) var(--sh) 0 0 #000}
+.panel::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:inset var(--sh) var(--sh) 0 0 #000}
+
+#toast{font-family:var(--font-rt);position:fixed;left:50%;top:16px;transform:translateX(-50%);padding:10px 18px;font-size:16px;
+  background:var(--fill);border:2px solid var(--line);border-radius:var(--radius);
+  box-shadow:2px 2px 0 #000;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+#hud{font-family:var(--font-rt);position:fixed;left:10px;top:8px;font-size:14px;color:#9fc4d4;z-index:9;pointer-events:none}

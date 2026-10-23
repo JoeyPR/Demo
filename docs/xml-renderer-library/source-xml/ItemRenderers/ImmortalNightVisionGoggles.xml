@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ItemRenderer>
+  <Data>
+    <Sprite name="equip_Sprite" fileName="game/player_cosmetics4.rttex" textureSize="32" frame="29,10"/>
+    
+    <RenderOptions>
+      <Default>
+        <Set name="IgnorePunchTypeCheck">true</Set>
+        <Set name="IsNightVision">true</Set>
+        <Set name="NightVisionColour">201,15,71</Set>
+      </Default>
+    </RenderOptions>
+
+  </Data>
+
+  <RenderRules>
+    <RenderFaceItem>
+      <SpriteRender name="equip_Sprite" alignment="DOWN_CENTER" blend="PREMULTIPLIED_ALPHA"/>
+    </RenderFaceItem>
+  </RenderRules>
+</ItemRenderer>

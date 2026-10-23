@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ItemRenderer>
+  <Data>
+    <Sprite name="s_glow" fileName="game/particles_large18.rttex" textureSize="64" frame="15,5" />
+    <Sprite name="s_wheat" fileName="game/particles_large18.rttex" textureSize="64" frame="13,5" />
+    <Sprite name="s_carrot" fileName="game/particles_large18.rttex" textureSize="64" frame="14,5" />
+    
+    <Animations>
+      <SpriteCurveAnimation name="a_glow" isLoop="true" autoPlay="true" sprite="s_glow" animTime="10000">
+        <Curve name="alpha">
+          <KeyFrame>0.f, 0.5f</KeyFrame>
+          <KeyFrame>0.45f, 1.f </KeyFrame>
+          <KeyFrame>0.55f, 1.f </KeyFrame>
+          <KeyFrame>1.f, 0.5f</KeyFrame>
+        </Curve>
+      </SpriteCurveAnimation>
+      <SpriteCurveAnimation name="a_wheat" autoPlay="true" isLoop="true" sprite="s_wheat" animTime="10000">
+        <Curve name="rotation">
+          <KeyFrame>0, 0</KeyFrame>
+          <KeyFrame>1, -360</KeyFrame>
+        </Curve>
+      </SpriteCurveAnimation>
+      <SpriteCurveAnimation name="a_carrot" autoPlay="true" isLoop="true" sprite="s_carrot" animTime="10000">
+        <Curve name="rotation">
+          <KeyFrame>0, 0</KeyFrame>
+          <KeyFrame>1, 360</KeyFrame>
+        </Curve>
+      </SpriteCurveAnimation>
+    </Animations>
+    <ParticleSystems />
+    <RenderOptions>
+      <Default>
+        <Set name="IgnorePunchTypeCheck">true</Set>
+        <Set name="DisableDefaultAncestralParticleEffects">true</Set>
+        <Set name="UserNameOffset">16</Set>
+      </Default>
+    </RenderOptions>
+  </Data>
+  <RenderRules>
+    <RenderBehind value="playerCenter">
+      <ContextUpdate type="SetFlip">
+        <Set name="flip">0,0</Set>
+      </ContextUpdate>
+      <Translate>0,-28,0</Translate>
+      <SpriteRender name="s_glow" alignment="CENTER" scale="1.5,1.5" blend="PREMULTIPLIED_ALPHA" drawShadow="false"/>
+      <Scale>0.9,0.9,1</Scale>
+      <SpriteRender name="s_wheat"  alignment="CENTER" blend="PREMULTIPLIED_ALPHA" drawShadow="false"/>
+      <SpriteRender name="s_carrot" alignment="CENTER" blend="PREMULTIPLIED_ALPHA" drawShadow="false"/>
+    </RenderBehind>
+  </RenderRules>
+</ItemRenderer>

@@ -1,0 +1,1209 @@
+{
+  "renderer": "AnomalyAura",
+  "family": "aura",
+  "source": "ItemRenderers/AnomalyAura.xml",
+  "sprites": [
+    {
+      "name": "auraBack",
+      "sourceTexture": "game/particles_large15.rttex",
+      "atlas": "particles_large15.png",
+      "textureSize": "64",
+      "frame": "0,4"
+    },
+    {
+      "name": "auraFront",
+      "sourceTexture": "game/particles_large15.rttex",
+      "atlas": "particles_large15.png",
+      "textureSize": "64",
+      "frame": "0,5"
+    },
+    {
+      "name": "s_hitFlash",
+      "sourceTexture": "game/particles12.rttex",
+      "atlas": "particles12.png",
+      "textureSize": "32",
+      "frame": "8,1"
+    },
+    {
+      "name": "s_Sparkles",
+      "sourceTexture": "game/particles12.rttex",
+      "atlas": "particles12.png",
+      "textureSize": "32",
+      "frame": "7,1"
+    }
+  ],
+  "timeline": [
+    {
+      "name": "darkEnabledBack",
+      "tag": "SpriteAnimation",
+      "sprite": "auraBack",
+      "durationMs": 900.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "ActiveType.Dark",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "darkEnabledBack",
+        "sprite": "auraBack",
+        "animTime": "900",
+        "isLoop": "true",
+        "playOnState": "ActiveType.Dark"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            5
+          ],
+          "startMs": 0.0,
+          "endMs": 81.8182,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 1,
+          "cell": [
+            1,
+            5
+          ],
+          "startMs": 81.8182,
+          "endMs": 163.6364,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 2,
+          "cell": [
+            2,
+            5
+          ],
+          "startMs": 163.6364,
+          "endMs": 245.4545,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 3,
+          "cell": [
+            3,
+            5
+          ],
+          "startMs": 245.4545,
+          "endMs": 327.2727,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 4,
+          "cell": [
+            4,
+            5
+          ],
+          "startMs": 327.2727,
+          "endMs": 409.0909,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 5,
+          "cell": [
+            5,
+            5
+          ],
+          "startMs": 409.0909,
+          "endMs": 490.9091,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 6,
+          "cell": [
+            6,
+            5
+          ],
+          "startMs": 490.9091,
+          "endMs": 572.7273,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 7,
+          "cell": [
+            7,
+            5
+          ],
+          "startMs": 572.7273,
+          "endMs": 654.5455,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 8,
+          "cell": [
+            8,
+            5
+          ],
+          "startMs": 654.5455,
+          "endMs": 736.3636,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 9,
+          "cell": [
+            9,
+            5
+          ],
+          "startMs": 736.3636,
+          "endMs": 818.1818,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 10,
+          "cell": [
+            10,
+            5
+          ],
+          "startMs": 818.1818,
+          "endMs": 900.0,
+          "durationMs": 81.8182
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "darkEnabledFront",
+      "tag": "SpriteAnimation",
+      "sprite": "auraFront",
+      "durationMs": 900.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "ActiveType.Dark",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "darkEnabledFront",
+        "sprite": "auraFront",
+        "animTime": "900",
+        "isLoop": "true",
+        "playOnState": "ActiveType.Dark"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            4
+          ],
+          "startMs": 0.0,
+          "endMs": 81.8182,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 1,
+          "cell": [
+            1,
+            4
+          ],
+          "startMs": 81.8182,
+          "endMs": 163.6364,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 2,
+          "cell": [
+            2,
+            4
+          ],
+          "startMs": 163.6364,
+          "endMs": 245.4545,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 3,
+          "cell": [
+            3,
+            4
+          ],
+          "startMs": 245.4545,
+          "endMs": 327.2727,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 4,
+          "cell": [
+            4,
+            4
+          ],
+          "startMs": 327.2727,
+          "endMs": 409.0909,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 5,
+          "cell": [
+            5,
+            4
+          ],
+          "startMs": 409.0909,
+          "endMs": 490.9091,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 6,
+          "cell": [
+            6,
+            4
+          ],
+          "startMs": 490.9091,
+          "endMs": 572.7273,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 7,
+          "cell": [
+            7,
+            4
+          ],
+          "startMs": 572.7273,
+          "endMs": 654.5455,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 8,
+          "cell": [
+            8,
+            4
+          ],
+          "startMs": 654.5455,
+          "endMs": 736.3636,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 9,
+          "cell": [
+            9,
+            4
+          ],
+          "startMs": 736.3636,
+          "endMs": 818.1818,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 10,
+          "cell": [
+            10,
+            4
+          ],
+          "startMs": 818.1818,
+          "endMs": 900.0,
+          "durationMs": 81.8182
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "lightEnabledBack",
+      "tag": "SpriteAnimation",
+      "sprite": "auraBack",
+      "durationMs": 900.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "ActiveType.Light",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "lightEnabledBack",
+        "sprite": "auraBack",
+        "animTime": "900",
+        "isLoop": "true",
+        "playOnState": "ActiveType.Light"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            7
+          ],
+          "startMs": 0.0,
+          "endMs": 81.8182,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 1,
+          "cell": [
+            1,
+            7
+          ],
+          "startMs": 81.8182,
+          "endMs": 163.6364,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 2,
+          "cell": [
+            2,
+            7
+          ],
+          "startMs": 163.6364,
+          "endMs": 245.4545,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 3,
+          "cell": [
+            3,
+            7
+          ],
+          "startMs": 245.4545,
+          "endMs": 327.2727,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 4,
+          "cell": [
+            4,
+            7
+          ],
+          "startMs": 327.2727,
+          "endMs": 409.0909,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 5,
+          "cell": [
+            5,
+            7
+          ],
+          "startMs": 409.0909,
+          "endMs": 490.9091,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 6,
+          "cell": [
+            6,
+            7
+          ],
+          "startMs": 490.9091,
+          "endMs": 572.7273,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 7,
+          "cell": [
+            7,
+            7
+          ],
+          "startMs": 572.7273,
+          "endMs": 654.5455,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 8,
+          "cell": [
+            8,
+            7
+          ],
+          "startMs": 654.5455,
+          "endMs": 736.3636,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 9,
+          "cell": [
+            9,
+            7
+          ],
+          "startMs": 736.3636,
+          "endMs": 818.1818,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 10,
+          "cell": [
+            10,
+            7
+          ],
+          "startMs": 818.1818,
+          "endMs": 900.0,
+          "durationMs": 81.8182
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "lightEnabledFront",
+      "tag": "SpriteAnimation",
+      "sprite": "auraFront",
+      "durationMs": 900.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "ActiveType.Light",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "lightEnabledFront",
+        "sprite": "auraFront",
+        "animTime": "900",
+        "isLoop": "true",
+        "playOnState": "ActiveType.Light"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            6
+          ],
+          "startMs": 0.0,
+          "endMs": 81.8182,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 1,
+          "cell": [
+            1,
+            6
+          ],
+          "startMs": 81.8182,
+          "endMs": 163.6364,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 2,
+          "cell": [
+            2,
+            6
+          ],
+          "startMs": 163.6364,
+          "endMs": 245.4545,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 3,
+          "cell": [
+            3,
+            6
+          ],
+          "startMs": 245.4545,
+          "endMs": 327.2727,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 4,
+          "cell": [
+            4,
+            6
+          ],
+          "startMs": 327.2727,
+          "endMs": 409.0909,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 5,
+          "cell": [
+            5,
+            6
+          ],
+          "startMs": 409.0909,
+          "endMs": 490.9091,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 6,
+          "cell": [
+            6,
+            6
+          ],
+          "startMs": 490.9091,
+          "endMs": 572.7273,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 7,
+          "cell": [
+            7,
+            6
+          ],
+          "startMs": 572.7273,
+          "endMs": 654.5455,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 8,
+          "cell": [
+            8,
+            6
+          ],
+          "startMs": 654.5455,
+          "endMs": 736.3636,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 9,
+          "cell": [
+            9,
+            6
+          ],
+          "startMs": 736.3636,
+          "endMs": 818.1818,
+          "durationMs": 81.8182
+        },
+        {
+          "index": 10,
+          "cell": [
+            10,
+            6
+          ],
+          "startMs": 818.1818,
+          "endMs": 900.0,
+          "durationMs": 81.8182
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    }
+  ],
+  "states": [
+    {
+      "name": "Punch",
+      "attributes": {
+        "name": "Punch"
+      },
+      "states": [
+        {
+          "name": "True",
+          "attributes": {
+            "name": "True"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "False",
+          "attributes": {
+            "name": "False"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "True",
+      "transitions": [
+        {
+          "from": [
+            "False"
+          ],
+          "to": "True",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsAction",
+                "v": "PUNCH"
+              },
+              {
+                "tag": "IsZombified",
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "from": "False",
+            "to": "True"
+          }
+        },
+        {
+          "from": [
+            "True"
+          ],
+          "to": "False",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "PUNCH"
+              }
+            ]
+          },
+          "attributes": {
+            "from": "True",
+            "to": "False"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ActiveType",
+      "attributes": {
+        "name": "ActiveType"
+      },
+      "states": [
+        {
+          "name": "Light",
+          "attributes": {
+            "name": "Light"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Dark",
+          "attributes": {
+            "name": "Dark"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "None",
+          "attributes": {
+            "name": "None"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Both",
+          "attributes": {
+            "name": "Both"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "Light",
+      "transitions": [
+        {
+          "from": [
+            "Dark",
+            "Light",
+            "None"
+          ],
+          "to": "Both",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "darkAnomaly"
+                },
+                "v": "true"
+              },
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "lightAnomaly"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Both",
+            "from": "Dark|Light|None"
+          }
+        },
+        {
+          "from": [
+            "Dark",
+            "Light"
+          ],
+          "to": "None",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "darkAnomaly"
+                },
+                "v": "false"
+              },
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "lightAnomaly"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "None",
+            "from": "Dark|Light"
+          }
+        },
+        {
+          "from": [
+            "None",
+            "Dark"
+          ],
+          "to": "Light",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "darkAnomaly"
+                },
+                "v": "false"
+              },
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "lightAnomaly"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Light",
+            "from": "None|Dark"
+          }
+        },
+        {
+          "from": [
+            "None",
+            "Light"
+          ],
+          "to": "Dark",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "darkAnomaly"
+                },
+                "v": "true"
+              },
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "lightAnomaly"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Dark",
+            "from": "None|Light"
+          }
+        }
+      ]
+    },
+    {
+      "name": "TimerState",
+      "attributes": {
+        "name": "TimerState"
+      },
+      "states": [
+        {
+          "name": "Stay",
+          "attributes": {
+            "name": "Stay"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Reset",
+          "attributes": {
+            "name": "Reset"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Idle",
+          "attributes": {
+            "name": "Idle"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Init",
+          "attributes": {
+            "name": "Init"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "TimerChanged",
+          "attributes": {
+            "name": "TimerChanged"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "Stay",
+      "transitions": [
+        {
+          "from": [
+            "Stay",
+            "Reset"
+          ],
+          "to": "Idle",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "timeCycle_On"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Idle",
+            "from": "Stay|Reset"
+          }
+        },
+        {
+          "from": [
+            "Idle"
+          ],
+          "to": "Init",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "timeCycle_On"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Init",
+            "from": "Idle"
+          }
+        },
+        {
+          "from": [
+            "Stay"
+          ],
+          "to": "TimerChanged",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "operatorType": "NotEqual",
+                  "VariableNameToCompare": "timeCyclePrevious",
+                  "RightHSVariableNameToCompare": "timeCycle"
+                },
+                "v": "15"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "TimerChanged",
+            "from": "Stay"
+          }
+        },
+        {
+          "from": [
+            "Reset",
+            "Init",
+            "TimerChanged"
+          ],
+          "to": "Stay",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "operatorType": "Greater",
+                  "VariableNameToCompare": "timeCycleTemp"
+                },
+                "v": "0"
+              },
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "timeCycle_On"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Stay",
+            "from": "Reset|Init|TimerChanged"
+          }
+        },
+        {
+          "from": [
+            "Stay",
+            "TimerChanged"
+          ],
+          "to": "Reset",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "operatorType": "Less",
+                  "VariableNameToCompare": "timeCycleTemp"
+                },
+                "v": "0"
+              },
+              {
+                "tag": "CompareCustomVariable",
+                "a": {
+                  "VariableNameToCompare": "timeCycle_On"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Reset",
+            "from": "Stay|TimerChanged"
+          }
+        }
+      ]
+    }
+  ],
+  "particleSystems": [
+    {
+      "name": "ps_hitFlash",
+      "attributes": {
+        "name": "ps_hitFlash"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "lifeTime": "0",
+        "particlesPerEmission": "1"
+      },
+      "particleAttributes": {},
+      "particleSets": {
+        "sprite": "s_hitFlash",
+        "blendingMode": "PREMULTIPLIED_ALPHA",
+        "lifeTime": "0.5"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialScale"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 1.6, 1.6"
+            }
+          ]
+        },
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "0.6, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ps_wandSparklesPunchTarget",
+      "attributes": {
+        "name": "ps_wandSparklesPunchTarget"
+      },
+      "emitterAttributes": {
+        "attachment": "targetPos"
+      },
+      "emitterSets": {
+        "offset": "0,0",
+        "offsetFacing": "true",
+        "emissionInterval": "0.2",
+        "particlesPerEmission": "8",
+        "particlesToEmit": "1"
+      },
+      "particleAttributes": {},
+      "particleSets": {
+        "sprite": "s_Sparkles",
+        "blendingMode": "PREMULTIPLIED_ALPHA",
+        "lifeTime": "0.4",
+        "rotateWithVelocity": "true"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 0"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "0.3, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "0.8, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "renderPasses": [
+    {
+      "hook": "Update",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [],
+      "tagCounts": {
+        "Update": 1,
+        "StopIf": 3,
+        "IsVariableBool": 1,
+        "IsAction": 1,
+        "IsWearing": 1,
+        "IsRenderMod": 4,
+        "IsZombified": 1,
+        "IsSleepingOnaBed": 1,
+        "ArithmethicOperation": 9
+      }
+    },
+    {
+      "hook": "RenderInFront",
+      "attributes": {
+        "value": "playerCenter"
+      },
+      "spriteRenders": [
+        {
+          "name": "auraFront",
+          "drawShadow": "false",
+          "offset": "0,-20",
+          "scale": "1.1, 1.1"
+        }
+      ],
+      "particleOperations": [],
+      "tagCounts": {
+        "RenderInFront": 1,
+        "StopIf": 3,
+        "IsVariableBool": 1,
+        "IsAction": 1,
+        "IsWearing": 1,
+        "IsRenderMod": 3,
+        "IsZombified": 1,
+        "IsSleepingOnaBed": 1,
+        "SpriteRender": 1
+      }
+    },
+    {
+      "hook": "RenderBehind",
+      "attributes": {
+        "value": "playerCenter"
+      },
+      "spriteRenders": [
+        {
+          "name": "auraBack",
+          "drawShadow": "false",
+          "offset": "0,-20",
+          "scale": "1.1, 1.1"
+        }
+      ],
+      "particleOperations": [],
+      "tagCounts": {
+        "RenderBehind": 1,
+        "StopIf": 3,
+        "IsVariableBool": 1,
+        "IsAction": 1,
+        "IsWearing": 1,
+        "IsRenderMod": 3,
+        "IsZombified": 1,
+        "IsSleepingOnaBed": 1,
+        "SpriteRender": 1
+      }
+    },
+    {
+      "hook": "OnDamagedTile",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [
+        {
+          "name": "ps_hitFlash"
+        },
+        {
+          "name": "ps_wandSparklesPunchTarget"
+        }
+      ],
+      "tagCounts": {
+        "OnDamagedTile": 1,
+        "ParticleSystemUpdate": 2
+      }
+    },
+    {
+      "hook": "OnDestroyedTile",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [
+        {
+          "name": "ps_hitFlash"
+        },
+        {
+          "name": "ps_wandSparklesPunchTarget"
+        }
+      ],
+      "tagCounts": {
+        "OnDestroyedTile": 1,
+        "ParticleSystemUpdate": 2
+      }
+    }
+  ]
+}

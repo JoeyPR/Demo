@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ItemRenderer>
+	<Data>
+		<Sprite name="s_Orb" fileName="game/player_cosmetics4.rttex" textureSize="32" frame="6,11"/>
+		<Sprite name="s_orbGodRays" fileName="game/particles_large13.rttex" textureSize="64" frame="12,13" />
+		<Sprite name="s_godRays" fileName="game/particles_large17.rttex" textureSize="64" frame="10,3" />
+		<Sprite name="s_punch" fileName="game/particles12.rttex" textureSize="32" frame="15,22" />
+		<Sprite name="s_punchFrag" fileName="game/particles12.rttex" textureSize="32" frame="17,22" />
+		<Animations>
+			<SpriteAnimation name="a_godRays" sprite="s_godRays">
+				<Frame>10,3</Frame>
+				<Frame>11,3</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_punch" sprite="s_punch">
+				<Frame>13,22</Frame>
+				<Frame>14,22</Frame>
+				<Frame>15,22</Frame>
+				<Frame>16,22</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_punchFrag" sprite="s_punchFrag">
+				<Frame>17,22</Frame>
+				<Frame>18,22</Frame>
+				<Frame>19,22</Frame>
+				<Frame>20,22</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_orbGodRays" sprite="s_orbGodRays" animTime="400" autoPlay="true" isLoop="true">
+				<Frame>12,13</Frame>
+				<Frame>13,13</Frame>
+				<Frame>14,13</Frame>
+				<Frame>15,13</Frame>
+			</SpriteAnimation>
+		</Animations>
+		<ParticleSystems>
+			<ParticleSystem name="ps_godrays" updateStage="AddClothingParticles" renderStage="RenderBehind">
+				<Emitter>
+					<Set name="offset">0, -28</Set>
+					<Set name="enable">true</Set>
+					<Set name="offsetFacing">false</Set>
+					<Set name="emissionInterval">1.5</Set>
+					<Set name="useCharacterPos">false</Set>
+					<Set name="infParticles">true</Set>
+					<Set name="infLifeTime">true</Set>
+					<Set name="particlesPerEmission">1</Set>
+				</Emitter>
+				<Particle particleIndexSpriteFrame="true">
+					<Set name="sprite">s_godRays</Set>
+					<Set name="relativeToEmitter">true</Set>
+					<Set name="inSpecificOrder">true</Set>
+					<Set name="blendingMode">PREMULTIPLIED_ALPHA</Set>
+					<Set name="isBackgroundParticle">false</Set>
+					<Set name="lifeTime">2</Set>
+					<Curve name="initialAlpha">
+						<KeyFrame>0, 0</KeyFrame>
+						<KeyFrame>0.5, 1</KeyFrame>
+						<KeyFrame>1, 0</KeyFrame>
+					</Curve>
+				</Particle>
+			</ParticleSystem>
+			<ParticleSystem name="ps_punchFrag">
+				<Emitter>
+					<Set name="offset">0,0</Set>
+					<Set name="lifeTime">0</Set>
+					<Set name="particlesPerEmission">4</Set>
+					<Set name="delayTimer">0.0</Set>
+				</Emitter>
+				<Particle randomSpriteFrame="true">
+					<Set name="sprite">s_punchFrag</Set>
+					<Set name="blendingMode">PREMULTIPLIED_ALPHA</Set>
+					<Set name="lifeTime">0.6</Set>
+					<Set name="rotateWithVelocity">true</Set>
+					<Curve name="initialAlpha">
+						<KeyFrame>0, 1</KeyFrame>
+						<KeyFrame>0.6, 1</KeyFrame>
+						<KeyFrame>1, 0</KeyFrame>
+					</Curve>
+					<RandomRadial name="initialVelocity" angleRange="0,360" radiusRange="30,50"/>
+					<Set name="useGravity">true</Set>
+					<Set name="gravityVector">0, 200</Set>
+				</Particle>
+			</ParticleSystem>
+			<ParticleSystem name="ps_Punch1">
+				<Emitter>
+					<Set name="offset">25, -25</Set>
+					<Set name="particlesPerEmission">1</Set>
+					<Set name="useCharacterPos">true</Set>
+
+					<Set name="lifeTime">0.3</Set>
+					<Set name="emissionInterval">0.05</Set>
+					<Set name="infParticles">true</Set>
+					<Set name="checkParticleNumToEmit">true</Set>
+					<Set name="particlesToEmit">1</Set>
+				</Emitter>
+				<Particle randomSpriteFrame="true">
+					<Set name="sprite">s_punch</Set>
+					<Set name="blendingMode">PREMULTIPLIED_ALPHA</Set>
+					<Set name="lifeTime">0.4</Set>
+					<Set name="rotateWithVelocity">true</Set>
+					<VectorTo name="initialVelocity" source="targetPos" duration="lifeTime" x="1"/>
+					<OnFinish>
+						<ParticleSystemName>ps_punchFrag</ParticleSystemName>
+					</OnFinish>
+				</Particle>
+			</ParticleSystem>
+			<ParticleSystem name="ps_Punch2">
+				<Emitter>
+					<Set name="offset">-25, -25</Set>
+					<Set name="particlesPerEmission">1</Set>
+					<Set name="useCharacterPos">true</Set>
+
+					<Set name="lifeTime">0.3</Set>
+					<Set name="emissionInterval">0.05</Set>
+					<Set name="infParticles">true</Set>
+					<Set name="checkParticleNumToEmit">true</Set>
+					<Set name="particlesToEmit">1</Set>
+				</Emitter>
+				<Particle randomSpriteFrame="true">
+					<Set name="sprite">s_punch</Set>
+					<Set name="blendingMode">PREMULTIPLIED_ALPHA</Set>
+					<Set name="lifeTime">0.4</Set>
+					<Set name="rotateWithVelocity">true</Set>
+					<VectorTo name="initialVelocity" source="targetPos" duration="lifeTime" x="1"/>
+					<OnFinish>
+						<ParticleSystemName>ps_punchFrag</ParticleSystemName>
+					</OnFinish>
+				</Particle>
+			</ParticleSystem>
+			<ParticleSystem name="ps_orbGodRays1" updateStage="RenderHandItem">
+				<Emitter attachment="handspotRoot">
+					<Set name="offset">0, 7.5</Set>
+					<Set name="lifeTime">15</Set>
+					<Set name="emissionInterval">0.25</Set>
+					<Set name="infParticles">true</Set>
+					<Set name="particlesPerEmission">1</Set>
+				</Emitter>
+				<Particle randomSpriteFrame="true" usePlayerFacing="true">
+					<Set name="sprite">s_orbGodRays</Set>
+					<Set name="relativeToEmitter">true</Set>
+					<Set name="blendingMode">ADDITIVE</Set>
+					<Set name="inSpecificOrder">true</Set>
+					<Curve name="initialAlpha">
+						<KeyFrame>0, 0</KeyFrame>
+						<KeyFrame>0.25, 0</KeyFrame>
+						<KeyFrame>0.5, 1</KeyFrame>
+						<KeyFrame>1, 0</KeyFrame>
+					</Curve>
+					<Curve name="initialScale">
+						<KeyFrame>0, 0.2, 0.2</KeyFrame>
+						<KeyFrame>0.5, 0.35, 0.35</KeyFrame>
+						<KeyFrame>1, 0.35, 0.35</KeyFrame>
+					</Curve>
+					<Set name="lifeTime">1</Set>
+					<Random name="initialAngle" min="0" max="360"/>
+				</Particle>
+			</ParticleSystem>
+			<ParticleSystem name="ps_orbGodRays2" updateStage="RenderBackHandItem">
+				<Emitter attachment="handspotRoot">
+					<Set name="offset">-4,4</Set>
+					<Set name="lifeTime">15</Set>
+					<Set name="emissionInterval">0.25</Set>
+					<Set name="infParticles">true</Set>
+					<Set name="particlesPerEmission">1</Set>
+				</Emitter>
+				<Particle randomSpriteFrame="true" usePlayerFacing="true">
+					<Set name="sprite">s_orbGodRays</Set>
+					<Set name="relativeToEmitter">true</Set>
+					<Set name="blendingMode">ADDITIVE</Set>
+					<Set name="inSpecificOrder">true</Set>
+					<Curve name="initialAlpha">
+						<KeyFrame>0, 0</KeyFrame>
+						<KeyFrame>0.25, 0</KeyFrame>
+						<KeyFrame>0.5, 1</KeyFrame>
+						<KeyFrame>1, 0</KeyFrame>
+					</Curve>
+					<Curve name="initialScale">
+						<KeyFrame>0, 0.2, 0.2</KeyFrame>
+						<KeyFrame>0.5, 0.35, 0.35</KeyFrame>
+						<KeyFrame>1, 0.35, 0.35</KeyFrame>
+					</Curve>
+					<Set name="lifeTime">1</Set>
+					<Random name="initialAngle" min="0" max="360"/>
+				</Particle>
+			</ParticleSystem>
+		</ParticleSystems>
+		<StateMachines>
+			<StateMachine name="Action">
+				<States>
+					<State name="None" />
+					<State name="Punch" />
+				</States>
+				<Transitions>
+					<Transition to="None" from="Punch">
+						<Condition>
+							<IsAction operatorType="NotEqual">PUNCH</IsAction>
+						</Condition>
+					</Transition>
+					<Transition to="Punch" from="None">
+						<Condition>
+							<IsAction>PUNCH</IsAction>
+						</Condition>
+					</Transition>
+				</Transitions>
+			</StateMachine>
+			<StateMachine name="Punch">
+				<States>
+					<State name="Off"/>
+					<State name="PunchA" ExitTime="0.25" />
+					<State name="PunchB" ExitTime="0.25"/>
+				</States>
+				<Transitions>
+					<Transition to="PunchA" from="Off|PunchB" >
+						<Condition type="and">
+							<IsAction>PUNCH</IsAction>
+							<IsZombified>false</IsZombified>
+						</Condition>
+					</Transition>
+					<Transition to="Off" from="PunchB|PunchA" >
+						<Condition>
+							<IsAction operatorType="NotEqual">PUNCH</IsAction>
+						</Condition>
+					</Transition>
+					<Transition to="PunchB" from="PunchA" />
+					
+				</Transitions>
+			</StateMachine>
+		</StateMachines>
+		<RenderOptions>
+			<Default>
+				<Set name="PunchSoundOverride">HAND</Set>
+				<Set name="DefaultRenderMannequinHandItem">false</Set>
+				<Set name="RenderFrontArmInfected">true</Set>
+				<Set name="RenderFrontArmInTheFront">true</Set>
+				<Set name="ShouldHover">true></Set>
+				<Set name="RenderFrontArmInTheFront">false</Set>
+				<Set name="RenderBackArmInTheFront">false</Set>
+				<Set name="DisableWalkAnimation">true</Set>
+			</Default>
+		</RenderOptions>
+	</Data>
+	<RenderRules>
+		<RenderHandItem>
+			<StopIf>
+				<IsZombified>true</IsZombified>
+			</StopIf>
+			<ParticleSystemRender name="ps_orbGodRays1"/>
+			<SpriteRender name="s_Orb" alignment="UPPER_CENTER" blend="PREMULTIPLIED_ALPHA"/>
+		</RenderHandItem>
+		<RenderBackHandItem>
+			<StopIf>
+				<IsZombified>true</IsZombified>
+			</StopIf>
+			<ParticleSystemRender name="ps_orbGodRays2"/>
+			<SpriteRender name="s_Orb" offset="-4,-4" rotateOffset="true" alignment="UPPER_CENTER" blend="PREMULTIPLIED_ALPHA"/>
+		</RenderBackHandItem>
+		<RenderFrontArm>
+			<ContextUpdate type="PositionSinPulse" onState="Action.Punch">
+				<Set name="period">200</Set>
+				<Set name="scale">-2</Set>
+				<Set name="clamp">true</Set>
+			</ContextUpdate>
+		</RenderFrontArm>
+		<RenderBackArm>
+			<ContextUpdate type="PositionSinPulse" onState="Action.Punch">
+				<Set name="period">-200</Set>
+				<Set name="scale">-2</Set>
+				<Set name="clamp">true</Set>
+			</ContextUpdate>
+		</RenderBackArm>
+		<RenderBehind value="playerCenter">
+			<StopIf>
+				<IsZombified>true</IsZombified>
+			</StopIf>
+			<SpriteRender name="s_punch" offset="-25, -25" blend="PREMULTIPLIED_ALPHA" onState="Punch.PunchA|Punch.Off"/>
+			<SpriteRender name="s_punch" offset="25, -25" blend="PREMULTIPLIED_ALPHA" onState="Punch.PunchB|Punch.Off"/>
+		</RenderBehind>
+		<Update>
+			<ParticleSystemUpdate name="ps_Punch1" onState="Punch.PunchA"/>
+			<ParticleSystemUpdate name="ps_Punch2" onState="Punch.PunchB"/>
+			<StopIf>
+				<IsWearing slot="SHIRT">ITEM_ID_TACTICAL_STEALTH_DEVICE</IsWearing>
+				<IsZombified>true</IsZombified>
+			</StopIf>
+			<Group onState="Action.None">
+				<AvatarTransform class="ArmAngle">
+					<Set name="armName">arm2Angle</Set>
+					<Set name="armAngle">45</Set>
+				</AvatarTransform>
+				<AvatarTransform class="ArmAngle">
+					<Set name="armName">arm1Angle</Set>
+					<Set name="armAngle">-45</Set>
+				</AvatarTransform>
+			</Group>
+		</Update>
+		<OnPunchUpdate>
+			<AvatarTransform class="Face">
+				<Set name="face">MAD</Set>
+			</AvatarTransform>
+			<AvatarTransform class="ArmAngle">
+				<Set name="armName">arm2Angle</Set>
+				<Set name="pointTowardsPunchTarget">true</Set>
+			</AvatarTransform>
+			<AvatarTransform class="ArmAngle">
+				<Set name="armName">arm1Angle</Set>
+				<Set name="pointTowardsPunchTarget">true</Set>
+			</AvatarTransform>
+		</OnPunchUpdate>
+	</RenderRules>
+</ItemRenderer>

@@ -1,0 +1,787 @@
+{
+  "renderer": "14DEViLsFriendlyDoggyLeash",
+  "family": "leash-or-companion-control",
+  "source": "ItemRenderers/14DEViLsFriendlyDoggyLeash.xml",
+  "sprites": [
+    {
+      "name": "s_Pants",
+      "sourceTexture": "game/player_cosmetics4.rttex",
+      "atlas": "player_cosmetics4.png",
+      "textureSize": "32,32",
+      "frame": "0,0"
+    },
+    {
+      "name": "s_Dog",
+      "sourceTexture": "game/pets/p_friendly_dog.rttex",
+      "atlas": "p_friendly_dog.png",
+      "textureSize": "32,32",
+      "frame": "0,0"
+    },
+    {
+      "name": "s_Punch",
+      "sourceTexture": "game/particles12.rttex",
+      "atlas": "particles12.png",
+      "textureSize": "32",
+      "frame": "31,3"
+    }
+  ],
+  "timeline": [
+    {
+      "name": "s_Dog_Idle",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 400.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Motion.None",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Idle",
+        "sprite": "s_Dog",
+        "isLoop": "true",
+        "animTime": "400",
+        "playOnState": "Motion.None"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            0
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            1,
+            0
+          ],
+          "startMs": 100.0,
+          "endMs": 200.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 2,
+          "cell": [
+            2,
+            0
+          ],
+          "startMs": 200.0,
+          "endMs": 300.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 3,
+          "cell": [
+            3,
+            0
+          ],
+          "startMs": 300.0,
+          "endMs": 400.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Dog_Death",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 2000.0,
+      "durationSource": "animTime",
+      "loop": false,
+      "playOnState": "Motion.Death",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Death",
+        "sprite": "s_Dog",
+        "isLoop": "false",
+        "animTime": "2000",
+        "playOnState": "Motion.Death"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            4,
+            1
+          ],
+          "startMs": 0.0,
+          "endMs": 1000.0,
+          "durationMs": 1000.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            5,
+            1
+          ],
+          "startMs": 1000.0,
+          "endMs": 2000.0,
+          "durationMs": 1000.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Dog_Sleep",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 100.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Motion.Sleep",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Sleep",
+        "sprite": "s_Dog",
+        "isLoop": "true",
+        "animTime": "100",
+        "playOnState": "Motion.Sleep"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            3,
+            1
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Dog_Jump",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 100.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Motion.Up",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Jump",
+        "sprite": "s_Dog",
+        "isLoop": "true",
+        "animTime": "100",
+        "playOnState": "Motion.Up"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            7,
+            0
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Dog_Fall",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 100.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Motion.Down",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Fall",
+        "sprite": "s_Dog",
+        "isLoop": "true",
+        "animTime": "100",
+        "playOnState": "Motion.Down"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            1
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Dog_Move",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 300.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Motion.Horizontal",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Move",
+        "sprite": "s_Dog",
+        "isLoop": "true",
+        "animTime": "300",
+        "playOnState": "Motion.Horizontal"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            4,
+            0
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            5,
+            0
+          ],
+          "startMs": 100.0,
+          "endMs": 200.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 2,
+          "cell": [
+            6,
+            0
+          ],
+          "startMs": 200.0,
+          "endMs": 300.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Dog_Punch",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Dog",
+      "durationMs": 400.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Motion.Punch",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Dog_Punch",
+        "sprite": "s_Dog",
+        "isLoop": "true",
+        "animTime": "400",
+        "playOnState": "Motion.Punch"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            1,
+            1
+          ],
+          "startMs": 0.0,
+          "endMs": 200.0,
+          "durationMs": 200.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            2,
+            1
+          ],
+          "startMs": 200.0,
+          "endMs": 400.0,
+          "durationMs": 200.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    }
+  ],
+  "states": [
+    {
+      "name": "Motion",
+      "attributes": {
+        "name": "Motion"
+      },
+      "states": [
+        {
+          "name": "None",
+          "attributes": {
+            "name": "None"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Up",
+          "attributes": {
+            "name": "Up"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Down",
+          "attributes": {
+            "name": "Down"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Horizontal",
+          "attributes": {
+            "name": "Horizontal"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Punch",
+          "attributes": {
+            "name": "Punch"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Death",
+          "attributes": {
+            "name": "Death"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Sleep",
+          "attributes": {
+            "name": "Sleep"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "None",
+      "transitions": [
+        {
+          "from": [
+            "Punch",
+            "Up",
+            "Down",
+            "Horizontal",
+            "Sleep",
+            "Death"
+          ],
+          "to": "None",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "pet.velocity.length",
+                  "operator": "Less",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "PUNCH"
+              },
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "SLEEP"
+              },
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "DIE"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "None",
+            "from": "Punch|Up|Down|Horizontal|Sleep|Death"
+          }
+        },
+        {
+          "from": [
+            "Punch",
+            "None",
+            "Down",
+            "Horizontal"
+          ],
+          "to": "Up",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "pet.velocity.y",
+                  "operator": "Less"
+                },
+                "v": "-0.1"
+              },
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "PUNCH"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Up",
+            "from": "Punch|None|Down|Horizontal"
+          }
+        },
+        {
+          "from": [
+            "Punch",
+            "None",
+            "Up",
+            "Horizontal"
+          ],
+          "to": "Down",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "pet.velocity.y",
+                  "operator": "Greater"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "PUNCH"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Down",
+            "from": "Punch|None|Up|Horizontal"
+          }
+        },
+        {
+          "from": [
+            "Punch",
+            "None",
+            "Down",
+            "Up"
+          ],
+          "to": "Horizontal",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "pet.velocity.x",
+                  "operator": "Greater",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "pet.velocity.y",
+                  "operator": "Less",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsAction",
+                "a": {
+                  "operatorType": "NotEqual"
+                },
+                "v": "PUNCH"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Horizontal",
+            "from": "Punch|None|Down|Up"
+          }
+        },
+        {
+          "from": [
+            "None",
+            "Up",
+            "Down",
+            "Horizontal",
+            "Sleep"
+          ],
+          "to": "Punch",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsAction",
+                "v": "PUNCH"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Punch",
+            "from": "None|Up|Down|Horizontal|Sleep"
+          }
+        },
+        {
+          "from": [
+            "None"
+          ],
+          "to": "Sleep",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsAction",
+                "v": "SLEEP"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Sleep",
+            "from": "None"
+          }
+        },
+        {
+          "from": [
+            "None",
+            "Punch",
+            "Up",
+            "Down",
+            "Horizontal",
+            "Sleep"
+          ],
+          "to": "Death",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsAction",
+                "v": "DIE"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Death",
+            "from": "None|Punch|Up|Down|Horizontal|Sleep"
+          }
+        }
+      ]
+    },
+    {
+      "name": "SleepParticle",
+      "attributes": {
+        "name": "SleepParticle"
+      },
+      "states": [
+        {
+          "name": "On",
+          "attributes": {
+            "name": "On"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Off",
+          "attributes": {
+            "name": "Off",
+            "ExitTime": "2"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "On",
+      "transitions": [
+        {
+          "from": [
+            "Off"
+          ],
+          "to": "On",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsAction",
+                "v": "SLEEP"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "On",
+            "from": "Off"
+          }
+        },
+        {
+          "from": [
+            "On"
+          ],
+          "to": "Off",
+          "condition": null,
+          "attributes": {
+            "to": "Off",
+            "from": "On"
+          }
+        }
+      ]
+    }
+  ],
+  "particleSystems": [
+    {
+      "name": "PunchParticle",
+      "attributes": {
+        "name": "PunchParticle"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "offset": "10, -16",
+        "emissionInterval": "0.2",
+        "infParticles": "true",
+        "infLifeTime": "true",
+        "particlesPerEmission": "1"
+      },
+      "particleAttributes": {},
+      "particleSets": {
+        "sprite": "s_Punch",
+        "blendingMode": "PREMULTIPLIED_ALPHA",
+        "rotateWithVelocity": "false",
+        "lifeTime": "0.5"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialScale"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 0.8, 0.8"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 1.2, 1.2"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "renderPasses": [
+    {
+      "hook": "Update",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [],
+      "tagCounts": {
+        "Update": 1,
+        "StopIf": 1,
+        "IsZombified": 1,
+        "IsVariableBool": 1,
+        "AvatarTransform": 1,
+        "Set": 2
+      }
+    },
+    {
+      "hook": "RenderPet",
+      "attributes": {},
+      "spriteRenders": [
+        {
+          "name": "s_Dog",
+          "alignment": "DOWN_CENTER"
+        }
+      ],
+      "particleOperations": [
+        {
+          "name": "PunchParticle",
+          "onState": "Motion.Punch"
+        },
+        {
+          "type": "5"
+        }
+      ],
+      "tagCounts": {
+        "RenderPet": 1,
+        "Translate": 1,
+        "SpriteRender": 1,
+        "StopIf": 1,
+        "IsTrnsformed": 1,
+        "IsVariableBool": 1,
+        "ParticleSystemUpdate": 1,
+        "Group": 1,
+        "ParticleSystemLegacy": 1
+      }
+    },
+    {
+      "hook": "UpdatePunch",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [],
+      "tagCounts": {
+        "UpdatePunch": 1
+      }
+    },
+    {
+      "hook": "UpdatePet",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [],
+      "tagCounts": {
+        "UpdatePet": 1,
+        "ContextUpdate": 1,
+        "Set": 2
+      }
+    }
+  ]
+}

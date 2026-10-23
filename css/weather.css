@@ -1,0 +1,3 @@
+/* WEATHER: background layer inside the Preview, behind the canvas. Starts black; weather types get added here as [data-w=...]. */
+#weather{position:absolute;inset:0;background:#000;border-radius:var(--radius)}
+#weather[data-w=none]{background:#000}

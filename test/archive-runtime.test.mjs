@@ -36,7 +36,9 @@ test("horse gait excludes complete 64px sprites and applies only during travel",
     {a:"horse.png",sx:0,sy:32,sw:32,sh:32,x:16,y:32,u:10}]};
   const i=normalizeCatalogItem(raw,{});assert.ok(mountedGaitProfile(i));
   advanceCatalogItem(i,0,frame(0,"walk"));advanceCatalogItem(i,115,frame(115,"walk"));
-  assert.equal(i.gait.bodyY,-1.5);assert.ok(i.pieces[1].y!==i.pieces[2].y);
+  // Rider bob tuning: the moving-hop period is deliberately slowed to 805 ms
+  // (see mounted-gait.mjs), so the 115 ms sample no longer hits the peak.
+  assert.equal(i.gait.bodyY,-1.5*Math.abs(Math.sin(2*Math.PI*115/805)));assert.ok(i.pieces[1].y!==i.pieces[2].y);
   advanceCatalogItem(i,100,frame(100));assert.equal(i.gait.active,false);
   const full=normalizeCatalogItem({...raw,gameIcon:[...raw.gameIcon,{a:"whole.png",sw:64,sh:64,x:16,y:32,u:10}]},{});
   assert.equal(mountedGaitProfile(full),null);

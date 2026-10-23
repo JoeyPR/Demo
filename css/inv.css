@@ -1,0 +1,96 @@
+/* INV: top drawer, handle, tabs, main drawer, boxes, side panel. All y values move with --dy.
+   Positions are measured from `ui reference.png` (2000-unit stage; y' = reference y - 260). */
+#inv{position:absolute;inset:0}
+#top,#handle,#tabs,#main,#side{transform:translateY(var(--dy))}
+#handle,#tabs{position:absolute;pointer-events:auto}
+
+/* 4. top drawer + handle (desktop handle by default, tab handle on touch devices) */
+#top{left:calc(660.3*var(--u));top:calc(100.9*var(--u));width:calc(677.4*var(--u));height:calc(181.4*var(--u));transform:translateY(var(--dy)) scale(1.06);transform-origin:center top}
+#quick{display:grid;grid-template-columns:repeat(4,calc(164*var(--u)));gap:calc(4.7*var(--u));padding-top:calc(5*var(--u))}
+#handle{left:calc(842.5*var(--u));top:calc(30*var(--u));width:calc(315*var(--u));cursor:grab;touch-action:none;outline:0}
+#handle.drag{cursor:grabbing}
+#handle .hm{display:none;width:100%}
+#handle .hd{position:absolute;left:0;top:0;width:100%;opacity:0}
+#handle .hd-n{position:static;opacity:1}
+#handle.up .hd-u,#handle.dn .hd-d{opacity:1}          /* dragging up / down arrows */
+#handle.up .hd-n,#handle.dn .hd-n{opacity:0}
+@media (max-width:900px),(hover:none) and (pointer:coarse){   /* mobile: tab handle at the reference size */
+  #handle{left:calc(937*var(--u));top:calc(5*var(--u));width:calc(126*var(--u))}
+  #handle .hm{display:block}#handle .hd{display:none}
+}
+
+/* main drawer border follows the active tab's pressed color */
+#main[data-t=equip]{--edge:#a5e3fb}#main[data-t=fav]{--edge:#ff0040}#main[data-t=cloth]{--edge:#cccccc}
+#main[data-t=custom]{--edge:#21a90d}#main[data-t=player]{--edge:#0099e1}#main[data-t=makeup]{--edge:#c851e9}
+
+/* 1. main drawer (outer 84..1741 x 546.2..screen bottom) */
+#main{left:calc(84*var(--u));top:calc(286.2*var(--u));width:calc(1657*var(--u));
+  height:calc(607.8*var(--u) - var(--dy));overflow:hidden}
+#s-icon{position:absolute;left:calc(19.7*var(--u));top:calc(19.7*var(--u));width:calc(60*var(--u));z-index:1;transition:opacity .12s}
+#q{position:absolute;left:calc(99.2*var(--u));top:calc(18.4*var(--u));width:calc(1539.7*var(--u));height:calc(57.7*var(--u));
+  background:transparent;border:var(--bd) solid var(--line);border-radius:var(--radius);outline:0;
+  box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000;transition:opacity .12s;
+  padding:0 calc(22*var(--u));font:inherit;font-size:calc(34*var(--u));color:#fff}
+#q::placeholder{color:#dfdfdf;opacity:1}
+#main.search-disabled #q,#main.search-disabled #s-icon{opacity:.5;pointer-events:none}
+#grid{position:absolute;left:0;right:0;top:calc(95*var(--u));bottom:0;overflow-y:auto;overflow-x:hidden;
+  display:grid;grid-template-columns:repeat(9,calc(171*var(--u)));gap:calc(5.9*var(--u)) calc(5.2*var(--u));align-content:start;
+  padding:calc(8*var(--u)) 0 calc(30*var(--u)) calc(33.2*var(--u));touch-action:pan-y;scrollbar-width:none}
+#grid::-webkit-scrollbar{display:none}
+
+/* item boxes: white = default, art = pink, blue = quick slots.
+   click = .focus (yellow brackets) | click again = .sel (box-sel + check) = equipped */
+.box{position:relative;aspect-ratio:1;outline:0;background:url(../img/box-white.png) 0 0/100% 100%}
+.box.art{background-image:url(../img/box-art.png)}
+.box.blue{background-image:url(../img/box-blue.png)}
+.box.sel{background-image:url(../img/box-sel.png)}
+.box.sel.art{background-image:url(../img/box-art.png)}
+.box::before{content:"";position:absolute;inset:-2.6% -4.9% -5.4% -3.1%;background:url(../img/box-focus.png) 0 0/100% 100%;opacity:0;pointer-events:none}
+.box.focus::before{opacity:1}
+.box .ck{position:absolute;right:3%;bottom:3%;width:42%;display:none;z-index:2;filter:drop-shadow(calc(8*var(--u)) calc(8*var(--u)) 0 rgba(0,0,0,.75))}
+.box.sel .ck.o{display:block}
+.box.sel.art .ck.o{display:none}
+.box.sel.art .ck.p{display:block}
+.box .ic{position:absolute;inset:16%;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);
+  font-size:calc(46*var(--u));text-shadow:0 2px 0 rgba(0,0,0,.45)}
+.box .n{position:absolute;left:14%;bottom:12%;font-size:calc(26*var(--u));color:#fff;text-shadow:0 2px 0 #000}
+.box .fv{position:absolute;right:2%;top:2%;width:74%;height:74%;object-fit:fill;display:none;z-index:2}   /* fav-box.png: box-sized overlay, star top-right */
+.box.fav .fv{display:block}
+.box img{pointer-events:none}
+.box.fav-special{background-image:url(../img/box-fav.png);background-position:center;background-size:100% 100%;cursor:default}
+.box.fav-special::before{display:none}
+
+/* 3. tabs (left of main drawer) */
+#tabs{left:0;top:calc(298*var(--u));width:calc(90*var(--u));height:calc(560*var(--u));pointer-events:none}
+.tab{display:block;position:relative;width:calc(90*var(--u));height:calc(91.5*var(--u));pointer-events:auto;outline:0}
+.tab img{position:absolute;inset:0;width:100%}
+.tab .on{display:none}
+.tab[aria-selected=true] .on{display:block}
+.tab[aria-selected=true] .off{display:none}
+
+/* 2. side panel (outer 1743.6..1915.4 x 546.2..1104.5) */
+#side{left:calc(1743.6*var(--u));top:calc(286.2*var(--u));width:calc(171.8*var(--u));
+  height:calc(558.3*var(--u) - var(--dy));overflow:hidden}
+#back{height:calc(86.3*var(--u));background:var(--back);box-shadow:0 var(--sh) 0 #000;position:relative;transition:background .15s;
+  display:flex;align-items:center;justify-content:center}   /* the only downward-only shadow */
+#side.srch #back{background:var(--back-on)}
+#sw{height:calc(66*var(--u));outline:0;pointer-events:none;cursor:default}
+#sw:disabled{opacity:1}
+#sw img{height:100%;width:auto}
+#sw .on{display:none}
+#sw[aria-checked=true] .on{display:block}
+#sw[aria-checked=true] .off{display:none}
+.sbtn{position:absolute;left:0;right:0;margin:0 auto;width:calc(134.6*var(--u));height:calc(58.3*var(--u));
+  background:#7BBAD2;border-radius:var(--radius);box-shadow:calc(2*var(--u)) calc(2*var(--u)) 0 #000;
+  color:#eaf6fb;font-size:calc(30*var(--u));letter-spacing:calc(1*var(--u));outline:0}
+.sbtn:active{transform:translate(var(--sh),var(--sh));box-shadow:none}
+.sbtn:disabled{opacity:.5}
+.sbtn:nth-of-type(1){top:calc(102.4*var(--u))}
+.sbtn:nth-of-type(2){top:calc(195.4*var(--u))}
+.sbtn:nth-of-type(3){top:calc(288.4*var(--u))}
+.sbtn:nth-of-type(4){top:calc(381.4*var(--u))}
+.sbtn:nth-of-type(5){top:calc(474.4*var(--u))}
+.sbtn.on{background:#a5e3fb}
+
+/* Sprite thumbnails from the Growtopia atlas database. */
+.box .ic canvas{display:block;width:100%;height:100%;image-rendering:pixelated}

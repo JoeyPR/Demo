@@ -1,0 +1,45 @@
+/* MOBILE: phone layout. Same parts as desktop, re-arranged: tabs flush left, one tall drawer, side panel right,
+   tab handle on top of the drawer, top drawer left of the handle, pads in a row above. Stage = 923 units wide. */
+@media (max-width:900px),(hover:none) and (pointer:coarse){
+:root{--u:calc(100vw / 923);--sh:calc(3*var(--u))}
+#ui{width:calc(923*var(--u));height:calc(885*var(--u));margin-left:calc(-461.5*var(--u))}
+#preview{top:calc(430*var(--u));--logo-w:460px}
+#hud{top:calc(8*var(--u));font-size:calc(22*var(--u))}
+
+/* pads: big, fixed inside the bottom of the preview box, side to side (do not move with the drawer) */
+#pads{position:fixed;left:0;top:0;width:100%;height:0;transform:none}
+#pad-left {left:calc(23*var(--u));top:calc(566*var(--u));width:calc(150*var(--u))}
+#pad-right{left:calc(218*var(--u));top:calc(566*var(--u));width:calc(150*var(--u))}
+#pad-jump {left:calc(611*var(--u));top:calc(552*var(--u));width:calc(120*var(--u))}
+#pad-punch{left:calc(771*var(--u));top:calc(552*var(--u));width:calc(120*var(--u))}
+
+/* top drawer keeps its desktop look, scaled, sitting on the main drawer; the tab handle sits on top of it */
+#top{left:calc(241.5*var(--u));top:calc(23*var(--u));width:calc(440*var(--u));height:calc(118*var(--u))}
+#quick{grid-template-columns:repeat(4,calc(106.5*var(--u)));gap:calc(3*var(--u));padding-top:calc(3.3*var(--u))}
+#handle{left:calc(391.5*var(--u));top:calc(-80*var(--u));width:calc(140*var(--u))}
+
+/* tabs flush left */
+#tabs{left:calc(6*var(--u));top:calc(145*var(--u));width:calc(94*var(--u));height:calc(585*var(--u))}
+.tab{width:calc(94*var(--u));height:calc(97.5*var(--u))}
+.tab img{height:100%}
+
+/* main drawer: search row + 5-column grid */
+#main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}
+#s-icon{left:calc(14*var(--u));top:calc(26*var(--u));width:calc(65*var(--u))}
+#q{left:calc(94*var(--u));top:calc(26*var(--u));width:calc(548*var(--u));height:calc(67*var(--u));font-size:calc(34*var(--u));padding:0 calc(14*var(--u))}
+#grid{top:calc(110*var(--u));grid-template-columns:repeat(5,calc(113.8*var(--u)));gap:calc(10.2*var(--u));padding:calc(14*var(--u)) 0 calc(30*var(--u)) calc(21.3*var(--u))}
+.box .ic{font-size:calc(30*var(--u))}
+.box .n{font-size:calc(20*var(--u))}
+.box .ck{filter:drop-shadow(calc(3*var(--u)) calc(3*var(--u)) 0 rgba(0,0,0,.75))}
+
+/* side panel */
+#side{left:calc(763*var(--u));top:calc(145*var(--u));width:calc(159*var(--u));height:calc(740*var(--u) - var(--dy))}
+#back{height:calc(110*var(--u))}
+#sw{height:calc(62*var(--u))}
+.sbtn{width:calc(128*var(--u));height:calc(73*var(--u));font-size:calc(26*var(--u))}
+.sbtn:nth-of-type(1){top:calc(148*var(--u))}
+.sbtn:nth-of-type(2){top:calc(255*var(--u))}
+.sbtn:nth-of-type(3){top:calc(362*var(--u))}
+.sbtn:nth-of-type(4){top:calc(469*var(--u))}
+.sbtn:nth-of-type(5){top:calc(576*var(--u))}
+}

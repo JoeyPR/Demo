@@ -1,0 +1,639 @@
+{
+  "renderer": "SpringLoadedShoes",
+  "family": "footwear",
+  "source": "ItemRenderers/SpringLoadedShoes.xml",
+  "sprites": [
+    {
+      "name": "s_foot1",
+      "sourceTexture": "game/player_feet16.rttex",
+      "atlas": "player_feet16.png",
+      "textureSize": "32",
+      "frame": "6,26"
+    },
+    {
+      "name": "s_foot2",
+      "sourceTexture": "game/player_feet16.rttex",
+      "atlas": "player_feet16.png",
+      "textureSize": "32",
+      "frame": "6,27"
+    },
+    {
+      "name": "s_pogoStick",
+      "sourceTexture": "game/particles12.rttex",
+      "atlas": "particles12.png",
+      "textureSize": "32",
+      "frame": "9,16"
+    }
+  ],
+  "timeline": [
+    {
+      "name": "a_Offset",
+      "tag": "CurveAnimationFloat",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.No",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_Offset",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.No"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.07,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.25,
+          "value": [
+            -15
+          ]
+        },
+        {
+          "time": 0.5,
+          "value": [
+            -18
+          ]
+        },
+        {
+          "time": 0.75,
+          "value": [
+            -15
+          ]
+        },
+        {
+          "time": 0.93,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 1.0,
+          "value": [
+            0
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 7
+    },
+    {
+      "name": "a_PoleScale",
+      "tag": "CurveAnimationVec3",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.No",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_PoleScale",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.No"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            1,
+            0.2,
+            1
+          ]
+        },
+        {
+          "time": 0.07,
+          "value": [
+            1,
+            0.2,
+            1
+          ]
+        },
+        {
+          "time": 0.25,
+          "value": [
+            1,
+            0.4,
+            1
+          ]
+        },
+        {
+          "time": 0.5,
+          "value": [
+            1,
+            0.4,
+            1
+          ]
+        },
+        {
+          "time": 0.75,
+          "value": [
+            1,
+            0.4,
+            1
+          ]
+        },
+        {
+          "time": 0.93,
+          "value": [
+            1,
+            0.2,
+            1
+          ]
+        },
+        {
+          "time": 1.0,
+          "value": [
+            1,
+            0.2,
+            1
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 7
+    },
+    {
+      "name": "a_PoleOffset",
+      "tag": "CurveAnimationVec3",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.No",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_PoleOffset",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.No"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "time": 0.07,
+          "value": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "time": 0.25,
+          "value": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "time": 0.5,
+          "value": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "time": 0.75,
+          "value": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "time": 0.93,
+          "value": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "time": 1.0,
+          "value": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 7
+    },
+    {
+      "name": "a_PoleScaleAir",
+      "tag": "CurveAnimationVec3",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.Yes",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_PoleScaleAir",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.Yes"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            1,
+            0.4,
+            1
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 1
+    },
+    {
+      "name": "a_PoleScaleManne",
+      "tag": "CurveAnimationVec3",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.Mannequin",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_PoleScaleManne",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.Mannequin"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            1,
+            0.15,
+            1
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 1
+    },
+    {
+      "name": "a_OffsetAir",
+      "tag": "CurveAnimationFloat",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.Yes",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_OffsetAir",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.Yes"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            0
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 1
+    },
+    {
+      "name": "a_LeftFoot",
+      "tag": "CurveAnimationFloat",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.No",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_LeftFoot",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.No"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            -1
+          ]
+        },
+        {
+          "time": 0.07,
+          "value": [
+            -1
+          ]
+        },
+        {
+          "time": 0.25,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.5,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.75,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.93,
+          "value": [
+            -1
+          ]
+        },
+        {
+          "time": 1.0,
+          "value": [
+            -1
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 7
+    },
+    {
+      "name": "a_RightFoot",
+      "tag": "CurveAnimationFloat",
+      "sprite": null,
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "MotionY.No",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "a_RightFoot",
+        "isLoop": "true",
+        "animTime": "700",
+        "playOnState": "MotionY.No"
+      },
+      "frames": [],
+      "keyframes": [
+        {
+          "time": 0.0,
+          "value": [
+            -1
+          ]
+        },
+        {
+          "time": 0.07,
+          "value": [
+            -1
+          ]
+        },
+        {
+          "time": 0.25,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.5,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.75,
+          "value": [
+            0
+          ]
+        },
+        {
+          "time": 0.93,
+          "value": [
+            -1
+          ]
+        },
+        {
+          "time": 1.0,
+          "value": [
+            -1
+          ]
+        }
+      ],
+      "descendantKeyFrameCount": 7
+    }
+  ],
+  "states": [
+    {
+      "name": "MotionY",
+      "attributes": {
+        "name": "MotionY"
+      },
+      "states": [
+        {
+          "name": "No",
+          "attributes": {
+            "name": "No"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Yes",
+          "attributes": {
+            "name": "Yes"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Mannequin",
+          "attributes": {
+            "name": "Mannequin"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "No",
+      "transitions": [
+        {
+          "from": [
+            "Yes"
+          ],
+          "to": "No",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.y",
+                  "operator": "Less",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "isMannequin"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "No",
+            "from": "Yes"
+          }
+        },
+        {
+          "from": [
+            "No"
+          ],
+          "to": "Yes",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.y",
+                  "operator": "Greater",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "isMannequin"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Yes",
+            "from": "No"
+          }
+        },
+        {
+          "from": [
+            "No",
+            "Yes"
+          ],
+          "to": "Mannequin",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "isMannequin"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Mannequin",
+            "from": "No|Yes"
+          }
+        }
+      ]
+    }
+  ],
+  "particleSystems": [],
+  "renderPasses": [
+    {
+      "hook": "Update",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [],
+      "tagCounts": {
+        "Update": 1,
+        "StopIf": 1,
+        "IsZombified": 1,
+        "IsSitting": 1,
+        "IsSleepingOnaBed": 1,
+        "AvatarTransform": 1,
+        "Set": 5,
+        "MusicSource": 1
+      }
+    },
+    {
+      "hook": "RenderShoes",
+      "attributes": {},
+      "spriteRenders": [
+        {
+          "name": "s_pogoStick",
+          "offset": "-4,0",
+          "alignment": "UPPER_CENTER"
+        },
+        {
+          "name": "s_pogoStick",
+          "offset": "8,0",
+          "alignment": "UPPER_CENTER"
+        },
+        {
+          "name": "s_foot1",
+          "alignment": "DOWN_CENTER"
+        },
+        {
+          "name": "s_foot2",
+          "alignment": "DOWN_CENTER"
+        }
+      ],
+      "particleOperations": [],
+      "tagCounts": {
+        "RenderShoes": 1,
+        "Group": 4,
+        "Translate": 3,
+        "Scale": 1,
+        "SpriteRender": 4,
+        "StopIf": 1,
+        "IsAction": 2,
+        "IsVariableFloat": 1,
+        "AvatarTransform": 2,
+        "Set": 4
+      }
+    }
+  ]
+}

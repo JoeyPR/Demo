@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<ItemRenderer>
+	<Data>
+		<Sprite name="s_chariot" fileName="game/player_feet16.rttex" textureSize="32" frame="0,28" />
+		<Sprite name="s_sheep" fileName="game/player_pet.rttex" textureSize="32" frame="0,24" />
+		<Sprite name="s_trail" fileName="game/particles12.rttex" textureSize="32" frame="24,17" />
+		<VariableMap>
+			<Set name="FinalOffset">0,0,0</Set>
+			<Set name="JumpTargetOffset">0,-10,0</Set>
+			<Set name="FallTargetOffset">0,5,0</Set>
+			<Set name="RopeStartFront">0,0,0</Set>
+			<Set name="IdleTargetOffset">0,0,0</Set>
+			<Set name="RopeEndFront">50,0,0</Set>
+		</VariableMap>
+		<RenderOptions>
+			<Default>
+				<Set name="PlayDefaultPunchAudio">true</Set>
+				<Set name="ClothingOffsetFromShoes">-3</Set>
+				<Set name="UserNameOffset">11</Set>
+				<Set name="RenderShoesWithMermaidTail">true</Set>
+				<Set name="IsCar">true</Set>
+				<Set name="IsVehicle">false</Set>
+				<Set name="IgnorePunchTypeCheck">true</Set>
+        <Set name="ShoesHidesBodyLegs">false</Set>
+        <Set name="ShoesShouldIgnoreRaptorLegsOffset">true</Set>
+        <Set name="IsToRenderPants">false</Set>
+        <Set name="IsRidingBird">true</Set>
+			</Default>
+		</RenderOptions>
+		<Animations>
+			<InterpolationVec3Animation name="a_jump" variableName="FinalOffset" targetVariableName="JumpTargetOffset" isLoop="false" animTime="1000" playOnState="Motion.Jump" />
+			<InterpolationVec3Animation name="a_fall" variableName="FinalOffset" targetVariableName="FallTargetOffset" isLoop="false" animTime="1000" playOnState="Motion.Fall" />
+			<InterpolationVec3Animation name="a_idle" variableName="FinalOffset" targetVariableName="IdleTargetOffset" isLoop="false" animTime="10" playOnState="Motion.Idle|Motion.GroundMove" />
+			<SpriteAnimation name="a_chariotIdle" sprite="s_chariot" animTime="1000" isLoop="true" playOnState="Motion.Idle">
+				<Frame>0,28</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_chariotMove" sprite="s_chariot" animTime="200" isLoop="true" playOnState="Motion.Fall|Motion.GroundMove|Motion.Jump">
+				<Frame>1,28</Frame>
+				<Frame>0,28</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_sheepFall" sprite="s_sheep" animTime="200" isLoop="true" playOnState="Motion.Fall">
+				<Frame>6,24</Frame>
+				<Frame>7,24</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_sheepIdle" sprite="s_sheep" animTime="1000" isLoop="true" playOnState="Motion.Idle">
+				<Frame>0,24</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_sheepJump" sprite="s_sheep" animTime="200" isLoop="true" playOnState="Motion.Jump">
+				<Frame>4,24</Frame>
+				<Frame>5,24</Frame>
+			</SpriteAnimation>
+			<SpriteAnimation name="a_sheepMove" sprite="s_sheep" animTime="300" isLoop="true" playOnState="Motion.GroundMove">
+				<Frame>1,24</Frame>
+				<Frame>2,24</Frame>
+				<Frame>3,24</Frame>
+			</SpriteAnimation>
+		</Animations>
+		<StateMachines>
+			<StateMachine name="Motion">
+				<States>
+					<State name="Idle" />
+					<State name="Jump" />
+					<State name="Fall" />
+					<State name="GroundMove" />
+				</States>
+				<Transitions>
+					<Transition to="Idle" from="Fall|Jump|GroundMove">
+						<Condition type="and">
+							<IsVariableBool name="onGround">true</IsVariableBool>
+							<IsVariableFloat name="speed.x" operator="Less" abs="true">0.1</IsVariableFloat>
+						</Condition>
+					</Transition>
+					<Transition to="GroundMove" from="Fall|Jump|Idle">
+						<Condition type="and">
+							<IsVariableBool name="onGround">true</IsVariableBool>
+							<IsVariableFloat name="speed.x" operator="Greater" abs="true">0.1</IsVariableFloat>
+						</Condition>
+					</Transition>
+					<Transition to="Jump" from="Idle|Fall|GroundMove">
+						<Condition type="and">
+							<IsVariableBool name="onGround">false</IsVariableBool>
+							<IsVariableFloat name="speed.y" operator="Less">-0.1</IsVariableFloat>
+						</Condition>
+					</Transition>
+					<Transition to="Fall" from="Jump|Idle|GroundMove">
+						<Condition type="and">
+							<IsVariableBool name="onGround">false</IsVariableBool>
+							<IsVariableFloat name="speed.y" operator="Greater">0.1</IsVariableFloat>
+						</Condition>
+					</Transition>
+				</Transitions>
+			</StateMachine>
+		</StateMachines>
+	</Data>
+	<RenderRules>
+		<Update />
+		<RenderShoes value="playerCenter">
+			<StopIf>
+				<IsZombified>true</IsZombified>
+				<IsTrnsformed>true</IsTrnsformed>
+				<IsSitting>true</IsSitting>
+				<IsSleepingOnaBed>true</IsSleepingOnaBed>
+				<IsWearing slot="SHIRT">ITEM_ID_TACTICAL_STEALTH_DEVICE</IsWearing>
+			</StopIf>
+			<Translate>0,-10,0</Translate>
+			<SpriteRender name="s_chariot" blend="PREMULTIPLIED_ALPHA" />
+			<Group>
+				<Translate>30,0,0</Translate>
+				<Translate>FinalOffset</Translate>
+				<SpriteRender name="s_sheep" blend="PREMULTIPLIED_ALPHA" />
+				<SpriteRender name="s_sheep" blend="PREMULTIPLIED_ALPHA" tintOverride="0,0,0,128" drawShadow="false" />
+			</Group>
+			<Group>
+				<Group>
+					<Translate>20,0,0</Translate>
+					<Translate>FinalOffset</Translate>
+					<SpriteRender name="s_sheep" blend="PREMULTIPLIED_ALPHA" />
+				</Group>
+				<Group>
+					<ArithmethicOperation LeftHandVariableName="RopeEndFront" RightHandVariableName="17,4,0" OperationType="Set" />
+					<ArithmethicOperation LeftHandVariableName="RopeEndFront" RightHandVariableName="FinalOffset" OperationType="Add" />
+					<LineRender color="173,63,38,255" StartPointVariableName="RopeStartFront" EndPointVariableName="RopeEndFront" LineWidth="6" />
+				</Group>
+			</Group>
+		</RenderShoes>
+	</RenderRules>
+</ItemRenderer>

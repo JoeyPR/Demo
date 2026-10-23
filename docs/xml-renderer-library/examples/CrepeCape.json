@@ -1,0 +1,646 @@
+{
+  "renderer": "CrepeCape",
+  "family": "cape-cloak-mantle",
+  "source": "ItemRenderers/CrepeCape.xml",
+  "sprites": [
+    {
+      "name": "s_Cape",
+      "sourceTexture": "game/particles_large15.rttex",
+      "atlas": "particles_large15.png",
+      "textureSize": "64",
+      "frame": "0,11"
+    },
+    {
+      "name": "s_Collar",
+      "sourceTexture": "game/player_cosmetics3.rttex",
+      "atlas": "player_cosmetics3.png",
+      "textureSize": "32",
+      "frame": "21,28"
+    },
+    {
+      "name": "s_spark",
+      "sourceTexture": "game/particles12.rttex",
+      "atlas": "particles12.png",
+      "textureSize": "32",
+      "frame": "17,0"
+    }
+  ],
+  "timeline": [
+    {
+      "name": "s_Wing_idle",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Cape",
+      "durationMs": 50.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Action.Idle",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Wing_idle",
+        "sprite": "s_Cape",
+        "animTime": "50",
+        "isLoop": "true",
+        "playOnState": "Action.Idle"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            11
+          ],
+          "startMs": 0.0,
+          "endMs": 50.0,
+          "durationMs": 50.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Wing_jump",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Cape",
+      "durationMs": 200.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Action.JumpStraight",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Wing_jump",
+        "sprite": "s_Cape",
+        "animTime": "200",
+        "isLoop": "true",
+        "playOnState": "Action.JumpStraight"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            0,
+            12
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            1,
+            12
+          ],
+          "startMs": 100.0,
+          "endMs": 200.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Wing_fall",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Cape",
+      "durationMs": 200.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Action.FallStraight",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Wing_fall",
+        "sprite": "s_Cape",
+        "animTime": "200",
+        "isLoop": "true",
+        "playOnState": "Action.FallStraight"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            2,
+            12
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            3,
+            12
+          ],
+          "startMs": 100.0,
+          "endMs": 200.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_spark_frames",
+      "tag": "SpriteAnimation",
+      "sprite": "s_spark",
+      "durationMs": 350,
+      "durationSource": "frameMsDefault",
+      "loop": null,
+      "playOnState": null,
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_spark_frames",
+        "sprite": "s_spark"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            18,
+            0
+          ],
+          "startMs": 0.0,
+          "endMs": 175.0,
+          "durationMs": 175.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            18,
+            0
+          ],
+          "startMs": 175.0,
+          "endMs": 350.0,
+          "durationMs": 175.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    },
+    {
+      "name": "s_Wing_walk",
+      "tag": "SpriteAnimation",
+      "sprite": "s_Cape",
+      "durationMs": 700.0,
+      "durationSource": "animTime",
+      "loop": true,
+      "playOnState": "Action.Walk",
+      "playOnAction": null,
+      "onAction": null,
+      "attributes": {
+        "name": "s_Wing_walk",
+        "sprite": "s_Cape",
+        "animTime": "700",
+        "isLoop": "true",
+        "playOnState": "Action.Walk"
+      },
+      "frames": [
+        {
+          "index": 0,
+          "cell": [
+            1,
+            11
+          ],
+          "startMs": 0.0,
+          "endMs": 100.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 1,
+          "cell": [
+            2,
+            11
+          ],
+          "startMs": 100.0,
+          "endMs": 200.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 2,
+          "cell": [
+            3,
+            11
+          ],
+          "startMs": 200.0,
+          "endMs": 300.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 3,
+          "cell": [
+            4,
+            11
+          ],
+          "startMs": 300.0,
+          "endMs": 400.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 4,
+          "cell": [
+            5,
+            11
+          ],
+          "startMs": 400.0,
+          "endMs": 500.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 5,
+          "cell": [
+            6,
+            11
+          ],
+          "startMs": 500.0,
+          "endMs": 600.0,
+          "durationMs": 100.0
+        },
+        {
+          "index": 6,
+          "cell": [
+            7,
+            11
+          ],
+          "startMs": 600.0,
+          "endMs": 700.0,
+          "durationMs": 100.0
+        }
+      ],
+      "keyframes": [],
+      "descendantKeyFrameCount": 0
+    }
+  ],
+  "states": [
+    {
+      "name": "Action",
+      "attributes": {
+        "name": "Action"
+      },
+      "states": [
+        {
+          "name": "Idle",
+          "attributes": {
+            "name": "Idle"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Walk",
+          "attributes": {
+            "name": "Walk"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "JumpStraight",
+          "attributes": {
+            "name": "JumpStraight"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "FallStraight",
+          "attributes": {
+            "name": "FallStraight"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "Idle",
+      "transitions": [
+        {
+          "from": [
+            "FallStraight",
+            "Walk"
+          ],
+          "to": "Idle",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.length",
+                  "operator": "Less",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "onGround"
+                },
+                "v": "true"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Idle",
+            "from": "FallStraight|Walk"
+          }
+        },
+        {
+          "from": [
+            "FallStraight",
+            "Idle",
+            "JumpStraight"
+          ],
+          "to": "Walk",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "onGround"
+                },
+                "v": "true"
+              },
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.x",
+                  "operator": "Greater",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Walk",
+            "from": "FallStraight|Idle|JumpStraight"
+          }
+        },
+        {
+          "from": [
+            "Idle",
+            "FallStraight",
+            "Walk"
+          ],
+          "to": "JumpStraight",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.y",
+                  "operator": "Less"
+                },
+                "v": "-0.1"
+              },
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "onGround"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "JumpStraight",
+            "from": "Idle|FallStraight|Walk"
+          }
+        },
+        {
+          "from": [
+            "JumpStraight",
+            "Idle",
+            "Walk"
+          ],
+          "to": "FallStraight",
+          "condition": {
+            "tag": "Condition",
+            "a": {
+              "type": "and"
+            },
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.y",
+                  "operator": "Greater"
+                },
+                "v": "0.1"
+              },
+              {
+                "tag": "IsVariableBool",
+                "a": {
+                  "name": "onGround"
+                },
+                "v": "false"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "FallStraight",
+            "from": "JumpStraight|Idle|Walk"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trail",
+      "attributes": {
+        "name": "Trail"
+      },
+      "states": [
+        {
+          "name": "Idle",
+          "attributes": {
+            "name": "Idle"
+          },
+          "onEnter": []
+        },
+        {
+          "name": "Move",
+          "attributes": {
+            "name": "Move"
+          },
+          "onEnter": []
+        }
+      ],
+      "initialState": "Idle",
+      "transitions": [
+        {
+          "from": [
+            "Move"
+          ],
+          "to": "Idle",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.length",
+                  "operator": "Less",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Idle",
+            "from": "Move"
+          }
+        },
+        {
+          "from": [
+            "Idle"
+          ],
+          "to": "Move",
+          "condition": {
+            "tag": "Condition",
+            "c": [
+              {
+                "tag": "IsVariableFloat",
+                "a": {
+                  "name": "speed.length",
+                  "operator": "Greater",
+                  "abs": "true"
+                },
+                "v": "0.1"
+              }
+            ]
+          },
+          "attributes": {
+            "to": "Move",
+            "from": "Idle"
+          }
+        }
+      ]
+    }
+  ],
+  "particleSystems": [
+    {
+      "name": "ps_luteTrailMove",
+      "attributes": {
+        "name": "ps_luteTrailMove"
+      },
+      "emitterAttributes": {},
+      "emitterSets": {
+        "offset": "0, -12",
+        "infParticles": "true",
+        "infLifeTime": "true",
+        "particlesPerEmission": "5",
+        "emissionInterval": "0.1"
+      },
+      "particleAttributes": {
+        "usePlayerFacing": "true",
+        "randomSpriteFrame": "true"
+      },
+      "particleSets": {
+        "sprite": "s_spark",
+        "renderAlignment": "CENTER",
+        "blendingMode": "ADDITIVE",
+        "initialScale": "0.25, 0.25",
+        "finalScale": "0.75, 0.75",
+        "interpolateScale": "true",
+        "useGravity": "true",
+        "gravityVector": "0, 30",
+        "lifeTime": "0.75",
+        "inSpecificOrder": "true",
+        "interpolateAngle": "true"
+      },
+      "emitterCurves": [],
+      "particleCurves": [
+        {
+          "tag": "Curve",
+          "a": {
+            "name": "initialAlpha"
+          },
+          "c": [
+            {
+              "tag": "KeyFrame",
+              "v": "0, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "0.5, 1"
+            },
+            {
+              "tag": "KeyFrame",
+              "v": "1, 0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "renderPasses": [
+    {
+      "hook": "AddClothingParticles",
+      "attributes": {},
+      "spriteRenders": [],
+      "particleOperations": [
+        {
+          "name": "ps_luteTrailMove",
+          "onState": "Trail.Move"
+        }
+      ],
+      "tagCounts": {
+        "AddClothingParticles": 1,
+        "StopIf": 1,
+        "IsRenderMod": 1,
+        "ParticleSystemUpdate": 1
+      }
+    },
+    {
+      "hook": "RenderBackpack",
+      "attributes": {},
+      "spriteRenders": [
+        {
+          "name": "s_Cape",
+          "offset": "-1,-16"
+        }
+      ],
+      "particleOperations": [
+        {
+          "name": "ps_luteTrailMove"
+        }
+      ],
+      "tagCounts": {
+        "RenderBackpack": 1,
+        "StopIf": 2,
+        "IsWearing": 1,
+        "SpriteRender": 1,
+        "IsRenderMod": 1,
+        "ParticleSystemRender": 1
+      }
+    },
+    {
+      "hook": "RenderFrontpack",
+      "attributes": {},
+      "spriteRenders": [
+        {
+          "name": "s_Collar",
+          "offset": "0.5,0.5",
+          "alignment": "DOWN_CENTER"
+        }
+      ],
+      "particleOperations": [],
+      "tagCounts": {
+        "RenderFrontpack": 1,
+        "SpriteRender": 1
+      }
+    }
+  ]
+}
