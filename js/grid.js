@@ -76,9 +76,8 @@
     b.title = it.name + ' (#' + it.id + ')';
     b._it = it;
     const ic = document.createElement('span'); ic.className = 'ic';
-    const n = document.createElement('span'); n.className = 'n';
     const ck = document.createElement('img'); ck.className = 'ck o'; ck.src = 'img/chk.png'; ck.alt = '';
-    b.append(ic, n, ck);
+    b.append(ic, ck);
     if (favs.has(it.id)) {
       const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/fav-box.png'; fv.alt = '';
       b.append(fv);
@@ -97,8 +96,6 @@
       if (thumbEl) ic.append(thumbEl);
       else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
     }
-    const n = b.querySelector('.n');
-    if (n && !n.textContent) n.textContent = it.name;
   }
   /* unmount the thumbnail (keep the light name) — keeps memory bounded */
   function unfillBox(b) {
@@ -221,6 +218,13 @@
     ic.append(img);
     b.append(ic);
     b.addEventListener('click', () => {
+      /* first click after focus was lost only focuses the tool box; the next
+         click swaps Fist/Wrench. Moving focus elsewhere resets this sequence. */
+      if (!P.inv.focus?.tool) {
+        P.inv.focus = { tool: true };
+        markFocus();
+        return;
+      }
       const pc = P.plateConfig.get();
       const on = !pc.wrenchOn;
       P.plateConfig.setWrenchOn(on);
@@ -274,7 +278,13 @@
   P.on('equip-state', renderQuick);
   P.on('plate-update', renderQuick);
   P.on('catalog', () => { build(); P.inv.refresh(); renderQuick(); });
-  P.on('tab', () => P.inv.refresh());
+  P.on('tab', () => { P.inv.focus = null; P.inv.refresh(); });
+  document.addEventListener('click', e => {
+    if (P.inv.focus?.tool && !e.target.closest('.box')) {
+      P.inv.focus = null;
+      markFocus();
+    }
+  });
   P.on('searchOn', on => {
     searchOn = on;
     if (searchOn) P.$('#q').focus();
