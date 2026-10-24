@@ -34,7 +34,7 @@ const state = {
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null
+  landBlock: null, landWorld: null, camera: null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -99,10 +99,17 @@ function step(dt) {
   if (state.doubleAt !== null && state.clock >= state.doubleAt) {
     state.jumpUntil = state.clock + 100; state.doubleAt = null;
   }
+  const point = P.input.punchPoint;
+  const view = state.camera;
+  const punchTarget = point && view ? [
+    16 + (point[0] - view.w / 2) / view.s,
+    32 + (point[1] - view.baselineY) / view.s
+  ] : undefined;
   const input = {
     right: !!(P.input.right), left: !!(P.input.left),
     jump: state.clock < state.jumpUntil || !!P.input.jump,
-    punch: state.clock < state.punchUntil || !!P.input.punch
+    punch: state.clock < state.punchUntil || !!P.input.punch,
+    punchTarget
   };
   const frame = motion.step(dt, input);
   if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
@@ -130,7 +137,10 @@ function renderAvatar() {
      registered yet (same as the Demo boot) — pieces appear next frame */
   const missing = [...new Set(state.lastResult.calls.filter(c => !atlases.has(c.atlas)).map(c => c.atlas))];
   for (const name of missing) loadAtlas(name);
-  const calls = state.lastResult.calls.filter(c => !state.hiddenPasses.has(c.pass) && atlases.has(c.atlas));
+  const calls = state.lastResult.calls.filter(c =>
+    !state.hiddenPasses.has(c.pass) &&
+    !(c.owner != null && state.ancestralMap?.has(Number(c.owner))) &&
+    atlases.has(c.atlas));
   const bounds = drawBounds(calls), scale = state.resolution / 32;
   const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
   if (avatar.width !== width || avatar.height !== height) { avatar.width = width; avatar.height = height; }
@@ -298,7 +308,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   const frame = state.lastFrame, result = state.lastResult;
   /* camera zoom (50% by default): scales the player, land and plate inside
      the preview — the weather backdrop always fills the canvas */
-  const s = Math.min(4, Math.max(3, w / 480)) * P.camZoom.v;
+  const s = 4 * P.camZoom.v;
   /* ground line: player centered in the frame (Growtopia keeps the actor
      mid-screen; the inventory overlays the lower part of the world) */
   const ground = h / 2 + 16 * s;   /* visible body (~32 world units) centered: body center = h/2 */
@@ -317,6 +327,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   const cameraY = Math.min(0, freeTop - 6);
   const groundCam = ground - cameraY;
   const rootX = w / 2 - 16 * s, rootY = groundCam - 32 * s + frame.y * s;
+  state.camera = { w, h, s, baselineY: groundCam + (frame.y + lift) * s };
 
   c.imageSmoothingEnabled = false;
   /* background: the weather scene (plain sky only if it failed to load) —
@@ -351,7 +362,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   /* name plate above the head (Website plate system, drawn at world scale).
      The plate's animations expect MILLISECONDS — state.clock is already ms. */
   if (P.plate) {
-    P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
+    P.plate.draw(c, w / 2 - 2 * s, rootY + lift * s - 6 * s, s * 0.95, state.clock);
   }
   /* weather foreground layer (rain, snow, particles in front) */
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
