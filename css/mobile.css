@@ -23,8 +23,8 @@ body{background:#212226}
 #handle{left:calc(391.5*var(--u));top:calc(-80*var(--u));width:calc(140*var(--u))}
 
 /* tabs flush against the main drawer's left border */
-#tabs{left:calc(36*var(--u));top:calc(145*var(--u));width:calc(64*var(--u));height:calc(585*var(--u))}
-.tab{width:calc(64*var(--u));height:calc(65*var(--u))}
+#tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(585*var(--u))}
+.tab{width:calc(100*var(--u));height:calc(65*var(--u))}
 .tab img{height:100%}
 
 /* main drawer: search row + 5-column grid */
