@@ -1,6 +1,7 @@
 /* TABS: the planner tabs (Equipped / Favorites / Clothing / Custom /
-   Player Customization / Makeup) + Weather, Land and Wrench. Image tabs exactly
-   like the donor; weather + land + wrench reuse the same chrome. */
+   Player Customization / Makeup). Weather and Land moved to corner dropdown
+   buttons; wrench styles and decorations live inside Player Customization.
+   The default tab at startup is Clothing. */
 (function(){
   const TABS = [
     { id: 'equip',   label: 'Equipped' },
@@ -8,14 +9,11 @@
     { id: 'cloth',   label: 'Clothing' },
     { id: 'custom',  label: 'Custom' },
     { id: 'player',  label: 'Player Customization' },
-    { id: 'makeup',  label: 'Makeup' },
-    { id: 'weather', label: 'Weather' },
-    { id: 'land',    label: 'Land' },
-    { id: 'wrench',  label: 'Wrench' }
+    { id: 'makeup',  label: 'Makeup' }
   ];
   P.tabs = {
     list: TABS.map(t => t.id),
-    cur: P.store.get('tab', 'equip'),
+    cur: 'cloth',
     open(id){
       if (!TABS.some(t => t.id === id)) return;
       P.tabs.cur = id;
@@ -38,5 +36,5 @@
     P.$('#tabs').appendChild(b);
   }
   P.on('open-tab', id => P.tabs.open(id));
-  P.tabs.open(P.tabs.cur);
+  P.tabs.open(P.tabs.cur);   /* always start on the Clothes tab */
 })();

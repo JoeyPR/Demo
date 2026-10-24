@@ -15,54 +15,6 @@
   color: #7c8f6d;
 }
 
-/* ---------- options row (category select + option buttons) ----------
-   Lives in the drawer's grid area, below the search bar. */
-#optsrow {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(95 * var(--u));
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-  padding: 8px 12px 14px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  z-index: 3;
-}
-#optsrow[hidden] { display: none; }
-.opts-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(16, 20, 24, 0.72);
-  border: 1px solid #ffffff22;
-  border-radius: 8px;
-  padding: 4px 8px;
-}
-#category {
-  flex: 0 0 auto;
-  background: #14181c;
-  color: #e8f4d9;
-  border: 1px solid #ffffff22;
-  border-radius: 6px;
-  font: 600 12px/1 "Century Gothic", system-ui, sans-serif;
-  padding: 7px 8px;
-  outline: none;
-  cursor: pointer;
-}
-#opts {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-#opts[hidden] { display: none; }
-
 .wopt {
   flex: 0 0 auto;
   display: inline-flex;

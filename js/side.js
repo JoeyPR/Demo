@@ -1,8 +1,9 @@
 /* SIDE: search switch + STORE/DROP/INFO/FAV/WRENCH/EXPORT acting on the
-   focused item. WRENCH jumps to the wrench tab; EXPORT saves a player PNG. */
+   focused item. WRENCH jumps to the wrench section of the Player
+   Customization tab; EXPORT saves a player PNG. */
 (function(){
   const side = P.$('#side'), sw = P.$('#sw'), main = P.$('#main'), q = P.$('#q');
-  const nonSearchableTabs = new Set(['custom', 'weather', 'wrench']);
+  const nonSearchableTabs = new Set(['custom']);
 
   const setSw = on => {
     on = !!on && !nonSearchableTabs.has(P.tabs.cur);
@@ -24,14 +25,17 @@
     drop(it)  { it.gone = true; P.inv.sel = null; P.toast('Dropped ' + it.name); },
     info(it)  { P.toast(`${it.name} · #${it.id} · ${it.script ? 'XML renderer' : 'sprite item'}`); },
     fav(it)   { P.emit('fav-toggle', it); },
-    wrench()  { P.emit('open-tab', 'wrench'); }
+    wrench()  { P.emit('focus-wrench'); P.emit('open-tab', 'player'); }
   };
   P.$$('.sbtn').forEach(b => b.onclick = () => {
     if (b.dataset.a === 'export') return; /* handled by app.js */
     /* STORE is disabled for now */
     if (b.dataset.a === 'store') return;
+    /* WRENCH routes to the wrench section — no item focus needed */
+    if (b.dataset.a === 'wrench') { A.wrench(); return; }
     const it = P.inv.focus || P.inv.sel;
-    if (!it) return P.toast('Select an item first');
+    /* the Fist/Wrench tool focus is protected — it is not an item */
+    if (!it || it.tool) return P.toast('Select an item first');
     A[b.dataset.a](it);
     if (it.gone) P.inv.focus = null;
     P.inv.refresh();

@@ -2,6 +2,9 @@
    tab handle on top of the drawer, top drawer left of the handle, pads in a row above. Stage = 923 units wide. */
 @media (max-width:900px),(hover:none) and (pointer:coarse){
 :root{--u:calc(100vw / 923);--sh:calc(3*var(--u))}
+/* the website background on mobile is a flat dark gray */
+body{background:#212226}
+#wrap{background:#212226}
 #ui{width:calc(923*var(--u));height:calc(885*var(--u));margin-left:calc(-461.5*var(--u))}
 #preview{top:calc(430*var(--u))}
 #logo{--logo-w:250px;top:8px;right:8px}
@@ -28,7 +31,8 @@
 #main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}
 #s-icon{left:calc(14*var(--u));top:calc(26*var(--u));width:calc(65*var(--u))}
 #q{left:calc(94*var(--u));top:calc(26*var(--u));width:calc(548*var(--u));height:calc(67*var(--u));font-size:calc(34*var(--u));padding:0 calc(14*var(--u))}
-#grid{top:calc(110*var(--u));grid-template-columns:repeat(5,calc(113.8*var(--u)));gap:calc(10.2*var(--u));padding:calc(14*var(--u)) 0 calc(30*var(--u)) calc(21.3*var(--u))}
+#grid{top:calc(110*var(--u))}
+#grid-window{grid-template-columns:repeat(5,calc(113.8*var(--u)));gap:calc(10.2*var(--u));padding:calc(14*var(--u)) 0 calc(30*var(--u)) calc(21.3*var(--u))}
 .box .ic{font-size:calc(30*var(--u))}
 .box .n{font-size:calc(20*var(--u))}
 .box .ck{filter:drop-shadow(calc(3*var(--u)) calc(3*var(--u)) 0 rgba(0,0,0,.75))}
@@ -46,6 +50,5 @@
 .sbtn:nth-of-type(6){top:calc(648*var(--u))}
 
 /* categorical options + custom panel sit in the grid area, below the search row */
-#optsrow{top:calc(110*var(--u))}
 #custom-tools{top:calc(110*var(--u))}
 }

@@ -208,6 +208,11 @@
   padding: 5px 10px; cursor: pointer;
 }
 .c-section.on { background: #7fb64a; color: #10200c; border-color: #ffe27e; }
+/* wrench section: option grid with canvas previews + names */
+.wrench-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; }
+.wrench-opt { flex-direction: column; gap: 4px; padding: 4px; min-width: 0; }
+.wrench-opt .wprev { width: 56px; height: 56px; }
+.wrench-opt-name { font-size: calc(15*var(--u)); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .c-titles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .c-title {
   display: flex; flex-direction: column; align-items: center; gap: 4px;

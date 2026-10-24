@@ -66,10 +66,12 @@
   /* ---------------- state ---------------- */
   const DEFAULTS = {
     growId: '', flag: 'us', role: '', titles: [],
-    guildRole: '', guildFlag: 0, wrenchStyle: 0, wrenchDecoration: 0
+    guildRole: '', guildFlag: 0, wrenchStyle: 0, wrenchDecoration: 0,
+    wrenchOn: false          /* the Fist/Wrench quick box: wrench only shows with a GrowID */
   };
   let state = Object.assign({}, DEFAULTS, P.store.get('plate', {}));
   if (!Array.isArray(state.titles)) state.titles = [];
+  if (typeof state.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);
   const save = () => { P.store.set('plate', state); P.emit('plate-update'); };
 
   /* ---------------- wrench data + sheets ---------------- */
@@ -211,7 +213,7 @@
     });
     if (tagSeparate) parts.push({ text: guildRole.text, colour: guildRole.colour, alpha: 1, tag: true });
     for (const t of both) parts.push({ img: TITLES_DIR + t.both + '.png', mirror: true });
-    if (state.wrenchStyle || state.wrenchDecoration) parts.push({ wrench: true });
+    if (state.wrenchOn && state.growId.trim()) parts.push({ wrench: true });
     return { parts, size: 7.5 * Math.max(1, ...sel.map(t => t.size ?? 1)) };
   }
 
@@ -425,6 +427,7 @@
     setGuildFlag(id) { state.guildFlag = +id || 0; save(); },
     setWrenchStyle(id) { state.wrenchStyle = +id || 0; save(); },
     setWrenchDecoration(id) { state.wrenchDecoration = +id || 0; save(); },
+    setWrenchOn(on) { state.wrenchOn = !!on; save(); },
     toggleTitle(key) {
       const i = state.titles.indexOf(key);
       if (i >= 0) state.titles.splice(i, 1);

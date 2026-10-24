@@ -35,9 +35,17 @@
 #q::placeholder{color:#dfdfdf;opacity:1}
 #main.search-disabled #q,#main.search-disabled #s-icon{opacity:.5;pointer-events:none}
 #grid{position:absolute;left:0;right:0;top:calc(95*var(--u));bottom:0;overflow-y:auto;overflow-x:hidden;
-  display:grid;grid-template-columns:repeat(9,calc(171*var(--u)));gap:calc(5.9*var(--u)) calc(5.2*var(--u));align-content:start;
-  padding:calc(8*var(--u)) 0 calc(30*var(--u)) calc(33.2*var(--u));touch-action:pan-y;scrollbar-width:none}
+  touch-action:pan-y;scrollbar-width:none}
 #grid::-webkit-scrollbar{display:none}
+/* virtualized grid: inner keeps the full scroll height, window holds only the
+   visible rows. Boxes' thumbnails pop in when they become visible. */
+#grid-inner{position:relative;width:100%}
+#grid-window{position:absolute;left:0;right:0;top:0;display:grid;
+  grid-template-columns:repeat(9,calc(171*var(--u)));gap:calc(5.9*var(--u)) calc(5.2*var(--u));
+  align-content:start;padding:calc(8*var(--u)) 0 calc(30*var(--u)) calc(33.2*var(--u))}
+#grid-window .box .ic,#grid-window .box .n{opacity:0;transform:translateY(8px) scale(.8);
+  transition:opacity .18s ease-out,transform .18s cubic-bezier(.2,1.5,.4,1)}
+#grid-window .box.vis .ic,#grid-window .box.vis .n{opacity:1;transform:none}
 
 /* item boxes: white = default, art = pink, blue = quick slots.
    click = .focus (yellow brackets) | click again = .sel (box-sel + check) = equipped */
@@ -59,11 +67,21 @@
 .box .ic{position:absolute;inset:16%;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);
   font-size:calc(46*var(--u));text-shadow:0 2px 0 rgba(0,0,0,.45)}
 .box .n{position:absolute;left:14%;bottom:12%;font-size:calc(26*var(--u));color:#fff;text-shadow:0 2px 0 #000}
-.box .fv{position:absolute;right:2%;top:2%;width:74%;height:74%;object-fit:fill;display:none;z-index:2}   /* fav-box.png: box-sized overlay, star top-right */
+.box .fv{position:absolute;right:calc(2% - 1px);top:calc(2% - 1px);width:74%;height:74%;object-fit:fill;display:none;z-index:2}   /* fav-box.png: box-sized overlay, star top-right (moved 1px up-right) */
 .box.fav .fv{display:block}
 .box img{pointer-events:none}
 .box.fav-special{background-image:url(../img/box-fav.png);background-position:center;background-size:100% 100%;cursor:default}
 .box.fav-special::before{display:none}
+
+/* 4. top drawer: every quick box uses the blue box (box-blue.png), including
+   the equipped (.sel) and empty slots — the check overlay still marks equipped */
+#quick .box{background-image:url(../img/box-blue.png)}
+#quick .box.sel{background-image:url(../img/box-blue.png)}
+#quick .box.art{background-image:url(../img/box-blue.png)}
+#quick .box.sel.art .ck.p{display:block}
+
+/* the protected first quick box (Fist/Wrench tool): icon-only, never equips */
+.box.tool .ic img{width:72%;height:auto;image-rendering:pixelated;margin:auto}
 
 /* 3. tabs (flush against the main drawer's left border, spanning its height) */
 #tabs{left:calc(16.5*var(--u));top:calc(286.2*var(--u));width:calc(67.5*var(--u));height:calc(607.8*var(--u));pointer-events:none}
@@ -101,10 +119,7 @@
 /* Sprite thumbnails from the Growtopia atlas database. */
 .box .ic canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 
-/* empty states span the full grid row so they never wrap mid-word */
-#grid .empty{grid-column:1/-1}
-#quick .quick-hint{grid-column:1/-1;text-align:center}
-
 /* system-option tabs own the drawer body — the (empty) item grid is hidden
    so its placeholder text can't show through behind the options */
-#main[data-t=weather] #grid,#main[data-t=land] #grid,#main[data-t=wrench] #grid{display:none}
+#grid .empty{grid-column:1/-1}
+#quick .quick-hint{grid-column:1/-1;text-align:center}

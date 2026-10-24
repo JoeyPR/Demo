@@ -101,14 +101,11 @@ export class WeatherRenderer {
     const cfg = this.cfg;
     const W = canvas.width, H = canvas.height;
 
-    // --- pick scale: fill the canvas without distorting the scene -----
-    // A "wide" variant (w != 1200) that is wider than the canvas is
-    // scaled by height (its sides are cropped); otherwise it is
-    // letterboxed to fit ("contain"). The base 1200x768 scene is always
-    // contained.
-    const scale = (cfg.w !== 1200 && cfg.w * H >= W * cfg.h)
-      ? H / cfg.h
-      : Math.min(W / cfg.w, H / cfg.h);
+    // --- pick scale: COVER — always fill the whole canvas -----------------
+    // The scene is scaled so it covers the canvas completely (edges are
+    // cropped), so the weather always reaches the preview's border with no
+    // letterbox bands and no mirrored fill.
+    const scale = Math.max(W / cfg.w, H / cfg.h);
 
     const offX = (W - cfg.w * scale) / 2;
     const offY = (H - cfg.h * scale) / 2;
@@ -151,20 +148,6 @@ export class WeatherRenderer {
       ctx.restore();
     } else {
       this._drawTracks(ctx, layer, t, 1);
-    }
-
-    // --- mirror-fill any empty bands at the sides/top -----------------
-    // If the scene is letterboxed (scale = contain), the empty margins
-    // are filled with mirrored copies of the edge so the weather always
-    // covers the whole canvas.
-    if (layer === 0) {
-      ctx.save();
-      this._mirrorFill(ctx, canvas, offX, offY, scale);
-      ctx.restore();
-      // restore the scene transform for the next layer pass
-      ctx.translate(offX, offY);
-      ctx.scale(scale, scale);
-      ctx.imageSmoothingEnabled = true;
     }
 
     ctx.restore();
@@ -317,43 +300,6 @@ export class WeatherRenderer {
       m.set(key, p);
     }
     return p;
-  }
-
-  /**
-   * Fill letterbox margins with mirrored copies of the rendered scene.
-   * Runs on the BACKGROUND canvas only, after layer 0 is drawn.
-   * Draws the canvas onto itself with a flip transform, exactly like
-   * the original engine: the scene's own edge strips are mirrored into
-   * the empty margins so the weather always covers the whole canvas.
-   * Call this while the ctx transform is still the scene transform.
-   */
-  _mirrorFill(ctx, canvas, offX, offY, scale) {
-    const W = canvas.width, H = canvas.height;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-    if (offY >= 1) {
-      // vertical margins: mirror the scene's top and bottom edge strips
-      const top = Math.ceil(offY);               // size of the top margin
-      const bottom = Math.ceil(H - offY);        // scene bottom edge
-      const band = Math.min(top, bottom - top);  // strip height to mirror
-      ctx.setTransform(1, 0, 0, -1, 0, top);     // fill top margin
-      ctx.drawImage(canvas, 0, top, W, band, 0, 0, W, band);
-      ctx.setTransform(1, 0, 0, -1, 0, 2 * bottom); // fill bottom margin
-      ctx.drawImage(canvas, 0, bottom - band, W, band, 0, bottom - band, W, band);
-    } else if (offX >= 1) {
-      // horizontal margins: mirror the scene's left and right edge strips.
-      // NOTE: the source rect must be the SCENE EDGE ([left, left+band)),
-      // not the empty margin itself — reading the margin mirrors black.
-      const left = Math.ceil(offX);
-      const right = Math.ceil(W - offX);
-      const band = Math.min(left, right - left);
-      ctx.setTransform(-1, 0, 0, 1, left, 0);    // fill left margin
-      ctx.drawImage(canvas, left, 0, band, H, 0, 0, band, H);
-      ctx.setTransform(-1, 0, 0, 1, 2 * right, 0); // fill right margin
-      ctx.drawImage(canvas, right - band, 0, band, H, right - band, 0, band, H);
-    }
-    ctx.restore();
   }
 }
 

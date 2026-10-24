@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="css/preview.css">
 <link rel="stylesheet" href="css/pads.css">
 <link rel="stylesheet" href="css/inv.css">
-<link rel="stylesheet" href="css/weather.css">
+<link rel="stylesheet" href="css/dropdowns.css">
 <link rel="stylesheet" href="css/systems.css">
 <link rel="stylesheet" href="css/customization.css">
 <link rel="stylesheet" href="css/mobile.css">
@@ -20,7 +20,6 @@
 <div id="wrap"></div>
 <img id="logo" src="img/logo.png" alt="GrowTool" draggable="false">
 <div id="preview">
-  <div id="weather"></div>
   <canvas id="pv" width="1920" height="1080"></canvas>
 </div>
 <div id="hud"></div>
@@ -56,10 +55,6 @@
       <img id="s-icon" src="img/search.png" alt="" draggable="false">
       <input id="q" type="text" placeholder="Enter Item Name" autocomplete="off" spellcheck="false" aria-label="Search items">
       <div id="custom-tools" hidden aria-live="polite"></div>
-      <div id="optsrow" hidden>
-        <div class="opts-head"><select id="category" aria-label="Category"></select></div>
-        <div id="opts" role="group" aria-label="Options"></div>
-      </div>
       <div id="grid"></div>
     </div>
 
@@ -86,11 +81,11 @@ P.dat = { slots: {"0":"Hat","1":"Shirt","2":"Pants","3":"Feet","4":"Face","5":"H
 </script>
 <script src="js/pads.js"></script>
 <script src="js/tabs.js"></script>
+<script src="js/plate.js"></script>
 <script src="js/grid.js"></script>
 <script src="js/side.js"></script>
 <script src="js/weather.js"></script>
 <script src="js/land.js"></script>
-<script src="js/plate.js"></script>
 <script src="js/customization.js"></script>
 <script src="js/wrench-ui.js"></script>
 <script src="js/handle.js"></script>

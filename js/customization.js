@@ -238,6 +238,14 @@
       grid2.append(b);
     }
     panel.append(grid2);
+
+    /* ---------------- wrench styles + decorations ---------------- */
+    /* the former Wrench tab, renovated into the Player Customization tab */
+    const wrenchSec = el('h3', 'custom-heading sm wrench-anchor', 'Wrench');
+    wrenchSec.id = 'wrench-section';
+    panel.append(wrenchSec);
+    panel.append(el('p', 'custom-note', 'Pick your wrench style and decoration — shown on the plate next to your name when the Fist/Wrench quick box is set to Wrench.'));
+    if (P.wrenchUI) P.wrenchUI.render(panel);
     tools.append(panel);
   }
   let titleCat = 'Name';
@@ -334,11 +342,20 @@
   function syncTab(tabId) {
     const toolsActive = tabId === 'player' || tabId === 'makeup';
     tools.hidden = !toolsActive;
-    grid.hidden = toolsActive || tabId === 'weather' || tabId === 'wrench';
+    grid.hidden = toolsActive;
     if (!toolsActive) return;
-    if (tabId === 'player') renderPlayerCustomization();
+    if (tabId === 'player') {
+      renderPlayerCustomization();
+      if (focusWrench) {
+        focusWrench = false;
+        const anchor = tools.querySelector('#wrench-section');
+        if (anchor) anchor.scrollIntoView({ block: 'start' });
+      }
+    }
     else renderMakeup();
   }
+  let focusWrench = false;
+  P.on('focus-wrench', () => { focusWrench = true; });
   P.on('tab', syncTab);
 
   applyDyes();

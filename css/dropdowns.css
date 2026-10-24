@@ -1,0 +1,122 @@
+/* DROPDOWNS: the renovated Weather and Land pickers — floating dropdown
+   buttons instead of inventory tabs. Weather sits at the bottom-right corner
+   (of the screen on desktop, below the preview on mobile); Land at the
+   bottom-left. Both open a scrollable panel of square tiles above the button. */
+
+.dd-btn {
+  position: fixed;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #1c2226;
+  color: #cfe3c0;
+  border: 2px solid #7BBAD2;
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 #000;
+  font: 600 13px/1 "Century Gothic", system-ui, sans-serif;
+  cursor: pointer;
+  outline: 0;
+}
+.dd-btn:hover { background: #2a333a; color: #fff; }
+.dd-btn .dd-thumb {
+  width: 34px; height: 34px;
+  border-radius: 4px;
+  border: 1px solid #ffffff22;
+  background: #14181c;
+  overflow: hidden;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+}
+.dd-btn .dd-thumb canvas, .dd-btn .dd-thumb img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.dd-btn .dd-caret { font-size: 10px; opacity: .7; }
+
+/* desktop: bottom corners of the screen; panels sit above their button */
+#dd-weather-btn { right: 14px; bottom: 14px; }
+#dd-land-btn { left: 14px; bottom: 14px; }
+#dd-weather-panel { right: 14px; bottom: 62px; }
+#dd-land-panel { left: 14px; bottom: 62px; }
+
+.dd-panel {
+  position: fixed;
+  z-index: 9;
+  width: min(420px, calc(100vw - 28px));
+  max-height: min(52vh, 460px);
+  display: none;
+  flex-direction: column;
+  background: #14181cee;
+  border: 2px solid #7BBAD2;
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 #000;
+  color: #dcecc9;
+  overflow: hidden;
+}
+.dd-panel.open { display: flex; }
+.dd-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: rgba(16, 20, 24, .85);
+  border-bottom: 1px solid #ffffff22;
+}
+.dd-head strong { font: 700 13px/1 "Century Gothic", system-ui, sans-serif; letter-spacing: .5px; }
+.dd-head select {
+  flex: 1 1 auto; min-width: 0;
+  background: #14181c; color: #e8f4d9;
+  border: 1px solid #ffffff22; border-radius: 6px;
+  font: 600 12px/1 "Century Gothic", system-ui, sans-serif;
+  padding: 6px 8px; outline: none; cursor: pointer;
+}
+.dd-body {
+  overflow-y: auto;
+  padding: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #7BBAD2 rgba(0,0,0,.2);
+  touch-action: pan-y;
+}
+
+/* weather: fully rendered 1:1 squares */
+.dd-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+.dd-tile {
+  display: flex; flex-direction: column; align-items: stretch; gap: 4px;
+  background: #1c2226;
+  border: 1px solid #ffffff1e;
+  border-radius: 8px;
+  padding: 4px;
+  cursor: pointer;
+  outline: 0;
+  color: #cfe3c0;
+  font: 600 10px/1.2 "Century Gothic", system-ui, sans-serif;
+  transition: background .12s;
+}
+.dd-tile:hover { background: #2a333a; }
+.dd-tile.on { border-color: #b3e37e; box-shadow: 0 0 0 1px #7fb64a; }
+.dd-tile .dd-sq {
+  aspect-ratio: 1 / 1;           /* 1:1 fully rendered square */
+  width: 100%;
+  border-radius: 5px;
+  background: #0a0d10;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.dd-tile .dd-sq canvas { width: 100%; height: 100%; display: block; }
+.dd-tile .dd-sq .dd-sq-loading { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #ffffff33; border-top-color: #7fb64a; animation: ddspin .8s linear infinite; }
+@keyframes ddspin { to { transform: rotate(360deg); } }
+.dd-tile .dd-name { text-align: center; padding: 2px 0 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* land: square block tiles with names */
+.dd-tiles-land { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+
+@media (max-width:900px),(hover:none) and (pointer:coarse) {
+  /* mobile: below the preview, at the corners */
+  #dd-weather-btn { right: 10px; top: calc(var(--pvb, 60vh) + 10px); bottom: auto; }
+  #dd-land-btn { left: 10px; top: calc(var(--pvb, 60vh) + 10px); bottom: auto; }
+  #dd-weather-panel { right: 10px; bottom: auto; top: calc(var(--pvb, 60vh) + 62px); max-height: min(38vh, 340px); }
+  #dd-land-panel { left: 10px; bottom: auto; top: calc(var(--pvb, 60vh) + 62px); max-height: min(38vh, 340px); }
+  .dd-btn { font-size: 12px; padding: 5px 8px; }
+  .dd-btn .dd-thumb { width: 30px; height: 30px; }
+}

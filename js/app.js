@@ -9,6 +9,7 @@ import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
 import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
 import { WeatherRenderer, loadSheets } from "../weather-engine/weather-renderer.js";
+import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, TILE, WORLD_W } from "./land-system.mjs";
 
 const $ = s => document.querySelector(s);
@@ -31,8 +32,8 @@ const state = {
   catalog: null, equipped: new Map(), skin: SKINS[P.store.get("skin", 0)].rgb,
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
-  weatherRenderer: null, weatherKey: null, ancestralMap: null,
-  ancestralPath: [], abilities: null, hiddenPasses: new Set(),
+  weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
+  ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
   landBlock: null, landWorld: null
 };
 let player, motion, lastTimestamp = 0;
@@ -118,27 +119,11 @@ window.addEventListener("blur", () => { P.input.left = P.input.right = P.input.j
 
 /* ---------------- rendering ------------------------------------------- */
 const PALETTE = {
-  sky: "#c6dcd1", cloud: "#e8eee0", sun: "#f7e9ac", far: "#acbeab", hill: "#94ac94",
-  grass: "#799555", edge: "#a1b36c", soil: "#8a745a", dark: "#76644f"
+  sky: "#c6dcd1"
 };
-function cloud(x, y, s, color) {
-  ctx.fillStyle = color;
-  for (const [dx, dy, w, h] of [[0, 8, 62, 12], [10, 0, 28, 28], [38, 5, 32, 20], [-8, 13, 18, 10]])
-    ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), Math.ceil(w * s), Math.ceil(h * s));
-}
-function drawScene(w, h, ground, s, scroll) {
-  /* plain sky fallback — only shown if the Sunny weather fails to load */
+function drawScene(w, h) {
+  /* plain sky fallback — only shown if the weather fails to load */
   ctx.fillStyle = PALETTE.sky; ctx.fillRect(0, 0, w, h);
-}
-function drawGround(w, h, ground, s, scroll) {
-  const tile = 32 * s;
-  ctx.fillStyle = PALETTE.soil; ctx.fillRect(0, ground, w, h - ground);
-  for (let i = -1; i < Math.ceil(w / tile) + 1; i++) {
-    const x = i * tile - (scroll % tile);
-    ctx.fillStyle = PALETTE.dark; ctx.fillRect(Math.round(x), ground + 14, 1, h);
-    ctx.fillStyle = PALETTE.grass; ctx.fillRect(Math.round(x), ground, tile + 1, 13);
-    ctx.fillStyle = PALETTE.edge; ctx.fillRect(Math.round(x), ground, tile + 1, 4);
-  }
 }
 function renderAvatar() {
   /* dynamically load any atlas a draw call references but we have not
@@ -157,19 +142,39 @@ function renderAvatar() {
 }
 
 /* ---------------- weather --------------------------------------------- */
+/* Loading a weather goes through a static preview first: once the weather's
+   sheets are decoded, its fully-rendered first frame is held still for a
+   moment (STATIC fully rendered weather), then the animation takes over from
+   that exact timeline position (ANIMATED fully rendered weather) — no jump. */
+const WEATHER_STATIC_MS = 500;
 async function setWeather(key) {
   state.weatherKey = key;
   state.weatherRenderer = null;
+  state.weatherStill = null;
   if (!key || key === "none") return;
+  /* PREVIEW WHILE LOADING: the weather dropdown's cached fully-rendered still
+     of the new weather is shown immediately, before its sheets are decoded */
+  if (P.weatherThumb) P.weatherThumb(key).then(c => {
+    if (c && state.weatherKey === key && !state.weatherRenderer) state.weatherStill = c;
+  }).catch(() => {});
   try {
     const res = await fetch(moduleURL(`../data/variants/base/${key}.json`));
     if (!res.ok) throw Error("weather config missing");
     const cfg = await res.json();
+    /* sunny / monochrome / spring ship with their cloud tracks parked above
+       the visible scene — remap them into the sky band (documented fix) */
+    if (CLOUD_FIX_KEYS.has(key)) applyCloudFix(cfg);
     const imgs = await loadSheets(cfg, moduleURL("../sheets/").href);
+    if (state.weatherKey !== key) return; /* switched again while loading */
     weatherBG.width = world.width; weatherBG.height = world.height;
     weatherFG.width = world.width; weatherFG.height = world.height;
-    if (state.weatherKey !== key) return; /* switched again while loading */
-    state.weatherRenderer = new WeatherRenderer(cfg, imgs, weatherBG, weatherFG);
+    const renderer = new WeatherRenderer(cfg, imgs, weatherBG, weatherFG);
+    state.weatherStill = null;   /* the full render takes over from the preview */
+    const t0 = Math.round(cfg.loop * cfg.step * 0.4);   /* still frame position */
+    renderer.render(t0);                                /* draw the static preview */
+    state.weatherRenderer = renderer;
+    state.weatherT0 = t0;
+    state.weatherAnimAt = performance.now() + WEATHER_STATIC_MS;
   } catch (err) {
     P.toast("Weather unavailable: " + key);
   }
@@ -194,11 +199,10 @@ function landPage(name) {
   landLoads.set(name, load);
   return load;
 }
+const DEFAULT_LAND = 2;   /* Dirt — the default land the player walks on */
 function setLand(id) {
-  if (id == null || id === "none" || !BLOCKS[id]) {
-    state.landBlock = null; state.landWorld = null;
-    return;
-  }
+  if (id == null || id === "none") id = DEFAULT_LAND;
+  if (!BLOCKS[id]) { state.landBlock = null; state.landWorld = null; return; }
   const def = BLOCKS[id];
   landPage(def.page || "tiles_page1");
   state.landBlock = id;
@@ -292,20 +296,39 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   while (state.remainder >= 1000 / 60) { step(1000 / 60); state.remainder -= 1000 / 60; }
 
   const frame = state.lastFrame, result = state.lastResult;
-  const s = Math.min(4, Math.max(3, w / 480));
+  /* camera zoom (50% by default): scales the player, land and plate inside
+     the preview — the weather backdrop always fills the canvas */
+  const s = Math.min(4, Math.max(3, w / 480)) * P.camZoom.v;
   /* ground line: player centered in the frame (Growtopia keeps the actor
      mid-screen; the inventory overlays the lower part of the world) */
   const ground = h / 2 + 16 * s;   /* visible body (~32 world units) centered: body center = h/2 */
-  const headroom = Math.min(100, Math.max(4, ground - 32 * s + Math.min(0, (result.lift?.y ?? 0) * s) - 18));
-  const cameraY = Math.min(0, frame.y * s + headroom);
   const scroll = frame.x * s;
-  const rootX = w / 2 - 16 * s, rootY = ground - 32 * s + frame.y * s - cameraY;
+
+  /* render the avatar FIRST so the current frame's bounds (which include
+     hats, hair and item lift) drive the camera */
+  renderAvatar();
+  const b = state.avatarBounds;
+  /* vertical camera: the player may rise freely until the top of the plate +
+     head reaches the preview's top border, then the camera follows so the
+     player is never cut off — the ground strip and shadow move with it */
+  const lift = result.lift?.y ?? 0;
+  const topUnits = Math.min(b?.y ?? 0, lift - 17);   /* 17 world units of name plate above the head */
+  const freeTop = ground - 32 * s + frame.y * s + topUnits * s;
+  const cameraY = Math.min(0, freeTop - 6);
+  const groundCam = ground - cameraY;
+  const rootX = w / 2 - 16 * s, rootY = groundCam - 32 * s + frame.y * s;
 
   c.imageSmoothingEnabled = false;
-  /* background: the Sunny weather scene (plain sky only if it failed to load) */
+  /* background: the weather scene (plain sky only if it failed to load) —
+     static fully-rendered preview first, then animated from that frame */
   if (state.weatherRenderer) {
-    state.weatherRenderer.render(performance.now() % 2147483647);
+    const now = performance.now();
+    if (now < state.weatherAnimAt) state.weatherRenderer.render(state.weatherT0);
+    else state.weatherRenderer.render(state.weatherT0 + now - state.weatherAnimAt);
     c.drawImage(weatherBG, 0, 0, w, h);
+  } else if (state.weatherStill) {
+    c.imageSmoothingEnabled = false;
+    c.drawImage(state.weatherStill, 0, 0, w, h);
   } else {
     drawScene(w, h, ground, s, scroll);
   }
@@ -313,25 +336,22 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.fillStyle = "rgba(37,61,53,0.17)";
   const shadow = Math.max(0.3, 1 + frame.y / 150);
   c.beginPath();
-  c.ellipse(w / 2, ground + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
+  c.ellipse(w / 2, groundCam + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
   c.fill();
   /* ground strip over the weather scene so the player is anchored; the land
-     selection replaces the procedural ground in both scenes */
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame);
-  else if (state.weatherRenderer) drawGround(w, h, ground, s, scroll);
+     system always renders it (Dirt by default) */
+  if (state.landWorld) drawLandGround(w, h, groundCam, s, frame);
   /* avatar + ancestral aura: the orbiting fx pass behind the player first,
      then the avatar, then the front fx (Growtopia's orbiting artifacts circle
      behind the player on the far side of their orbit) */
-  renderAvatar();
-  const b = state.avatarBounds;
-  drawAncestralAura(s, rootX, ground, cameraY, frame, "behind");
+  drawAncestralAura(s, rootX, groundCam, cameraY, frame, "behind");
   c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
   /* ancestral aura (front fx) */
-  drawAncestralAura(s, rootX, ground, cameraY, frame, "front");
-  /* name plate above the head (Website plate system, drawn at world scale) */
+  drawAncestralAura(s, rootX, groundCam, cameraY, frame, "front");
+  /* name plate above the head (Website plate system, drawn at world scale).
+     The plate's animations expect MILLISECONDS — state.clock is already ms. */
   if (P.plate) {
-    const t = state.clock / 1000;
-    P.plate.draw(c, w / 2, rootY + (result.lift?.y ?? 0) * s - 6 * s, s, t);
+    P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
   }
   /* weather foreground layer (rain, snow, particles in front) */
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
@@ -483,18 +503,18 @@ window.plannerApp = state;   /* debug/QA hook */
       const rows = await (await fetch(moduleURL("../data/land-blocks.json?v=2"))).json();
       registerBlocks(rows);
     } catch { /* land tab will report unavailable */ }
+    /* set the land (Dirt by default) before the first frame so the scene is complete */
+    const savedLand0 = P.store.get("land", String(DEFAULT_LAND));
+    setLand(savedLand0 === "none" ? DEFAULT_LAND : +savedLand0);
 
     state.ready = true;
     P.equippedIds = new Set();
     P.emit("catalog");
     P.emit("boot");
     updateHUD();
-    /* restore the saved weather */
+    /* restore the saved weather (Sunny by default) */
     const saved = P.store.get("weather", "sunny");
     if (saved && saved !== "none") setWeather(saved);
-    /* restore the saved land block */
-    const savedLand = P.store.get("land", "none");
-    if (savedLand && savedLand !== "none") setLand(+savedLand);
   } catch (error) {
     console.error(error);
     $("#hud").textContent = "Unable to start: " + error.message;

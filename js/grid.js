@@ -1,15 +1,25 @@
 /* GRID: the Demo catalog + the planner's eight custom placeholders, filtered
-   by the planner tabs (Equipped / Favorites / Clothing / Custom). Thumbnails
-   are drawn from the Demo sprite atlases (P.thumb); clicking equips through
-   the Demo rendering engine. */
+   by the planner tabs (Equipped / Favorites / Clothing / Custom).
+   The clothing grid is VIRTUALIZED: only the boxes inside (or cut off by)
+   the visible drawer are in the DOM, and each box's thumbnail + name only
+   render when it is actually seen — content pops in while scrolling. This
+   keeps the 4000+-item catalog light and lag-free.
+   Box-focus flow (every item box, quick drawer included):
+     click 1 -> box-focus | click 2 -> equipped (focus consumed)
+     equipped: click 1 -> box-focus | click 2 -> unequipped (focus consumed) */
 (function(){
   const g = P.$('#grid');
   let searchOn = P.store.get('searchOn', true);
   let favs = new Set(P.store.get('favs', []));
   let all = [];            /* decorated items: tab / eq / fav flags */
-  let render = [], renderStart = 0;
-  const step = 96;
-  const more = document.createElement('button'); more.id = 'more'; more.textContent = '…';
+  let render = [];
+  /* virtualization: #grid (scroll container) > #grid-inner (full height) >
+     #grid-window (positioned grid holding only the visible rows) */
+  const inner = document.createElement('div'); inner.id = 'grid-inner';
+  const win = document.createElement('div'); win.id = 'grid-window';
+  inner.append(win); g.append(inner);
+  let m = null;            /* column metrics */
+  let firstRow = -1, lastRow = -1;
 
   /* the planner's custom clothing placeholders — present in the Custom tab,
      not wearable by the Demo engine (official catalog items only) */
@@ -45,17 +55,18 @@
       syncFlags();
       render = all.filter(it => !it.gone && visible(it) &&
         (!q || it.name.toLowerCase().includes(q) || String(it.id) === q));
-      renderStart = 0;
-      renderBoxes();
+      g.scrollTop = 0;
+      renderWindow(true);
     }
   };
 
   function markEquipped() {
     const eq = P.equippedIds || new Set();
-    for (const b of g.querySelectorAll('.box')) b.classList.toggle('sel', eq.has(+b.dataset.id));
+    for (const b of win.querySelectorAll('.box')) b.classList.toggle('sel', eq.has(+b.dataset.id));
+    for (const b of P.$('#quick').querySelectorAll('.box')) if (b.dataset.id) b.classList.toggle('sel', eq.has(+b.dataset.id));
   }
 
-  function boxEl(it) {
+  function boxEl(it, lazy) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '') +
@@ -63,58 +74,179 @@
     b.dataset.id = it.id;
     if (it.slot != null) b.dataset.slot = it.slot;
     b.title = it.name + ' (#' + it.id + ')';
+    b._it = it;
     const ic = document.createElement('span'); ic.className = 'ic';
-    const thumbEl = P.thumb ? P.thumb(it, 64) : null;
-    if (thumbEl) ic.append(thumbEl);
-    else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
-    b.append(ic);
     const n = document.createElement('span'); n.className = 'n';
-    n.textContent = it.name;
-    b.append(n);
     const ck = document.createElement('img'); ck.className = 'ck o'; ck.src = 'img/chk.png'; ck.alt = '';
-    b.append(ck);
+    b.append(ic, n, ck);
     if (favs.has(it.id)) {
       const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/fav-box.png'; fv.alt = '';
       b.append(fv);
     }
+    if (!lazy) fillBox(b);
     return b;
   }
 
-  function renderBoxes() {
+  /* mount a box's thumbnail + name (only called when the box is seen) */
+  function fillBox(b) {
+    const it = b._it;
+    if (!it) return;
+    const ic = b.querySelector('.ic');
+    if (ic && !ic.firstChild) {
+      const thumbEl = P.thumb ? P.thumb(it, 64) : null;
+      if (thumbEl) ic.append(thumbEl);
+      else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
+    }
+    const n = b.querySelector('.n');
+    if (n && !n.textContent) n.textContent = it.name;
+  }
+  /* unmount the thumbnail (keep the light name) — keeps memory bounded */
+  function unfillBox(b) {
+    const ic = b.querySelector('.ic');
+    if (ic) ic.replaceChildren();
+  }
+
+  /* boxes pop in exactly when they become visible — even when cut off by the
+     drawer's edge. Zero margin: nothing renders before it is actually seen. */
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) {
+      const b = e.target;
+      if (e.isIntersecting) {
+        if (!b.classList.contains('vis')) { b.classList.add('vis'); fillBox(b); }
+      } else if (b.classList.contains('vis')) {
+        b.classList.remove('vis');
+        unfillBox(b);
+      }
+    }
+  }, { root: g, rootMargin: '0px' });
+  /* stop observing boxes before they leave the window (both paths) so the
+     observer never holds references to detached nodes */
+  function releaseWindow() {
+    for (const b of win.querySelectorAll('.box')) io.unobserve(b);
+  }
+
+  function layoutMetrics() {
+    const cs = getComputedStyle(win);
+    let spec = cs.gridTemplateColumns;
+    /* a hidden grid keeps its specified value — expand `repeat(n, w)` ourselves */
+    const rep = spec.match(/repeat\(\s*(\d+)\s*,\s*([^)]+)\)/);
+    if (rep) spec = Array.from({ length: +rep[1] }, () => rep[2]).join(' ');
+    const cols = spec.split(' ').map(parseFloat).filter(v => v > 0);
+    return {
+      n: Math.max(1, cols.length),
+      colW: cols[0] || 100,
+      rowGap: parseFloat(cs.rowGap) || 0,
+      /* square boxes (aspect-ratio 1) + the row gap = one row's height */
+      rowH: (cols[0] || 100) + (parseFloat(cs.rowGap) || 0),
+      padTop: parseFloat(cs.paddingTop) || 0,
+      padBottom: parseFloat(cs.paddingBottom) || 0
+    };
+  }
+
+  function renderWindow(force) {
     if (!render.length) {
+      releaseWindow();
+      win.replaceChildren();
+      inner.style.height = '0px';
       const empty = document.createElement('div');
       empty.className = 'empty';
       empty.textContent = 'No items found.';
-      g.replaceChildren(empty);
+      win.append(empty);
+      firstRow = lastRow = -1;
       return;
     }
+    if (!m) m = layoutMetrics();
+    const rows = Math.ceil(render.length / m.n);
+    inner.style.height = Math.ceil(m.padTop + rows * m.rowH + m.padBottom) + 'px';
+    const st = g.scrollTop, vh = g.clientHeight;
+    const f = Math.max(0, Math.floor((st - m.padTop) / m.rowH) - 2);
+    const l = Math.min(rows - 1, Math.ceil((st + vh - m.padTop) / m.rowH) + 2);
+    if (!force && f === firstRow && l === lastRow) return;
+    firstRow = f; lastRow = l;
+    win.style.top = (firstRow * m.rowH) + 'px';   /* the window keeps its own padding-top */
     const frag = document.createDocumentFragment();
-    const slice = render.slice(renderStart, renderStart + step);
-    for (const it of slice) frag.append(boxEl(it));
-    g.replaceChildren(frag);
-    if (render.length > renderStart + step) {
-      more.addEventListener('click', () => { renderStart += step; renderBoxes(); }, { once: true });
-      g.append(more);
-    }
+    for (let row = firstRow; row <= lastRow; row++)
+      for (let col = 0; col < m.n; col++) {
+        const idx = row * m.n + col;
+        if (idx >= render.length) break;
+        const b = boxEl(render[idx], true);
+        io.observe(b);
+        frag.append(b);
+      }
+    releaseWindow();
+    win.replaceChildren(frag);
     markEquipped();
     markFocus();
   }
 
-  /* quick drawer: 4 regular item boxes showing the first four equipped
-     pieces (slot order) — click to unequip. NOT favorites. */
+  g.addEventListener('scroll', () => renderWindow(false), { passive: true });
+  if (window.ResizeObserver) new ResizeObserver(() => { m = null; renderWindow(true); }).observe(g);
+
+  /* ---------------- box-focus activation (the four-click state machine) --- */
+  function activate(item) {
+    const f = P.inv.focus;
+    if (f && !f.tool && f.id === item.id) {
+      P.inv.focus = null;                      /* consume the focus */
+      P.emit('equip', { id: item.id });        /* equipped -> unequips, else equips */
+    } else {
+      P.inv.focus = item;
+    }
+    markFocus();
+  }
+
+  g.addEventListener('click', e => {
+    const b = e.target.closest('.box');
+    if (!b) return;
+    const item = P.inv.itemById(+b.dataset.id);
+    if (!item) return;
+    if (item.wearable === false) { P.toast(item.name + ' is a placeholder — custom clothing is not rendered by this engine.'); return; }
+    activate(item);
+  });
+
+  /* ---------------- quick drawer ---------------------------------------- */
+  /* slot 0: the protected Fist/Wrench tool box (never equips, box-focus only,
+     every click alternates Fist <-> Wrench). The wrench only pulls up on the
+     plate when the player's GrowID is typed in. slots 1-3: the first three
+     equipped pieces. */
+  function toolBox() {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'box qbox tool';
+    b.dataset.tool = '1';
+    b.title = 'Fist / Wrench — click to alternate. The wrench pulls up your wrench when your GrowID is typed in.';
+    const ic = document.createElement('span'); ic.className = 'ic';
+    const img = document.createElement('img');
+    img.src = P.plateConfig.get().wrenchOn ? 'img/wrench-quick.png' : 'img/fist.png';
+    img.alt = P.plateConfig.get().wrenchOn ? 'Wrench' : 'Fist';
+    ic.append(img);
+    b.append(ic);
+    b.addEventListener('click', () => {
+      const pc = P.plateConfig.get();
+      const on = !pc.wrenchOn;
+      P.plateConfig.setWrenchOn(on);
+      if (on && !pc.growId.trim()) P.toast('Type your GrowID in Player Customization to pull up the wrench.');
+      img.src = on ? 'img/wrench-quick.png' : 'img/fist.png';
+      img.alt = on ? 'Wrench' : 'Fist';
+      P.inv.focus = { tool: true };
+      markFocus();
+    });
+    return b;
+  }
+
   function renderQuick() {
     const quick = P.$('#quick');
     quick.replaceChildren();
+    quick.append(toolBox());
     const eq = [...(P.equippedIds || new Set())]
       .map(id => P.inv.itemById(id)).filter(Boolean)
       .sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       const it = eq[i];
       if (it) {
         const b = boxEl(it);
         b.classList.add('sel', 'qbox');
         b.classList.remove('art');   /* the top drawer always shows regular boxes */
-        b.addEventListener('click', () => { P.emit('equip', { id: it.id }); });
+        b.addEventListener('click', () => activate(it));
         quick.append(b);
       } else {
         const b = document.createElement('button');
@@ -124,33 +256,23 @@
         quick.append(b);
       }
     }
+    markFocus();
   }
 
-  /* mark the focused box (double-tap equip: first click focuses, second
-     click equips/unequips — the planner's yellow-brackets behavior) */
+  /* mark the focused box (yellow brackets) in the grid, the quick drawer's
+     tool box and the quick drawer's equipped item boxes */
   function markFocus() {
     const f = P.inv.focus;
-    for (const b of g.querySelectorAll('.box')) b.classList.toggle('focus', !!f && +b.dataset.id === f.id);
+    for (const b of win.querySelectorAll('.box')) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
+    for (const b of P.$$('#quick .box')) {
+      if (b.classList.contains('tool')) b.classList.toggle('focus', !!f && !!f.tool);
+      else if (b.dataset.id) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
+    }
   }
-
-  g.addEventListener('click', e => {
-    const b = e.target.closest('.box');
-    if (!b || b.id === 'more') return;
-    const item = P.inv.itemById(+b.dataset.id);
-    if (!item) return;
-    if (item.wearable === false) { P.toast(item.name + ' is a placeholder — custom clothing is not rendered by this engine.'); return; }
-    /* box-focus double-tap: clicking a different box moves the focus; clicking
-       the focused box again equips it (or unequips if already worn) */
-    const wasFocused = P.inv.focus && P.inv.focus.id === item.id;
-    P.inv.focus = item;
-    markFocus();
-    if (!wasFocused) return;
-    const equipped = (P.equippedIds || new Set()).has(item.id);
-    P.emit('equip', { id: +b.dataset.id, unequip: equipped });
-  });
 
   P.on('equip-state', markEquipped);
   P.on('equip-state', renderQuick);
+  P.on('plate-update', renderQuick);
   P.on('catalog', () => { build(); P.inv.refresh(); renderQuick(); });
   P.on('tab', () => P.inv.refresh());
   P.on('searchOn', on => {
