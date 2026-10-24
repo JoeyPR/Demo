@@ -19,11 +19,13 @@
     P.emit('preview', pv);
   }
   /* Growtopia-style camera zoom: scroll wheel over the world (outside the
-     inventory panels) zooms the preview in/out around the screen center */
+     inventory panels) zooms the preview in/out around the screen center.
+     The canvas element keeps covering the window (min zoom = the base fit),
+     so zoom never exposes the void outside the rendered world. */
   document.addEventListener('wheel', e => {
     if (e.target.closest && e.target.closest('#ui, #hud, #toast, #logo')) return;
     e.preventDefault();
-    pv.zoom = Math.min(3, Math.max(0.5, pv.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+    pv.zoom = Math.min(3, Math.max(1, pv.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
     apply();
   }, { passive: false });
   addEventListener('resize', fit); fit();

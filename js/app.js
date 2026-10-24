@@ -295,7 +295,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   const s = Math.min(4, Math.max(3, w / 480));
   /* ground line: player centered in the frame (Growtopia keeps the actor
      mid-screen; the inventory overlays the lower part of the world) */
-  const ground = h * 0.62;
+  const ground = h / 2 + 16 * s;   /* visible body (~32 world units) centered: body center = h/2 */
   const headroom = Math.min(100, Math.max(4, ground - 32 * s + Math.min(0, (result.lift?.y ?? 0) * s) - 18));
   const cameraY = Math.min(0, frame.y * s + headroom);
   const scroll = frame.x * s;

@@ -113,6 +113,7 @@
       if (it) {
         const b = boxEl(it);
         b.classList.add('sel', 'qbox');
+        b.classList.remove('art');   /* the top drawer always shows regular boxes */
         b.addEventListener('click', () => { P.emit('equip', { id: it.id }); });
         quick.append(b);
       } else {
