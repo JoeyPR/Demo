@@ -7,7 +7,7 @@
   const root = P.$('#preview'), cv = P.$('#pv'), ctx = cv.getContext('2d');
   const mq = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
   const pv = P.preview = { w: 1920, h: 1080, ctx, scale: 1, mobile: false };
-  P.camZoom = { v: 0.5, min: 0.5, max: 2 };   /* player/world camera zoom, 50% by default */
+  P.camZoom = { v: 1, min: 0.5, max: 2 };   /* start close to the player; land and avatar share the same world zoom */
   const Z = P.camZoom;
 
   function fit() {
@@ -39,20 +39,65 @@
     setZoom(Z.v * (e.deltaY < 0 ? 1.15 : 1 / 1.15));
   }, { passive: false });
 
-  /* Pinch zoom for touch devices: two fingers anywhere over the world (outside
-     the UI panels and dropdown controls) zooms the camera in/out. */
+  /* Touch/mouse punching lives on the preview itself. A captured pointer lets
+     us keep tracking a drag, but punching is released as soon as the pointer
+     leaves the preview's content box. A second pointer switches to pinch zoom. */
+  P.input = P.input || {};
+  cv.style.touchAction = 'none';
   const pointers = new Map();
   let pinchBase = null;   /* { dist, zoom } */
+  let punchPointer = null;
   const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, [data-dd]');
+  function canvasBox() {
+    const r = cv.getBoundingClientRect(), cs = getComputedStyle(cv);
+    const l = parseFloat(cs.borderLeftWidth) || 0, rr = parseFloat(cs.borderRightWidth) || 0;
+    const top = parseFloat(cs.borderTopWidth) || 0, bottom = parseFloat(cs.borderBottomWidth) || 0;
+    return { left: r.left + l, top: r.top + top, width: r.width - l - rr, height: r.height - top - bottom };
+  }
+  function canvasPoint(e) {
+    const b = canvasBox();
+    return [Math.max(0, Math.min(pv.w, (e.clientX - b.left) / Math.max(1, b.width) * pv.w)),
+            Math.max(0, Math.min(pv.h, (e.clientY - b.top) / Math.max(1, b.height) * pv.h))];
+  }
+  function insideCanvas(e) {
+    const b = canvasBox();
+    return e.clientX >= b.left && e.clientX < b.left + b.width &&
+           e.clientY >= b.top && e.clientY < b.top + b.height;
+  }
+  function updatePunch(e) {
+    if (punchPointer !== e.pointerId) return;
+    if (insideCanvas(e)) {
+      P.input.punch = 1;
+      P.input.punchPoint = canvasPoint(e);
+    } else {
+      P.input.punch = 0;
+      P.input.punchPoint = null;
+    }
+  }
+  function releasePunch(pointerId) {
+    if (punchPointer !== pointerId) return;
+    punchPointer = null;
+    P.input.punch = 0;
+    P.input.punchPoint = null;
+  }
   document.addEventListener('pointerdown', e => {
     if (overUI(e.target)) return;
     pointers.set(e.pointerId, [e.clientX, e.clientY]);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];
       pinchBase = { dist: Math.hypot(a[0] - b[0], a[1] - b[1]), zoom: Z.v };
+      if (punchPointer !== null) releasePunch(punchPointer);
+    }
+    if (e.target === cv && pointers.size === 1 &&
+        (e.pointerType !== 'mouse' || e.button === 0)) {
+      punchPointer = e.pointerId;
+      try { cv.setPointerCapture(e.pointerId); } catch {}
+      updatePunch(e);
+      e.preventDefault();
     }
   });
   document.addEventListener('pointermove', e => {
+    if (punchPointer === e.pointerId) updatePunch(e);
     if (!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, [e.clientX, e.clientY]);
     if (pointers.size === 2 && pinchBase) {
@@ -62,11 +107,17 @@
     }
   });
   const drop = e => {
+    releasePunch(e.pointerId);
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinchBase = null;
   };
   document.addEventListener('pointerup', drop);
   document.addEventListener('pointercancel', drop);
+  window.addEventListener('blur', () => {
+    if (punchPointer !== null) releasePunch(punchPointer);
+    pointers.clear();
+    pinchBase = null;
+  });
 
   addEventListener('resize', fit); fit();
 
