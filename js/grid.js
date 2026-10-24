@@ -1,8 +1,8 @@
 /* GRID: the Demo catalog + the planner's eight custom placeholders, filtered
    by the planner tabs (Equipped / Favorites / Clothing / Custom).
    The clothing grid is VIRTUALIZED: only the boxes inside (or cut off by)
-   the visible drawer are in the DOM, and each box's thumbnail + name only
-   render when it is actually seen — content pops in while scrolling. This
+   the visible drawer are in the DOM, and each box's thumbnail only
+   renders when it is actually seen — content pops in while scrolling. This
    keeps the 4000+-item catalog light and lag-free.
    Box-focus flow (every item box, quick drawer included):
      click 1 -> box-focus | click 2 -> equipped (focus consumed)
@@ -73,7 +73,7 @@
       (P.ancestralIds && P.ancestralIds.has(it.id) ? ' art' : '');
     b.dataset.id = it.id;
     if (it.slot != null) b.dataset.slot = it.slot;
-    b.title = it.name + ' (#' + it.id + ')';
+    b.setAttribute('aria-label', it.name + ' (item ' + it.id + ')');
     b._it = it;
     const ic = document.createElement('span'); ic.className = 'ic';
     const ck = document.createElement('img'); ck.className = 'ck o'; ck.src = 'img/chk.png'; ck.alt = '';
@@ -86,7 +86,7 @@
     return b;
   }
 
-  /* mount a box's thumbnail + name (only called when the box is seen) */
+  /* mount a box's thumbnail (only called when the box is seen) */
   function fillBox(b) {
     const it = b._it;
     if (!it) return;
@@ -97,7 +97,7 @@
       else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
     }
   }
-  /* unmount the thumbnail (keep the light name) — keeps memory bounded */
+  /* unmount the thumbnail — keeps memory bounded */
   function unfillBox(b) {
     const ic = b.querySelector('.ic');
     if (ic) ic.replaceChildren();
