@@ -73,7 +73,7 @@
       (P.ancestralIds && P.ancestralIds.has(it.id) ? ' art' : '');
     b.dataset.id = it.id;
     if (it.slot != null) b.dataset.slot = it.slot;
-    b.title = it.name + ' (#' + it.id + ')';
+    b.setAttribute('aria-label', it.name + ' (#' + it.id + ')');
     b._it = it;
     const ic = document.createElement('span'); ic.className = 'ic';
     const n = document.createElement('span'); n.className = 'n';
@@ -98,7 +98,7 @@
       else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
     }
     const n = b.querySelector('.n');
-    if (n && !n.textContent) n.textContent = it.name;
+    if (n && !n.textContent) n.textContent = it.name;   /* kept as metadata; the label itself is hidden (names never show) */
   }
   /* unmount the thumbnail (keep the light name) — keeps memory bounded */
   function unfillBox(b) {
@@ -184,6 +184,7 @@
 
   /* ---------------- box-focus activation (the four-click state machine) --- */
   function activate(item) {
+    toolArmed = false;                       /* any real-item activation resets the tool sequence */
     const f = P.inv.focus;
     if (f && !f.tool && f.id === item.id) {
       P.inv.focus = null;                      /* consume the focus */
@@ -204,31 +205,42 @@
   });
 
   /* ---------------- quick drawer ---------------------------------------- */
-  /* slot 0: the protected Fist/Wrench tool box (never equips, box-focus only,
-     every click alternates Fist <-> Wrench). The wrench only pulls up on the
-     plate when the player's GrowID is typed in. slots 1-3: the first three
-     equipped pieces. */
+  /* slot 0: the protected Fist/Wrench tool box — box-focus on the first click,
+     Fist <-> Wrench swap on every click after that, and the sequence restarts
+     (focus, then swap) whenever anything outside the box is activated. The
+     box itself is rebuilt on every render, so the sequence state lives at
+     module level; a capture-phase pointerdown resets it when the press starts
+     outside the box (before any click handler can rebuild the DOM). */
+  let toolArmed = false;
+  document.addEventListener('pointerdown', e => {
+    if (toolArmed && !(e.target.closest && e.target.closest('#quick .box.tool'))) toolArmed = false;
+  }, true);
+
   function toolBox() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'box qbox tool';
     b.dataset.tool = '1';
-    b.title = 'Fist / Wrench — click to alternate. The wrench pulls up your wrench when your GrowID is typed in.';
+    b.setAttribute('aria-label', 'Fist / Wrench tool — click for box focus, click again to swap');
     const ic = document.createElement('span'); ic.className = 'ic';
     const img = document.createElement('img');
-    img.src = P.plateConfig.get().wrenchOn ? 'img/wrench-quick.png' : 'img/fist.png';
-    img.alt = P.plateConfig.get().wrenchOn ? 'Wrench' : 'Fist';
+    const setToolArt = on => {
+      img.src = on ? 'img/wrench-quick.png' : 'img/fist.png';
+      img.alt = on ? 'Wrench' : 'Fist';
+      img.className = on ? 'art-wrench' : 'art-fist';
+    };
+    setToolArt(P.plateConfig.get().wrenchOn);
     ic.append(img);
     b.append(ic);
     b.addEventListener('click', () => {
+      P.inv.focus = { tool: true };
+      markFocus();
+      if (!toolArmed) { toolArmed = true; return; }   /* first click: box-focus only */
       const pc = P.plateConfig.get();
       const on = !pc.wrenchOn;
       P.plateConfig.setWrenchOn(on);
       if (on && !pc.growId.trim()) P.toast('Type your GrowID in Player Customization to pull up the wrench.');
-      img.src = on ? 'img/wrench-quick.png' : 'img/fist.png';
-      img.alt = on ? 'Wrench' : 'Fist';
-      P.inv.focus = { tool: true };
-      markFocus();
+      setToolArt(on);
     });
     return b;
   }

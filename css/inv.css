@@ -66,7 +66,7 @@
 .box.sel.art .ck.p{display:block}
 .box .ic{position:absolute;inset:16%;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);
   font-size:calc(46*var(--u));text-shadow:0 2px 0 rgba(0,0,0,.45)}
-.box .n{position:absolute;left:14%;bottom:12%;font-size:calc(26*var(--u));color:#fff;text-shadow:0 2px 0 #000}
+.box .n{display:none}   /* item names never show — kept in the DOM as metadata only */
 .box .fv{position:absolute;right:calc(2% - 1px);top:calc(2% - 1px);width:74%;height:74%;object-fit:fill;display:none;z-index:2}   /* fav-box.png: box-sized overlay, star top-right (moved 1px up-right) */
 .box.fav .fv{display:block}
 .box img{pointer-events:none}
@@ -80,13 +80,33 @@
 #quick .box.art{background-image:url(../img/box-blue.png)}
 #quick .box.sel.art .ck.p{display:block}
 
-/* the protected first quick box (Fist/Wrench tool): icon-only, never equips */
-.box.tool .ic img{width:72%;height:auto;image-rendering:pixelated;margin:auto}
+/* the protected first quick box (Fist/Wrench tool): icon-only, never equips.
+   The icon art has transparent margins baked into its canvas, so the image
+   is scaled past 100% — the VISIBLE artwork fills the space inside the
+   box's border and only the invisible margins overflow.
+   art bounds: fist 162/192 of its canvas, wrench 169/192. */
+.box.tool .ic{inset:5%}
+.box.tool .ic img{width:118.5%;height:auto;image-rendering:pixelated;margin:auto}
+.box.tool .ic img.art-wrench{width:113.6%}
 
-/* 3. tabs (flush against the main drawer's left border, spanning its height) */
-#tabs{left:calc(16.5*var(--u));top:calc(286.2*var(--u));width:calc(67.5*var(--u));height:calc(607.8*var(--u));pointer-events:none}
-.tab{display:block;position:relative;width:calc(67.5*var(--u));height:calc(67.5*var(--u));pointer-events:auto;outline:0}
-.tab img{position:absolute;inset:0;width:100%}
+/* 3. tabs (scaled to reach the screen's left edge while staying attached to
+   the main drawer's left border, spanning its height). The strip grows left
+   of the stage on wide screens; the tab art stays docked against the drawer
+   border and the extension carries each tab's body colour, with the art's
+   rounded left corners and black bottom edge continued across it. */
+#tabs{left:calc(1000*var(--u) - 50vw);top:calc(286.2*var(--u));width:calc(50vw - 916*var(--u));
+  height:calc(607.8*var(--u) - var(--dy));pointer-events:none}
+.tab{display:block;position:relative;width:100%;height:calc(67.5*var(--u));pointer-events:auto;outline:0;
+  background:var(--tc,#4d5156);border-bottom:calc(3.5*var(--u)) solid #000;
+  border-radius:calc(4*var(--u)) 0 0 calc(4*var(--u))}
+.tab img{position:absolute;top:0;right:0;height:100%;width:auto}
+.tab[data-t=equip]{--tc:#445c66;--tc-on:#a5e3fb}
+.tab[data-t=fav]{--tc:#800020;--tc-on:#ff0040}
+.tab[data-t=cloth]{--tc:#636363;--tc-on:#d0d0d0}
+.tab[data-t=custom]{--tc:#105507;--tc-on:#21a90d}
+.tab[data-t=player]{--tc:#004e71;--tc-on:#009be2}
+.tab[data-t=makeup]{--tc:#642975;--tc-on:#c851ea}
+.tab[aria-selected=true]{background:var(--tc-on,#d0d0d0)}
 .tab .on{display:none}
 .tab[aria-selected=true] .on{display:block}
 .tab[aria-selected=true] .off{display:none}
