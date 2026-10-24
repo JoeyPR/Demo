@@ -48,6 +48,10 @@
 .box.sel.art{background-image:url(../img/box-art.png)}
 .box::before{content:"";position:absolute;inset:-2.6% -4.9% -5.4% -3.1%;background:url(../img/box-focus.png) 0 0/100% 100%;opacity:0;pointer-events:none}
 .box.focus::before{opacity:1}
+/* empty quick-drawer slot: the regular box, dimmed */
+.box.empty{opacity:.45;cursor:default}
+/* quick-drawer boxes: icon only (names live in the tooltip) */
+.qbox .n{display:none}
 .box .ck{position:absolute;right:3%;bottom:3%;width:42%;display:none;z-index:2;filter:drop-shadow(calc(8*var(--u)) calc(8*var(--u)) 0 rgba(0,0,0,.75))}
 .box.sel .ck.o{display:block}
 .box.sel.art .ck.o{display:none}
@@ -61,9 +65,9 @@
 .box.fav-special{background-image:url(../img/box-fav.png);background-position:center;background-size:100% 100%;cursor:default}
 .box.fav-special::before{display:none}
 
-/* 3. tabs (left of main drawer) */
-#tabs{left:0;top:calc(298*var(--u));width:calc(66*var(--u));height:calc(594*var(--u));pointer-events:none}
-.tab{display:block;position:relative;width:calc(66*var(--u));height:calc(66*var(--u));pointer-events:auto;outline:0}
+/* 3. tabs (flush against the main drawer's left border, spanning its height) */
+#tabs{left:calc(16.5*var(--u));top:calc(286.2*var(--u));width:calc(67.5*var(--u));height:calc(607.8*var(--u));pointer-events:none}
+.tab{display:block;position:relative;width:calc(67.5*var(--u));height:calc(67.5*var(--u));pointer-events:auto;outline:0}
 .tab img{position:absolute;inset:0;width:100%}
 .tab .on{display:none}
 .tab[aria-selected=true] .on{display:block}

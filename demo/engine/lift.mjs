@@ -1,12 +1,12 @@
 // Recovered profiles use isolated source arithmetic for default actor state.
 // Unknown hover curves use separately labelled reference fallbacks below.
 import {isFloatingItem,FLOATING_MOUNT_IDS} from "./motion-policy.mjs";
-// Rider bob tuning: mount up/down cycles run slower than the raw source
-// default-state constants so riding reads as a gentle sway instead of a
-// fast bounce. Amplitudes and base offsets are untouched.
-const RIDE_BOB_PERIOD_SCALE=2.2;
+// Rider bob tuning: the cycle keeps the raw source speed, but the bob's
+// amplitude is scaled down so the ride (and the rider on it) does not slide
+// as far down / rise as far up as the raw constants (lesser endpoints).
+const RIDE_BOB_AMPLITUDE_SCALE=0.65;
 function rideProfile(profile) {
-  return {...profile,periodMs:Math.max(1,Math.round(profile.periodMs*RIDE_BOB_PERIOD_SCALE))};
+  return {...profile,amplitude:Math.fround(profile.amplitude*RIDE_BOB_AMPLITUDE_SCALE)};
 }
 export function sampleLiftProfile(profile,timeMs,{bob=true}={}) {
   if(!profile?.publicStillAgrees&&!profile?.reference)return null;

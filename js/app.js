@@ -127,22 +127,8 @@ function cloud(x, y, s, color) {
     ctx.fillRect(Math.round(x + dx * s), Math.round(y + dy * s), Math.ceil(w * s), Math.ceil(h * s));
 }
 function drawScene(w, h, ground, s, scroll) {
+  /* plain sky fallback — only shown if the Sunny weather fails to load */
   ctx.fillStyle = PALETTE.sky; ctx.fillRect(0, 0, w, h);
-  const sunX = w * .77, sunY = h * .22;
-  ctx.fillStyle = PALETTE.sun; ctx.fillRect(sunX - 18, sunY - 24, 36, 48); ctx.fillRect(sunX - 24, sunY - 18, 48, 36);
-  cloud(w * .15 - scroll * .08, h * .22, 1.35, PALETTE.cloud);
-  cloud(w * .58 - scroll * .04, h * .12, .75, PALETTE.cloud);
-  cloud(w * .89 - scroll * .03, h * .37, .65, PALETTE.cloud);
-  ctx.fillStyle = PALETTE.far;
-  for (let i = -1; i < Math.ceil(w / 110) + 2; i++) {
-    const x = i * 110 - ((scroll * .13) % 110), top = ground - 55 - (i % 3) * 18;
-    ctx.fillRect(x, top, 110, h); ctx.fillRect(x + 20, top - 18, 70, 20);
-  }
-  ctx.fillStyle = PALETTE.hill;
-  for (let i = -1; i < Math.ceil(w / 160) + 2; i++) {
-    const x = i * 160 - ((scroll * .23) % 160), top = ground - 22 - (i % 3) * 11;
-    ctx.fillRect(x, top, 160, h); ctx.fillRect(x + 24, top - 16, 95, 20);
-  }
 }
 function drawGround(w, h, ground, s, scroll) {
   const tile = 32 * s;
@@ -247,11 +233,13 @@ async function loadAncestrals() {
     for (const [famKey, fam] of Object.entries(data.families))
       for (const lv of fam.levels) map.set(lv.id, { family: famKey, level: lv, name: lv.name });
     state.ancestralMap = map;
+    /* the inventory grid uses this to give leveled ancestrals the box-art item box */
+    P.ancestralIds = new Set(map.keys());
   } catch { state.ancestralMap = new Map(); }
 }
 const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
 const ancestralTint = new TintCache();
-function drawAncestralAura(s, rootX, ground, cameraY, frame) {
+function drawAncestralAura(s, rootX, ground, cameraY, frame, layer) {
   const item = state.equipped.get(9);
   if (!item || !state.ancestralMap) return;
   const info = state.ancestralMap.get(item.id);
@@ -263,19 +251,25 @@ function drawAncestralAura(s, rootX, ground, cameraY, frame) {
      position — fxEntries already offsets world-anchored entries by their birth
      positions, so the base itself carries no character motion */
   const base = [s, 0, 0, s, rootX, ground - 32 * s + (frame.y + lift) * s - cameraY];
-  const motionState = {
-    x: charX, y: charY,
-    facing: motion.facing,
-    path: state.ancestralPath
-  };
-  state.ancestralPath.push([state.clock, charX, charY, motion.facing]);
-  while (state.ancestralPath.length > 240) state.ancestralPath.shift();
+  if (layer !== "behind") {
+    const motionState = {
+      x: charX, y: charY,
+      facing: motion.facing,
+      path: state.ancestralPath
+    };
+    state.ancestralPath.push([state.clock, charX, charY, motion.facing]);
+    while (state.ancestralPath.length > 240) state.ancestralPath.shift();
+  }
   drawAncestral(ctx, info.level, state.clock, {
     facing: motion.facing,
     /* the ancestral renderer reads sheets as a plain object keyed by name */
     sheets: Object.fromEntries(images),
     tint: ancestralTint,
-    base, motion: motionState
+    base, motion: {
+      x: charX, y: charY,
+      facing: motion.facing,
+      path: state.ancestralPath
+    }, layer
   });
 }
 
@@ -299,16 +293,16 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 
   const frame = state.lastFrame, result = state.lastResult;
   const s = Math.min(4, Math.max(3, w / 480));
-  /* ground line: keep the character standing clear of the inventory panel
-     (the panel's top edge sits ~500 CSS px above the window bottom at desktop scale) */
-  const ground = h * Math.min(0.78, Math.max(0.42, 1 - 500 / window.innerHeight));
+  /* ground line: player centered in the frame (Growtopia keeps the actor
+     mid-screen; the inventory overlays the lower part of the world) */
+  const ground = h * 0.62;
   const headroom = Math.min(100, Math.max(4, ground - 32 * s + Math.min(0, (result.lift?.y ?? 0) * s) - 18));
   const cameraY = Math.min(0, frame.y * s + headroom);
   const scroll = frame.x * s;
   const rootX = w / 2 - 16 * s, rootY = ground - 32 * s + frame.y * s - cameraY;
 
   c.imageSmoothingEnabled = false;
-  /* background: weather scene or the Demo's procedural reference scene */
+  /* background: the Sunny weather scene (plain sky only if it failed to load) */
   if (state.weatherRenderer) {
     state.weatherRenderer.render(performance.now() % 2147483647);
     c.drawImage(weatherBG, 0, 0, w, h);
@@ -325,12 +319,15 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
      selection replaces the procedural ground in both scenes */
   if (state.landWorld) drawLandGround(w, h, ground, s, frame);
   else if (state.weatherRenderer) drawGround(w, h, ground, s, scroll);
-  /* avatar */
+  /* avatar + ancestral aura: the orbiting fx pass behind the player first,
+     then the avatar, then the front fx (Growtopia's orbiting artifacts circle
+     behind the player on the far side of their orbit) */
   renderAvatar();
   const b = state.avatarBounds;
+  drawAncestralAura(s, rootX, ground, cameraY, frame, "behind");
   c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
-  /* ancestral aura */
-  drawAncestralAura(s, rootX, ground, cameraY, frame);
+  /* ancestral aura (front fx) */
+  drawAncestralAura(s, rootX, ground, cameraY, frame, "front");
   /* name plate above the head (Website plate system, drawn at world scale) */
   if (P.plate) {
     const t = state.clock / 1000;
@@ -408,16 +405,23 @@ P.thumb = function (raw, size = 64) {
   const c2 = canvas.getContext("2d");
   c2.imageSmoothingEnabled = false;
   const pieces = (raw.gameIcon ?? []).filter(r => r.a);
-  const primary = pieces.find(r => r.a === raw.atlas) ?? pieces[0] ?? (raw.atlas ? {
+  let primary = pieces.find(r => r.a === raw.atlas) ?? pieces[0] ?? (raw.atlas ? {
     a: raw.atlas, sx: (raw.x ?? 0) * (raw.cell?.[0] ?? 1) * 32, sy: (raw.y ?? 0) * (raw.cell?.[1] ?? 1) * 32,
     sw: (raw.cell?.[0] ?? 1) * 32, sh: (raw.cell?.[1] ?? 1) * 32
   } : null);
+  /* ancestrals: use the tight box-art region of the artifact cell (the
+     planner's box field) instead of the full cell, so the icon is the
+     artifact itself, not the cell's leftover metadata */
+  if (primary && raw.box && raw.atlas === "player_artifact.png") {
+    primary = { ...primary, sx: primary.sx + raw.box[0], sy: primary.sy + raw.box[1], sw: raw.box[2], sh: raw.box[3] };
+  }
   const draw = () => {
     c2.clearRect(0, 0, canvas.width, canvas.height);
     if (primary && images.has(primary.a)) {
       const s2 = size * 1.6;
       c2.drawImage(images.get(primary.a), primary.sx, primary.sy, primary.sw, primary.sh,
-        (size * 2 - s2) / 2, (size * 2 - s2) / 2, s2, s2);
+        (size * 2 - s2 * (primary.sw / Math.max(primary.sw, primary.sh))) / 2, (size * 2 - s2 * (primary.sh / Math.max(primary.sw, primary.sh))) / 2,
+        s2 * (primary.sw / Math.max(primary.sw, primary.sh)), s2 * (primary.sh / Math.max(primary.sw, primary.sh)));
     } else {
       c2.fillStyle = "#a8b79e"; c2.font = `${size * .48}px monospace`; c2.textAlign = "center";
       c2.fillText(primary ? "…" : "?", size, size * 1.15);
@@ -476,7 +480,7 @@ window.plannerApp = state;   /* debug/QA hook */
     motion.setAbilities(state.abilities);
     await loadAncestrals();
     try {
-      const rows = await (await fetch(moduleURL("../data/land-blocks.json"))).json();
+      const rows = await (await fetch(moduleURL("../data/land-blocks.json?v=2"))).json();
       registerBlocks(rows);
     } catch { /* land tab will report unavailable */ }
 
@@ -486,7 +490,7 @@ window.plannerApp = state;   /* debug/QA hook */
     P.emit("boot");
     updateHUD();
     /* restore the saved weather */
-    const saved = P.store.get("weather", "none");
+    const saved = P.store.get("weather", "sunny");
     if (saved && saved !== "none") setWeather(saved);
     /* restore the saved land block */
     const savedLand = P.store.get("land", "none");

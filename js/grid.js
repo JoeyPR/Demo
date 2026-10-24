@@ -58,7 +58,8 @@
   function boxEl(it) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '');
+    b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '') +
+      (P.ancestralIds && P.ancestralIds.has(it.id) ? ' art' : '');
     b.dataset.id = it.id;
     if (it.slot != null) b.dataset.slot = it.slot;
     b.title = it.name + ' (#' + it.id + ')';
@@ -96,22 +97,39 @@
       g.append(more);
     }
     markEquipped();
+    markFocus();
   }
 
+  /* quick drawer: 4 regular item boxes showing the first four equipped
+     pieces (slot order) — click to unequip. NOT favorites. */
   function renderQuick() {
     const quick = P.$('#quick');
-    const list = [...favs].slice(0, 8).map(id => P.inv.itemById(id)).filter(Boolean);
     quick.replaceChildren();
-    for (const it of list) {
-      const b = boxEl(it);
-      b.addEventListener('click', () => P.emit('equip', { id: it.id }));
-      quick.append(b);
+    const eq = [...(P.equippedIds || new Set())]
+      .map(id => P.inv.itemById(id)).filter(Boolean)
+      .sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));
+    for (let i = 0; i < 4; i++) {
+      const it = eq[i];
+      if (it) {
+        const b = boxEl(it);
+        b.classList.add('sel', 'qbox');
+        b.addEventListener('click', () => { P.emit('equip', { id: it.id }); });
+        quick.append(b);
+      } else {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'box reg empty qbox';
+        b.disabled = true;
+        quick.append(b);
+      }
     }
-    if (!list.length) {
-      const hint = document.createElement('span');
-      hint.className = 'quick-hint'; hint.textContent = 'FAV boxes appear here';
-      quick.append(hint);
-    }
+  }
+
+  /* mark the focused box (double-tap equip: first click focuses, second
+     click equips/unequips — the planner's yellow-brackets behavior) */
+  function markFocus() {
+    const f = P.inv.focus;
+    for (const b of g.querySelectorAll('.box')) b.classList.toggle('focus', !!f && +b.dataset.id === f.id);
   }
 
   g.addEventListener('click', e => {
@@ -119,12 +137,19 @@
     if (!b || b.id === 'more') return;
     const item = P.inv.itemById(+b.dataset.id);
     if (!item) return;
-    P.inv.focus = item;
     if (item.wearable === false) { P.toast(item.name + ' is a placeholder — custom clothing is not rendered by this engine.'); return; }
-    P.emit('equip', { id: +b.dataset.id });
+    /* box-focus double-tap: clicking a different box moves the focus; clicking
+       the focused box again equips it (or unequips if already worn) */
+    const wasFocused = P.inv.focus && P.inv.focus.id === item.id;
+    P.inv.focus = item;
+    markFocus();
+    if (!wasFocused) return;
+    const equipped = (P.equippedIds || new Set()).has(item.id);
+    P.emit('equip', { id: +b.dataset.id, unequip: equipped });
   });
 
   P.on('equip-state', markEquipped);
+  P.on('equip-state', renderQuick);
   P.on('catalog', () => { build(); P.inv.refresh(); renderQuick(); });
   P.on('tab', () => P.inv.refresh());
   P.on('searchOn', on => {

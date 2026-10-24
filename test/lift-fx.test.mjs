@@ -19,12 +19,13 @@ test("disputed float profile stays disabled",()=>{
 });
 test("vehicle and seat keep their shared dynamic float delta",()=>{
   const i={slot:3,id:1,vehicle:true,riderLift:-8,liftProfile:{base:-8,amplitude:1,periodMs:1000,publicStillAgrees:true}};
-  // Rider bob tuning: mount bob periods run 2.2x slower (lift.mjs
-  // RIDE_BOB_PERIOD_SCALE), so samples are computed against 2200 ms.
+  // Rider bob tuning: the cycle keeps the raw source period (1000 ms here) but
+  // the amplitude is scaled 0.65x (lift.mjs RIDE_BOB_AMPLITUDE_SCALE) so the
+  // ride does not slide as far down / rise as far up.
   const a=resolvePlayerLift([i],250),b=resolvePlayerLift([i],750);
-  const bobA=Math.sin(2*Math.PI*250/2200),bobB=Math.sin(2*Math.PI*750/2200);
-  assert.ok(Math.abs(a.y-(-8+bobA))<1e-6);assert.ok(Math.abs(a.vehicleY-bobA)<1e-6);
-  assert.ok(Math.abs(b.y-(-8+bobB))<1e-6);assert.ok(Math.abs(b.vehicleY-bobB)<1e-6);
+  const bobA=Math.sin(2*Math.PI*250/1000),bobB=Math.sin(2*Math.PI*750/1000);
+  assert.ok(Math.abs(a.y-(-8+0.65*bobA))<1e-6);assert.ok(Math.abs(a.vehicleY-0.65*bobA)<1e-6);
+  assert.ok(Math.abs(b.y-(-8+0.65*bobB))<1e-6);assert.ok(Math.abs(b.vehicleY-0.65*bobB)<1e-6);
 });
 test("pixel sampler matches five isolated source crop fixtures",()=>{
   const d=read("sampler-differential-fixtures.json");

@@ -333,11 +333,20 @@ export function drawAncestral(ctx, level, t, opts = {}) {
   const tint = opts.tint ?? new TintCache();
   const facing = opts.facing ?? 1;
   const base = opts.base ?? [1, 0, 0, 1, 0, 0];
+  /* depth layer: the orbiting moons circle AROUND the player — entries in the
+     top half of their orbit (entry y above the orbit midpoint ~14, chest
+     height in the fx-local frame where the feet sit at y=32) pass BEHIND the
+     player; callers render 'behind' before the avatar and 'front' after it.
+     Sparkles always render in front. */
+  const layer = opts.layer ?? null;
+  const BEHIND_Y = 14;
 
   // FX tracks first; the sparkle is drawn AFTER the fx (verified by
   // frame-aligned capture: the planner's sparkle draw follows the last
   // fx draw in every frame).
   for (const e of fxEntries(level, t, facing, opts.motion ?? null)) {
+    if (layer === 'behind' && !(e.m[5] < BEHIND_Y)) continue;
+    if (layer === 'front' && e.m[5] < BEHIND_Y) continue;
     const img = sheets[e.sheet];
     if (!img) continue;
     const bmp = tint.get(img, e.sx, e.sy, e.sw, e.sh, e.tint);
@@ -350,7 +359,7 @@ export function drawAncestral(ctx, level, t, opts = {}) {
     ctx.restore();
   }
 
-  if (opts.sparkle !== false) {
+  if (opts.sparkle !== false && layer !== 'behind') {
     for (const e of sparkleEntries(level, t)) {
       const img = sheets[e.sheet];
       if (!img) continue;

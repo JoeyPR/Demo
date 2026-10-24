@@ -20,7 +20,7 @@
   setSw(!nonSearchableTabs.has(P.tabs.cur));
 
   const A = {
-    store(it) { it.gone = true; P.inv.sel = null; P.toast('Stored ' + it.name); },
+    store(it) { it.gone = true; P.inv.sel = null; P.toast('Stored ' + it.name); },   /* disabled below */
     drop(it)  { it.gone = true; P.inv.sel = null; P.toast('Dropped ' + it.name); },
     info(it)  { P.toast(`${it.name} · #${it.id} · ${it.script ? 'XML renderer' : 'sprite item'}`); },
     fav(it)   { P.emit('fav-toggle', it); },
@@ -28,6 +28,8 @@
   };
   P.$$('.sbtn').forEach(b => b.onclick = () => {
     if (b.dataset.a === 'export') return; /* handled by app.js */
+    /* STORE is disabled for now */
+    if (b.dataset.a === 'store') return;
     const it = P.inv.focus || P.inv.sel;
     if (!it) return P.toast('Select an item first');
     A[b.dataset.a](it);
@@ -35,4 +37,5 @@
     P.inv.refresh();
     P.emit('act', { a: b.dataset.a, it });
   });
+  document.querySelector('.sbtn[data-a=store]').disabled = true;
 })();

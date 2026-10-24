@@ -31,6 +31,7 @@
     if (pageLoads.has(name)) return pageLoads.get(name);
     const load = new Promise(res => {
       const img = new Image();
+      img.crossOrigin = 'anonymous';
       img.onload = () => { pageImages.set(name, img); res(img); };
       img.onerror = () => { pageImages.set(name, null); res(null); };
       img.src = 'sheets/tiles/' + name + '.png';
@@ -43,10 +44,37 @@
   function sel() { return P.tabs.cur; }
 
   function buildLand() {
-    fetch('data/land-blocks.json').then(r => r.json()).then(list => {
+    /* show a loading state immediately if the tab is already open */
+    if (sel() === 'land' && !blocks) {
+      opts.replaceChildren();
+      const loading = document.createElement('div');
+      loading.className = 'empty';
+      loading.textContent = 'Loading blocks…';
+      opts.append(loading);
+    }
+    fetch('data/land-blocks.json?v=2').then(r => {
+      if (!r.ok) throw Error(r.status);
+      return r.json();
+    }).then(list => {
       blocks = list;
       if (sel() === 'land') renderLandCat();
-    }).catch(() => P.toast('Land list unavailable'));
+    }).catch(() => {
+      blocks = null;
+      if (sel() === 'land') {
+        opts.replaceChildren();
+        const err = document.createElement('div');
+        err.className = 'empty';
+        err.textContent = 'Blocks failed to load. ';
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'wopt';
+        retry.textContent = 'Retry';
+        retry.addEventListener('click', () => { buildLand(); });
+        err.append(retry);
+        opts.append(err);
+      }
+      P.toast('Land list unavailable');
+    });
   }
 
   function renderLandCat() {

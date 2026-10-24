@@ -19,8 +19,8 @@
 #quick{grid-template-columns:repeat(4,calc(106.5*var(--u)));gap:calc(3*var(--u));padding-top:calc(3.3*var(--u))}
 #handle{left:calc(391.5*var(--u));top:calc(-80*var(--u));width:calc(140*var(--u))}
 
-/* tabs flush left */
-#tabs{left:calc(6*var(--u));top:calc(145*var(--u));width:calc(94*var(--u));height:calc(585*var(--u))}
+/* tabs flush against the main drawer's left border */
+#tabs{left:calc(36*var(--u));top:calc(145*var(--u));width:calc(64*var(--u));height:calc(585*var(--u))}
 .tab{width:calc(64*var(--u));height:calc(65*var(--u))}
 .tab img{height:100%}
 

@@ -45,9 +45,9 @@ test("far punch expands export beyond the old fixed surface",()=>{
 test("known hover without curve uses an explicitly unverified shared bob",()=>{
   const item={id:3788,slot:3,vehicle:true,riderLift:-3};
   const a=resolvePlayerLift([item],0),b=resolvePlayerLift([item],250);
-  // Rider bob tuning: mount bob periods are scaled 2.2x (lift.mjs), so the
-  // 250 ms sample is sin(2*pi*250/2200) instead of the old full cycle peak.
-  const bob=Math.sin(2*Math.PI*250/2200);
+  // Rider bob tuning: raw source period, amplitude scaled 0.65x (lift.mjs
+  // RIDE_BOB_AMPLITUDE_SCALE) so the ride does not slide as far down.
+  const bob=0.65*Math.sin(2*Math.PI*250/1000);
   assert.ok(Math.abs(b.y-a.y-bob)<1e-6);assert.ok(Math.abs(b.vehicleY-a.vehicleY-bob)<1e-6);
   assert.equal(b.outfitInteractionsVerified,false);assert.ok(b.evidence.includes("reference"));
 });

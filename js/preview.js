@@ -4,16 +4,28 @@
 (function(){
   const root = P.$('#preview'), cv = P.$('#pv'), ctx = cv.getContext('2d');
   const mq = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
-  const pv = P.preview = { w: 1920, h: 1080, ctx, scale: 1, mobile: false };
+  const pv = P.preview = { w: 1920, h: 1080, ctx, scale: 1, zoom: 1, mobile: false };
 
   function fit() {
     pv.mobile = mq.matches;
     pv.w = pv.mobile ? 1280 : 1920; pv.h = pv.mobile ? 720 : 1080;
     if (cv.width !== pv.w) { cv.width = pv.w; cv.height = pv.h; }
-    pv.scale = pv.mobile ? innerWidth * (907 / 923) / pv.w : Math.max(innerWidth / pv.w, innerHeight / pv.h);   // desktop: cover the window (world fills the screen, HUD overlays it) — phone: fills the width
+    pv.baseScale = pv.mobile ? innerWidth * (907 / 923) / pv.w : Math.max(innerWidth / pv.w, innerHeight / pv.h);   // desktop: cover the window (world fills the screen, HUD overlays it) — phone: fills the width
+    apply();
+  }
+  function apply() {
+    pv.scale = pv.baseScale * pv.zoom;
     root.style.setProperty('--ps', pv.scale);
     P.emit('preview', pv);
   }
+  /* Growtopia-style camera zoom: scroll wheel over the world (outside the
+     inventory panels) zooms the preview in/out around the screen center */
+  document.addEventListener('wheel', e => {
+    if (e.target.closest && e.target.closest('#ui, #hud, #toast, #logo')) return;
+    e.preventDefault();
+    pv.zoom = Math.min(3, Math.max(0.5, pv.zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+    apply();
+  }, { passive: false });
   addEventListener('resize', fit); fit();
 
   let t0 = performance.now();

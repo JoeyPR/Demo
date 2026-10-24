@@ -17,8 +17,8 @@
     }
   };
 
-  /* restore last selection (do not auto-download heavy configs yet) */
-  const saved = P.store.get('weather', 'none');
+  /* restore last selection (Sunny by default) */
+  const saved = P.store.get('weather', 'sunny');
   el.dataset.w = saved;
   current = saved;
 
