@@ -34,7 +34,7 @@ export function mountedGaitProfile(item) {
   const halves=records.filter(p=>p.a&&!p.skin&&!p.seat&&p.a!=="player_sleeve.png");
   // Full 64-pixel sprites never receive the opposing-half transformation.
   if(!horseSeat||halves.some(p=>p.sw>32||p.sh>32)||new Set(halves.map(p=>p.sy)).size<2)return null;
-  return {periodMs:460,hop:1.5,slide:1.25,evidence:"user-observed-split-animal-reference"};
+  return {periodMs:460,hop:1.0,slide:0.55,evidence:"user-observed-split-animal-reference"};
 }
 export function sampleMountedGait(item,motion) {
   const profile=mountedGaitProfile(item),state=locomotionState(motion);
