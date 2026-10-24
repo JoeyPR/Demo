@@ -34,7 +34,11 @@ export function mountedGaitProfile(item) {
   const halves=records.filter(p=>p.a&&!p.skin&&!p.seat&&p.a!=="player_sleeve.png");
   // Full 64-pixel sprites never receive the opposing-half transformation.
   if(!horseSeat||halves.some(p=>p.sw>32||p.sh>32)||new Set(halves.map(p=>p.sy)).size<2)return null;
-  return {periodMs:460,hop:1.5,slide:1.25,evidence:"user-observed-split-animal-reference"};
+  /* slide: the two halves of a riding item offset against each other while
+     moving. Kept well under a world unit so the pieces stay visually
+     attached — the oscillation reads as a gentle gallop, not pieces sliding
+     far apart (user-tuned down from 1.25, which slid them way off). */
+  return {periodMs:460,hop:1.5,slide:0.5,evidence:"user-observed-split-animal-reference"};
 }
 export function sampleMountedGait(item,motion) {
   const profile=mountedGaitProfile(item),state=locomotionState(motion);
