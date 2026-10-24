@@ -30,11 +30,11 @@ const SKINS = [
 
 const state = {
   catalog: null, equipped: new Map(), skin: SKINS[P.store.get("skin", 0)].rgb,
-  resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
+  resolution: 32, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null
+  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -84,11 +84,21 @@ function equipToggle(id) {
   if (state.equipped.get(raw.slot)?.id === id) state.equipped.delete(raw.slot);
   else state.equipped.set(raw.slot, normalize(raw));
   player.equip([...state.equipped.values()]);
+  syncAuraPass();
   state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
   motion?.setAbilities(state.abilities);
   P.equippedIds = new Set([...state.equipped.values()].map(i => i.id));
   P.emit("equip-state");
   updateHUD();
+}
+/* Ancestral auras are drawn by the ancestral FX renderer (drawAncestralAura)
+   below — the engine's own static RenderAura pass (the artifact's old sprite
+   drawn on the character) is hidden so only the animated aura shows. */
+function syncAuraPass() {
+  const item = state.equipped.get(9);
+  const handled = !!(item && state.ancestralMap?.has(item.id));
+  if (handled) state.hiddenPasses.add("RenderAura");
+  else state.hiddenPasses.delete("RenderAura");
 }
 P.on("equip", payload => equipToggle(typeof payload === "object" && payload !== null ? payload.id : payload));
 P.on("skin", i => { state.skin = SKINS[i].rgb; });
@@ -102,8 +112,18 @@ function step(dt) {
   const input = {
     right: !!(P.input.right), left: !!(P.input.left),
     jump: state.clock < state.jumpUntil || !!P.input.jump,
-    punch: state.clock < state.punchUntil || !!P.input.punch
+    punch: state.clock < state.punchUntil || !!P.input.punch || state.punchHold
   };
+  /* touch punch aim: the gesture's canvas point steers the punch at the
+     character — same contract as the Demo render lab (punchTarget is in
+     32-unit world space relative to the avatar root, facing-adjusted). */
+  if (state.aim && input.punch && state.view) {
+    const { rootX, rootY, s, lift } = state.view;
+    motion.facing = state.aim.x >= rootX + 16 * s ? 1 : -1;
+    let x = (state.aim.x - rootX) / s;
+    if (motion.facing < 0) x = 32 - x;
+    input.punchTarget = [x, (state.aim.y - rootY) / s - (lift ?? 0)];
+  }
   const frame = motion.step(dt, input);
   if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
   state.lastFrame = frame;
@@ -116,6 +136,49 @@ P.on("pad", pad => {
   if (pad.k === "punch" && pad.down) state.punchUntil = state.clock + 34;
 });
 window.addEventListener("blur", () => { P.input.left = P.input.right = P.input.jump = P.input.punch = 0; });
+
+/* ---------------- touch punch (tap/hold/drag on the preview) ------------- */
+/* Hold a touch on the preview to hold the punch, drag to steer it, and let go
+   when the touch leaves the preview box. The gesture never touches P.input —
+   it drives its own punchHold flag, so releasing it can't clear a punch held
+   by the keyboard or the on-screen pad. */
+function punchRelease() {
+  state.punchHold = false;
+  state.aim = null;
+  state.punchPointer = null;
+}
+function punchAimFromEvent(e) {
+  const r = world.getBoundingClientRect();
+  state.aim = {
+    x: (e.clientX - r.left) * world.width / r.width,
+    y: (e.clientY - r.top) * world.height / r.height
+  };
+}
+function punchInside(e) {
+  const r = world.getBoundingClientRect();
+  return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+}
+const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, [data-dd]");
+document.addEventListener("pointerdown", e => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  if (punchOverUI(e.target)) return;
+  if (state.punchPointer !== null) { punchRelease(); return; }   /* second finger: pinch zoom takes over */
+  if (!punchInside(e)) return;
+  punchAimFromEvent(e);
+  state.punchHold = true;
+  state.punchPointer = e.pointerId;
+  state.punchUntil = state.clock + 34;
+}, { capture: false });
+document.addEventListener("pointermove", e => {
+  if (state.punchPointer !== e.pointerId) return;
+  if (!punchInside(e)) { punchRelease(); return; }   /* let go at the preview's edge */
+  punchAimFromEvent(e);
+});
+const punchDrop = e => { if (state.punchPointer === e.pointerId) punchRelease(); };
+document.addEventListener("pointerup", punchDrop);
+document.addEventListener("pointercancel", punchDrop);
+document.addEventListener("lostpointercapture", punchDrop);
+window.addEventListener("blur", punchRelease);
 
 /* ---------------- rendering ------------------------------------------- */
 const PALETTE = {
@@ -215,10 +278,13 @@ function setLand(id) {
 }
 P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame) {
-  const lw = Math.ceil(w / s), lh = Math.ceil((h - ground) / s) + 2;
+  const lw = Math.ceil(w / s), lh = Math.max(1, Math.ceil((h - ground) / s) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) { landCanvas.width = lw; landCanvas.height = lh; }
+  landCtx.imageSmoothingEnabled = false;   /* re-set after every resize (resize resets context state) */
   const span = WORLD_W * TILE;
-  const camX = ((frame.x % span) + span) % span;
+  /* snap the camera to whole world pixels — tiles always land on the 32x32
+     pixel grid, so moving and zooming can never open seams between them */
+  const camX = Math.floor(((frame.x % span) + span) % span);
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
   renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * TILE, lw, lh, state.clock);
@@ -226,7 +292,7 @@ function drawLandGround(w, h, ground, s, frame) {
      right edge, draw the wrapped columns again on the right (the ground is a
      uniform fill, so the seam is invisible) */
   if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * TILE, lw, lh, state.clock);
-  ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, ground, lw * s, lh * s);
+  ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, Math.round(ground), lw * s, lh * s);
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -243,7 +309,7 @@ async function loadAncestrals() {
 }
 const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
 const ancestralTint = new TintCache();
-function drawAncestralAura(s, rootX, ground, cameraY, frame, layer) {
+function drawAncestralAura(s, rootX, ground, frame, layer) {
   const item = state.equipped.get(9);
   if (!item || !state.ancestralMap) return;
   const info = state.ancestralMap.get(item.id);
@@ -253,8 +319,10 @@ function drawAncestralAura(s, rootX, ground, cameraY, frame, layer) {
   const charX = 16 + frame.x, charY = 32 + frame.y + lift;
   /* base must map the fx anchor (16,32) onto the character's CURRENT canvas
      position — fxEntries already offsets world-anchored entries by their birth
-     positions, so the base itself carries no character motion */
-  const base = [s, 0, 0, s, rootX, ground - 32 * s + (frame.y + lift) * s - cameraY];
+     positions, so the base itself carries no character motion. `ground` is
+     already the camera-adjusted ground line (groundCam), so the aura shares
+     the avatar's transform exactly — no extra camera offset. */
+  const base = [s, 0, 0, s, rootX, ground - 32 * s + (frame.y + lift) * s];
   if (layer !== "behind") {
     const motionState = {
       x: charX, y: charY,
@@ -296,8 +364,9 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   while (state.remainder >= 1000 / 60) { step(1000 / 60); state.remainder -= 1000 / 60; }
 
   const frame = state.lastFrame, result = state.lastResult;
-  /* camera zoom (50% by default): scales the player, land and plate inside
-     the preview — the weather backdrop always fills the canvas */
+  /* camera zoom (100% by default — close to the player): scales the player,
+     land and plate inside the preview — the weather backdrop always fills
+     the canvas */
   const s = Math.min(4, Math.max(3, w / 480)) * P.camZoom.v;
   /* ground line: player centered in the frame (Growtopia keeps the actor
      mid-screen; the inventory overlays the lower part of the world) */
@@ -317,6 +386,8 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   const cameraY = Math.min(0, freeTop - 6);
   const groundCam = ground - cameraY;
   const rootX = w / 2 - 16 * s, rootY = groundCam - 32 * s + frame.y * s;
+  /* published for the touch-punch aim (used by the next step) */
+  state.view = { rootX, rootY, s, lift };
 
   c.imageSmoothingEnabled = false;
   /* background: the weather scene (plain sky only if it failed to load) —
@@ -344,14 +415,15 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   /* avatar + ancestral aura: the orbiting fx pass behind the player first,
      then the avatar, then the front fx (Growtopia's orbiting artifacts circle
      behind the player on the far side of their orbit) */
-  drawAncestralAura(s, rootX, groundCam, cameraY, frame, "behind");
+  drawAncestralAura(s, rootX, groundCam, frame, "behind");
   c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
   /* ancestral aura (front fx) */
-  drawAncestralAura(s, rootX, groundCam, cameraY, frame, "front");
+  drawAncestralAura(s, rootX, groundCam, frame, "front");
   /* name plate above the head (Website plate system, drawn at world scale).
-     The plate's animations expect MILLISECONDS — state.clock is already ms. */
+     The plate's animations expect MILLISECONDS — state.clock is already ms.
+     A touch smaller than the world scale, nudged a touch left of center. */
   if (P.plate) {
-    P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
+    P.plate.draw(c, w / 2 - 2 * s, rootY + lift * s - 6 * s, s * 0.9, state.clock);
   }
   /* weather foreground layer (rain, snow, particles in front) */
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
@@ -367,12 +439,18 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 /* ---------------- export ------------------------------------------------ */
 document.querySelector('[data-a="export"]')?.addEventListener("click", () => {
   try {
+    /* the live preview renders on the 32px tile grid (matching the land's
+       32x32 style); exports still come out at the dense 128px scale */
+    const live = state.resolution;
+    state.resolution = 128;
     renderAvatar();
+    state.resolution = live;
     const a = document.createElement("a");
-    a.download = `growtopia-${state.resolution}px.png`;
+    a.download = `growtopia-${avatar.width}px.png`;
     a.href = avatar.toDataURL("image/png");
     a.click();
     P.toast(`Exported ${avatar.width} × ${avatar.height} PNG`);
+    renderAvatar();   /* restore the preview-resolution canvas */
   } catch { P.toast("Export blocked by image security."); }
 });
 
@@ -454,6 +532,7 @@ P.thumb = function (raw, size = 64) {
 
 /* ---------------- boot -------------------------------------------------- */
 window.plannerApp = state;   /* debug/QA hook */
+state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels = land holes) */
 (async function init() {
   try {
     const response = await fetch(moduleURL("../demo/catalog.json"));

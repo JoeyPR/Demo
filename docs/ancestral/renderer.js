@@ -286,11 +286,20 @@ export function sparkleEntries(level, t) {
 /* ------------------------------------------------------------------ */
 
 export class TintCache {
-  constructor() { this.map = new Map(); }
+  constructor() { this.map = new Map(); this.sheetIds = new WeakMap(); this.nextSheetId = 1; }
+
+  /* stable id per sheet image — `${sheet}` alone stringifies every Image the
+     same way ("[object HTMLImageElement]"), so different sprites' cells
+     collided on one cache key and returned each other's bitmaps */
+  sheetId(sheet) {
+    let id = this.sheetIds.get(sheet);
+    if (id === undefined) { id = this.nextSheetId++; this.sheetIds.set(sheet, id); }
+    return id;
+  }
 
   /** Get (or build) the cell bitmap tinted with [r,g,b]. */
   get(sheet, sx, sy, sw, sh, tint) {
-    const key = `${sheet}|${sx},${sy},${sw},${sh}|${tint ? tint.join(',') : ''}`;
+    const key = `${this.sheetId(sheet)}|${sx},${sy},${sw},${sh}|${tint ? tint.join(',') : ''}`;
     let c = this.map.get(key);
     if (!c) {
       c = document.createElement('canvas');
