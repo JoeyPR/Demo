@@ -34,7 +34,7 @@ const state = {
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null
+  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -112,12 +112,16 @@ function step(dt) {
   const input = {
     right: !!(P.input.right), left: !!(P.input.left),
     jump: state.clock < state.jumpUntil || !!P.input.jump,
-    punch: state.clock < state.punchUntil || !!P.input.punch || state.punchHold
+    punch: state.clock < state.punchUntil || !!P.input.punch || state.punchHold || state.clock < state.gesturePunchUntil
   };
   /* touch punch aim: the gesture's canvas point steers the punch at the
      character — same contract as the Demo render lab (punchTarget is in
-     32-unit world space relative to the avatar root, facing-adjusted). */
-  if (state.aim && input.punch && state.view) {
+     32-unit world space relative to the avatar root, facing-adjusted).
+     Only the gesture's own punches (hold, or the tap queued by
+     gesturePunchUntil) consume the aim — a keyboard/pad punch keeps the
+     engine's default target. */
+  const gesturePunch = state.punchHold || state.clock < state.gesturePunchUntil;
+  if (gesturePunch && state.aim && state.view) {
     const { rootX, rootY, s, lift } = state.view;
     motion.facing = state.aim.x >= rootX + 16 * s ? 1 : -1;
     let x = (state.aim.x - rootX) / s;
@@ -141,11 +145,18 @@ window.addEventListener("blur", () => { P.input.left = P.input.right = P.input.j
 /* Hold a touch on the preview to hold the punch, drag to steer it, and let go
    when the touch leaves the preview box. The gesture never touches P.input —
    it drives its own punchHold flag, so releasing it can't clear a punch held
-   by the keyboard or the on-screen pad. */
+   by the keyboard or the on-screen pad.
+   A fast tap can release before the next simulation step, so the tap's aim
+   coordinates must SURVIVE the release: punchRelease only stops the hold,
+   while punchCancel (left the preview, pinch, blur) also kills the queued
+   tap punch (gesturePunchUntil) so nothing can stick around delayed. */
 function punchRelease() {
   state.punchHold = false;
-  state.aim = null;
   state.punchPointer = null;
+}
+function punchCancel() {
+  punchRelease();
+  state.gesturePunchUntil = 0;
 }
 function punchAimFromEvent(e) {
   const r = world.getBoundingClientRect();
@@ -162,23 +173,23 @@ const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, [data
 document.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
   if (punchOverUI(e.target)) return;
-  if (state.punchPointer !== null) { punchRelease(); return; }   /* second finger: pinch zoom takes over */
+  if (state.punchPointer !== null) { punchCancel(); return; }   /* second finger: pinch zoom takes over */
   if (!punchInside(e)) return;
   punchAimFromEvent(e);
   state.punchHold = true;
   state.punchPointer = e.pointerId;
-  state.punchUntil = state.clock + 34;
+  state.gesturePunchUntil = state.clock + 34;   /* one punch even if the tap ends before the next step */
 }, { capture: false });
 document.addEventListener("pointermove", e => {
   if (state.punchPointer !== e.pointerId) return;
-  if (!punchInside(e)) { punchRelease(); return; }   /* let go at the preview's edge */
+  if (!punchInside(e)) { punchCancel(); return; }   /* let go at the preview's edge */
   punchAimFromEvent(e);
 });
-const punchDrop = e => { if (state.punchPointer === e.pointerId) punchRelease(); };
+const punchDrop = e => { if (state.punchPointer === e.pointerId) punchRelease(); };   /* release: keep the tap's aim */
 document.addEventListener("pointerup", punchDrop);
-document.addEventListener("pointercancel", punchDrop);
+document.addEventListener("pointercancel", e => { if (state.punchPointer === e.pointerId) punchCancel(); });
 document.addEventListener("lostpointercapture", punchDrop);
-window.addEventListener("blur", punchRelease);
+window.addEventListener("blur", punchCancel);
 
 /* ---------------- rendering ------------------------------------------- */
 const PALETTE = {
