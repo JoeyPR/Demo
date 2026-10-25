@@ -55,10 +55,8 @@ test("avatar stays pinned to its feet while land tiles use the full 32-unit scal
 
 test("shadow is black at 50% and shifts exactly 12px down toward facing", () => {
   assert.deepEqual(PLAYER_SHADOW_COLOR, [0, 0, 0]);
-  assert.deepEqual(playerShadowOffset(1, 1), { x: 12, y: 12 });
-  assert.deepEqual(playerShadowOffset(1, -1), { x: -12, y: 12 });
-  assert.deepEqual(playerShadowOffset(2, 1), { x: 6, y: 6 },
-    "camera zoom still produces an exact 12px screen-space offset");
+  assert.deepEqual(playerShadowOffset(1), { x: 12, y: 12 });
+  assert.deepEqual(playerShadowOffset(-1), { x: -12, y: 12 });
   assert.equal(PLAYER_SHADOW_OFFSET, 12);
   assert.equal(PLAYER_SHADOW_DROP, 12);
   assert.equal(PLAYER_SHADOW_OPACITY, 0.5);
@@ -74,6 +72,11 @@ test("preview uses the shadow mask, removes the circular floor shadow, and draws
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
   assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
+  assert.match(app, /c\.setTransform\(1, 0, 0, 1, 0, 0\)/,
+    "shadow is drawn without the camera zoom transform");
+  assert.match(app, /shadowScreenCenterX/);
+  assert.match(app, /shadowScreenBottomY/);
+  assert.match(app, /c\.drawImage\(avatarShadow, shadowScreenX, shadowScreenY,/);
   assert.match(app, /const landS = s \* \(24 \/ 32\);/, "land tiles render at the 24-unit midpoint scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
   const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)");
