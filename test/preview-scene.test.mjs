@@ -142,23 +142,58 @@ describe('hill weathers — scroll with the player beyond the rendered region', 
 
   it('wraps hill draw positions seamlessly and covers the scene at every offset', () => {
     for (const { cfg } of configs.filter(({ cfg }) => hillSheetIndices(cfg).size > 0)) {
+      const hills = hillSheetIndices(cfg);
       const periods = hillPeriods(cfg);
-      for (const [s, period] of periods) {
-        // the band's sprite width (drawn size), for coverage
-        const track = cfg.tracks.find(t => t.s === s && t.k.some(kf => kf.length > 1));
-        const kf = track.k.find(kf => kf.length > 1);
-        const spriteW = kf[3];
+      // group ALL sibling tracks per sheet — the band is their union, so the
+      // geometry must be checked with the real track positions, not a sample x
+      const bySheet = new Map();
+      for (const t of cfg.tracks || []) if (hills.has(t.s)) {
+        if (!bySheet.has(t.s)) bySheet.set(t.s, []);
+        bySheet.get(t.s).push(t);
+      }
+      for (const [s, tracks] of bySheet) {
+        const period = periods.get(s);
+        // every keyframe of every sibling: hill bands hold their x static
+        // across the loop (asserted below), so all keyframes share geometry
+        for (const t of tracks)
+          assert.equal(new Set(t.k.filter(kf => kf.length > 1).map(kf => kf[1])).size, 1,
+            `hill track x must be static: ${cfg.sheets[s]}`);
+        const kfs = tracks.flatMap(t => t.k.filter(kf => kf.length > 1));
+        const spriteW = Math.max(...kfs.map(kf => kf[3]));
         // no offset: the sprite's own position, unchanged
-        const still = hillDrawXs(600, 0, period);
-        assert.deepEqual(still, [600]);
-        // any offset: two copies exactly one period apart, the second inside [0, period)
-        for (const offset of [-2345.6, -1, -0.5, 0.5, 1, 300, period - 0.5, period + 0.5, 2400, 12345.6]) {
-          const xs = hillDrawXs(600, offset, period);
-          assert.equal(xs.length, 2);
-          assert.ok(Math.abs((xs[1] - xs[0]) - period) < 1e-9, 'copies one period apart');
-          assert.ok(xs[1] >= 0 && xs[1] < period, 'wrapped base inside one period');
-          assert.ok(xs[0] < 0, 'earlier copy covers the left edge');
-          assert.ok(xs[1] + spriteW >= cfg.w, 'band covers the scene width');
+        for (const kf of kfs)
+          assert.deepEqual(hillDrawXs(kf[1], 0, period), [kf[1]]);
+        // wrap boundaries occur where a track's wrapped base crosses a
+        // multiple of the period: offset = k*period − x. Check both sides of
+        // EVERY track's boundary, plus generic offsets.
+        const xs = [...new Set(kfs.map(kf => kf[1]))];
+        const offsets = [-2345.6, -1, -0.5, 0.5, 1, 300, period / 2, 2400, 12345.6];
+        for (let k = -2; k <= 2; k++) for (const x of xs) {
+          const b = k * period - x;
+          offsets.push(b - 0.5, b + 0.5);
+        }
+        for (const offset of offsets) {
+          // any offset: two copies exactly one period apart, the second inside [0, period)
+          for (const kf of kfs) {
+            const drawXs = hillDrawXs(kf[1], offset, period);
+            assert.equal(drawXs.length, 2);
+            assert.ok(Math.abs((drawXs[1] - drawXs[0]) - period) < 1e-9, 'copies one period apart');
+            assert.ok(drawXs[1] >= 0 && drawXs[1] < period, 'wrapped base inside one period');
+            assert.ok(drawXs[0] < 0, 'earlier copy covers the left edge');
+          }
+          // combined sibling intervals: the drawn band must be gap-free —
+          // no internal hole between consecutive drawn copies at any offset
+          const drawn = kfs.flatMap(kf =>
+            hillDrawXs(kf[1], offset, period).map(base => [base, base + kf[3]]))
+            .sort((a, b) => a[0] - b[0]);
+          let pos = drawn[0][1];
+          for (const [lo, hi] of drawn.slice(1)) {
+            assert.ok(lo <= pos + 1e-9,
+              `gap inside the ${cfg.sheets[s]} band at offset ${offset}`);
+            pos = Math.max(pos, hi);
+          }
+          assert.ok(spriteW >= period - 1e-9 || pos >= cfg.w,
+            `band covers the scene width: ${cfg.sheets[s]}`);
         }
       }
     }
