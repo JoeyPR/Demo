@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import {
   PLAYER_VISUAL_SCALE,
   PLAYER_SHADOW_OFFSET,
+  PLAYER_SHADOW_DROP,
+  PLAYER_SHADOW_OPACITY,
   PLAYER_SHADOW_COLOR,
   getPlayerShadowCalls,
   playerVisualRect,
@@ -54,9 +56,11 @@ test("avatar scale is 1.56 half-size land tiles and stays pinned to the feet", (
 
 test("shadow projection is black and falls down-right or down-left with facing", () => {
   assert.deepEqual(PLAYER_SHADOW_COLOR, [0, 0, 0]);
-  assert.deepEqual(playerShadowOffset(4, 1), { x: 5, y: 5 });
-  assert.deepEqual(playerShadowOffset(4, -1), { x: -5, y: 5 });
+  assert.deepEqual(playerShadowOffset(4, 1), { x: 5, y: 10 });
+  assert.deepEqual(playerShadowOffset(4, -1), { x: -5, y: 10 });
   assert.equal(PLAYER_SHADOW_OFFSET, 1.25);
+  assert.equal(PLAYER_SHADOW_DROP, 2.5);
+  assert.equal(PLAYER_SHADOW_OPACITY, 0.5);
 });
 
 
@@ -68,4 +72,9 @@ test("preview uses the shadow mask, removes the circular floor shadow, and draws
   assert.match(app, /playerVisualRect\(b, rootX, rootY, s\)/);
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
   assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
+  assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
+  assert.ok(app.indexOf("c.drawImage(avatar, playerRect.x") < app.indexOf("drawLandGround(w, h, ground, s, frame, zoom)"),
+    "foreground land is drawn after the player");
+  assert.ok(app.indexOf("drawAncestralAura(s, rootX, ground, frame, \"front\"") < app.indexOf("drawLandGround(w, h, ground, s, frame, zoom)"),
+    "foreground land occludes the full player/effects composite");
 });
