@@ -455,9 +455,9 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
   });
 }
 
-/* Hill bands derive their offset from the live camera position every frame.
-   Keep the camera-relative direction consistent as the player reverses, and
-   never clamp travel at the edge of the decorative weather scene. */
+/* Hill bands derive their offset from live camera travel every frame. Their
+   screen drift follows player travel and reverses immediately when the player
+   changes direction; travel is never clamped at the decorative scene's edge. */
 function hillOffsetsNow(w, h, s, cameraWorldX) {
   const r = state.weatherRenderer;
   if (!r || !r.hillSpeeds?.size) return new Map();
@@ -465,12 +465,12 @@ function hillOffsetsNow(w, h, s, cameraWorldX) {
   const pxPerSceneUnit = Math.max(w / cfg.w, h / cfg.h);   /* the renderer's COVER scale */
   const offsets = new Map();
   for (const [sheetIndex, speed] of r.hillSpeeds) {
-    offsets.set(sheetIndex, hillSceneOffset(-cameraWorldX, s, pxPerSceneUnit, speed));
+    offsets.set(sheetIndex, hillSceneOffset(cameraWorldX, s, pxPerSceneUnit, speed));
   }
   // A single sprite sheet can contain multiple independent parallax bands.
   // Arid's two desert_wobbly groups follow their nearest desert hill layer.
   for (const [track, speed] of (r.hillTrackSpeeds ?? new Map())) {
-    offsets.set(track, hillSceneOffset(-cameraWorldX, s, pxPerSceneUnit, speed));
+    offsets.set(track, hillSceneOffset(cameraWorldX, s, pxPerSceneUnit, speed));
   }
   return offsets;
 }
