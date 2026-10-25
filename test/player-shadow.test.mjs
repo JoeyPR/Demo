@@ -53,14 +53,14 @@ test("avatar stays pinned to its feet while land tiles use the full 32-unit scal
   assert.equal(rect.y + rect.height, 200 + 32 * 4);
 });
 
-test("shadow is black at 50% and shifts exactly 3px down toward facing", () => {
+test("shadow is black at 50% and shifts exactly 6px down toward facing", () => {
   assert.deepEqual(PLAYER_SHADOW_COLOR, [0, 0, 0]);
-  assert.deepEqual(playerShadowOffset(1, 1), { x: 3, y: 3 });
-  assert.deepEqual(playerShadowOffset(1, -1), { x: -3, y: 3 });
-  assert.deepEqual(playerShadowOffset(2, 1), { x: 1.5, y: 1.5 },
-    "camera zoom still produces an exact 3px screen-space offset");
-  assert.equal(PLAYER_SHADOW_OFFSET, 3);
-  assert.equal(PLAYER_SHADOW_DROP, 3);
+  assert.deepEqual(playerShadowOffset(1, 1), { x: 6, y: 6 });
+  assert.deepEqual(playerShadowOffset(1, -1), { x: -6, y: 6 });
+  assert.deepEqual(playerShadowOffset(2, 1), { x: 3, y: 3 },
+    "camera zoom still produces an exact 6px screen-space offset");
+  assert.equal(PLAYER_SHADOW_OFFSET, 6);
+  assert.equal(PLAYER_SHADOW_DROP, 6);
   assert.equal(PLAYER_SHADOW_OPACITY, 0.5);
 });
 
