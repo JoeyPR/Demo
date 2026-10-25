@@ -96,18 +96,20 @@
    border and the extension carries each tab's body colour, with the art's
    rounded left corners and black bottom edge continued across it. */
 #tabs{left:calc(1000*var(--u) - 50vw);top:calc(286.2*var(--u));width:calc(50vw - 916*var(--u));
-  height:calc(607.8*var(--u) - var(--dy));pointer-events:none}
-.tab{display:block;position:relative;width:100%;height:calc(67.5*var(--u));pointer-events:auto;outline:0;
-  background:transparent;border:0;border-radius:0;overflow:hidden}
-.tab img{position:absolute;left:0;right:auto;top:auto;bottom:0;transform:none;
-  height:100%;width:auto;max-width:100%;object-fit:contain;object-position:left bottom;image-rendering:pixelated}
+  height:calc(607.8*var(--u) - var(--dy));display:flex;flex-direction:column;pointer-events:none}
+.tab{display:block;position:relative;flex:1 1 0;min-height:0;width:100%;height:auto;
+  box-sizing:border-box;pointer-events:auto;outline:0;overflow:hidden;
+  background:var(--tc,#4d5156);border:0;border-bottom:calc(3.5*var(--u)) solid #000;
+  border-radius:calc(4*var(--u)) 0 0 calc(4*var(--u))}
+.tab img{position:absolute;right:0;left:auto;top:auto;bottom:0;transform:none;
+  width:100%;height:auto;max-height:100%;object-fit:contain;object-position:right bottom;image-rendering:pixelated}
 .tab[data-t=equip]{--tc:#445c66;--tc-on:#a5e3fb}
 .tab[data-t=fav]{--tc:#800020;--tc-on:#ff0040}
 .tab[data-t=cloth]{--tc:#636363;--tc-on:#d0d0d0}
 .tab[data-t=custom]{--tc:#105507;--tc-on:#21a90d}
 .tab[data-t=player]{--tc:#004e71;--tc-on:#009be2}
 .tab[data-t=makeup]{--tc:#642975;--tc-on:#c851ea}
-.tab[aria-selected=true]{background:transparent}
+.tab[aria-selected=true]{background:var(--tc-on,#d0d0d0)}
 .tab .on{display:none}
 .tab[aria-selected=true] .on{display:block}
 .tab[aria-selected=true] .off{display:none}

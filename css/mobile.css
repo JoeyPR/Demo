@@ -24,10 +24,11 @@ body{background:#212226}
 
 /* tabs scaled to reach the screen's left edge (the mobile stage IS the
    screen), staying attached to the main drawer's left border at 100u */
-#tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(740*var(--u) - var(--dy))}
-.tab{width:100%;height:calc(65*var(--u))}
-.tab img{left:0;right:auto;top:auto;bottom:0;transform:none;width:auto;height:100%;max-width:100%;
-  object-fit:contain;object-position:left bottom;image-rendering:pixelated}
+#tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(740*var(--u) - var(--dy));
+  display:flex;flex-direction:column}
+.tab{width:100%;height:auto;flex:1 1 0;min-height:0}
+.tab img{right:0;left:auto;top:auto;bottom:0;transform:none;width:100%;height:auto;max-height:100%;
+  object-fit:contain;object-position:right bottom;image-rendering:pixelated}
 
 /* main drawer: search row + 5-column grid */
 #main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}
