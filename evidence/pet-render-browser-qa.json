@@ -1,5 +1,5 @@
 {
-  "method": "Local static server + Playwright headless Chromium driving the shipped index.html UI (search box + two-click grid equip), 1600x900 viewport. Same-origin assets, so canvas reads and element screenshots are untainted. Every measurement below is from the live running app, not Node unit tests.",
+  "method": "Local static server + Playwright headless Chromium driving the shipped index.html UI (search box + two-click grid equip), 1600x900 viewport. Same-origin assets, so canvas reads and element screenshots are untainted. Every measurement below is from the live running app, not Node unit tests. Note: this is local QA of the shipped UI; the originally requested side-by-side visual comparison against the live SetPlannerGT site was not performed and remains open.",
   "fix": "js/app.js and demo/app.js renderAvatar filtered draw calls with atlases.has(c.atlas); the pet leash string is a line primitive with no atlas, so it was dropped before drawCanvas. Both hosts now pass pieces carrying line (c.line || atlases.has(c.atlas)) and exclude them from the missing-atlas scan. Verified: Summer Kite string renders (evidence/screenshots/pet-kite-summer-string.png) from the pet at local (-97.7, -102.5) to the hand anchor (13, 26).",
   "pets": {
     "1742 Puppy Leash (kind 8, trail)": {
@@ -8,7 +8,7 @@
         "playerStartsMovingMs": 847,
         "petStartsMovingMs": 1166,
         "measuredLagMs": 319,
-        "note": "approximately 19-20 ticks at 60Hz; the source flushes a 20-tick trail (~21 ticks incl. spawn), so the observable follow lag is reproduced"
+        "note": "319 ms is the observed wall-clock follow delay (roughly 19-20 frames at the observed frame rate), consistent with the source's 20-tick trail flush; not an exact tick-count validation"
       },
       "visual": "trails behind the moving player, faces the player (evidence/screenshots/pet-trail-puppy-following.png)"
     },
@@ -35,7 +35,7 @@
         "cellsSeen": "rows 832/896 (machine rows 13/14), stand and move cells sampled on the pet clock"
       },
       "punchFlip": "wolf faces the player while punching (source petPunching semantics), evidence/screenshots/pet-machine-wolf-punch.png",
-      "hoverExtra": "at hover-at-target the machine pushes a second 64x64 piece at cell [10,14] = (640,896), rotated on the pet clock, additively blended (add: true); two RenderPet pieces confirmed for 40+ frames, screenshot captured with the punch still held and the extra visible as the bright spin streak over the lunging wolf (evidence/screenshots/pet-machine-wolf-hover-extra.png and the -crop zoom)"
+      "hoverExtra": "extra generation confirmed: two RenderPet pieces for 40+ frames with the punch held (second piece at cell [10,14] = (640,896), rotated on the pet clock, additively blended). The screenshot (evidence/screenshots/pet-machine-wolf-hover-extra.png and the -crop zoom) was captured while the punch was held, but the additive piece's pixels were not isolated in a with/without comparison, so its visual appearance is recorded as not identified rather than equated with the faint streak visible in the capture."
     },
     "11562 Pet Blood Dragon (kind 200, machine)": {
       "pieces": "tf_page1.png 64x64, one main piece",
@@ -53,12 +53,11 @@
   },
   "regressions": {
     "npmTest": "111/111 pass",
-    "demoTest": "65/72, same 7 pre-existing failures as 4fb7669 (floating vehicle delta, default-state fixtures, texture edge clamping/pet wrapping, Riding Cloud, horse-sit mounts, XML emitter hooks, generic float)",
-    "followLagNote": "319 ms is the observed wall-clock follow delay (~19-20 frames at the observed frame rate), consistent with the 20-tick trail flush; not an exact tick-count validation"
+    "demoTest": "65/72, same 7 pre-existing failures as 4fb7669 (floating vehicle delta, default-state fixtures, texture edge clamping/pet wrapping, Riding Cloud, horse-sit mounts, XML emitter hooks, generic float)"
   },
   "environmentNotes": [
     "The world canvas composited correctly on the local server; the earlier missing-player symptom on the proxy-deployed copy did not reproduce and its cause was not isolated, so it stays unexplained rather than attributed.",
     "The flat-floor solidAt and the one-frame arm-angle lag remain documented placeholders; the idle screenshots do not exercise arm motion or terrain edges.",
-    "Source cross-check: the current live bundle app.8f20650106.js was fetched and the machine extra emission compared - the port matches (extra only in the non-dragon machines at st===6, cell [10,row+1], dx 4, rotation floor(clock/2)%360, additive; dragon branch early-returns). The earlier 'dragon wing' label was a mislabel."
+    "Source cross-check: the current live bundle https://setplannergt.com/app.8f20650106.js was fetched and the machine extra emission compared - the st===6 extra (cell [10,row+1], dx 4, rotation floor(clock/2)%360, additive) and the state-6 +16 y offset match the port. The bundle's machine-name gate string is obfuscated, so the wolf/dragon attribution rests on branch structure (the extra emission follows the dragon branch's early return) and the port, not on a decoded gate. The earlier 'dragon wing' label was a mislabel."
   ]
 }
