@@ -1,5 +1,5 @@
-// Static public poses must not overwrite jump, fall or punch on normal items.
-// A supplied per-state descriptor outranks our explicitly labeled mount fallback.
+// Static poses must not override jump, fall or punch.
+// Mounted airborne movement uses the player's own rig animation.
 import {isFloatingItem,locomotionState} from "./motion-policy.mjs";
 export function resolveItemPose(items,motion,visual={}) {
   const mergeDefined=(target,source)=>Object.assign(target,
@@ -18,16 +18,27 @@ export function resolveItemPose(items,motion,visual={}) {
     if(motion.locomotion==="stop"&&item.raw?.moves?.stop)continue;
     mergeDefined(override,item.staticArmPose??item.pose);
   }
+  const mountedAirborne=!!mounted&&locomotion.airborne&&!motion.punch;
   if(mounted) {
-    // No recovered native riding clip: hold authored still arms when available.
-    // Do not invent motorcycle handlebar angles when the public data has none.
-    if(!motion.punch)mergeDefined(override,mounted.staticArmPose??mounted.pose);
-    override.disableWalk=true;override.backFoot=0;override.frontFoot=0;
-    evidence="public-static-mount-fallback";owner=mounted.id;
+    // Hold the captured ride pose only while grounded. In the air, preserve
+    // the player's jump/fall arm and foot motion; the ride item keeps its own
+    // sequence and draw calls in the item renderer.
+    if(!motion.punch&&!locomotion.airborne)
+      mergeDefined(override,mounted.staticArmPose??mounted.pose);
+    override.disableWalk=true;
+    if(!locomotion.airborne) {
+      override.backFoot=0;
+      override.frontFoot=0;
+    }
+    evidence=mountedAirborne?"player-airborne-pose-while-mounted":"public-static-mount-fallback";
+    owner=mounted.id;
   }
   const ordered=[...items].sort((a,b)=>(b.slot===3)-(a.slot===3));
   const move=motion.punch?"punch":motion.locomotion;
   for(const item of ordered) {
+    // A cached item pose must not replace the player jump pose while riding.
+    // The item's visual animation continues independently of this pose resolver.
+    if(mountedAirborne)break;
     const pose=item.statePoses?.[state]??item.statePoses?.[move];
     if(!pose)continue;
     mergeDefined(override,typeof pose==="function"?pose(motion):pose);

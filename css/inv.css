@@ -85,8 +85,9 @@
    is scaled past 100% — the VISIBLE artwork fills the space inside the
    box's border and only the invisible margins overflow.
    art bounds: fist 162/192 of its canvas, wrench 169/192. */
-.box.tool .ic{inset:5%}
-.box.tool .ic img{width:112%;height:auto;object-fit:contain;image-rendering:pixelated;margin:auto}
+.box.tool .ic{inset:12%;overflow:hidden}
+.box.tool .ic img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:112%;height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
 .box.tool .ic img.art-wrench{width:108%}
 
 /* 3. tabs (scaled to reach the screen's left edge while staying attached to
@@ -97,16 +98,15 @@
 #tabs{left:calc(1000*var(--u) - 50vw);top:calc(286.2*var(--u));width:calc(50vw - 916*var(--u));
   height:calc(607.8*var(--u) - var(--dy));pointer-events:none}
 .tab{display:block;position:relative;width:100%;height:calc(67.5*var(--u));pointer-events:auto;outline:0;
-  background:var(--tc,#4d5156);border-bottom:calc(3.5*var(--u)) solid #000;
-  border-radius:calc(4*var(--u)) 0 0 calc(4*var(--u))}
-.tab img{position:absolute;top:0;right:0;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:right center;image-rendering:pixelated}
+  background:transparent;border:0;border-radius:0;overflow:hidden}
+.tab img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:right center;image-rendering:pixelated}
 .tab[data-t=equip]{--tc:#445c66;--tc-on:#a5e3fb}
 .tab[data-t=fav]{--tc:#800020;--tc-on:#ff0040}
 .tab[data-t=cloth]{--tc:#636363;--tc-on:#d0d0d0}
 .tab[data-t=custom]{--tc:#105507;--tc-on:#21a90d}
 .tab[data-t=player]{--tc:#004e71;--tc-on:#009be2}
 .tab[data-t=makeup]{--tc:#642975;--tc-on:#c851ea}
-.tab[aria-selected=true]{background:var(--tc-on,#d0d0d0)}
+.tab[aria-selected=true]{background:transparent}
 .tab .on{display:none}
 .tab[aria-selected=true] .on{display:block}
 .tab[aria-selected=true] .off{display:none}

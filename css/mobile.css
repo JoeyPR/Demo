@@ -26,7 +26,7 @@ body{background:#212226}
    screen), staying attached to the main drawer's left border at 100u */
 #tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(740*var(--u) - var(--dy))}
 .tab{width:100%;height:calc(65*var(--u))}
-.tab img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:right center;image-rendering:pixelated}
+.tab img{width:100%;height:100%;object-fit:contain;object-position:right center;image-rendering:pixelated}
 
 /* main drawer: search row + 5-column grid */
 #main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}
