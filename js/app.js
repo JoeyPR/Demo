@@ -35,7 +35,7 @@ const state = {
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
-  ancestralMap: null, abilities: null, hiddenPasses: new Set(),
+  ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
   landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0
 };
 let player, motion, lastTimestamp = 0;
@@ -85,6 +85,9 @@ function equipToggle(id) {
   if (!raw) return;
   if (state.equipped.get(raw.slot)?.id === id) state.equipped.delete(raw.slot);
   else state.equipped.set(raw.slot, normalize(raw));
+  // A different ancestral starts a fresh motion sequence; don't inherit the
+  // previous item's walking/jump history or its in-flight FX birth positions.
+  if (raw.slot === 9) state.ancestralPath.length = 0;
   player.equip([...state.equipped.values()]);
   syncAuraPass();
   state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
@@ -407,11 +410,30 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
     cameraPivotX + (baseX - cameraPivotX) * zoom,
     cameraPivotY + (baseY - cameraPivotY) * zoom
   ];
+  // The ancestral renderer's movement-aware sequence needs the avatar's
+  // actual position history, not just its current facing. It samples this
+  // path at each FX instance's birth time, so walking, jumps, and turns all
+  // choose the correct authored animation sequence for every ancestral.
+  const charX = 16 + frame.x;
+  const charY = 32 + frame.y + lift;
+  // The behind pass runs first: record exactly once per displayed frame so
+  // both depth passes receive the same current sample. Keep the last 6 s,
+  // which covers the lifetime of the authored FX particles without growing
+  // history forever. Frame time can repeat when RAF outruns the sim step.
+  if (layer === "behind") {
+    const sample = [state.clock, charX, charY, motion.facing];
+    const last = state.ancestralPath[state.ancestralPath.length - 1];
+    if (last && last[0] === state.clock) state.ancestralPath[state.ancestralPath.length - 1] = sample;
+    else state.ancestralPath.push(sample);
+    while (state.ancestralPath.length && state.ancestralPath[0][0] < state.clock - 6000)
+      state.ancestralPath.shift();
+  }
   drawAncestral(ctx, info.level, state.clock, {
     facing: motion.facing,
     sheets: Object.fromEntries(images),
     tint: ancestralTint,
-    base, layer
+    base, layer,
+    motion: { x: charX, y: charY, facing: motion.facing, path: state.ancestralPath }
   });
 }
 
