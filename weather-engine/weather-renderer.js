@@ -77,11 +77,12 @@ export class WeatherRenderer {
     this.fg = fgCanvas;
     this.tintCache = new Map();   // sheetImg -> Map(colorKey, canvas)>
     this.tintCount = 0;
-    // Player-driven hill scrolling: hill bands (sheets whose name contains
-    // "hill") can be shifted horizontally by travel. See render().
+    // Continuous player-driven parallax, independently tuned per band.
+    // desert_wobbly is deliberately paired with desert_hills for Arid.
     this.hillSheets = hillSheetIndices(cfg);
     this.hillPeriods = hillPeriods(cfg);
-    this.hillOffset = 0;
+    this.hillSpeeds = hillScrollSpeeds(cfg);
+    this.hillOffsets = new Map();
     // The engine derives the true layer ("near" = foreground) from the raw
     // `l` field: an l=1 track is only foreground if EVERY keyframe is either
     // an end marker [t] or a small sprite (w < 64 AND h < 64). Big l=1
@@ -94,12 +95,18 @@ export class WeatherRenderer {
 
   /** Advance to wall-clock time `now` (ms). Call this every frame.
    *
-   * `hillOffset` (optional, scene units) scrolls the hill bands with the
-   * player's travel: positive = player moved right, so the hills move in the
-   * direction the player is going. Only hill tracks shift — sky, sun and
-   * clouds stay put. Omit it (e.g. for still-frame thumbnails) for no shift. */
-  render(now, hillOffset) {
-    this.hillOffset = Number.isFinite(hillOffset) ? hillOffset : 0;
+   * `hillOffsets` is a Map of sheet index to scene-space offset. The app
+   * derives each offset continuously from the player's current world X and
+   * that sheet's parallax multiplier. A numeric value remains supported for
+   * still/manual callers and applies the same offset to every hill sheet. */
+  render(now, hillOffsets) {
+    if (hillOffsets instanceof Map) {
+      this.hillOffsets = new Map(hillOffsets);
+    } else if (Number.isFinite(hillOffsets)) {
+      this.hillOffsets = new Map([...this.hillSheets].map(index => [index, hillOffsets]));
+    } else {
+      this.hillOffsets = new Map();
+    }
     this._renderLayer(this.bg.getContext('2d'), this.bg, now, 0);
     this._renderLayer(this.fg.getContext('2d'), this.fg, now, 1);
   }
@@ -274,10 +281,11 @@ export class WeatherRenderer {
 
   /* --- helpers ------------------------------------------------------ */
 
-  /** Wrapped draw positions for a hill track at scene x (see hillDrawXs). */
+  /** Wrapped draw positions using this sheet's independent parallax offset. */
   _hillDrawXs(track, x) {
-    if (!this.hillOffset || !this.hillSheets.has(track.s)) return [x];
-    return hillDrawXs(x, this.hillOffset, this.hillPeriods.get(track.s));
+    const offset = this.hillOffsets.get(track.s) ?? 0;
+    if (!offset || !this.hillSheets.has(track.s)) return [x];
+    return hillDrawXs(x, offset, this.hillPeriods.get(track.s));
   }
 
   /** linear interpolation of keyframe field `i` between `a` and `b`. */
@@ -331,13 +339,44 @@ export class WeatherRenderer {
 /* Hill helpers (pure, exported for tests)                             */
 /* ------------------------------------------------------------------ */
 
-/** Sheet indices whose name contains "hill" — the scrolling hill bands. */
+/** Sheet indices belonging to hill bands, including Arid's paired wobble layer. */
 export function hillSheetIndices(cfg) {
   const out = new Set();
-  (cfg.sheets || []).forEach((name, i) => {
-    if (/hill/i.test(name)) out.add(i);
+  const sheets = cfg.sheets || [];
+  const hasDesertHills = sheets.some(name => /^desert_hills(?:\\.|$)/i.test(name));
+  sheets.forEach((name, i) => {
+    if (/hill/i.test(name) || (/desert_wobbly/i.test(name) && hasDesertHills)) out.add(i);
   });
   return out;
+}
+
+/**
+ * Relative motion per sheet: hill1 follows player travel at 1x, hill2 at 0.5x,
+ * hill3 at 0.25x. Arid has two main bands: desert_hills at 0.25x and
+ * desert_hills2 at 0.5x; desert_wobbly inherits desert_hills' speed.
+ */
+export function hillScrollSpeeds(cfg) {
+  const sheets = cfg.sheets || [];
+  const speeds = new Map();
+  const desertBase = sheets.findIndex(name => /^desert_hills(?:\\.|$)/i.test(name));
+
+  for (let i = 0; i < sheets.length; i++) {
+    const name = sheets[i];
+    if (/desert_wobbly/i.test(name)) continue;
+    if (/^desert_hills2(?:\\.|$)/i.test(name)) speeds.set(i, 0.5);
+    else if (/^desert_hills(?:\\.|$)/i.test(name)) speeds.set(i, 0.25);
+    else if (/hills?1/i.test(name)) speeds.set(i, 1);
+    else if (/hills?2/i.test(name)) speeds.set(i, 0.5);
+    else if (/hills?3/i.test(name)) speeds.set(i, 0.25);
+    else if (/hill/i.test(name)) speeds.set(i, 0.25);
+  }
+
+  for (let i = 0; i < sheets.length; i++) {
+    if (/desert_wobbly/i.test(sheets[i])) {
+      speeds.set(i, desertBase >= 0 ? (speeds.get(desertBase) ?? 0.25) : 0.25);
+    }
+  }
+  return speeds;
 }
 
 /**
@@ -372,6 +411,15 @@ export function hillPeriods(cfg) {
     }
     periods.set(s, period);
   }
+
+  // Arid's desert_wobbly sprites are a companion texture to desert_hills.
+  // Reuse its wrap period so all wobbling accents drift seamlessly in lockstep.
+  const sheets = cfg.sheets || [];
+  const desertBase = sheets.findIndex(name => /^desert_hills(?:\\.|$)/i.test(name));
+  const desertWobbly = sheets.findIndex(name => /desert_wobbly/i.test(name));
+  if (desertBase >= 0 && desertWobbly >= 0 && periods.has(desertBase)) {
+    periods.set(desertWobbly, periods.get(desertBase));
+  }
   return periods;
 }
 
@@ -388,10 +436,8 @@ export function hillDrawXs(x, offset, period) {
 }
 
 /**
- * How far `worldX` lies beyond the fixed rendered region [regionMin,
- * regionMax] (world px). Inside the region the answer is 0 — the hills do
- * not move at all; outside it the excess grows with the distance past the
- * edge and retraces exactly when the player comes back.
+ * Legacy pure helper retained for callers that need a bounded-region distance.
+ * Active hill parallax no longer uses a world-edge threshold.
  */
 export function hillTravelExcess(worldX, regionMin, regionMax) {
   if (!Number.isFinite(worldX)) return 0;
@@ -399,18 +445,16 @@ export function hillTravelExcess(worldX, regionMin, regionMax) {
 }
 
 /**
- * Hill drift in scene units for a travel excess (world px).
- * `worldPxPerUnit` is the world's draw scale (s) and `pxPerSceneUnit` the
- * weather renderer's COVER scale — the ratio makes the drift
- * zoom-independent (the weather canvases are viewport-space, outside the
- * camera transform). The drift moves in the direction the player travels
- * (positive excess → positive offset → hills move right).
+ * Convert absolute player travel (world px) to a hill-layer offset in weather
+ * scene units. The scale ratio makes movement match the rendered player speed
+ * while keeping weather canvases viewport-space. `parallax` is each sheet's
+ * relative speed (1 = player speed, 0.5 = half speed, 0.25 = quarter speed).
  */
-export function hillSceneOffset(excessWorldPx, worldPxPerUnit, pxPerSceneUnit, parallax = 0.25) {
-  if (!Number.isFinite(excessWorldPx) || !excessWorldPx) return 0;
+export function hillSceneOffset(playerTravelWorldPx, worldPxPerUnit, pxPerSceneUnit, parallax = 0.25) {
+  if (!Number.isFinite(playerTravelWorldPx) || !playerTravelWorldPx) return 0;
   if (!Number.isFinite(worldPxPerUnit) || worldPxPerUnit <= 0) return 0;
   if (!Number.isFinite(pxPerSceneUnit) || pxPerSceneUnit <= 0) return 0;
-  return excessWorldPx * (worldPxPerUnit / pxPerSceneUnit) * parallax;
+  return playerTravelWorldPx * (worldPxPerUnit / pxPerSceneUnit) * parallax;
 }
 
 /* ------------------------------------------------------------------ */
