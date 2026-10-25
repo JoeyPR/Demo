@@ -8,15 +8,17 @@ import {
   hillSceneOffset,
   hillScrollSpeeds,
   hillSheetIndices,
+  hillTrackScrollSpeeds,
+  hillTrackPeriods,
 } from "../weather-engine/weather-renderer.js";
 
 const arid = JSON.parse(readFileSync(new URL("../data/variants/base/arid.json", import.meta.url), "utf8"));
 
 test("hill1, hill2 and hill3 use independent player-relative speeds", () => {
   const speeds = hillScrollSpeeds({ sheets: ["hills1.webp", "hills2.webp", "hills3.webp"] });
-  assert.equal(speeds.get(0), 1);
-  assert.equal(speeds.get(1), 0.5);
-  assert.equal(speeds.get(2), 0.25);
+  assert.equal(speeds.get(0), 0.5);
+  assert.equal(speeds.get(1), 0.25);
+  assert.equal(speeds.get(2), 0.125);
 });
 
 test("parallax starts immediately with travel and reverses with the player", () => {
@@ -27,16 +29,31 @@ test("parallax starts immediately with travel and reverses with the player", () 
   assert.equal(hillSceneOffset(0, 4, 2, 1), 0);
 });
 
-test("Arid desert_wobbly follows desert_hills at the same speed and repeat period", () => {
+test("Arid wobble groups follow their matching desert hill layers", () => {
   const movingSheets = hillSheetIndices(arid);
   const speeds = hillScrollSpeeds(arid);
   const periods = hillPeriods(arid);
+  const trackSpeeds = hillTrackScrollSpeeds(arid, speeds);
+  const trackPeriods = hillTrackPeriods(arid, periods);
   assert.deepEqual([...movingSheets].sort((a, b) => a - b), [0, 1, 3]);
-  assert.equal(speeds.get(0), 0.25, "desert_hills uses the slowest parallax speed");
-  assert.equal(speeds.get(1), 0.5, "desert_hills2 uses half player speed");
-  assert.equal(speeds.get(3), speeds.get(0), "desert_wobbly moves with desert_hills");
+  assert.equal(speeds.get(0), 0.125, "desert_hills is half as fast as before");
+  assert.equal(speeds.get(1), 0.25, "desert_hills2 is half as fast as before");
   assert.equal(periods.get(0), 1200);
-  assert.equal(periods.get(3), periods.get(0), "wobble sheet shares the desert_hills wrap period");
+  assert.equal(periods.get(1), 1200);
+
+  const wobbleTracks = arid.tracks.filter(track => track.s === 3);
+  const upperWobbles = wobbleTracks.filter(track => Math.abs(track.k.find(k => k.length > 1)[2] - 130.2) < 1);
+  const lowerWobbles = wobbleTracks.filter(track => Math.abs(track.k.find(k => k.length > 1)[2] - 245) < 1);
+  assert.equal(upperWobbles.length, 2);
+  assert.equal(lowerWobbles.length, 2);
+  for (const track of upperWobbles) {
+    assert.equal(trackSpeeds.get(track), speeds.get(1), "upper desert_wobbly follows desert_hills2");
+    assert.equal(trackPeriods.get(track), periods.get(1));
+  }
+  for (const track of lowerWobbles) {
+    assert.equal(trackSpeeds.get(track), speeds.get(0), "lower desert_wobbly follows desert_hills");
+    assert.equal(trackPeriods.get(track), periods.get(0));
+  }
 });
 
 test("each sheet draws using its own offset rather than a shared hill offset", () => {
@@ -63,5 +80,6 @@ test("live app calculates offsets from current player X instead of a world-edge 
   const app = readApp(new URL("../js/app.js", import.meta.url), "utf8");
   assert.match(app, /hillSceneOffset\(frame\.x, s, pxPerSceneUnit, speed\)/);
   assert.match(app, /hillOffsetsNow\(w, h, s, frame\)/);
+  assert.match(app, /offsets\.set\(track, hillSceneOffset\(frame\.x, s, pxPerSceneUnit, speed\)\)/);
   assert.doesNotMatch(app, /hillTravelExcess\(frame\.x/);
 });
