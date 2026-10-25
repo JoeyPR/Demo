@@ -1,0 +1,35 @@
+name: inventory icon data
+
+on:
+  push:
+    branches: [origin]
+    paths:
+      - "demo/assets/**"
+      - "demo/inventory-icons.json"
+      - "demo/catalog.json"
+      - "js/inventory-icons.mjs"
+      - "test/inventory-icons-data.test.mjs"
+      - ".github/workflows/inventory-icons.yml"
+  pull_request:
+    paths:
+      - "demo/assets/**"
+      - "demo/inventory-icons.json"
+      - "demo/catalog.json"
+      - "js/inventory-icons.mjs"
+      - "test/inventory-icons-data.test.mjs"
+      - ".github/workflows/inventory-icons.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  icon-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify local icon coverage, source cells, and color metadata
+        run: node --test test/inventory-icons-data.test.mjs

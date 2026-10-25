@@ -111,7 +111,7 @@ function tintFrame(frame, tint) {
   const ctx = output.getContext("2d", { alpha: true, willReadFrequently: true });
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(frame, 0, 0);
-  const pixels = ctx.getImageData(0, 0, 32, 32);
+  const pixels = ctx.getImageData(0, 0, output.width, output.height);
   for (let i = 0; i < pixels.data.length; i += 4) {
     pixels.data[i] = Math.round(pixels.data[i] * color[0] / 255);
     pixels.data[i + 1] = Math.round(pixels.data[i + 1] * color[1] / 255);
