@@ -74,7 +74,7 @@ test("preview uses the shadow mask, removes the circular floor shadow, and draws
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
   assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
-  assert.match(app, /const landS = s;/, "land tiles render at full 32-unit scale");
+  assert.match(app, /const landS = s \* \(24 \/ 32\);/, "land tiles render at the 24-unit midpoint scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
   const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)");
   const player = app.indexOf("c.drawImage(avatar, playerRect.x");
