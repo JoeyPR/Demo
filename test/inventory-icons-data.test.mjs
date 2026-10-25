@@ -4,6 +4,7 @@ import { readFile, readdir } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
 const index = JSON.parse(await readFile(new URL("demo/inventory-icons.json", root), "utf8"));
+const rendererSource = await readFile(new URL("js/inventory-icons.mjs", root), "utf8");
 const assetNames = new Set((await readdir(new URL("demo/assets/", root))).filter(name => name.endsWith(".png")));
 
 test("Demo inventory icon metadata covers every catalog item exactly once", async () => {
@@ -52,5 +53,18 @@ test("vertical icon sources retain 32px per-frame stride", () => {
   for (const candidate of vertical) {
     assert.equal(candidate.strideY, 32);
     assert.ok(candidate.cellHeight >= 1);
+  }
+});
+
+
+test("layered items keep their primary icon candidate", () => {
+  assert.match(rendererSource, /renderWebsiteLayers\(record\.iconLayers,\s*skin,\s*frame\)/,
+    "secondary layers must be composed with the selected item icon");
+  assert.doesNotMatch(rendererSource,
+    /if \(record\?\.iconLayers\?\.length\) \{\s*const composed = await renderWebsiteLayers\(record\.iconLayers, skin\);\s*if \(composed && hasPixels\(composed\)\) return composed;/,
+    "iconLayers must not short-circuit and discard the primary icon");
+  for (const item of index.items.filter(item => Array.isArray(item.iconLayers) && item.iconLayers.length)) {
+    assert.ok(Array.isArray(item.candidates) && item.candidates.length,
+      "item " + item.id + " must retain its own icon candidate alongside extra layers");
   }
 });

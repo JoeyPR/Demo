@@ -194,7 +194,7 @@ async function trimLargeCanvas(source) {
   return output;
 }
 
-async function renderWebsiteLayers(layers, skin = null) {
+async function renderWebsiteLayers(layers, skin = null, baseFrame = null) {
   if (!Array.isArray(layers) || !layers.length) return null;
   // Mirrors Set Planner GT's iconLayers placement data locally; no remote
   // renderer/runtime is used. The original source sheets are in Demo's assets.
@@ -233,6 +233,18 @@ async function renderWebsiteLayers(layers, skin = null) {
     } catch {
       // Missing secondary art does not prevent the primary item icon rendering.
     }
+  }
+  // Website's iconLayers are background/secondary artwork. Keep their native
+  // transforms, then paint the selected per-item icon source on top instead
+  // of returning the secondary layers as if they were the entire icon.
+  if (baseFrame) {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(baseFrame, 128, 128);
+    ctx.restore();
+    drew = true;
   }
   return drew ? trimLargeCanvas(work) : null;
 }
@@ -284,54 +296,66 @@ async function renderPairedFeet(candidate) {
 }
 
 async function makeFrame(record, fallbackItem, skin) {
-  if (record?.iconLayers?.length) {
-    const composed = await renderWebsiteLayers(record.iconLayers, skin);
-    if (composed && hasPixels(composed)) return composed;
-  }
   const candidates = Array.isArray(record?.candidates) ? record.candidates : [];
+  let frame = null;
   if (record?.iconTints?.length && record.tintCandidate) {
     try {
-      const tinted = await renderTintedCells(record, skin);
-      if (tinted && hasPixels(tinted)) return tinted;
+      frame = await renderTintedCells(record, skin);
+      if (!frame || !hasPixels(frame)) frame = null;
     } catch {}
   }
-  if (record?.profileLayers?.length) {
-    // Profile-layer instructions are per-item icon metadata compiled into
-    // Demo's manifest, so compose any explicitly declared local profile layers.
+  if (!frame && record?.profileLayers?.length) {
+    // Profile-layer instructions are explicit per-item icon metadata. Treat
+    // them as a primary source, but still allow any extra Website icon layers
+    // to be composed around them below.
     try {
       const composite = await renderProfileLayers(record, candidates, skin);
-      if (composite && hasPixels(composite)) return composite;
+      if (composite && hasPixels(composite)) frame = composite;
     } catch {}
   }
-  let lastError = null;
-  for (const candidate of candidates) {
-    try {
-      let frame = record?.iconRule === "paired-feet.static-composition"
-        ? await renderPairedFeet(candidate)
-        : candidate.vertical ? await renderVerticalIcon(candidate) : await cropCandidate(candidate);
-      if (!frame || !hasPixels(frame)) continue;
-      frame = await renderSourceTint(record, candidate, frame);
-      return frame;
-    } catch (error) {
-      lastError = error;
+  if (!frame) {
+    let lastError = null;
+    for (const candidate of candidates) {
+      try {
+        const candidateFrame = record?.iconRule === "paired-feet.static-composition"
+          ? await renderPairedFeet(candidate)
+          : candidate.vertical ? await renderVerticalIcon(candidate) : await cropCandidate(candidate);
+        if (!candidateFrame || !hasPixels(candidateFrame)) continue;
+        frame = await renderSourceTint(record, candidate, candidateFrame);
+        break;
+      } catch (error) {
+        lastError = error;
+      }
     }
-  }
-  // Demo-only last resort: use its catalog atlas cell rather than an old
-  // question-mark placeholder. All coordinates remain item-data coordinates.
-  const atlas = assetName(fallbackItem?.atlas);
-  if (atlas) {
-    try {
-      const x = Number(fallbackItem?.x ?? 0), y = Number(fallbackItem?.y ?? 0);
-      const frame = await cropCandidate({ file: atlas, sx: x * 32, sy: y * 32, w: 32, h: 32 });
-      if (frame && hasPixels(frame)) return frame;
-    } catch (error) {
-      lastError = error;
+    // Demo-only last resort: use its catalog atlas cell rather than a
+    // question-mark placeholder. Coordinates remain catalog-native.
+    if (!frame) {
+      const atlas = assetName(fallbackItem?.atlas);
+      if (atlas) {
+        try {
+          const x = Number(fallbackItem?.x ?? 0), y = Number(fallbackItem?.y ?? 0);
+          const candidateFrame = await cropCandidate({ file: atlas, sx: x * 32, sy: y * 32, w: 32, h: 32 });
+          if (candidateFrame && hasPixels(candidateFrame)) frame = candidateFrame;
+        } catch (error) {
+          lastError = error;
+        }
+      }
     }
+    if (!frame && warnings++ < 5) console.warn("Demo could not resolve an inventory icon from its local sprite data.", {
+      id: fallbackItem?.id, name: fallbackItem?.name, error: lastError
+    });
   }
-  if (warnings++ < 5) console.warn("Demo could not resolve an inventory icon from its local sprite data.", {
-    id: fallbackItem?.id, name: fallbackItem?.name, error: lastError
-  });
-  return blankFrame();
+
+  // Website's iconLayers are secondary visual layers; they must never replace
+  // the icon sheet/profile cell selected for the item. Compose them together
+  // in the same coordinate space, preserving each layer's offsets and tint.
+  if (Array.isArray(record?.iconLayers) && record.iconLayers.length) {
+    try {
+      const composed = await renderWebsiteLayers(record.iconLayers, skin, frame);
+      if (composed && hasPixels(composed)) frame = composed;
+    } catch {}
+  }
+  return frame && hasPixels(frame) ? frame : blankFrame();
 }
 
 function paintContained(canvas, frame) {
