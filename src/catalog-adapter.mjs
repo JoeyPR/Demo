@@ -2,7 +2,7 @@ import {importPlannerItem, samplePublicParts} from "./items.mjs";
 import {sequencePolicy,sequenceTime,sampleSequenceIndex,isFloatingItem} from "./motion-policy.mjs";
 import {bindXmlRenderer,advanceXmlRenderer} from "./xml-renderer.mjs";
 import {applyMountedGait} from "./mounted-gait.mjs";
-import {advancePet} from "./pet-motion.mjs";
+import {advancePet} from "./pet-system.mjs";
 
 // Public reference adapter. gameIcon supplies an authored still, not native clips.
 export function normalizeCatalogItem(raw,catalog) {
@@ -28,6 +28,18 @@ export function normalizeCatalogItem(raw,catalog) {
   }
   item.pose={...item.staticArmPose};
   const source=records.some(r=>r.a)?records.filter(r=>r.a):samplePublicParts(item,0,catalog);
+  // Machine pets (kind 200) can ship without a gameIcon: their whole draw is a
+  // single rect part flagged pet:1. The live client expands that rect into a
+  // 64x64 piece reading the cell at (rect.x, rect.y-32) — the bottom half of
+  // the rect's 64x64 cell — center-anchored at the part's authored at. Verified
+  // against the live setplannergt.com canvas: the Royal Alpha Wolf piece draws
+  // from (0,704,64,64) for rect [0,736,64,32].
+  if(!source.some(r=>r.pet)&&raw.parts?.some(p=>p.pet&&p.rect)) {
+    for(const part of raw.parts.filter(p=>p.pet&&p.rect)) {
+      source.push({a:part.atlas,sx:part.rect[0],sy:part.rect[1]-32,sw:64,sh:64,
+        x:part.at?.[0]??0,y:part.at?.[1]??0,ax:.5,ay:.5,u:part.front?12:0,pet:true});
+    }
+  }
   item.pieces=source.filter(r=>!(r.a==="player_arm.png"&&r.skin)).map(record=>{
     let attachment="body";
     let pass=({0:"RenderHat",1:"RenderShirt",2:"RenderPants",3:"RenderShoes",4:"RenderFaceItem",
@@ -146,8 +158,11 @@ export function advanceCatalogItem(item,timeMs,motion={}) {
         u:sine<0?0:12,pass:sine<0?"RenderBehind":"RenderInFront",attachment:"body",sm:1});
     }
   }
-  advanceXmlRenderer(item,timeMs,motion);
+  // Pet state must exist before the scripted renderer steps: the Captain Bark
+  // XML states read PetFlyWalk/PunchDelay from motion.petVars, which advancePet
+  // publishes for the equipped pet each frame.
   advancePet(item,timeMs,motion);
+  advanceXmlRenderer(item,timeMs,motion);
   applyMountedGait(item,motion);
   return item.pieces;
 }

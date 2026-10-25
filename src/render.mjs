@@ -90,6 +90,14 @@ function sampleItem(item,motion,pose,catalog,profile) {
   }
   const out=[];
   for(const record of records) {
+    // Pet leash string: a line primitive, not an atlas blit. from/to are rig
+    // coordinates authored by the pet step; it composes through the same
+    // root/attachment path as the pet pieces.
+    if(record.line) {
+      out.push({...blank(),line:record.line,matrix:IDENTITY,pass:record.pass??"RenderBehind",
+        owner:item.id,attachment:record.attachment??"pet",unlifted:!!record.unlifted,pet:!!record.pet});
+      continue;
+    }
     const side=record.a==="player_sleeve.png"?(record.x===24?"back":record.x===9?"front":null):null;
     if(side==="back"&&pose.punch) {
       const index=Math.round(record.sx/record.sw);
@@ -167,6 +175,19 @@ export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}=
   try {
     ctx.imageSmoothingEnabled=false;
     for(const call of calls) {
+      if(call.line) {
+        const m=compose(viewport,call.matrix);
+        ctx.setTransform(...m);
+        ctx.globalAlpha=call.alpha;
+        ctx.strokeStyle=`rgb(${(call.line.rgb??[180,180,180]).join(",")})`;
+        ctx.lineWidth=call.line.width??1;
+        ctx.lineCap="round";
+        ctx.beginPath();
+        ctx.moveTo(call.line.from[0],call.line.from[1]);
+        ctx.lineTo(call.line.to[0],call.line.to[1]);
+        ctx.stroke();
+        continue;
+      }
       const atlas=atlases.get(call.atlas);
       if(!atlas) throw Error(`Missing atlas ${call.atlas}`);
       const ppu=atlas.pixelsPerUnit??1;

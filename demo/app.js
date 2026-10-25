@@ -178,8 +178,20 @@ function reset() {
   state.lastFrame=motion.snapshot();state.lastFrame.locomotion=state.baseAction;
   updateRig(0);
 }
+/* Pet engine host extras carried on the motion: the rig arm angle and player
+   lift lag one render (the pose resolves after the items advance), the
+   bare-head flag feeds head-riding pets, and the preview floor is flat so the
+   solid query is always standable — the source queries real world tiles for
+   the pet trail's platform edges. */
+function withPetHost(motion) {
+  return {...motion,
+    armAngle:state.lastResult?.pose?.frontAngle??0,
+    petBareHead:!state.equipped.get(0),
+    petLift:state.lastResult?.lift?.y??0,
+    petWorld:{solidAt:()=>true}};
+}
 function updateRig(dt) {
-  const f={...state.lastFrame,worldX:state.lastFrame.x,worldY:state.lastFrame.y,x:0,y:0};
+  const f=withPetHost({...state.lastFrame,worldX:state.lastFrame.x,worldY:state.lastFrame.y,x:0,y:0});
   state.lastResult=player.step(f,dt,{skin:state.skin,
     forceFloat:state.hover,effects:state.fx});
 }
@@ -549,7 +561,7 @@ async function init() {
       abilities:state.abilities,avatarBounds:state.avatarBounds,view:state.view,
       catalogItems:state.catalog.items.length,poseResolution:state.lastResult?.poseResolution,
       failedAtlases:[...failedAtlases],lift:state.lastResult?.lift,
-      itemFrames:[...state.equipped.values()].map(i=>({id:i.id,animationState:i.animationState,gait:i.gait,petMotion:i.petMotion,pieces:i.pieces.map(p=>({
+      itemFrames:[...state.equipped.values()].map(i=>({id:i.id,animationState:i.animationState,gait:i.gait,pieces:i.pieces.map(p=>({
         atlas:p.a,sx:p.sx,sy:p.sy,sw:p.sw,sh:p.sh,alpha:p.o,add:!!p.add,scale:p.k}))}))})};
   }catch(error){
     console.error(error);$("#loading").textContent=`Unable to start: ${error.message}. Please reload.`;

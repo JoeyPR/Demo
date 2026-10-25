@@ -47,6 +47,14 @@ test("public pet frame duration is total and it is not arm-attached",()=>{
   const raw={id:1,slot:5,cell:[1,1,0],parts:[{pet:true,atlas:"pet.png"}],
     petCells:{move:{ms:400,cells:[[0,0],[1,0],[2,0],[3,0]]}},
     gameIcon:[{a:"pet.png",sx:0,sy:0,sw:32,sh:32,x:-16,y:32,pet:1,u:12}]};
-  const i=normalizeCatalogItem(raw,{});advanceCatalogItem(i,150,frame(150,"walk"));
-  assert.equal(i.pieces[0].sx,32);assert.equal(i.pieces[0].attachment,"pet");
+  const i=normalizeCatalogItem(raw,{});
+  // The source steps the pet on its own 60Hz tick clock and clamps frames to
+  // 50ms; the pet chases a 20-tick-deep trail, so it only starts moving once
+  // the trail flushes (~21 ticks of walking). t68 then reads 22/60 s (~367ms),
+  // which samples move-row cell 3 at 400ms/4 frames.
+  const walkFrame=k=>({clockMs:k*1000/60,moveMs:k*1000/60,ground:true,locomotion:"walk",
+    facing:1,vx:90,vy:0,dtMs:1000/60,x:k*90/60,y:0});
+  advanceCatalogItem(i,0,walkFrame(0));
+  for(let k=1;k<=21;k++)advanceCatalogItem(i,k*1000/60,walkFrame(k));
+  assert.equal(i.pieces[0].sx,96);assert.equal(i.pieces[0].attachment,"pet");
 });

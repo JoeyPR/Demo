@@ -113,6 +113,18 @@ P.on("skin", i => {
 });
 
 /* ---------------- simulation ------------------------------------------- */
+/* Pet engine host extras carried on the motion: the rig arm angle and player
+   lift lag one render (the pose resolves after the items advance), the
+   bare-head flag feeds head-riding pets, and the preview floor is flat so the
+   solid query is always standable — the source queries real world tiles for
+   the pet trail's platform edges. */
+function withPetHost(motion) {
+  return { ...motion,
+    armAngle: state.lastResult?.pose?.frontAngle ?? 0,
+    petBareHead: !state.equipped.get(0),
+    petLift: state.lastResult?.lift?.y ?? 0,
+    petWorld: { solidAt: () => true } };
+}
 function step(dt) {
   state.clock += dt;
   if (state.doubleAt !== null && state.clock >= state.doubleAt) {
@@ -148,7 +160,7 @@ function step(dt) {
   if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
   state.lastFrame = frame;
   state.lastResult = player.step(
-    { ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }, dt,
+    withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
     { skin: state.skin, effects: true });
 }
 P.on("pad", pad => {
@@ -589,7 +601,7 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     player = new PlannerPlayer(state.catalog);
     state.lastFrame = motion.snapshot();
     state.lastResult = player.step(
-      { ...state.lastFrame, worldX: state.lastFrame.x, worldY: state.lastFrame.y, x: 0, y: 0 }, 0,
+      withPetHost({ ...state.lastFrame, worldX: state.lastFrame.x, worldY: state.lastFrame.y, x: 0, y: 0 }), 0,
       { skin: state.skin, effects: true });
     state.equipped.clear();
     state.abilities = resolveAbilities([], state.abilityRegistry);

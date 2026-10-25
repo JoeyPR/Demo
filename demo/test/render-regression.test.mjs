@@ -33,6 +33,12 @@ test("all catalog records have finite rendering geometry in four movement states
       const result=player.step(frame({locomotion:state,ground:!["jump","fall"].includes(state),moveMs:99}),1000/60);
       for(const c of result.calls) {
         assert.ok(c.matrix.every(Number.isFinite),`${raw.id} ${state} transform`);
+        if(c.line){ // pet leash string: a line primitive, not an atlas blit
+          assert.ok(c.line.from.every(Number.isFinite)&&c.line.to.every(Number.isFinite),
+            `${raw.id} ${state} line ends`);
+          assert.ok(Number.isFinite(c.line.width??1),`${raw.id} ${state} line width`);
+          continue;
+        }
         for(const k of ["sx","sy","sw","sh"])assert.ok(Number.isFinite(c[k]),`${raw.id} ${state} ${k}`);
         assert.ok(c.sw>0&&c.sh>0,`${raw.id} source area`);calls++;
       }

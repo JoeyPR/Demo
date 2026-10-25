@@ -97,16 +97,24 @@ class Script {
   getVar(n) {
     if (this.vars.has(n)) return this.vars.get(n);
     const h = this.host;
+    // Custom variables published by the pet engine step (flat dotted keys —
+    // PunchDelay, PetFlyWalk.*) reach FX conditions the same way the source's
+    // vars map does.
+    if (h.petVars && n in h.petVars) return h.petVars[n];
     const dot = n.lastIndexOf('.');
     if (dot > 0 && !['speed.x','speed.y','speed.length','pet.velocity.x','pet.velocity.y','pet.velocity.length'].includes(n)) { const base = this.getVar(n.slice(0, dot)), c = n.slice(dot + 1); if (Array.isArray(base)) return c === 'length' ? Math.hypot(...base) : base[{ x: 0, y: 1, z: 2 }[c] ?? 0] ?? 0; }
     if (n === 'speed.x') return h.vx; if (n === 'speed.y') return h.vy;
     if (n === 'speed.length') return Math.hypot(h.vx, h.vy);
-    if (n === 'pet.velocity.x') return h.vx; if (n === 'pet.velocity.y') return h.vy; if (n === 'pet.velocity.length') return Math.hypot(h.vx, h.vy);
+    if (n === 'pet.velocity.x') return h.pet?.v?.[0] ?? 0;
+    if (n === 'pet.velocity.y') return h.pet?.v?.[1] ?? 0;
+    if (n === 'pet.velocity.length') return h.pet?.speed ?? Math.hypot(...(h.pet?.v ?? [0, 0]));
+    if (n === 'pet.facingLeft') return (h.pet?.face ?? 1) < 0;
+    if (n === 'distanceToPet') return h.pet?.dist ?? 0;
     if (n === 'onGround') return h.onGround;
     if (n === 'Player.GetFacing') return h.facing;
     if (n === 'punchCount') return h.punches || 0;
     if (n === 'isMoving') return Math.abs(h.vx) > 0.1;
-    if (n === 'PunchDelay') return 0;
+    if (n === 'PunchDelay') return h.petVars?.PunchDelay ?? 0;
     return undefined;
   }
   cmp(a, b, op) {

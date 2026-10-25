@@ -80,14 +80,32 @@ test("Dirt, Twilight and Infinity aura particle-backed paths produce finite spri
     assert.ok(i.pieces.every(p=>[p.sx,p.sy,p.x,p.y,...(p.k??[])].every(Number.isFinite)));
   }
 });
-test("petCells use total duration, switch motion row, and follower lags reversal",()=>{
-  const i=item(870);advance(i,0);advance(i,150,"walk");
+test("petCells follow the pet's own clock, switch motion row, and the trail pet lags reversal",()=>{
+  const i=item(870);
+  // Frames at the source's 60Hz step rate; the host walks so the trail point
+  // advances and the pet (chasing a 20-tick-deep trail) starts moving after
+  // the trail flushes.
+  let k=0,hx=0;
+  const frame=(state,facing)=>({clockMs:k*1000/60,moveMs:k*1000/60,ground:true,
+    locomotion:state,facing,vx:state==="walk"?90*facing:0,vy:0,dtMs:1000/60,x:hx,y:0});
+  const steps=(n,state="idle",facing=1)=>{for(let j=0;j<n;j++){
+    if(state==="walk")hx+=90/60*facing;
+    advanceCatalogItem(i,k*1000/60,(k++,frame(state,facing)));}};
+  steps(1);steps(21,"walk");
   const pet=()=>i.pieces.find(p=>p.attachment==="pet");
   const cells=i.raw.petCells.move;
-  const expected=cells.cells[Math.floor(150/cells.ms*cells.cells.length)];
-  assert.equal(pet().sx,expected[0]*32);assert.equal(pet().sy,expected[1]*32);
-  advance(i,200,"walk");
-  const x=i.petMotion.x;advance(i,216,"walk",-1);assert.ok(i.petMotion.x>x&&i.petMotion.x<56);
+  // t68 = 22/60 s (~367ms) of the pet's own clock samples move-row cell 3.
+  assert.equal(pet().sx,cells.cells[3][0]*32);assert.equal(pet().sy,cells.cells[3][1]*32);
+  // Standing still lets the pet settle on the idle behind point, and the
+  // animation snaps to the stand row.
+  steps(30,"idle");
+  assert.equal(pet().sx,i.raw.petCells.stand.cells[0][0]*32);
+  // The trail pet chases the point behind the player: after a reversal it
+  // keeps moving toward the new behind point without overshooting the player.
+  const x0=i.petEngine.pet.x;
+  steps(30,"walk",-1);
+  const x1=i.petEngine.pet.x;
+  assert.ok(x1>x0&&x1<56,`trail pet lags reversal (${x0} -> ${x1})`);
 });
 test("all catalog items remain finite with XML, pet and mount motion in twelve states/times",()=>{
   let count=0;
@@ -95,7 +113,11 @@ test("all catalog items remain finite with XML, pet and mount motion in twelve s
     const i=normalizeCatalogItem(raw,catalog);
     for(const t of [0,400,1200]){
       advance(i,t,state);
-      assert.ok(i.pieces.every(p=>[p.sx,p.sy,p.sw,p.sh,p.x,p.y,...(p.k??[])].every(Number.isFinite)),`${raw.id} ${state} ${t}`);
+      // The leash string is a line primitive (no sprite geometry); its ends
+      // and width must stay finite instead.
+      assert.ok(i.pieces.every(p=>p.line
+        ?[...p.line.from,...p.line.to,p.line.width??1].every(Number.isFinite)
+        :[p.sx,p.sy,p.sw,p.sh,p.x,p.y,...(p.k??[])].every(Number.isFinite)),`${raw.id} ${state} ${t}`);
       count++;
     }
   }assert.equal(count,48972);

@@ -16,6 +16,10 @@ const ITEM_SYMBOL_IDS={
 };
 export function variable(name,motion) {
   const state=locomotionState(motion),vx=motion.vx||(state.moving?90:0),vy=motion.vy??0;
+  // Custom variables published by the pet engine step (flat dotted keys,
+  // e.g. PunchDelay / PetFlyWalk.IsWalking) — the source sets them the same
+  // flat way (vars.set("PetFlyWalk."+k)).
+  if(motion.petVars&&name in motion.petVars)return motion.petVars[name];
   return {"speed.x":vx,"speed.y":vy,"speed.length":Math.hypot(vx,vy),
     onGround:!state.airborne,punchInProgress:!!motion.punch,punching:!!motion.punch,
     isFacingLeft:motion.facing<0}[name];
@@ -40,6 +44,18 @@ export function condition(n,motion,states={}) {
   }
   if(n.tag==="IsVariableBool"){
     const x=variable(a.name,motion);return x===undefined?undefined:x===truth(v);
+  }
+  // Source cond(): CompareCustomVariable resolves the named custom variable
+  // (left) against the raw value or a second named variable (right), coerced to
+  // numbers — booleans fold to 0/1 — under operatorType||operator||"Equal".
+  if(n.tag==="CompareCustomVariable") {
+    const left=variable(a.VariableNameToCompare,motion);
+    if(left===undefined)return undefined;
+    const right=a.RightHSVariableNameToCompare?variable(a.RightHSVariableNameToCompare,motion)
+      :(/^[-\d.]/.test(String(v).trim())?Number(v):truth(v)?1:0);
+    if(right===undefined)return undefined;
+    const l=Number(left),r=Number(right);
+    return ({Less:l<r,Greater:l>r,LessOrEqual:l<=r,GreaterOrEqual:l>=r,Equal:l===r,NotEqual:l!==r})[a.operatorType??a.operator??"Equal"]??false;
   }
   const context=motion.renderContext??{};
   const contextual={
