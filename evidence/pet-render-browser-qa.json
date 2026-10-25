@@ -30,16 +30,16 @@
       "pieces": "tf_page1.png 64x64, one main piece",
       "punchLeap": {
         "trigger": "held punch (punchHold)",
-        "petYArc": "-32 -> -16 -> -32 (leap up 16 units and back)",
-        "petXTravel": "-68 to +106 (100+ units toward the punch aim, past the player)",
+        "observedTranslation": "piece my -32 -> -16 during the punch; this is the source's state-6 +16 hover offset ('y': ... + (st===6 ? 16 : 0) in the live bundle app.8f20650106.js), not an upward leap",
+        "petXTravel": "-68 to +106 (100+ units of horizontal lunge toward the punch target, fist height)",
         "cellsSeen": "rows 832/896 (machine rows 13/14), stand and move cells sampled on the pet clock"
       },
       "punchFlip": "wolf faces the player while punching (source petPunching semantics), evidence/screenshots/pet-machine-wolf-punch.png",
-      "hoverExtra": "at hover-at-target state the machine pushes a second 64x64 piece at cell [10,14] = (640,896), rotated ~93 degrees, additively blended (add: true), drawn past the main piece at the target; two RenderPet pieces confirmed for 40+ frames, evidence/screenshots/pet-machine-wolf-hover-extra.png"
+      "hoverExtra": "at hover-at-target the machine pushes a second 64x64 piece at cell [10,14] = (640,896), rotated on the pet clock, additively blended (add: true); two RenderPet pieces confirmed for 40+ frames, screenshot captured with the punch still held and the extra visible as the bright spin streak over the lunging wolf (evidence/screenshots/pet-machine-wolf-hover-extra.png and the -crop zoom)"
     },
     "11562 Pet Blood Dragon (kind 200, machine)": {
       "pieces": "tf_page1.png 64x64, one main piece",
-      "note": "dragon machine follows the motion state directly (no lunge, no extras in the ported state machine); renders at the player's heel, evidence/screenshots/pet-machine-dragon.png"
+      "note": "dragon machine follows the motion state directly with no extras, as ported and as in the source (the live bundle's dragon branch early-returns before the extra emission); renders at the player's heel, evidence/screenshots/pet-machine-dragon.png"
     },
     "13116 Crimson Thief Mask (kind 200, machine)": {
       "pieces": "particles_large8.png 64x64 generated piece from the parts rect (no gameIcon pet records)",
@@ -53,10 +53,12 @@
   },
   "regressions": {
     "npmTest": "111/111 pass",
-    "demoTest": "65/72, same 7 pre-existing failures as 4fb7669 (floating vehicle delta, default-state fixtures, texture edge clamping/pet wrapping, Riding Cloud, horse-sit mounts, XML emitter hooks, generic float)"
+    "demoTest": "65/72, same 7 pre-existing failures as 4fb7669 (floating vehicle delta, default-state fixtures, texture edge clamping/pet wrapping, Riding Cloud, horse-sit mounts, XML emitter hooks, generic float)",
+    "followLagNote": "319 ms is the observed wall-clock follow delay (~19-20 frames at the observed frame rate), consistent with the 20-tick trail flush; not an exact tick-count validation"
   },
   "environmentNotes": [
-    "The world canvas composited correctly on the local server; the earlier missing-player symptom seen on the proxy-deployed copy did not reproduce and is an environment artifact of that deployment, not the app code.",
-    "The flat-floor solidAt and one-frame arm-angle lag are visually imperceptible in the preview (the string anchor tracks the hand); both remain documented placeholders in PET_SYSTEM_REVISION.md."
+    "The world canvas composited correctly on the local server; the earlier missing-player symptom on the proxy-deployed copy did not reproduce and its cause was not isolated, so it stays unexplained rather than attributed.",
+    "The flat-floor solidAt and the one-frame arm-angle lag remain documented placeholders; the idle screenshots do not exercise arm motion or terrain edges.",
+    "Source cross-check: the current live bundle app.8f20650106.js was fetched and the machine extra emission compared - the port matches (extra only in the non-dragon machines at st===6, cell [10,row+1], dx 4, rotation floor(clock/2)%360, additive; dragon branch early-returns). The earlier 'dragon wing' label was a mislabel."
   ]
 }
