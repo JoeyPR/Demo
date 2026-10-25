@@ -73,8 +73,8 @@ test("preview uses the shadow mask, removes the circular floor shadow, and draws
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
   assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
-  assert.ok(app.indexOf("c.drawImage(avatar, playerRect.x") < app.indexOf("drawLandGround(w, h, ground, s, frame, zoom)"),
+  assert.ok(app.indexOf("c.drawImage(avatar, playerRect.x") < app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)"),
     "foreground land is drawn after the player");
-  assert.ok(app.indexOf("drawAncestralAura(s, rootX, ground, frame, \"front\"") < app.indexOf("drawLandGround(w, h, ground, s, frame, zoom)"),
+  assert.ok(app.indexOf("drawAncestralAura(s, rootX, ground, frame, \"front\"") < app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)"),
     "foreground land occludes the full player/effects composite");
 });
