@@ -78,9 +78,9 @@ test("each sheet draws using its own offset rather than a shared hill offset", (
 test("live app derives hill parallax from the camera without edge thresholds", async () => {
   const { readFileSync: readApp } = await import("node:fs");
   const app = readApp(new URL("../js/app.js", import.meta.url), "utf8");
-  assert.match(app, /hillSceneOffset\(-cameraWorldX, s, pxPerSceneUnit, speed\)/);
+  assert.match(app, /hillSceneOffset\(cameraWorldX, s, pxPerSceneUnit, speed\)/);
   assert.match(app, /hillOffsetsNow\(w, h, s, camera\.cameraWorldX\)/);
-  assert.match(app, /offsets\.set\(track, hillSceneOffset\(-cameraWorldX, s, pxPerSceneUnit, speed\)\)/);
+  assert.match(app, /offsets\.set\(track, hillSceneOffset\(cameraWorldX, s, pxPerSceneUnit, speed\)\)/);
   assert.match(app, /frameX: frame\.x, frameY: frame\.y/);
   assert.doesNotMatch(app, /hillTravelExcess\(frame\.x/);
 });
