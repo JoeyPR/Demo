@@ -264,7 +264,12 @@
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'box reg empty qbox';
-        b.disabled = true;
+        b.setAttribute('aria-label', 'Empty quick slot — browse clothing to equip an item');
+        b.addEventListener('click', () => {
+          P.tabs.open('cloth');
+          P.$('#q').focus();
+          P.toast('Choose an item from Clothing to equip it.');
+        });
         quick.append(b);
       }
     }

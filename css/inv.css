@@ -57,7 +57,7 @@
 .box::before{content:"";position:absolute;inset:-2.6% -4.9% -5.4% -3.1%;background:url(../img/box-focus.png) 0 0/100% 100%;opacity:0;pointer-events:none}
 .box.focus::before{opacity:1}
 /* empty quick-drawer slot: the regular box, dimmed */
-.box.empty{opacity:.45;cursor:default}
+.box.empty{opacity:1;cursor:pointer}
 /* quick-drawer boxes: icon only (names live in the tooltip) */
 .qbox .n{display:none}
 .box .ck{position:absolute;right:3%;bottom:3%;width:42%;display:none;z-index:2;filter:drop-shadow(calc(8*var(--u)) calc(8*var(--u)) 0 rgba(0,0,0,.75))}
@@ -86,8 +86,8 @@
    box's border and only the invisible margins overflow.
    art bounds: fist 162/192 of its canvas, wrench 169/192. */
 .box.tool .ic{inset:5%}
-.box.tool .ic img{width:118.5%;height:auto;image-rendering:pixelated;margin:auto}
-.box.tool .ic img.art-wrench{width:113.6%}
+.box.tool .ic img{width:112%;height:auto;object-fit:contain;image-rendering:pixelated;margin:auto}
+.box.tool .ic img.art-wrench{width:108%}
 
 /* 3. tabs (scaled to reach the screen's left edge while staying attached to
    the main drawer's left border, spanning its height). The strip grows left
@@ -99,7 +99,7 @@
 .tab{display:block;position:relative;width:100%;height:calc(67.5*var(--u));pointer-events:auto;outline:0;
   background:var(--tc,#4d5156);border-bottom:calc(3.5*var(--u)) solid #000;
   border-radius:calc(4*var(--u)) 0 0 calc(4*var(--u))}
-.tab img{position:absolute;top:0;right:0;height:100%;width:auto}
+.tab img{position:absolute;top:0;right:0;height:100%;width:auto;max-width:100%;object-fit:contain;object-position:right center;image-rendering:pixelated}
 .tab[data-t=equip]{--tc:#445c66;--tc-on:#a5e3fb}
 .tab[data-t=fav]{--tc:#800020;--tc-on:#ff0040}
 .tab[data-t=cloth]{--tc:#636363;--tc-on:#d0d0d0}

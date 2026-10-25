@@ -42,11 +42,22 @@ export function mountedGaitProfile(item) {
 }
 export function sampleMountedGait(item,motion) {
   const profile=mountedGaitProfile(item),state=locomotionState(motion);
-  if(!profile||state.airborne||!state.moving)return {active:false,bodyY:0,slide:0};
-  const t=item.motionPlayback?motion.clockMs-item.motionPlayback.startedMs:motion.moveMs??0;
-  const phase=2*Math.PI*Math.max(0,t)/profile.periodMs;
-  return {active:true,bodyY:-profile.hop*Math.abs(Math.sin(phase)),
-    slide:profile.slide*Math.sin(phase),phase,profile};
+  if(!profile)return {active:false,bodyY:0,slide:0,weight:0};
+
+  // Preserve the gait clock when movement starts/stops, and ease the split
+  // halves back to rest instead of snapping their transforms in one frame.
+  const now=Number.isFinite(motion.clockMs)?motion.clockMs:Math.max(0,motion.moveMs??0);
+  const previous=item.gait;
+  const dt=previous&&Number.isFinite(previous.clockMs)?Math.max(0,now-previous.clockMs):0;
+  const targetWeight=!state.airborne&&state.moving?1:0;
+  const oldWeight=Number.isFinite(previous?.weight)?previous.weight:0;
+  const blend=dt>0?1-Math.exp(-dt/85):0;
+  const weight=oldWeight+(targetWeight-oldWeight)*blend;
+  const t=item.motionPlayback?Math.max(0,now-item.motionPlayback.startedMs)
+    :Number.isFinite(previous?.cycleMs)?previous.cycleMs+dt:Math.max(0,motion.moveMs??0);
+  const phase=2*Math.PI*(((t%profile.periodMs)+profile.periodMs)%profile.periodMs)/profile.periodMs;
+  return {active:weight>0.002,bodyY:-profile.hop*Math.abs(Math.sin(phase))*weight,
+    slide:profile.slide*Math.sin(phase)*weight,phase,profile,weight,clockMs:now,cycleMs:t};
 }
 export function applyMountedGait(item,motion) {
   const gait=sampleMountedGait(item,motion);item.gait=gait;

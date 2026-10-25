@@ -354,8 +354,13 @@ export function drawAncestral(ctx, level, t, opts = {}) {
   // frame-aligned capture: the planner's sparkle draw follows the last
   // fx draw in every frame).
   for (const e of fxEntries(level, t, facing, opts.motion ?? null)) {
-    if (layer === 'behind' && !(e.m[5] < BEHIND_Y)) continue;
-    if (layer === 'front' && e.m[5] < BEHIND_Y) continue;
+    // Use the transformed sprite center: rotation and scale can carry the
+    // visible particle across the player's depth line even when its origin
+    // remains on the opposite side.
+    const centerY = e.m[1] * (e.sw / 2) + e.m[3] * (e.sh / 2) + e.m[5];
+    const behind = centerY < BEHIND_Y;
+    if (layer === 'behind' && !behind) continue;
+    if (layer === 'front' && behind) continue;
     const img = sheets[e.sheet];
     if (!img) continue;
     const bmp = tint.get(img, e.sx, e.sy, e.sw, e.sh, e.tint);

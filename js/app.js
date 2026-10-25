@@ -30,7 +30,7 @@ const SKINS = [
 
 const state = {
   catalog: null, equipped: new Map(), skin: SKINS[P.store.get("skin", 0)].rgb,
-  resolution: 32, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
+  resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   ancestralMap: null, abilities: null, hiddenPasses: new Set(), contentTop: 0,
@@ -226,7 +226,15 @@ function renderAvatar() {
      registered yet (same as the Demo boot) — pieces appear next frame */
   const missing = [...new Set(state.lastResult.calls.filter(c => !atlases.has(c.atlas)).map(c => c.atlas))];
   for (const name of missing) loadAtlas(name);
-  const calls = state.lastResult.calls.filter(c => !state.hiddenPasses.has(c.pass) && atlases.has(c.atlas));
+  const wornAncestral = state.equipped.get(9);
+  const customAncestralId = wornAncestral && state.ancestralMap?.has(wornAncestral.id)
+    ? wornAncestral.id : null;
+  const calls = state.lastResult.calls.filter(c =>
+    !state.hiddenPasses.has(c.pass) &&
+    // The dedicated ancestral renderer owns the worn artifact's appearance.
+    // Suppress its legacy sprite draws even when they use RenderInFront.
+    !(customAncestralId !== null && c.owner === customAncestralId) &&
+    atlases.has(c.atlas));
   const bounds = drawBounds(calls), scale = state.resolution / 32;
   const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
   if (avatar.width !== width || avatar.height !== height) { avatar.width = width; avatar.height = height; }
@@ -340,7 +348,7 @@ function drawLandGround(w, h, ground, s, frame) {
      right edge, draw the wrapped columns again on the right (the ground is a
      uniform fill, so the seam is invisible) */
   if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * TILE, lw, lh, state.clock);
-  ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, Math.round(ground), lw * s, lh * s);
+  ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, ground, lw * s, lh * s);
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -351,6 +359,7 @@ async function loadAncestrals() {
     for (const [famKey, fam] of Object.entries(data.families))
       for (const lv of fam.levels) map.set(lv.id, { family: famKey, level: lv, name: lv.name });
     state.ancestralMap = map;
+    syncAuraPass();
     /* the inventory grid uses this to give leveled ancestrals the box-art item box */
     P.ancestralIds = new Set(map.keys());
   } catch { state.ancestralMap = new Map(); }
@@ -461,10 +470,14 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   /* the avatar canvas is scaled by PS around the feet pivot (rig 16,32):
      rig point (16,32) lands on (rootX + 16*s, groundCam) — planted on the
      ground line, centered — and every other point follows proportionally */
+  c.save();
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = "high";
   c.drawImage(avatar,
     rootX + (16 - 16 * PS) * s + b.x * PS * s,
     rootY + (32 - 32 * PS) * s + b.y * PS * s,
     b.width * PS * s, b.height * PS * s);
+  c.restore();
   /* ancestral aura (front fx) */
   drawAncestralAura(s, rootX, groundCam, frame, "front");
   /* name plate above the head (Website plate system, drawn at world scale).
