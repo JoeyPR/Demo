@@ -376,12 +376,10 @@ function setLand(id) {
 }
 P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame, zoom) {
-  // Land tiles render at HALF the player's unit scale: two tiles match the
-  // player's height (the requested proportion — the land was too big next
-  // to the player at 1:1). Tile/world coordinates remain native; only the
-  // on-screen tile size changes. Render enough surface for the viewport at
-  // every zoom, rather than scaling a screen-width strip.
-  const landS = s / 2;
+  // Render one full 32-unit land tile at the player's unscaled world-unit
+  // scale (instead of 16 units). The player remains separately scaled to 0.78.
+  // Tile/world coordinates stay native; only the on-screen tile size changes.
+  const landS = s;
   const lw = Math.ceil(w / (landS * zoom));
   const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
@@ -532,9 +530,9 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.translate(-cameraPivotX, -cameraPivotY);
 
   const playerRect = playerVisualRect(b, rootX, rootY, s);
-  const shadowOffset = playerShadowOffset(s, motion.facing);
-  // Growtopia's DropShadow shader is an alpha-mask tint with a texture offset.
-  // Composite its projected silhouettes after the land and before the player.
+  const shadowOffset = playerShadowOffset(zoom, motion.facing);
+  // Render order: the shadow is behind land, while the player and clothing
+  // remain in front of land as in the original preview.
   c.imageSmoothingEnabled = false;
   c.save();
   c.globalAlpha = PLAYER_SHADOW_OPACITY;
@@ -542,9 +540,10 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
-  // Scale the player and all clothing around rig feet (16,32). The land tiles
-  // are half-size, so 0.78 yields a 1.56-tile-tall player instead of two tiles.
+  // Scale the player and all clothing around rig feet (16,32). Land tiles use
+  // the full 32-unit world scale; the character remains at 0.78 scale.
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
@@ -552,10 +551,6 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
     P.plate.draw(c, w / 2, playerTop - 6 * s, s * 0.9, state.clock);
   }
-  // Foreground terrain must occlude the complete avatar/clothing composite.
-  // This is intentionally the last world layer, so blocks cover the feet and
-  // any body pixels that extend into the ground instead of appearing behind it.
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
   c.restore();
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
