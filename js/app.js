@@ -8,7 +8,7 @@ import { drawCanvas } from "../demo/engine/render.mjs";
 import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
 import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
-import { WeatherRenderer, loadSheets, hillTravelExcess, hillSceneOffset } from "../weather-engine/weather-renderer.js";
+import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
@@ -455,21 +455,19 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
   });
 }
 
-/* Hill weathers scroll with the player: the hill bands drift in the
-   direction the player travels, but only once they leave the rendered
-   region of the world — one full 100-tile world span. Inside that region
-   the hills stay perfectly still; beyond it the drift grows with the
-   distance past the edge and retraces exactly when the player comes back.
-   The mapping is zoom-independent (the weather canvases are viewport-space,
-   outside the camera transform), so zooming never moves the hills. */
-const HILL_PARALLAX = 0.25;
-function hillOffsetNow(w, h, s, frame) {
+/* Every hill band follows accumulated player travel immediately — no
+   waiting until the player reaches a world edge. The weather renderer applies
+   each sheet's own speed: hill1 = 1x, hill2 = 0.5x, hill3 = 0.25x. */
+function hillOffsetsNow(w, h, s, frame) {
   const r = state.weatherRenderer;
-  if (!r || !r.hillSheets || !r.hillSheets.size) return 0;
+  if (!r || !r.hillSpeeds?.size) return new Map();
   const cfg = r.cfg;
   const pxPerSceneUnit = Math.max(w / cfg.w, h / cfg.h);   /* the renderer's COVER scale */
-  const excess = hillTravelExcess(frame.x, 0, WORLD_PX_W);
-  return hillSceneOffset(excess, s, pxPerSceneUnit, HILL_PARALLAX);
+  const offsets = new Map();
+  for (const [sheetIndex, speed] of r.hillSpeeds) {
+    offsets.set(sheetIndex, hillSceneOffset(frame.x, s, pxPerSceneUnit, speed));
+  }
+  return offsets;
 }
 
 /* ---------------- frame loop ------------------------------------------- */
@@ -512,7 +510,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const t = now < state.weatherAnimAt ? state.weatherT0 : state.weatherT0 + now - state.weatherAnimAt;
     /* hill weathers drift with the player's travel beyond the rendered world
        region (see hillSceneOffset); every other weather ignores it */
-    state.weatherRenderer.render(t, hillOffsetNow(w, h, s, frame));
+    state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, frame));
     c.drawImage(weatherBG, 0, 0, w, h);
   } else if (state.weatherStill) {
     c.drawImage(state.weatherStill, 0, 0, w, h);
