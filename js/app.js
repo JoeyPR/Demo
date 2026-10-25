@@ -533,14 +533,22 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.translate(-cameraPivotX, -cameraPivotY);
 
   const playerRect = playerVisualRect(b, rootX, rootY, s);
-  const shadowOffset = playerShadowOffset(zoom, motion.facing);
+  const shadowOffset = playerShadowOffset(motion.facing);
+  // Keep the shadow in screen space: it follows the zoom-projected player
+  // position, but neither its 12px offset nor its silhouette size scales.
+  const shadowScreenCenterX = cameraPivotX +
+    (playerRect.x + playerRect.width / 2 - cameraPivotX) * zoom;
+  const shadowScreenBottomY = cameraPivotY +
+    (playerRect.y + playerRect.height - cameraPivotY) * zoom;
+  const shadowScreenX = shadowScreenCenterX - playerRect.width / 2 + shadowOffset.x;
+  const shadowScreenY = shadowScreenBottomY - playerRect.height + shadowOffset.y;
   // Render order: the shadow is behind land, while the player and clothing
   // remain in front of land as in the original preview.
   c.imageSmoothingEnabled = false;
   c.save();
+  c.setTransform(1, 0, 0, 1, 0, 0);
   c.globalAlpha = PLAYER_SHADOW_OPACITY;
-  c.drawImage(avatarShadow,
-    playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
+  c.drawImage(avatarShadow, shadowScreenX, shadowScreenY,
     playerRect.width, playerRect.height);
   c.restore();
   if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
