@@ -467,6 +467,11 @@ function hillOffsetsNow(w, h, s, frame) {
   for (const [sheetIndex, speed] of r.hillSpeeds) {
     offsets.set(sheetIndex, hillSceneOffset(frame.x, s, pxPerSceneUnit, speed));
   }
+  // A single sprite sheet can contain multiple independent parallax bands.
+  // Arid's two desert_wobbly groups follow their nearest desert hill layer.
+  for (const [track, speed] of (r.hillTrackSpeeds ?? new Map())) {
+    offsets.set(track, hillSceneOffset(frame.x, s, pxPerSceneUnit, speed));
+  }
   return offsets;
 }
 
