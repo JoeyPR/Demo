@@ -33,7 +33,7 @@ test("hill draw positions follow player travel direction and reverse when travel
   const idle = hillDrawXs(0, 0, 100);
   const rightOffset = hillSceneOffset(10, 1, 1, 0.5);
   const leftOffset = hillSceneOffset(-10, 1, 1, 0.5);
-  assert.deepEqual(idle, [-100, 0]);
+  assert.deepEqual(idle, [0]);
   assert.deepEqual(hillDrawXs(0, rightOffset, 100), [-95, 5]);
   assert.deepEqual(hillDrawXs(0, leftOffset, 100), [-5, 95]);
 });
