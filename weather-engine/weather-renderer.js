@@ -99,10 +99,11 @@ export class WeatherRenderer {
 
   /** Advance to wall-clock time `now` (ms). Call this every frame.
    *
-   * `hillOffsets` is a Map of sheet index to scene-space offset. The app
-   * derives each offset continuously from the player's current world X and
-   * that sheet's parallax multiplier. A numeric value remains supported for
-   * still/manual callers and applies the same offset to every hill sheet. */
+   * `hillOffsets` is a Map keyed by sheet index or individual track object.
+   * Track-specific offsets override the shared sheet offset, allowing multiple
+   * parallax groups on one texture. The app derives offsets continuously from
+   * player world X and each band's speed. A numeric value remains supported
+   * for still/manual callers and applies the same offset to every hill sheet. */
   render(now, hillOffsets) {
     if (hillOffsets instanceof Map) {
       this.hillOffsets = new Map(hillOffsets);
@@ -498,7 +499,8 @@ export function hillTravelExcess(worldX, regionMin, regionMax) {
  * Convert absolute player travel (world px) to a hill-layer offset in weather
  * scene units. The scale ratio makes movement match the rendered player speed
  * while keeping weather canvases viewport-space. `parallax` is each sheet's
- * relative speed (1 = player speed, 0.5 = half speed, 0.25 = quarter speed).
+ * speed multiplier. Current presets are hill1 = 0.5x, hill2 = 0.25x,
+ * and hill3 = 0.125x (each half the speed of the previous tuning).
  */
 export function hillSceneOffset(playerTravelWorldPx, worldPxPerUnit, pxPerSceneUnit, parallax = 0.25) {
   if (!Number.isFinite(playerTravelWorldPx) || !playerTravelWorldPx) return 0;
