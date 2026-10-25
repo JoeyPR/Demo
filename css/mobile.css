@@ -23,10 +23,11 @@ body{background:#212226}
 #handle{left:calc(397.5*var(--u));top:calc(-80*var(--u));width:calc(128*var(--u))}
 
 /* Original baked tab artwork, scaled proportionally and attached to the drawer. */
-#tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(740*var(--u));
-  display:flex;flex-direction:column}
-.tab{width:100%;height:calc(123.333333*var(--u));flex:0 0 calc(123.333333*var(--u));
-  min-height:0;overflow:visible}
+#tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(600*var(--u));
+  display:flex;flex-direction:column;gap:0}
+/* Tab sprites are near-square; use matching rows so adjacent tabs meet without gaps. */
+.tab{width:100%;height:calc(100*var(--u));flex:0 0 calc(100*var(--u));
+  min-height:0;margin:0;padding:0;overflow:visible}
 .tab img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
   object-position:right bottom;image-rendering:pixelated}
 
