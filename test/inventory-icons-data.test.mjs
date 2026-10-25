@@ -30,3 +30,12 @@ test("Set Planner tint and layered-icon indicators remain represented", () => {
   assert.ok(index.items.some(item => Array.isArray(item.iconLayers) && item.iconLayers.length));
   assert.ok(index.items.some(item => item.iconRule));
 });
+
+test("vertical icon sources retain 32px per-frame stride", () => {
+  const vertical = index.items.flatMap(item => item.candidates ?? [])
+    .filter(candidate => candidate.kind === "setplanner-icon-data" && candidate.vertical);
+  for (const candidate of vertical) {
+    assert.equal(candidate.strideY, 32);
+    assert.ok(candidate.cellHeight >= 1);
+  }
+});

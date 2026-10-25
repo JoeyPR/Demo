@@ -103,8 +103,13 @@ function parseTint(value, skin) {
 function tintFrame(frame, tint) {
   if (!tint) return frame;
   const color = tint.map(v => Math.max(0, Math.min(255, Number(v) || 0)));
-  const output = blankFrame();
+  // Layer crops may be 64×64 or other native sizes. Preserve their dimensions;
+  // forcing them through a 32×32 tint canvas cuts off edges before composition.
+  const output = document.createElement("canvas");
+  output.width = frame.width;
+  output.height = frame.height;
   const ctx = output.getContext("2d", { alpha: true, willReadFrequently: true });
+  ctx.imageSmoothingEnabled = false;
   ctx.drawImage(frame, 0, 0);
   const pixels = ctx.getImageData(0, 0, 32, 32);
   for (let i = 0; i < pixels.data.length; i += 4) {
@@ -140,6 +145,20 @@ async function renderTintedCells(record, skin) {
     compositeFrame(frame, tinted);
   }
   return hasPixels(frame) ? frame : null;
+}
+
+async function renderVerticalIcon(candidate) {
+  const count = Math.max(1, Math.min(16, Number(candidate?.cellHeight) || 1));
+  if (!candidate?.vertical || count < 2) return cropCandidate(candidate);
+  const output = blankFrame();
+  // Set Planner's icon tuple can indicate several vertical frames that must
+  // be composited into one inventory icon. Paint bottom-to-top, matching the
+  // legacy item-data order, while keeping every source cell at native pixels.
+  for (let row = count - 1; row >= 0; row--) {
+    const frame = await cropCandidate(candidate, 0, row * 32);
+    if (frame) compositeFrame(output, frame);
+  }
+  return hasPixels(output) ? output : null;
 }
 
 async function renderSourceTint(record, candidate, frame) {
@@ -242,7 +261,6 @@ async function renderProfileLayers(record, candidates) {
 }
 
 async function renderPairedFeet(candidate) {
-  const image = await loadSprite(candidate.file);
   const primary = await cropCandidate(candidate);
   if (!primary || !hasPixels(primary)) return primary;
   const cx = Number(candidate.cellX ?? 0), cy = Number(candidate.cellY ?? 0);
@@ -287,7 +305,8 @@ async function makeFrame(record, fallbackItem, skin) {
   for (const candidate of candidates) {
     try {
       let frame = record?.iconRule === "paired-feet.static-composition"
-        ? await renderPairedFeet(candidate) : await cropCandidate(candidate);
+        ? await renderPairedFeet(candidate)
+        : candidate.vertical ? await renderVerticalIcon(candidate) : await cropCandidate(candidate);
       if (!frame || !hasPixels(frame)) continue;
       frame = await renderSourceTint(record, candidate, frame);
       return frame;
