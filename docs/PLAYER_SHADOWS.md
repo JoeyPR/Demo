@@ -9,12 +9,12 @@ Public Growtopia depot manifests list a `Shaders` directory with `DropShadow.fs.
 ## Planner behavior
 
 - The old elliptical floor shadow is removed.
-- Foreground land is rendered after the player, clothing, ancestral aura and nameplate so it overlays the complete character composite at the ground line.
+- Render order keeps the shadow behind the land and the player/clothing in front of the land. Land no longer overlays the character.
 - Eligible player and clothing sprite calls are rendered to a separate, black-tinted alpha-mask canvas, preserving each sprite's transparency and transform.
 - The mask is composited at 50% opacity.
-- The mask shifts 1.25 logical units toward the facing side and 2.5 logical units downward: right-facing characters project bottom-right, left-facing characters bottom-left.
+- The mask shifts exactly 3 canvas pixels toward the facing side and 3 canvas pixels downward: right-facing characters project bottom-right, left-facing characters bottom-left. Camera zoom is compensated so the screen-space shift stays 3×3 pixels.
 - Ancestral slot sprites, aura/FX calls, additive visuals, pets, lines, particles, and punch-arm/hand projections are filtered out. During a punch, arm/hand calls and the triggering punch item are also excluded; the torso and unrelated clothing keep their shadows.
 - Shadow color is #000000 with no blur, preserving crisp pixels.
-- The base 32-unit player rig is scaled to 0.78. With land tiles drawn at half-scale, the player body is approximately 1.56 land tiles tall, with the feet pivot fixed.
+- The base 32-unit player rig is scaled to 0.78 and land tiles render at their full 32-unit scale instead of 16. The feet pivot remains fixed; the character is slightly shorter than one full tile.
 
 The silhouette is built from each eligible draw call using its own matrix. The shared mask is only a rendering optimization; the projected shape remains the combined set of individual player/clothing sprite silhouettes.
