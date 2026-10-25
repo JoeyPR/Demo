@@ -49,12 +49,10 @@ export function playerVisualRect(bounds, rootX, rootY, unitScale) {
 }
 
 /** Directional projection: facing right => bottom-right, left => bottom-left. */
-export function playerShadowOffset(cameraZoom, facing) {
-  // This helper is called inside the camera's zoom transform. Divide out that
-  // transform so the final projected offset remains exactly 12 canvas pixels.
-  const zoom = Number.isFinite(cameraZoom) && cameraZoom > 0 ? cameraZoom : 1;
+export function playerShadowOffset(facing) {
+  // Drawn on an identity canvas transform, these remain fixed screen pixels.
   return {
-    x: (facing < 0 ? -1 : 1) * PLAYER_SHADOW_OFFSET / zoom,
-    y: PLAYER_SHADOW_DROP / zoom,
+    x: (facing < 0 ? -1 : 1) * PLAYER_SHADOW_OFFSET,
+    y: PLAYER_SHADOW_DROP,
   };
 }
