@@ -1,0 +1,62 @@
+{
+  "method": "Local static server + Playwright headless Chromium driving the shipped index.html UI (search box + two-click grid equip), 1600x900 viewport. Same-origin assets, so canvas reads and element screenshots are untainted. Every measurement below is from the live running app, not Node unit tests.",
+  "fix": "js/app.js and demo/app.js renderAvatar filtered draw calls with atlases.has(c.atlas); the pet leash string is a line primitive with no atlas, so it was dropped before drawCanvas. Both hosts now pass pieces carrying line (c.line || atlases.has(c.atlas)) and exclude them from the missing-atlas scan. Verified: Summer Kite string renders (evidence/screenshots/pet-kite-summer-string.png) from the pet at local (-97.7, -102.5) to the hand anchor (13, 26).",
+  "pets": {
+    "1742 Puppy Leash (kind 8, trail)": {
+      "pieces": "ptdag.png 32x32, two u:0/u:12 records, both drawn",
+      "followLag": {
+        "playerStartsMovingMs": 847,
+        "petStartsMovingMs": 1166,
+        "measuredLagMs": 319,
+        "note": "approximately 19-20 ticks at 60Hz; the source flushes a 20-tick trail (~21 ticks incl. spawn), so the observable follow lag is reproduced"
+      },
+      "visual": "trails behind the moving player, faces the player (evidence/screenshots/pet-trail-puppy-following.png)"
+    },
+    "882 Butterfly Leash (kind 1, flyer)": {
+      "pieces": "pet_butterfly.png 32x32, two records",
+      "visual": "hovers up and to the left of the player (evidence/screenshots/pet-flyer-butterfly.png)"
+    },
+    "870 Calf Leash (kind 0, trail)": {
+      "pieces": "pet_calf.png 32x32, two records",
+      "visual": "stands at the player's heel (evidence/screenshots/pet-trail-calf.png)",
+      "note": "kind 0 has no string in the source (strings are kinds 4/30 only), so no line piece is expected here"
+    },
+    "1670 Summer Kite (kind 4, kite + string)": {
+      "pieces": "pot_kide2.png 32x32, two records",
+      "string": "RenderBehind line primitive, width 1, rgb [180,180,180], pet anchor to hand point; visible after the atlas-filter fix",
+      "visual": "evidence/screenshots/pet-kite-summer-string.png"
+    },
+    "11704 Alpha Wolf (kind 200, machine)": {
+      "pieces": "tf_page1.png 64x64, one main piece",
+      "punchLeap": {
+        "trigger": "held punch (punchHold)",
+        "petYArc": "-32 -> -16 -> -32 (leap up 16 units and back)",
+        "petXTravel": "-68 to +106 (100+ units toward the punch aim, past the player)",
+        "cellsSeen": "rows 832/896 (machine rows 13/14), stand and move cells sampled on the pet clock"
+      },
+      "punchFlip": "wolf faces the player while punching (source petPunching semantics), evidence/screenshots/pet-machine-wolf-punch.png",
+      "hoverExtra": "at hover-at-target state the machine pushes a second 64x64 piece at cell [10,14] = (640,896), rotated ~93 degrees, additively blended (add: true), drawn past the main piece at the target; two RenderPet pieces confirmed for 40+ frames, evidence/screenshots/pet-machine-wolf-hover-extra.png"
+    },
+    "11562 Pet Blood Dragon (kind 200, machine)": {
+      "pieces": "tf_page1.png 64x64, one main piece",
+      "note": "dragon machine follows the motion state directly (no lunge, no extras in the ported state machine); renders at the player's heel, evidence/screenshots/pet-machine-dragon.png"
+    },
+    "13116 Crimson Thief Mask (kind 200, machine)": {
+      "pieces": "particles_large8.png 64x64 generated piece from the parts rect (no gameIcon pet records)",
+      "cells": "idle/moving/punch rows share cells [6..10,14] per the machine config",
+      "visual": "evidence/screenshots/pet-machine-thief-mask.png"
+    },
+    "15336 Captain Bark (kind 38, flyWalk script pet)": {
+      "pieces": "p_cb_regular.png 32x32, single record",
+      "visual": "renders beside the player, facing the player; PetFlyWalk publication is covered by test/pet-system.test.mjs (evidence/screenshots/pet-script-captain-bark.png)"
+    }
+  },
+  "regressions": {
+    "npmTest": "111/111 pass",
+    "demoTest": "65/72, same 7 pre-existing failures as 4fb7669 (floating vehicle delta, default-state fixtures, texture edge clamping/pet wrapping, Riding Cloud, horse-sit mounts, XML emitter hooks, generic float)"
+  },
+  "environmentNotes": [
+    "The world canvas composited correctly on the local server; the earlier missing-player symptom seen on the proxy-deployed copy did not reproduce and is an environment artifact of that deployment, not the app code.",
+    "The flat-floor solidAt and one-frame arm-angle lag are visually imperceptible in the preview (the string anchor tracks the hand); both remain documented placeholders in PET_SYSTEM_REVISION.md."
+  ]
+}

@@ -8,7 +8,7 @@ You are implementing a Growtopia planner's player rendering system. Read RESEARC
 
 Read ARCHIVE_MOUNT_PET_REVISION.md first, then STATE_ROUTING_REVISION.md and older revision notes. Use catalog-adapter.mjs to retain seats, legacy lift metadata, captured still arms and public piece sequences; do not truncate the wearable catalog or reintroduce unconditional neutral-pose overrides. Load compiled renderer XML before normalization; a loaded XML file is not proof of full native support.
 
-Latest: start with STATE_ROUTING_REVISION.md, then ANIMATION_FX_FLOAT_REVISION.md and the riding revision. Preserve full frame size and source-cell-local offsets; PlannerPlayer.step now advances normalized catalog items from the same MotionFrame, so do not advance them again separately. Load the shipped lift profiles before normalization. “Generated draw call” is not “correct animation,” and missing renderer/FX references must remain explicit.
+Latest: start with PET_SYSTEM_REVISION.md (pet engine port; includes the render-verification follow-up and the leash-string atlas-filter fix), then STATE_ROUTING_REVISION.md, ANIMATION_FX_FLOAT_REVISION.md and the riding revision. Preserve full frame size and source-cell-local offsets; PlannerPlayer.step now advances normalized catalog items from the same MotionFrame, so do not advance them again separately. Load the shipped lift profiles before normalization. “Generated draw call” is not “correct animation,” and missing renderer/FX references must remain explicit.
 
 ## Objective
 

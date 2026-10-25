@@ -311,13 +311,14 @@ function background(w,h,ground,cameraY,displayScale) {
   return floor;
 }
 function renderAvatar() {
-  const calls=state.lastResult.calls.filter(c=>!state.hiddenPasses.has(c.pass)&&atlases.has(c.atlas));
+  /* the pet leash string is a line primitive with no atlas; it needs none */
+  const calls=state.lastResult.calls.filter(c=>!state.hiddenPasses.has(c.pass)&&(c.line||atlases.has(c.atlas)));
   const bounds=drawBounds(calls),scale=state.resolution/32;
   const width=Math.ceil(bounds.width*scale),height=Math.ceil(bounds.height*scale);
   if(avatar.width!==width||avatar.height!==height){avatar.width=width;avatar.height=height;}
   avatarCtx.setTransform(1,0,0,1,0,0);avatarCtx.clearRect(0,0,width,height);
   state.avatarBounds=bounds;
-  const missing=[...new Set(state.lastResult.calls.filter(c=>!atlases.has(c.atlas)).map(c=>c.atlas))];
+  const missing=[...new Set(state.lastResult.calls.filter(c=>!c.line&&!atlases.has(c.atlas)).map(c=>c.atlas))];
   for(const name of missing)loadAtlas(name);
   if(missing.some(name=>failedAtlases.has(name)))$("#coverage-status").textContent=
     `Unavailable sprite sheets: ${missing.filter(n=>failedAtlases.has(n)).join(", ")}. Other outfit pieces remain visible.`;

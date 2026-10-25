@@ -243,7 +243,8 @@ function drawScene(w, h) {
 function renderAvatar() {
   /* dynamically load any atlas a draw call references but we have not
      registered yet (same as the Demo boot) — pieces appear next frame */
-  const missing = [...new Set(state.lastResult.calls.filter(c => !atlases.has(c.atlas)).map(c => c.atlas))];
+  /* the pet leash string is a line primitive with no atlas; it needs none */
+  const missing = [...new Set(state.lastResult.calls.filter(c => !c.line && !atlases.has(c.atlas)).map(c => c.atlas))];
   for (const name of missing) loadAtlas(name);
   const wornAncestral = state.equipped.get(9);
   const customAncestralId = wornAncestral && state.ancestralMap?.has(wornAncestral.id)
@@ -253,7 +254,7 @@ function renderAvatar() {
     // The dedicated ancestral renderer owns the worn artifact's appearance.
     // Suppress its legacy sprite draws even when they use RenderInFront.
     !(customAncestralId !== null && c.owner === customAncestralId) &&
-    atlases.has(c.atlas));
+    (c.line || atlases.has(c.atlas)));
   const bounds = drawBounds(calls), scale = state.resolution / 32;
   const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
   if (avatar.width !== width || avatar.height !== height) { avatar.width = width; avatar.height = height; }
