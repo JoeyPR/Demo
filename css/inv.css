@@ -87,8 +87,8 @@
    art bounds: fist 162/192 of its canvas, wrench 169/192. */
 .box.tool .ic{inset:18%;overflow:hidden}
 .box.tool .ic img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:calc(100% + 4*var(--u));height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
-.box.tool .ic img.art-wrench{width:calc(96% + 4*var(--u))}
+  width:calc(100% + 4px);height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
+.box.tool .ic img.art-wrench{width:calc(96% + 4px)}
 
 /* 3. tabs — the PNGs already contain their own outlines, corners and shadows.
    The button adds no background/border and never clips the baked drop shadow. */
