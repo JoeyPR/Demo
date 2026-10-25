@@ -44,9 +44,8 @@ test("shadow caster selection keeps player/clothing and excludes FX, pets, parti
   ]);
 });
 
-test("avatar scale is 1.56 half-size land tiles and stays pinned to the feet", () => {
+test("avatar stays pinned to its feet while land tiles use the full 32-unit scale", () => {
   assert.equal(PLAYER_VISUAL_SCALE, 0.78);
-  assert.equal(PLAYER_VISUAL_SCALE * 2, 1.56);
   const rect = playerVisualRect({ x: 0, y: 0, width: 32, height: 32 }, 100, 200, 4);
   assert.equal(rect.width, 32 * 4 * PLAYER_VISUAL_SCALE);
   assert.equal(rect.height, 32 * 4 * PLAYER_VISUAL_SCALE);
@@ -54,12 +53,14 @@ test("avatar scale is 1.56 half-size land tiles and stays pinned to the feet", (
   assert.equal(rect.y + rect.height, 200 + 32 * 4);
 });
 
-test("shadow projection is black and falls down-right or down-left with facing", () => {
+test("shadow is black at 50% and shifts exactly 3px down toward facing", () => {
   assert.deepEqual(PLAYER_SHADOW_COLOR, [0, 0, 0]);
-  assert.deepEqual(playerShadowOffset(4, 1), { x: 5, y: 10 });
-  assert.deepEqual(playerShadowOffset(4, -1), { x: -5, y: 10 });
-  assert.equal(PLAYER_SHADOW_OFFSET, 1.25);
-  assert.equal(PLAYER_SHADOW_DROP, 2.5);
+  assert.deepEqual(playerShadowOffset(1, 1), { x: 3, y: 3 });
+  assert.deepEqual(playerShadowOffset(1, -1), { x: -3, y: 3 });
+  assert.deepEqual(playerShadowOffset(2, 1), { x: 1.5, y: 1.5 },
+    "camera zoom still produces an exact 3px screen-space offset");
+  assert.equal(PLAYER_SHADOW_OFFSET, 3);
+  assert.equal(PLAYER_SHADOW_DROP, 3);
   assert.equal(PLAYER_SHADOW_OPACITY, 0.5);
 });
 
@@ -73,8 +74,12 @@ test("preview uses the shadow mask, removes the circular floor shadow, and draws
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
   assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
-  assert.ok(app.indexOf("c.drawImage(avatar, playerRect.x") < app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)"),
-    "foreground land is drawn after the player");
-  assert.ok(app.indexOf("drawAncestralAura(s, rootX, ground, frame, \"front\"") < app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)"),
-    "foreground land occludes the full player/effects composite");
+  assert.match(app, /const landS = s;/, "land tiles render at full 32-unit scale");
+  const shadow = app.indexOf("c.drawImage(avatarShadow");
+  const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)");
+  const player = app.indexOf("c.drawImage(avatar, playerRect.x");
+  assert.ok(shadow < land && land < player,
+    "shadow is behind the land and land is behind the player");
+  assert.ok(player < app.indexOf("drawAncestralAura(s, rootX, ground, frame, \"front\""),
+    "front ancestral effects remain above the player");
 });
