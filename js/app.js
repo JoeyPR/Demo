@@ -13,7 +13,7 @@ import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
-import { PLAYER_VISUAL_SCALE, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
+import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -531,15 +531,17 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.scale(zoom, zoom);
   c.translate(-cameraPivotX, -cameraPivotY);
 
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(s, motion.facing);
   // Growtopia's DropShadow shader is an alpha-mask tint with a texture offset.
   // Composite its projected silhouettes after the land and before the player.
   c.imageSmoothingEnabled = false;
+  c.save();
+  c.globalAlpha = PLAYER_SHADOW_OPACITY;
   c.drawImage(avatarShadow,
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
+  c.restore();
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   // Scale the player and all clothing around rig feet (16,32). The land tiles
   // are half-size, so 0.78 yields a 1.56-tile-tall player instead of two tiles.
@@ -550,6 +552,10 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
     P.plate.draw(c, w / 2, playerTop - 6 * s, s * 0.9, state.clock);
   }
+  // Foreground terrain must occlude the complete avatar/clothing composite.
+  // This is intentionally the last world layer, so blocks cover the feet and
+  // any body pixels that extend into the ground instead of appearing behind it.
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
   c.restore();
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
