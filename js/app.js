@@ -376,10 +376,10 @@ function setLand(id) {
 }
 P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame, zoom) {
-  // Render one full 32-unit land tile at the player's unscaled world-unit
-  // scale (instead of 16 units). The player remains separately scaled to 0.78.
-  // Tile/world coordinates stay native; only the on-screen tile size changes.
-  const landS = s;
+  // Render land tiles at 24 screen-units per 32-unit source tile — the
+  // midpoint between the former 16-unit and 32-unit sizes. Player scale stays
+  // separate at 0.78; tile/world coordinates remain native.
+  const landS = s * (24 / 32);
   const lw = Math.ceil(w / (landS * zoom));
   const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
