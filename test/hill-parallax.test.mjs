@@ -29,6 +29,15 @@ test("parallax starts immediately with travel and reverses with the player", () 
   assert.equal(hillSceneOffset(0, 4, 2, 1), 0);
 });
 
+test("hill draw positions follow player travel direction and reverse when travel reverses", () => {
+  const idle = hillDrawXs(0, 0, 100);
+  const rightOffset = hillSceneOffset(10, 1, 1, 0.5);
+  const leftOffset = hillSceneOffset(-10, 1, 1, 0.5);
+  assert.deepEqual(idle, [-100, 0]);
+  assert.deepEqual(hillDrawXs(0, rightOffset, 100), [-95, 5]);
+  assert.deepEqual(hillDrawXs(0, leftOffset, 100), [-5, 95]);
+});
+
 test("Arid wobble groups follow their matching desert hill layers", () => {
   const movingSheets = hillSheetIndices(arid);
   const speeds = hillScrollSpeeds(arid);
