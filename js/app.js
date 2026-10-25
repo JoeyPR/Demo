@@ -102,7 +102,14 @@ function syncAuraPass() {
   else state.hiddenPasses.delete("RenderAura");
 }
 P.on("equip", payload => equipToggle(typeof payload === "object" && payload !== null ? payload.id : payload));
-P.on("skin", i => { state.skin = SKINS[i].rgb; });
+P.on("skin", i => {
+  state.skin = SKINS[i].rgb;
+  // Refresh currently mounted inventory canvases that use skin-relative tint.
+  // The grid is virtualized, so this touches only the visible boxes.
+  document.querySelectorAll(".box .ic canvas").forEach(canvas => {
+    if (canvas.__demoItem) renderDemoInventoryIcon(canvas, canvas.__demoItem, state.skin);
+  });
+});
 
 /* ---------------- simulation ------------------------------------------- */
 function step(dt) {
@@ -528,6 +535,7 @@ P.thumb = function (raw, size = 64) {
   canvas.style.width = "100%";
   canvas.style.height = "100%";
   canvas.setAttribute("aria-hidden", "true");
+  canvas.__demoItem = raw;
   renderDemoInventoryIcon(canvas, raw, state.skin);
   return canvas;
 };

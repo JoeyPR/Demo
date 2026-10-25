@@ -1,8 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
 
 const root = new URL("../", import.meta.url);
 const index = JSON.parse(await readFile(new URL("demo/inventory-icons.json", root), "utf8"));
@@ -26,9 +24,12 @@ test("all icon source candidates resolve to local Demo assets", () => {
 });
 
 test("Set Planner tint and layered-icon indicators remain represented", () => {
-  assert.ok(index.items.some(item => Array.isArray(item.iconTints) && item.iconTints.length));
+  const tinted = index.items.filter(item => Array.isArray(item.iconTints) && item.iconTints.length);
+  assert.equal(tinted.length, 208, "preserve Website's 208 per-item iconTints entries");
+  assert.ok(tinted.some(item => item.iconTints.includes("s")), "skin-relative tint must be present");
+  assert.ok(tinted.some(item => item.iconTints.some(tint => typeof tint === "string" && /^[0-9a-f]{6}$/i.test(tint))));
   assert.ok(index.items.some(item => Array.isArray(item.iconLayers) && item.iconLayers.length));
-  assert.ok(index.items.some(item => item.iconRule));
+  assert.ok(index.items.some(item => item.iconRule), "Planner's per-item icon indication rules must be present");
 });
 
 test("vertical icon sources retain 32px per-frame stride", () => {
