@@ -169,28 +169,14 @@ async function renderSourceTint(record, candidate, frame) {
   return tintFrame(frame, record.sourceTint);
 }
 
-async function trimLargeCanvas(source) {
-  const ctx = source.getContext("2d", { willReadFrequently: true });
-  const image = ctx.getImageData(0, 0, source.width, source.height);
-  let left = source.width, top = source.height, right = -1, bottom = -1;
-  for (let y = 0; y < source.height; y++) {
-    for (let x = 0; x < source.width; x++) {
-      if (image.data[(y * source.width + x) * 4 + 3] <= 12) continue;
-      if (x < left) left = x;
-      if (x > right) right = x;
-      if (y < top) top = y;
-      if (y > bottom) bottom = y;
-    }
-  }
-  if (right < left || bottom < top) return null;
+function cropIconFrame(source, x = 112, y = 112) {
+  // iconLayers are positioned around (128,128) on a work canvas. Capture the
+  // full native 32x32 icon cell; do not alpha-trim and enlarge its visible art.
+  if (!source || x < 0 || y < 0 || x + 32 > source.width || y + 32 > source.height) return null;
   const output = blankFrame();
-  const out = output.getContext("2d", { alpha: true });
-  out.imageSmoothingEnabled = false;
-  const width = right - left + 1, height = bottom - top + 1;
-  const scale = Math.min(30 / width, 30 / height);
-  const dw = Math.max(1, Math.round(width * scale)), dh = Math.max(1, Math.round(height * scale));
-  out.drawImage(source, left, top, width, height,
-    Math.floor((32 - dw) / 2), Math.floor((32 - dh) / 2), dw, dh);
+  const ctx = output.getContext("2d", { alpha: true });
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(source, x, y, 32, 32, 0, 0, 32, 32);
   return output;
 }
 
@@ -242,11 +228,11 @@ async function renderWebsiteLayers(layers, skin = null, baseFrame = null) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(baseFrame, 128, 128);
+    ctx.drawImage(baseFrame, 112, 112);
     ctx.restore();
     drew = true;
   }
-  return drew ? trimLargeCanvas(work) : null;
+  return drew ? cropIconFrame(work, 112, 112) : null;
 }
 
 async function renderProfileLayers(record, candidates, skin = null) {
@@ -362,23 +348,10 @@ function paintContained(canvas, frame) {
   const ctx = canvas.getContext("2d", { alpha: true });
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const pixels = frame.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, 32, 32).data;
-  let left = 32, top = 32, right = -1, bottom = -1;
-  for (let y = 0; y < 32; y++) {
-    for (let x = 0; x < 32; x++) {
-      if (pixels[(y * 32 + x) * 4 + 3] <= 4) continue;
-      if (x < left) left = x;
-      if (x > right) right = x;
-      if (y < top) top = y;
-      if (y > bottom) bottom = y;
-    }
-  }
-  if (right < left || bottom < top) return;
-  const width = right - left + 1, height = bottom - top + 1;
-  const scale = Math.min(58 / width, 58 / height);
-  const dw = Math.max(1, Math.round(width * scale)), dh = Math.max(1, Math.round(height * scale));
-  ctx.drawImage(frame, left, top, width, height,
-    Math.floor((canvas.width - dw) / 2), Math.floor((canvas.height - dh) / 2), dw, dh);
+  // The 64x64 backing canvas is 2x density for the full 32x32 source cell.
+  // Draw the entire cell, including transparent margins; never scale its
+  // alpha-bounded artwork to fill the inventory slot.
+  ctx.drawImage(frame, 0, 0, 32, 32, 0, 0, 64, 64);
 }
 
 export async function renderDemoInventoryIcon(canvas, item, skin = null) {

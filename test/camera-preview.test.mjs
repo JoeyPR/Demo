@@ -16,29 +16,37 @@ test('zoom clamps to the preview control limits and handles invalid values', () 
   assert.equal(clampCameraZoom(Number.NaN), 1);
 });
 
-test('100% zoom preserves the baseline vertical framing calculation', () => {
-  const input = { width: 1920, height: 1080, scale: 4, frameY: -60, topUnits: -35, zoom: 1 };
-  const layout = computeCameraLayout(input);
-  const ground = input.height / 2 + 16 * input.scale;
-  const freeTop = ground - 32 * input.scale + input.frameY * input.scale + input.topUnits * input.scale;
-  assert.equal(layout.cameraY, Math.min(0, freeTop - 6));
+test('camera layout matches fe5851f scale-before-layout behavior at every zoom', () => {
+  const width = 1920, height = 1080, scale = 4, frameY = -60, topUnits = -35;
+  for (const zoom of [0.5, 0.75, 1, 1.25, 1.5, 2]) {
+    const layout = computeCameraLayout({ width, height, scale, frameY, topUnits, zoom });
+    const scaled = scale * zoom;
+    const baselineGround = height / 2 + 16 * scaled;
+    const baselineRootY = baselineGround - 32 * scaled + frameY * scaled;
+    const baselineFreeTop = baselineRootY + topUnits * scaled;
+    const baselineCameraY = Math.min(0, baselineFreeTop - 6);
+
+    near(layout.cameraY, baselineCameraY);
+    near(layout.cameraPivotX, width / 2);
+    near(layout.cameraPivotY, height / 2);
+    near(projectCameraPoint(0, layout.groundCam, 0, height / 2, zoom).y,
+      baselineGround - baselineCameraY);
+    near(projectCameraPoint(0, layout.rootY, 0, height / 2, zoom).y,
+      baselineRootY - baselineCameraY);
+    const projectedTop = projectCameraPoint(0, layout.framedTopY, 0, height / 2, zoom).y;
+    near(projectedTop, baselineFreeTop - baselineCameraY);
+    assert.ok(projectedTop >= 6 - 1e-8, 'zoom ' + zoom + ' clipped the head/nameplate');
+    if (baselineCameraY < 0) near(projectedTop, 6);
+  }
 });
 
-test('zoomed-in framing keeps the projected head/nameplate below the upper edge', () => {
-  for (const zoom of [1.15, 1.5, 2]) {
-    const layout = computeCameraLayout({
-      width: 1920, height: 1080, scale: 4, frameY: -60, topUnits: -35, zoom,
-    });
-    const projectedTop = projectCameraPoint(
-      0, layout.framedTopY, 0, layout.cameraPivotY, zoom,
-    ).y;
-    assert.ok(projectedTop >= 6 - 1e-8, 'zoom ' + zoom + ' clipped the top at ' + projectedTop);
-    if (layout.cameraY < 0) {
-      assert.ok(Math.abs(projectedTop - 6) <= 1e-8, 'framed top should rest at the margin');
-    } else {
-      assert.ok(projectedTop > 6, 'zoom ' + zoom + ' shifted the scene unnecessarily');
-    }
-  }
+test('jump displacement scales with zoom instead of being absorbed by the pivot', () => {
+  const input = { width: 1920, height: 1080, scale: 4, topUnits: -5, zoom: 1.5 };
+  const grounded = computeCameraLayout({ ...input, frameY: 0 });
+  const jumping = computeCameraLayout({ ...input, frameY: -10 });
+  const groundedRoot = projectCameraPoint(0, grounded.rootY, 0, input.height / 2, input.zoom).y;
+  const jumpingRoot = projectCameraPoint(0, jumping.rootY, 0, input.height / 2, input.zoom).y;
+  near(jumpingRoot - groundedRoot, -10 * input.scale * input.zoom);
 });
 
 test('zooming out avoids unnecessary camera follow when the projected top is visible', () => {
@@ -46,7 +54,7 @@ test('zooming out avoids unnecessary camera follow when the projected top is vis
     width: 1920, height: 1080, scale: 4, frameY: -60, topUnits: -35, zoom: 0.5,
   });
   assert.equal(layout.cameraY, 0);
-  const projectedTop = projectCameraPoint(0, layout.framedTopY, 0, layout.cameraPivotY, 0.5).y;
+  const projectedTop = projectCameraPoint(0, layout.framedTopY, 0, 540, 0.5).y;
   assert.ok(projectedTop > 6);
 });
 
@@ -56,7 +64,7 @@ test('camera-space touch aiming is the inverse of the draw transform', () => {
     const source = { x: 123.25, y: 987.5 };
     const screen = projectCameraPoint(source.x, source.y, pivotX, pivotY, zoom);
     const restored = unprojectCameraPoint(screen.x, screen.y, pivotX, pivotY, zoom);
-    assert.ok(Math.abs(restored.x - source.x) < 1e-8);
-    assert.ok(Math.abs(restored.y - source.y) < 1e-8);
+    near(restored.x, source.x);
+    near(restored.y, source.y);
   }
 });

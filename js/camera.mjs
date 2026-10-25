@@ -23,7 +23,12 @@ export function unprojectCameraPoint(x, y, pivotX, pivotY, zoom) {
   };
 }
 
-/** Keep the preview's upper framing boundary correct after camera zoom. */
+/**
+ * Keep the zoom transform equivalent to the pre-camera-scope renderer:
+ * zoom scales the actor's position, jump displacement, ground and nameplate
+ * together. The pivot is the stable viewport center, not the moving actor.
+ * cameraY is a post-zoom screen-space shift used to keep the head/plate visible.
+ */
 export function computeCameraLayout({ width, height, scale, frameY, topUnits, zoom, topMargin = 6 }) {
   for (const [name, value] of Object.entries({ width, height, scale, frameY, topUnits, topMargin })) {
     if (!Number.isFinite(value)) throw new TypeError('Camera layout ' + name + ' must be finite');
@@ -36,21 +41,23 @@ export function computeCameraLayout({ width, height, scale, frameY, topUnits, zo
   const ground = height / 2 + 16 * scale;
   const rootX = width / 2 - 16 * scale;
   const baseRootY = ground - 32 * scale + frameY * scale;
-  const basePivotY = baseRootY + 16 * scale;
-  const baseTopY = ground - 32 * scale + frameY * scale + topUnits * scale;
-  const projectedTopY = basePivotY + (baseTopY - basePivotY) * z;
+  const baseTopY = baseRootY + topUnits * scale;
 
-  // cameraY is non-positive. Moving the world down by -cameraY keeps the
-  // transformed head/nameplate below the upper preview edge at every zoom.
+  // Mirror the legacy layout, where world scale was multiplied by zoom before
+  // the camera-follow clamp was calculated.
+  const cameraPivotX = width / 2;
+  const cameraPivotY = height / 2;
+  const projectedTopY = cameraPivotY + (baseTopY - cameraPivotY) * z;
   const cameraY = Math.min(0, projectedTopY - topMargin);
-  const groundCam = ground - cameraY;
-  const rootY = groundCam - 32 * scale + frameY * scale;
-  const cameraPivotX = rootX + 16 * scale;
-  const cameraPivotY = rootY + 16 * scale;
+  // Coordinates passed through the shared canvas transform need the inverse
+  // offset so the resulting on-screen translation remains exactly -cameraY.
+  const cameraOffsetY = -cameraY / z;
+  const groundCam = ground + cameraOffsetY;
+  const rootY = baseRootY + cameraOffsetY;
 
   return {
-    ground, cameraY, groundCam, rootX, rootY,
+    ground, cameraY, cameraOffsetY, groundCam, rootX, rootY,
     cameraPivotX, cameraPivotY, zoom: z,
-    framedTopY: baseTopY - cameraY,
+    framedTopY: baseTopY + cameraOffsetY,
   };
 }

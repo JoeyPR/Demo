@@ -68,3 +68,19 @@ test("layered items keep their primary icon candidate", () => {
       "item " + item.id + " must retain its own icon candidate alongside extra layers");
   }
 });
+
+
+test("inventory icons preserve the full native 32x32 cell", () => {
+  assert.match(rendererSource,
+    /ctx\.drawImage\(frame, 0, 0, 32, 32, 0, 0, 64, 64\)/,
+    "the 2x canvas should scale the complete source cell, not only its opaque pixels");
+  assert.doesNotMatch(rendererSource,
+    /Math\.min\(58 \/ width, 58 \/ height\)/,
+    "alpha-bounds fitting must not enlarge item artwork");
+  assert.match(rendererSource,
+    /ctx\.drawImage\(baseFrame, 112, 112\)/,
+    "the primary icon cell must align to the center of the layered composition");
+  assert.match(rendererSource,
+    /cropIconFrame\(work, 112, 112\)/,
+    "layered art must be clipped to the full 32x32 icon frame");
+});

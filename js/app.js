@@ -454,15 +454,16 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 
   if (state.landWorld) drawLandGround(w, h, groundCam, s, frame, zoom);
   drawAncestralAura(s, rootX, groundCam, frame, "behind", cameraPivotX, cameraPivotY, zoom);
-  c.save();
-  c.imageSmoothingEnabled = true;
-  c.imageSmoothingQuality = "high";
+  // Keep Growtopia's hard pixel edges instead of smoothing the high-resolution
+  // source through another fractional camera-scale pass.
+  c.imageSmoothingEnabled = false;
   c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
-  c.restore();
   drawAncestralAura(s, rootX, groundCam, frame, "front", cameraPivotX, cameraPivotY, zoom);
   if (P.plate) P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
-  if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
   c.restore();
+  // Foreground weather is viewport-space, as it was before camera-scope
+  // rendering; zooming the world must not move or scale rain/snow overlays.
+  if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
   } catch (err) {
