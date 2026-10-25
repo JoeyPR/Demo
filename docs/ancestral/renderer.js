@@ -182,6 +182,21 @@ export function pathAt(path, t) {
   return path[lo];
 }
 
+/** Orbital sprites are behind the player on the right-to-left rear arc.
+ * The forward difference distinguishes both turning points: after the
+ * rightmost point x decreases (behind); after the leftmost point x increases
+ * (in front). */
+export function orbitDirectionX(track, c) {
+  const keys = track?.keys;
+  if (!keys || keys.length < 2) return 0;
+  const start = keys[0][0], end = keys[keys.length - 1][0], span = end - start;
+  if (!(span > 0)) return 0;
+  const wrap = time => start + (((time - start) % span) + span) % span;
+  const step = Math.max(1, Math.min(16, span / Math.max(2, keys.length * 4)));
+  const now = wrap(c);
+  return sampleKeys(keys, wrap(now + step)).x - sampleKeys(keys, now).x;
+}
+
 /** One track sampled at time c -> one drawable entry (planner's fxAt).
  * offset: optional affine applied on top of the entry matrix (the planner's
  * world-anchor eR, mul(eR, m)) — used in movement mode. */
@@ -216,6 +231,8 @@ function fxEntry(track, c, offset) {
     add: track.blend === 1,
     tint: r === 255 && g === 255 && b === 255 ? null : [r, g, b],
     smooth: track.smooth === 1,
+    orbiting: track.blend === 2,
+    orbitDirectionX: track.blend === 2 ? orbitDirectionX(track, c) : 0,
   };
 }
 
@@ -342,10 +359,8 @@ export function drawAncestral(ctx, level, t, opts = {}) {
   const tint = opts.tint ?? new TintCache();
   const facing = opts.facing ?? 1;
   const base = opts.base ?? [1, 0, 0, 1, 0, 0];
-  /* depth layer: the orbiting moons circle AROUND the player — entries in the
-     top half of their orbit (entry y above the orbit midpoint ~14, chest
-     height in the fx-local frame where the feet sit at y=32) pass BEHIND the
-     player; callers render 'behind' before the avatar and 'front' after it.
+  /* Depth layer: orbital moons use their travel direction to select the
+     rear/front half-cycle; non-orbit particles retain the vertical fallback.
      Sparkles always render in front. */
   const layer = opts.layer ?? null;
   const BEHIND_Y = 14;
@@ -358,7 +373,9 @@ export function drawAncestral(ctx, level, t, opts = {}) {
     // visible particle across the player's depth line even when its origin
     // remains on the opposite side.
     const centerY = e.m[1] * (e.sw / 2) + e.m[3] * (e.sh / 2) + e.m[5];
-    const behind = centerY < BEHIND_Y;
+    const behind = e.orbiting && Math.abs(e.orbitDirectionX) > 1e-5
+      ? e.orbitDirectionX < 0
+      : centerY < BEHIND_Y;
     if (layer === 'behind' && !behind) continue;
     if (layer === 'front' && behind) continue;
     const img = sheets[e.sheet];

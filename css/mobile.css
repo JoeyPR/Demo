@@ -20,13 +20,13 @@ body{background:#212226}
 /* top drawer keeps its desktop look, scaled, sitting on the main drawer; the tab handle sits on top of it */
 #top{left:calc(241.5*var(--u));top:calc(23*var(--u));width:calc(440*var(--u));height:calc(118*var(--u))}
 #quick{grid-template-columns:repeat(4,calc(106.5*var(--u)));gap:calc(3*var(--u));padding-top:calc(3.3*var(--u))}
-#handle{left:calc(391.5*var(--u));top:calc(-80*var(--u));width:calc(140*var(--u))}
+#handle{left:calc(395.5*var(--u));top:calc(-80*var(--u));width:calc(132*var(--u))}
 
 /* tabs scaled to reach the screen's left edge (the mobile stage IS the
    screen), staying attached to the main drawer's left border at 100u */
 #tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(740*var(--u) - var(--dy))}
 .tab{width:100%;height:calc(65*var(--u))}
-.tab img{width:100%;height:100%;object-fit:contain;object-position:right center;image-rendering:pixelated}
+.tab img{width:100%;height:86%;object-fit:contain;object-position:right center;image-rendering:pixelated}
 
 /* main drawer: search row + 5-column grid */
 #main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}

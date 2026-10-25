@@ -11,6 +11,7 @@ import { resolveAbilities } from "../demo/engine/abilities.mjs";
 import { WeatherRenderer, loadSheets } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, TILE, WORLD_W } from "./land-system.mjs";
+import { renderPlannerInventoryIcon } from "./inventory-icons.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -37,12 +38,10 @@ const state = {
   landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0
 };
 let player, motion, lastTimestamp = 0;
-/* Growtopia's players stand ~1.5-1.6 blocks tall on 32px tiles. The engine's
-   rig is 1 block tall, so the composited avatar — and everything anchored to
-   it (shadow, name plate, ancestral aura, punch aim) — is scaled by PS
-   around the feet pivot (rig 16,32): the feet stay planted on the ground
-   line and the player keeps the land's 32x32 proportions at every zoom */
-const PS = 1.5625;
+/* Player pixels and land tiles share the same logical 32×32 unit.
+   Keep the feet pivot fixed at (16,32), but do not enlarge the avatar
+   separately from the world when camera zoom changes. */
+const PS = 1;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
 
 /* ---------------- atlas loading (from the Demo renderer) ---------------- */
@@ -556,38 +555,19 @@ function tintEyes() {
   atlases.set(name, registerAtlas(c));
 }
 
-/* ---------------- thumbnails for the grid ------------------------------- */
+/* ---------------- Planner inventory icons -------------------------------
+   The old Demo thumbnail path cropped arbitrary gameIcon/worn sprites. Use
+   Planner's authoritative inventory icon profiles, chosen frame, composed
+   feet icons and color reconstruction. The source frame stays 32×32; CSS
+   confines it to the safe interior of each item box. */
 P.thumb = function (raw, size = 64) {
   const canvas = document.createElement("canvas");
-  canvas.width = size * 2; canvas.height = size * 2;
-  canvas.style.width = canvas.style.height = size + "px";
-  const c2 = canvas.getContext("2d");
-  c2.imageSmoothingEnabled = false;
-  const pieces = (raw.gameIcon ?? []).filter(r => r.a);
-  let primary = pieces.find(r => r.a === raw.atlas) ?? pieces[0] ?? (raw.atlas ? {
-    a: raw.atlas, sx: (raw.x ?? 0) * (raw.cell?.[0] ?? 1) * 32, sy: (raw.y ?? 0) * (raw.cell?.[1] ?? 1) * 32,
-    sw: (raw.cell?.[0] ?? 1) * 32, sh: (raw.cell?.[1] ?? 1) * 32
-  } : null);
-  /* ancestrals: use the tight box-art region of the artifact cell (the
-     planner's box field) instead of the full cell, so the icon is the
-     artifact itself, not the cell's leftover metadata */
-  if (primary && raw.box && raw.atlas === "player_artifact.png") {
-    primary = { ...primary, sx: primary.sx + raw.box[0], sy: primary.sy + raw.box[1], sw: raw.box[2], sh: raw.box[3] };
-  }
-  const draw = () => {
-    c2.clearRect(0, 0, canvas.width, canvas.height);
-    if (primary && images.has(primary.a)) {
-      const s2 = size * 1.6;
-      c2.drawImage(images.get(primary.a), primary.sx, primary.sy, primary.sw, primary.sh,
-        (size * 2 - s2 * (primary.sw / Math.max(primary.sw, primary.sh))) / 2, (size * 2 - s2 * (primary.sh / Math.max(primary.sw, primary.sh))) / 2,
-        s2 * (primary.sw / Math.max(primary.sw, primary.sh)), s2 * (primary.sh / Math.max(primary.sw, primary.sh)));
-    } else {
-      c2.fillStyle = "#a8b79e"; c2.font = `${size * .48}px monospace`; c2.textAlign = "center";
-      c2.fillText(primary ? "…" : "?", size, size * 1.15);
-    }
-  };
-  if (primary && !images.has(primary.a)) loadAtlas(primary.a).then(draw);
-  draw();
+  canvas.width = 32;
+  canvas.height = 32;
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas.setAttribute("aria-hidden", "true");
+  renderPlannerInventoryIcon(canvas, raw);
   return canvas;
 };
 
