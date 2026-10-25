@@ -13,11 +13,13 @@ import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
+import { PLAYER_VISUAL_SCALE, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
 const world = $("#pv"), ctx = world.getContext("2d");
 const avatar = document.createElement("canvas"), avatarCtx = avatar.getContext("2d");
+const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarShadow.getContext("2d");
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
 const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
@@ -261,10 +263,26 @@ function renderAvatar() {
   const bounds = drawBounds(calls), scale = state.resolution / 32;
   const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
   if (avatar.width !== width || avatar.height !== height) { avatar.width = width; avatar.height = height; }
+  if (avatarShadow.width !== width || avatarShadow.height !== height) { avatarShadow.width = width; avatarShadow.height = height; }
   avatarCtx.setTransform(1, 0, 0, 1, 0, 0);
   avatarCtx.clearRect(0, 0, width, height);
   state.avatarBounds = bounds;
   drawCanvas(avatarCtx, calls, atlases, { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
+
+  // Project a separate pure-black alpha mask from the player and wearable
+  // sprites. FX, visuals, particles, pets, the ancestral and punch pieces are
+  // intentionally excluded; each remaining item keeps its own draw matrix.
+  const punching = !!state.lastFrame?.punch;
+  const punchItemId = punching ? state.lastResult?.punchPose?.itemId ?? null : null;
+  const shadows = getPlayerShadowCalls(calls, {
+    ancestralId: state.equipped.get(9)?.id ?? null,
+    punchingItemId: punchItemId,
+    punching,
+  });
+  avatarShadowCtx.setTransform(1, 0, 0, 1, 0, 0);
+  avatarShadowCtx.clearRect(0, 0, width, height);
+  if (shadows.length) drawCanvas(avatarShadowCtx, shadows, atlases,
+    { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
   return calls.length;
 }
 
@@ -401,15 +419,17 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
   const info = state.ancestralMap.get(item.id);
   if (!info) return;
   const lift = state.lastResult.lift?.y ?? 0;
-  // The effect renderer writes absolute transforms, so compose the same
-  // camera mapping explicitly into its base matrix.
-  const baseX = rootX;
-  const baseY = ground - 32 * s + (frame.y + lift) * s;
-  const base = [
-    s * zoom, 0, 0, s * zoom,
-    cameraPivotX + (baseX - cameraPivotX) * zoom,
-    cameraPivotY + (baseY - cameraPivotY) * zoom
-  ];
+  // The effect renderer writes absolute transforms. Scale its authored rig
+  // space with the player, while pinning the FX anchor (16,32) to the same
+  // current feet/chest point and applying camera zoom exactly once.
+  const anchorX = rootX + 16 * s;
+  const anchorY = ground + (frame.y + lift) * s;
+  const screenAnchorX = cameraPivotX + (anchorX - cameraPivotX) * zoom;
+  const screenAnchorY = cameraPivotY + (anchorY - cameraPivotY) * zoom;
+  const fxScale = s * PLAYER_VISUAL_SCALE * zoom;
+  const base = [fxScale, 0, 0, fxScale,
+    screenAnchorX - 16 * fxScale,
+    screenAnchorY - 32 * fxScale];
   // The ancestral renderer's movement-aware sequence needs the avatar's
   // actual position history, not just its current facing. It samples this
   // path at each FX instance's birth time, so walking, jumps, and turns all
@@ -511,20 +531,25 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.scale(zoom, zoom);
   c.translate(-cameraPivotX, -cameraPivotY);
 
-  c.fillStyle = "rgba(37,61,53,0.17)";
-  const shadow = Math.max(0.3, 1 + frame.y / 150);
-  c.beginPath();
-  c.ellipse(w / 2, ground + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
-  c.fill();
-
   if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
-  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
-  // Keep Growtopia's hard pixel edges instead of smoothing the high-resolution
-  // source through another fractional camera-scale pass.
+  const playerRect = playerVisualRect(b, rootX, rootY, s);
+  const shadowOffset = playerShadowOffset(s, motion.facing);
+  // Growtopia's DropShadow shader is an alpha-mask tint with a texture offset.
+  // Composite its projected silhouettes after the land and before the player.
   c.imageSmoothingEnabled = false;
-  c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
+  c.drawImage(avatarShadow,
+    playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
+    playerRect.width, playerRect.height);
+  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
+  // Scale the player and all clothing around rig feet (16,32). The land tiles
+  // are half-size, so 0.78 yields a 1.56-tile-tall player instead of two tiles.
+  c.imageSmoothingEnabled = false;
+  c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
-  if (P.plate) P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
+  if (P.plate) {
+    const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
+    P.plate.draw(c, w / 2, playerTop - 6 * s, s * 0.9, state.clock);
+  }
   c.restore();
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
