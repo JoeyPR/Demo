@@ -1,0 +1,33 @@
+name: Camera and preview regression
+on:
+  push:
+    branches: [origin]
+    paths:
+      - 'js/app.js'
+      - 'js/camera.mjs'
+      - 'js/preview.js'
+      - 'css/preview.css'
+      - 'css/inv.css'
+      - 'css/mobile.css'
+      - 'test/camera-preview.test.mjs'
+      - '.github/workflows/camera-preview.yml'
+  pull_request:
+    branches: [origin]
+    paths:
+      - 'js/app.js'
+      - 'js/camera.mjs'
+      - 'js/preview.js'
+      - 'css/preview.css'
+      - 'css/inv.css'
+      - 'css/mobile.css'
+      - 'test/camera-preview.test.mjs'
+      - '.github/workflows/camera-preview.yml'
+jobs:
+  camera-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/camera-preview.test.mjs

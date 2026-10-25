@@ -27,8 +27,8 @@ body{background:#212226}
   display:flex;flex-direction:column;gap:0}
 /* Tab sprites are near-square; use matching rows so adjacent tabs meet without gaps. */
 .tab{width:100%;height:calc(100*var(--u));flex:0 0 calc(100*var(--u));
-  min-height:0;margin:0;padding:0;overflow:visible}
-.tab img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  min-height:0;margin:0;padding:0;box-sizing:border-box;overflow:visible}
+.tab img{position:absolute;top:0;right:0;width:auto;height:100%;max-width:none;object-fit:contain;
   object-position:right bottom;image-rendering:pixelated}
 
 /* main drawer: search row + 5-column grid *//* main drawer: search row + 5-column grid */

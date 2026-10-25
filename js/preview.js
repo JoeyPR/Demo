@@ -31,10 +31,17 @@
     P.emit('camzoom', Z.v);
   }
 
+  const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, [data-dd]');
+  function insidePreview(e) {
+    const r = cv.getBoundingClientRect();
+    return e.clientX >= r.left && e.clientX <= r.right &&
+      e.clientY >= r.top && e.clientY <= r.bottom;
+  }
+
   /* Growtopia-style camera zoom: scroll wheel over the world (outside the
      inventory panels and the dropdown buttons) zooms the camera in/out. */
   document.addEventListener('wheel', e => {
-    if (e.target.closest && e.target.closest('#ui, #hud, #toast, #logo, [data-dd]')) return;
+    if (overUI(e.target) || !insidePreview(e)) return;
     e.preventDefault();
     setZoom(Z.v * (e.deltaY < 0 ? 1.15 : 1 / 1.15));
   }, { passive: false });
@@ -43,9 +50,8 @@
      the UI panels and dropdown controls) zooms the camera in/out. */
   const pointers = new Map();
   let pinchBase = null;   /* { dist, zoom } */
-  const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, [data-dd]');
   document.addEventListener('pointerdown', e => {
-    if (overUI(e.target)) return;
+    if (overUI(e.target) || !insidePreview(e)) return;
     pointers.set(e.pointerId, [e.clientX, e.clientY]);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()];

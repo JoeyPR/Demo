@@ -12,6 +12,7 @@ import { WeatherRenderer, loadSheets } from "../weather-engine/weather-renderer.
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, TILE, WORLD_W } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
+import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -133,9 +134,10 @@ function step(dt) {
     const { rootX, rootY, s, lift } = state.view;
     /* Unproject the pointer through the camera scope before aiming in the
        player's fixed 32-unit rig coordinates. */
-    const zoom = Math.max(0.5, state.view.cameraZoom ?? 1);
-    const aimX = state.view.cameraPivotX + (state.aim.x - state.view.cameraPivotX) / zoom;
-    const aimY = state.view.cameraPivotY + (state.aim.y - state.view.cameraPivotY) / zoom;
+    const { x: aimX, y: aimY } = unprojectCameraPoint(
+      state.aim.x, state.aim.y,
+      state.view.cameraPivotX, state.view.cameraPivotY, state.view.cameraZoom
+    );
     const cx = rootX + 16 * s, cy = rootY + 32 * s;
     motion.facing = aimX >= cx ? 1 : -1;
     let x = 16 + (aimX - cx) / s;
@@ -289,6 +291,15 @@ async function setWeather(key) {
   }
 }
 P.on("weather", key => setWeather(key));
+// The weather renderer shares these canvases by reference. Resize them when
+// the preview switches logical dimensions (mobile/desktop or orientation).
+P.on("preview", pv => {
+  const w = pv?.w ?? world.width, h = pv?.h ?? world.height;
+  for (const canvas of [weatherBG, weatherFG]) {
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+  }
+});
 
 /* ---------------- land -------------------------------------------------- */
 /* The land system (land-system.mjs, from the Planner-LANDsystem package):
@@ -323,10 +334,9 @@ function setLand(id) {
   state.landWorld = { seed: 1, fg, bg: fg.map(r => r.map(() => 0)), flip: {} };
 }
 P.on("land", id => setLand(id));
-function drawLandGround(w, h, ground, s, frame) {
+function drawLandGround(w, h, ground, s, frame, zoom) {
   // Tile/world coordinates remain native. Render enough surface for the
   // viewport at every zoom, rather than scaling a screen-width strip.
-  const zoom = Math.max(0.5, P.camZoom?.v ?? 1);
   const lw = Math.ceil(w / (s * zoom));
   const lh = Math.max(1, Math.ceil(h / (s * zoom)) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
@@ -402,21 +412,17 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   const frame = state.lastFrame, result = state.lastResult;
   // Logical draw scale never includes zoom. Only the camera transform changes.
   const s = Math.min(4, Math.max(3, w / 480));
-  const zoom = Math.max(0.5, Math.min(2, P.camZoom?.v ?? 1));
-  const ground = h / 2 + 16 * s;
+  const zoom = clampCameraZoom(P.camZoom?.v ?? 1);
   const scroll = frame.x * s;
 
   renderAvatar();
   const b = state.avatarBounds;
   const lift = result.lift?.y ?? 0;
   const topUnits = Math.min(b?.y ?? 0, lift - 17);
-  const freeTop = ground - 32 * s + frame.y * s + topUnits * s;
-  const cameraY = Math.min(0, freeTop - 6);
-  const groundCam = ground - cameraY;
-  const rootX = w / 2 - 16 * s;
-  const rootY = groundCam - 32 * s + frame.y * s;
-  const cameraPivotX = rootX + 16 * s;
-  const cameraPivotY = rootY + 16 * s;
+  const camera = computeCameraLayout({
+    width: w, height: h, scale: s, frameY: frame.y, topUnits, zoom, topMargin: 6
+  });
+  const { ground, groundCam, rootX, rootY, cameraPivotX, cameraPivotY } = camera;
   state.view = { rootX, rootY, s, lift, cameraZoom: zoom, cameraPivotX, cameraPivotY };
 
   c.imageSmoothingEnabled = false;
@@ -446,7 +452,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.ellipse(w / 2, groundCam + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
   c.fill();
 
-  if (state.landWorld) drawLandGround(w, h, groundCam, s, frame);
+  if (state.landWorld) drawLandGround(w, h, groundCam, s, frame, zoom);
   drawAncestralAura(s, rootX, groundCam, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   c.save();
   c.imageSmoothingEnabled = true;

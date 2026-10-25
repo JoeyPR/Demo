@@ -1,6 +1,6 @@
 /* PREVIEW: the Growtopia viewport. Logical size is fixed (1920x1080 desktop, 1280x720 mobile) and scaled to fit by preview.js.
    Sits above the Weather background, under the pads + inventory. Centered, a little above middle. */
 #preview{position:fixed;left:50%;top:50%;z-index:1;transform-origin:50% 50%;
-  transform:translate(-50%,-50%) scale(var(--ps,1));pointer-events:none}
-#pv{position:relative;display:block;background:#05080c;border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 #000}
+  transform:translate(-50%,-50%) scale(var(--ps,1));pointer-events:auto;touch-action:none}
+#pv{position:relative;display:block;background:#05080c;border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 #000;touch-action:none}
 #ui{z-index:2}
