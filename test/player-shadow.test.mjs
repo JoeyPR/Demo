@@ -63,22 +63,18 @@ test("shadow is black at 50% and shifts exactly 12px down toward facing", () => 
 });
 
 
-test("preview uses the shadow mask, removes the circular floor shadow, and draws a smaller feet-pinned avatar", async () => {
+test("preview keeps the shadow proportional to the player during camera zoom", async () => {
   const { readFileSync } = await import("node:fs");
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   assert.match(app, /getPlayerShadowCalls\(calls/);
   assert.match(app, /drawImage\(avatarShadow/);
   assert.match(app, /playerVisualRect\(b, rootX, rootY, s\)/);
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
-  assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
-  assert.match(app, /c\.setTransform\(1, 0, 0, 1, 0, 0\)/,
-    "shadow is drawn without the camera zoom transform");
-  assert.match(app, /shadowScreenCenterX/);
-  assert.match(app, /shadowScreenBottomY/);
-  assert.match(app, /c\.drawImage\(avatarShadow, shadowScreenX, shadowScreenY,/);
-  assert.match(app, /playerRect\.width, playerRect\.height\);/,
-    "shadow dimensions are not multiplied by camera zoom");
+  assert.match(app, /c\.drawImage\(avatarShadow,\s*playerRect\.x \+ shadowOffset\.x, playerRect\.y \+ shadowOffset\.y,\s*playerRect\.width, playerRect\.height\)/,
+    "shadow uses the player's same zoom transform and relative dimensions");
+  assert.doesNotMatch(app, /shadowScreenCenterX|shadowScreenBottomY|setTransform\(1, 0, 0, 1, 0, 0\)/,
+    "shadow is not reset to identity screen space before drawing");
   assert.match(app, /const landS = s \* \(24 \/ 32\);/, "land tiles render at the 24-unit midpoint scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
   const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)");
