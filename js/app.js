@@ -456,8 +456,8 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
 }
 
 /* Every hill band follows accumulated player travel immediately — no
-   waiting until the player reaches a world edge. The weather renderer applies
-   each sheet's own speed: hill1 = 1x, hill2 = 0.5x, hill3 = 0.25x. */
+   waiting until the player reaches a world edge. All layers are half the
+   previous speeds: hill1 = 0.5x, hill2 = 0.25x, hill3 = 0.125x. */
 function hillOffsetsNow(w, h, s, frame) {
   const r = state.weatherRenderer;
   if (!r || !r.hillSpeeds?.size) return new Map();
