@@ -96,8 +96,9 @@
   width:calc(50vw - 916*var(--u));height:calc(607.8*var(--u));
   display:flex;flex-direction:column;gap:0;pointer-events:none}
 .tab{display:block;position:relative;flex:0 0 calc(101.3*var(--u));min-height:0;
-  width:100%;height:calc(101.3*var(--u));margin:0;padding:0;box-sizing:border-box;
+  width:100%;height:calc(101.3*var(--u));margin:0 0 calc(-4*var(--u));padding:0;box-sizing:border-box;
   pointer-events:auto;outline:0;background:none;border:0;border-radius:0;overflow:visible}
+#tabs .tab:last-child{margin-bottom:0}
 .tab img{position:absolute;top:0;right:0;width:auto;height:100%;max-width:none;object-fit:contain;
   object-position:right bottom;image-rendering:pixelated}
 .tab .on{display:none}
