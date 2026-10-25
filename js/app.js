@@ -11,7 +11,7 @@ import { resolveAbilities } from "../demo/engine/abilities.mjs";
 import { WeatherRenderer, loadSheets } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, TILE, WORLD_W } from "./land-system.mjs";
-import { renderPlannerInventoryIcon } from "./inventory-icons.mjs";
+import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -518,19 +518,17 @@ function tintEyes() {
   atlases.set(name, registerAtlas(c));
 }
 
-/* ---------------- Planner inventory icons -------------------------------
-   The old Demo thumbnail path cropped arbitrary gameIcon/worn sprites. Use
-   Planner's authoritative inventory icon profiles, chosen frame, composed
-   feet icons and color reconstruction. The source frame stays 32×32; CSS
-   confines it to the safe interior of each item box. */
+/* ---------------- Demo-native inventory icons -----------------------------
+   Item-specific source cells and tint/layer indicators are loaded from Demo's
+   generated inventory icon index; all render code and source images stay local. */
 P.thumb = function (raw, size = 64) {
   const canvas = document.createElement("canvas");
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = 64;
+  canvas.height = 64;
   canvas.style.width = "100%";
   canvas.style.height = "100%";
   canvas.setAttribute("aria-hidden", "true");
-  renderPlannerInventoryIcon(canvas, raw);
+  renderDemoInventoryIcon(canvas, raw, state.skin);
   return canvas;
 };
 
