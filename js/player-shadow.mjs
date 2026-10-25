@@ -3,8 +3,8 @@
  * offset. Effects are deliberately filtered before this projection.
  */
 export const PLAYER_VISUAL_SCALE = 0.78; // character is slightly shorter than a full 32-unit land tile
-export const PLAYER_SHADOW_OFFSET = 6; // exact output-pixel shift, mirrored by facing
-export const PLAYER_SHADOW_DROP = 6; // exact output-pixel downward shift
+export const PLAYER_SHADOW_OFFSET = 12; // exact output-pixel shift, mirrored by facing
+export const PLAYER_SHADOW_DROP = 12; // exact output-pixel downward shift
 export const PLAYER_SHADOW_OPACITY = 0.5; // 50% opacity
 export const PLAYER_SHADOW_COLOR = Object.freeze([0, 0, 0]);
 
@@ -51,7 +51,7 @@ export function playerVisualRect(bounds, rootX, rootY, unitScale) {
 /** Directional projection: facing right => bottom-right, left => bottom-left. */
 export function playerShadowOffset(cameraZoom, facing) {
   // This helper is called inside the camera's zoom transform. Divide out that
-  // transform so the final projected offset remains exactly 6 canvas pixels.
+  // transform so the final projected offset remains exactly 12 canvas pixels.
   const zoom = Number.isFinite(cameraZoom) && cameraZoom > 0 ? cameraZoom : 1;
   return {
     x: (facing < 0 ? -1 : 1) * PLAYER_SHADOW_OFFSET / zoom,
