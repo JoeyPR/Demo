@@ -452,6 +452,47 @@ export function renderWorld(ctx, world, atlas, camX, camY, viewW, viewH, now = D
   }
 }
 
+/* ------------------------- Planner land policy ---------------------------- */
+/* The preview's land picker offers only the Dirt and Bedrock families plus a
+ * genuine "None" (no land at all). Cave Background is a backdrop, not land:
+ * it fills the world's background layer BEHIND the selected foreground
+ * blocks and is not drawn when there is no land. */
+
+export const CAVE_BACKGROUND_ID = 14;
+export const LAND_NONE = 'none';
+export const DEFAULT_LAND_ID = 2;   /* Dirt — the default land */
+
+/* A land option is any block whose name is from the Dirt or Bedrock family. */
+export function isDirtOrBedrockName(name) {
+  return typeof name === 'string' && /dirt|bedrock/i.test(name);
+}
+
+/* Resolve a stored land selection to LAND_NONE or a block id. 'none'/null
+ * stay None; unknown, unsupported or non-dirt/bedrock ids (legacy picks)
+ * normalize to None. */
+export function resolveLandSelection(value) {
+  if (value == null || value === LAND_NONE) return LAND_NONE;
+  const id = Number(value);
+  if (!Number.isFinite(id)) return LAND_NONE;
+  const def = BLOCKS[id];
+  if (!def || def.unsupported || !isDirtOrBedrockName(def.name)) return LAND_NONE;
+  return id;
+}
+
+/* Uniform land world for the preview: rows 0..topRow-1 air, topRow..bottom
+ * filled with `blockId` in the foreground and Cave Background behind it in
+ * the background layer (renderWorld draws bg first, so it sits behind the
+ * blocks). The top row picks up the block's top-edge autotile variant;
+ * world-edge columns read as connected so scrolling wraps cleanly. */
+export function uniformLandWorld(blockId, topRow = 24) {
+  const fg = [], bg = [];
+  for (let y = 0; y < WORLD_H; y++) {
+    fg.push(new Array(WORLD_W).fill(y < topRow ? 0 : blockId));
+    bg.push(new Array(WORLD_W).fill(y < topRow ? 0 : CAVE_BACKGROUND_ID));
+  }
+  return { seed: 1, fg, bg, flip: {} };
+}
+
 /* ------------------------------ 6. Physics ------------------------------- */
 /* Collision queries. Solid = collision 1 (blocks). Platforms (2) are handled
  * specially in stepPlayer: you land on top only while falling. */

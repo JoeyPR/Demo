@@ -1,17 +1,22 @@
 /* LAND DROPDOWN: the renovated land picker — a dropdown button pinned to the
    bottom-left corner (of the screen on desktop, below the preview on mobile).
-   The panel lists every foreground block as a square tile drawn from the
-   shared tile-sheet pages, chunked so a huge catalog never blocks the UI.
-   Selecting a block calls P.land.set(id); app.js renders the ground strip.
-   There is deliberately no "None" option — Dirt is the default land. */
+   The panel lists ONLY the Dirt and Bedrock families plus a genuine "None"
+   (no land at all), chunked so a huge catalog never blocks the UI. Selecting
+   a block calls P.land.set(id); app.js renders the ground strip with Cave
+   Background behind the blocks. Dirt is the default land. */
 (function(){
   'use strict';
   let blocks = null;        /* fg rows: [id,name,action,page,tx,ty,...] */
   let shown = 0;            /* chunked rendering cursor */
   let chunkPending = false;
   const CHUNK = 150;
-  const CATS = [[14, 'Platforms'], [15, 'Bedrock'], [16, 'Lava'], [17, 'Foreground']];
+  const CATS = [[17, 'Dirts'], [15, 'Bedrocks']];
   const DEFAULT_LAND = 2;  /* Dirt */
+  const LAND_NONE = 'none';
+  /* The only land options are the Dirt and Bedrock families. This is the
+     same policy as isDirtOrBedrockName() in js/land-system.mjs (kept in
+     sync by test). */
+  const isLandOption = b => /dirt|bedrock/i.test(b[1]);
   const pageImages = new Map(), pageLoads = new Map();
 
   /* ---------------- button + panel scaffolding ---------------- */
@@ -32,7 +37,8 @@
   P.land = {
     get key() {
       const saved = P.store.get('land', null);
-      if (saved == null || saved === 'none') return DEFAULT_LAND;
+      if (saved == null) return DEFAULT_LAND;
+      if (saved === LAND_NONE) return LAND_NONE;
       return Number.isFinite(+saved) ? +saved : DEFAULT_LAND;
     },
     set(id) {
@@ -72,9 +78,10 @@
   function visibleBlocks() {
     if (!blocks) return [];
     const c = catSel.value;
-    if (!c || c === 'All') return blocks;
+    const list = blocks.filter(isLandOption);
+    if (!c || c === 'All') return list;
     const action = (CATS.find(x => x[1] === c) || [])[0];
-    return blocks.filter(b => b[2] === action);
+    return list.filter(b => b[2] === action);
   }
 
   function makeTile(b, curId) {
@@ -94,6 +101,26 @@
     el.append(sq, label);
     drawBlock(cv, b, 32);
     el.addEventListener('click', () => P.land.set(b[0]));
+    return el;
+  }
+
+  /* "None" — no land at all: a blank square, no block art. */
+  function makeNoneTile(curId) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'dd-tile' + (curId === LAND_NONE ? ' on' : '');
+    el.dataset.id = LAND_NONE;
+    el.title = 'None';
+    const sq = document.createElement('span');
+    sq.className = 'dd-sq';
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 32;
+    sq.append(cv);
+    const label = document.createElement('span');
+    label.className = 'dd-name';
+    label.textContent = 'None';
+    el.append(sq, label);
+    el.addEventListener('click', () => P.land.set(LAND_NONE));
     return el;
   }
 
@@ -125,17 +152,21 @@
     if ([...catSel.options].some(x => x.value === cur)) catSel.value = cur;
     shown = 0;
     tilesEl.replaceChildren();
+    tilesEl.append(makeNoneTile(P.land.key));
     pumpChunks();
   }
 
   function markCurrent() {
-    const curId = P.land.key;
-    for (const t of tilesEl.querySelectorAll('.dd-tile')) t.classList.toggle('on', +t.dataset.id === curId);
+    const curId = String(P.land.key);
+    for (const t of tilesEl.querySelectorAll('.dd-tile')) t.classList.toggle('on', String(t.dataset.id) === curId);
   }
 
   /* ---------------- button icon ---------------- */
   function updateIcon() {
+    const g = iconCv.getContext('2d');
+    g.clearRect(0, 0, 32, 32);
     const id = P.land.key;
+    if (id === LAND_NONE) return;   /* None: a blank icon */
     const b = blocks && blocks.find(x => x[0] === id);
     if (b) drawBlock(iconCv, b, 32);
   }

@@ -8,9 +8,9 @@ import { drawCanvas } from "../demo/engine/render.mjs";
 import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
 import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
-import { WeatherRenderer, loadSheets } from "../weather-engine/weather-renderer.js";
+import { WeatherRenderer, loadSheets, hillTravelExcess, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
-import { registerBlocks, renderWorld, BLOCKS, TILE, WORLD_W } from "./land-system.mjs";
+import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
 
@@ -272,10 +272,12 @@ function renderAvatar() {
    that exact timeline position (ANIMATED fully rendered weather) — no jump. */
 const WEATHER_STATIC_MS = 500;
 async function setWeather(key) {
+  /* "None" was removed from the weathers: a saved 'none' (or empty) falls
+     back to Sunny — there is always a weather. */
+  if (!key || key === "none") key = "sunny";
   state.weatherKey = key;
   state.weatherRenderer = null;
   state.weatherStill = null;
-  if (!key || key === "none") return;
   /* PREVIEW WHILE LOADING: the weather dropdown's cached fully-rendered still
      of the new weather is shown immediately, before its sheets are decoded */
   if (P.weatherThumb) P.weatherThumb(key).then(c => {
@@ -332,38 +334,47 @@ function landPage(name) {
   landLoads.set(name, load);
   return load;
 }
-const DEFAULT_LAND = 2;   /* Dirt — the default land the player walks on */
+const DEFAULT_LAND = DEFAULT_LAND_ID;   /* Dirt — the default land the player walks on */
 function setLand(id) {
-  if (id == null || id === "none") id = DEFAULT_LAND;
-  if (!BLOCKS[id]) { state.landBlock = null; state.landWorld = null; return; }
-  const def = BLOCKS[id];
+  /* Only the Dirt and Bedrock families are land options, plus a genuine
+     None: no land at all (and therefore no Cave Background — it is a backdrop
+     behind land blocks, never drawn on its own). Legacy unsupported picks
+     normalize to None via resolveLandSelection. */
+  const resolved = resolveLandSelection(id);
+  if (resolved === LAND_NONE) { state.landBlock = null; state.landWorld = null; return; }
+  const def = BLOCKS[resolved];
   landPage(def.page || "tiles_page1");
-  state.landBlock = id;
-  /* uniform world: rows 0-23 air, rows 24-59 the selected block — the top
-     row picks up the block's top-edge autotile variant, everything below is
-     interior; world-edge columns read as connected so scrolling wraps cleanly */
-  const fg = [];
-  for (let y = 0; y < 60; y++) fg.push(new Array(WORLD_W).fill(y < 24 ? 0 : id));
-  state.landWorld = { seed: 1, fg, bg: fg.map(r => r.map(() => 0)), flip: {} };
+  /* Cave Background renders BEHIND the blocks: it fills the world's background
+     layer (renderWorld draws bg before fg), so its sheet page must load too. */
+  landPage(BLOCKS[CAVE_BACKGROUND_ID].page || "tiles_page1");
+  state.landBlock = resolved;
+  /* uniform world: rows 0-23 air, rows 24-59 the selected block with Cave
+     Background behind it — the top row picks up the block's top-edge autotile
+     variant; world-edge columns read as connected so scrolling wraps cleanly */
+  state.landWorld = uniformLandWorld(resolved);
 }
 P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame, zoom) {
-  // Tile/world coordinates remain native. Render enough surface for the
-  // viewport at every zoom, rather than scaling a screen-width strip.
-  const lw = Math.ceil(w / (s * zoom));
-  const lh = Math.max(1, Math.ceil(h / (s * zoom)) + 2);
+  // Land tiles render at HALF the player's unit scale: two tiles match the
+  // player's height (the requested proportion — the land was too big next
+  // to the player at 1:1). Tile/world coordinates remain native; only the
+  // on-screen tile size changes. Render enough surface for the viewport at
+  // every zoom, rather than scaling a screen-width strip.
+  const landS = s / 2;
+  const lw = Math.ceil(w / (landS * zoom));
+  const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
     landCanvas.width = lw; landCanvas.height = lh;
   }
   landCtx.imageSmoothingEnabled = false;
-  const span = WORLD_W * TILE;
+  const span = WORLD_PX_W;
   const camX = ((Math.floor(frame.x) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
-  renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * TILE, lw, lh, state.clock);
-  if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * TILE, lw, lh, state.clock);
-  const dx = (w - lw * s) / 2;
-  ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * s, lh * s);
+  renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
+  if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
+  const dx = (w - lw * landS) / 2;
+  ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS);
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -404,6 +415,23 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
   });
 }
 
+/* Hill weathers scroll with the player: the hill bands drift in the
+   direction the player travels, but only once they leave the rendered
+   region of the world — one full 100-tile world span. Inside that region
+   the hills stay perfectly still; beyond it the drift grows with the
+   distance past the edge and retraces exactly when the player comes back.
+   The mapping is zoom-independent (the weather canvases are viewport-space,
+   outside the camera transform), so zooming never moves the hills. */
+const HILL_PARALLAX = 0.25;
+function hillOffsetNow(w, h, s, frame) {
+  const r = state.weatherRenderer;
+  if (!r || !r.hillSheets || !r.hillSheets.size) return 0;
+  const cfg = r.cfg;
+  const pxPerSceneUnit = Math.max(w / cfg.w, h / cfg.h);   /* the renderer's COVER scale */
+  const excess = hillTravelExcess(frame.x, 0, WORLD_PX_W);
+  return hillSceneOffset(excess, s, pxPerSceneUnit, HILL_PARALLAX);
+}
+
 /* ---------------- frame loop ------------------------------------------- */
 let hudTimer = 0;
 function updateHUD() {
@@ -426,34 +454,36 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   // Logical draw scale never includes zoom. Only the camera transform changes.
   const s = Math.min(4, Math.max(3, w / 480));
   const zoom = clampCameraZoom(P.camZoom?.v ?? 1);
-  const scroll = frame.x * s;
 
   renderAvatar();
   const b = state.avatarBounds;
   const lift = result.lift?.y ?? 0;
-  const topUnits = Math.min(b?.y ?? 0, lift - 17);
-  const camera = computeCameraLayout({
-    width: w, height: h, scale: s, frameY: frame.y, topUnits, zoom, topMargin: 6
-  });
-  const { ground, groundCam, rootX, rootY, cameraPivotX, cameraPivotY } = camera;
+  /* the singular camera: player-centered zoom — the pivot is the ground point
+     under the player, and there are no clamps, pans or post-zoom shifts, so
+     for a fixed pose every position below is identical at every zoom */
+  const camera = computeCameraLayout({ width: w, height: h, scale: s, frameY: frame.y, zoom });
+  const { ground, rootX, rootY, cameraPivotX, cameraPivotY } = camera;
   state.view = { rootX, rootY, s, lift, cameraZoom: zoom, cameraPivotX, cameraPivotY };
 
   c.imageSmoothingEnabled = false;
   // Backdrop remains viewport-filling; otherwise zoom-out would reveal blanks.
   if (state.weatherRenderer) {
     const now = performance.now();
-    if (now < state.weatherAnimAt) state.weatherRenderer.render(state.weatherT0);
-    else state.weatherRenderer.render(state.weatherT0 + now - state.weatherAnimAt);
+    const t = now < state.weatherAnimAt ? state.weatherT0 : state.weatherT0 + now - state.weatherAnimAt;
+    /* hill weathers drift with the player's travel beyond the rendered world
+       region (see hillSceneOffset); every other weather ignores it */
+    state.weatherRenderer.render(t, hillOffsetNow(w, h, s, frame));
     c.drawImage(weatherBG, 0, 0, w, h);
   } else if (state.weatherStill) {
     c.drawImage(state.weatherStill, 0, 0, w, h);
   } else {
-    drawScene(w, h, ground, s, scroll);
+    drawScene(w, h);
   }
 
-  // Apply one player-centered scope transform to all foreground world art.
-  // Physics positions, tile coordinates and the avatar's source pixels do not
-  // change when zooming; all scene elements share the exact same camera map.
+  // Apply the one player-centered scope transform to all foreground world art:
+  // zoom scales the actor's position, jump displacement, ground and land
+  // together around the player's ground point. Physics positions, tile
+  // coordinates and the avatar's source pixels do not change when zooming.
   c.save();
   c.translate(cameraPivotX, cameraPivotY);
   c.scale(zoom, zoom);
@@ -462,16 +492,16 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.fillStyle = "rgba(37,61,53,0.17)";
   const shadow = Math.max(0.3, 1 + frame.y / 150);
   c.beginPath();
-  c.ellipse(w / 2, groundCam + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
+  c.ellipse(w / 2, ground + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
   c.fill();
 
-  if (state.landWorld) drawLandGround(w, h, groundCam, s, frame, zoom);
-  drawAncestralAura(s, rootX, groundCam, frame, "behind", cameraPivotX, cameraPivotY, zoom);
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
+  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   // Keep Growtopia's hard pixel edges instead of smoothing the high-resolution
   // source through another fractional camera-scale pass.
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
-  drawAncestralAura(s, rootX, groundCam, frame, "front", cameraPivotX, cameraPivotY, zoom);
+  drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
   if (P.plate) P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
   c.restore();
   // Foreground weather is viewport-space, as it was before camera-scope
@@ -612,18 +642,17 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
       const rows = await (await fetch(moduleURL("../data/land-blocks.json?v=2"))).json();
       registerBlocks(rows);
     } catch { /* land tab will report unavailable */ }
-    /* set the land (Dirt by default) before the first frame so the scene is complete */
-    const savedLand0 = P.store.get("land", String(DEFAULT_LAND));
-    setLand(savedLand0 === "none" ? DEFAULT_LAND : +savedLand0);
+    /* set the land before the first frame so the scene is complete (Dirt by
+       default; a saved 'none' or a legacy unsupported pick renders no land) */
+    setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
 
     state.ready = true;
     P.equippedIds = new Set();
     P.emit("catalog");
     P.emit("boot");
     updateHUD();
-    /* restore the saved weather (Sunny by default) */
-    const saved = P.store.get("weather", "sunny");
-    if (saved && saved !== "none") setWeather(saved);
+    /* restore the saved weather (Sunny by default — there is no "None" weather) */
+    setWeather(P.store.get("weather", "sunny"));
   } catch (error) {
     console.error(error);
     $("#hud").textContent = "Unable to start: " + error.message;

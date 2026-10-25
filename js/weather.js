@@ -31,7 +31,12 @@
   P.weatherThumb = renderStill;
 
   P.weather = {
-    get key() { return P.store.get('weather', 'sunny'); },
+    /* "None" was removed from the weathers — there is always a weather.
+       A legacy saved 'none' normalizes to Sunny. */
+    get key() {
+      const saved = P.store.get('weather', 'sunny');
+      return (!saved || saved === 'none') ? 'sunny' : saved;
+    },
     set(name) {
       P.store.set('weather', name);
       P.emit('weather', name);
@@ -55,14 +60,6 @@
   /* ---------------- still frame rendering (cached) ---------------- */
   async function renderStill(key) {
     if (stillCache.has(key)) return stillCache.get(key);
-    if (key === 'none') {
-      const c = document.createElement('canvas'); c.width = c.height = TILE;
-      const x = c.getContext('2d');
-      const g = x.createLinearGradient(0, 0, 0, TILE);
-      g.addColorStop(0, '#8fd0ff'); g.addColorStop(1, '#d8f2c0');
-      x.fillStyle = g; x.fillRect(0, 0, TILE, TILE);
-      stillCache.set(key, c); return c;
-    }
     const m = await getMods();
     const cfg = await (await fetch(`data/variants/base/${key}.json`)).json();
     if (CLOUD_FIX_PENDING.has(key)) m.applyCloudFix(cfg);   /* sunny/monochrome/spring */
@@ -142,7 +139,7 @@
     }
     if ([...catSel.options].some(x => x.value === cur)) catSel.value = cur;
 
-    /* tiles */
+    /* tiles — no "None" option: every weather is always active */
     const c = catSel.value;
     tilesEl.replaceChildren();
     const curKey = P.weather.key;
@@ -150,7 +147,6 @@
       if (c !== 'All' && (w.name.split(/\s+/)[0] || '') !== c) continue;
       tilesEl.append(makeTile(w.key, w.name, curKey));
     }
-    tilesEl.prepend(makeTile('none', 'None', curKey));
   }
 
   function makeTile(key, name, curKey) {

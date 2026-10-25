@@ -1,13 +1,14 @@
 /* PREVIEW: fixed logical viewport (1920x1080 desktop / 1280x720 mobile) scaled to fit the window.
    P.preview = { w, h, ctx, scale, mobile }.  Emits 'frame' {dt, ctx, w, h} every animation frame:
    every Growtopia-side system (world, player, items, weather fx) draws by listening to 'frame'.
-   Camera zoom (P.camZoom.v, default 50%) scales the player/world rendering inside the canvas —
-   the preview box itself always stays fitted to the window. Desktop: mouse wheel. Mobile: pinch. */
+   Camera zoom (P.camZoom.v) scales the player/world rendering inside the canvas — the preview
+   box itself always stays fitted to the window. Default is 100% (close to the player), matching
+   CAMERA_ZOOM_DEFAULT in js/camera.mjs (kept in sync by test). Desktop: mouse wheel. Mobile: pinch. */
 (function(){
   const root = P.$('#preview'), cv = P.$('#pv'), ctx = cv.getContext('2d');
   const mq = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
   const pv = P.preview = { w: 1920, h: 1080, ctx, scale: 1, mobile: false };
-  P.camZoom = { v: 0.5, min: 0.5, max: 2 };   /* player/world camera zoom, 50% by default */
+  P.camZoom = { v: 1, min: 0.5, max: 2 };   /* player/world camera zoom, 100% (close) by default */
   const Z = P.camZoom;
 
   function fit() {

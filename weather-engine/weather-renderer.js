@@ -77,6 +77,11 @@ export class WeatherRenderer {
     this.fg = fgCanvas;
     this.tintCache = new Map();   // sheetImg -> Map(colorKey, canvas)>
     this.tintCount = 0;
+    // Player-driven hill scrolling: hill bands (sheets whose name contains
+    // "hill") can be shifted horizontally by travel. See render().
+    this.hillSheets = hillSheetIndices(cfg);
+    this.hillPeriods = hillPeriods(cfg);
+    this.hillOffset = 0;
     // The engine derives the true layer ("near" = foreground) from the raw
     // `l` field: an l=1 track is only foreground if EVERY keyframe is either
     // an end marker [t] or a small sprite (w < 64 AND h < 64). Big l=1
@@ -87,8 +92,14 @@ export class WeatherRenderer {
     }
   }
 
-  /** Advance to wall-clock time `now` (ms). Call this every frame. */
-  render(now) {
+  /** Advance to wall-clock time `now` (ms). Call this every frame.
+   *
+   * `hillOffset` (optional, scene units) scrolls the hill bands with the
+   * player's travel: positive = player moved right, so the hills move in the
+   * direction the player is going. Only hill tracks shift — sky, sun and
+   * clouds stay put. Omit it (e.g. for still-frame thumbnails) for no shift. */
+  render(now, hillOffset) {
+    this.hillOffset = Number.isFinite(hillOffset) ? hillOffset : 0;
     this._renderLayer(this.bg.getContext('2d'), this.bg, now, 0);
     this._renderLayer(this.fg.getContext('2d'), this.fg, now, 1);
   }
@@ -232,21 +243,28 @@ export class WeatherRenderer {
 
       const flip = cur[14];    // 1 = flipX, 2 = flipY, 3 = both
 
-      if (rot || flip) {
-        ctx.save();
-        ctx.translate(x + w / 2, y + h / 2);
-        if (rot) ctx.rotate(rot * Math.PI / 180);
-        ctx.scale((flip & 1) ? -1 : 1, (flip & 2) ? -1 : 1);
-        // source rect comes from the CURRENT keyframe only
-        ctx.drawImage(sheet, cur[10], cur[11], cur[12], cur[13],
-                      -w / 2, -h / 2, w, h);
-        ctx.restore();
-      } else if (w > 64) {
-        // slight overscan on big sprites to avoid hairline seams
-        ctx.drawImage(sheet, cur[10], cur[11], cur[12], cur[13],
-                      x - 0.35, y - 0.35, w + 0.7, h + 0.7);
-      } else {
-        ctx.drawImage(sheet, cur[10], cur[11], cur[12], cur[13], x, y, w, h);
+      // Hill bands scroll with the player: draw the sprite at its wrapped
+      // position and one period earlier so the band stays seamless at every
+      // offset (see hillDrawXs).
+      const drawXs = this._hillDrawXs(track, x);
+
+      for (const dx of drawXs) {
+        if (rot || flip) {
+          ctx.save();
+          ctx.translate(dx + w / 2, y + h / 2);
+          if (rot) ctx.rotate(rot * Math.PI / 180);
+          ctx.scale((flip & 1) ? -1 : 1, (flip & 2) ? -1 : 1);
+          // source rect comes from the CURRENT keyframe only
+          ctx.drawImage(sheet, cur[10], cur[11], cur[12], cur[13],
+                        -w / 2, -h / 2, w, h);
+          ctx.restore();
+        } else if (w > 64) {
+          // slight overscan on big sprites to avoid hairline seams
+          ctx.drawImage(sheet, cur[10], cur[11], cur[12], cur[13],
+                        dx - 0.35, y - 0.35, w + 0.7, h + 0.7);
+        } else {
+          ctx.drawImage(sheet, cur[10], cur[11], cur[12], cur[13], dx, y, w, h);
+        }
       }
     }
 
@@ -255,6 +273,12 @@ export class WeatherRenderer {
   }
 
   /* --- helpers ------------------------------------------------------ */
+
+  /** Wrapped draw positions for a hill track at scene x (see hillDrawXs). */
+  _hillDrawXs(track, x) {
+    if (!this.hillOffset || !this.hillSheets.has(track.s)) return [x];
+    return hillDrawXs(x, this.hillOffset, this.hillPeriods.get(track.s));
+  }
 
   /** linear interpolation of keyframe field `i` between `a` and `b`. */
   _lerp(a, b, f, i) {
@@ -301,6 +325,92 @@ export class WeatherRenderer {
     }
     return p;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Hill helpers (pure, exported for tests)                             */
+/* ------------------------------------------------------------------ */
+
+/** Sheet indices whose name contains "hill" — the scrolling hill bands. */
+export function hillSheetIndices(cfg) {
+  const out = new Set();
+  (cfg.sheets || []).forEach((name, i) => {
+    if (/hill/i.test(name)) out.add(i);
+  });
+  return out;
+}
+
+/**
+ * Wrap period of each hill band, derived from the band's own repeated
+ * geometry — NOT from an assumed scene width: sibling tracks sharing a
+ * sheet repeat at their closest x spacing; a lone track repeats at its own
+ * sprite width. Returns a Map<sheetIndex, period>.
+ */
+export function hillPeriods(cfg) {
+  const hills = hillSheetIndices(cfg);
+  const bySheet = new Map();
+  for (const t of cfg.tracks || []) {
+    if (hills.has(t.s)) {
+      if (!bySheet.has(t.s)) bySheet.set(t.s, []);
+      bySheet.get(t.s).push(t);
+    }
+  }
+  const periods = new Map();
+  for (const [s, tracks] of bySheet) {
+    const xs = [...new Set(tracks.flatMap(t =>
+      t.k.filter(kf => kf.length > 1).map(kf => kf[1])))];
+    let period = null;
+    if (xs.length >= 2) {
+      xs.sort((a, b) => a - b);
+      period = Infinity;
+      for (let i = 1; i < xs.length; i++)
+        period = Math.min(period, xs[i] - xs[i - 1]);
+    }
+    if (period == null || !Number.isFinite(period) || period <= 0) {
+      const kf = tracks[0].k.find(kf => kf.length > 1);
+      period = kf ? kf[3] : (cfg.w || 0);
+    }
+    periods.set(s, period);
+  }
+  return periods;
+}
+
+/**
+ * Draw positions for a hill sprite at scene x with travel `offset`: the
+ * sprite wrapped into one period plus one copy a period earlier, so the
+ * band covers the scene seamlessly at every offset. No offset → the
+ * sprite's own position, unchanged.
+ */
+export function hillDrawXs(x, offset, period) {
+  if (!offset || !period || period <= 0) return [x];
+  const base = ((x + offset) % period + period) % period;
+  return [base - period, base];
+}
+
+/**
+ * How far `worldX` lies beyond the fixed rendered region [regionMin,
+ * regionMax] (world px). Inside the region the answer is 0 — the hills do
+ * not move at all; outside it the excess grows with the distance past the
+ * edge and retraces exactly when the player comes back.
+ */
+export function hillTravelExcess(worldX, regionMin, regionMax) {
+  if (!Number.isFinite(worldX)) return 0;
+  return worldX - Math.min(regionMax, Math.max(regionMin, worldX));
+}
+
+/**
+ * Hill drift in scene units for a travel excess (world px).
+ * `worldPxPerUnit` is the world's draw scale (s) and `pxPerSceneUnit` the
+ * weather renderer's COVER scale — the ratio makes the drift
+ * zoom-independent (the weather canvases are viewport-space, outside the
+ * camera transform). The drift moves in the direction the player travels
+ * (positive excess → positive offset → hills move right).
+ */
+export function hillSceneOffset(excessWorldPx, worldPxPerUnit, pxPerSceneUnit, parallax = 0.25) {
+  if (!Number.isFinite(excessWorldPx) || !excessWorldPx) return 0;
+  if (!Number.isFinite(worldPxPerUnit) || worldPxPerUnit <= 0) return 0;
+  if (!Number.isFinite(pxPerSceneUnit) || pxPerSceneUnit <= 0) return 0;
+  return excessWorldPx * (worldPxPerUnit / pxPerSceneUnit) * parallax;
 }
 
 /* ------------------------------------------------------------------ */
