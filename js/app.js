@@ -375,7 +375,7 @@ function setLand(id) {
   state.landWorld = uniformLandWorld(resolved);
 }
 P.on("land", id => setLand(id));
-function drawLandGround(w, h, ground, s, frame, zoom) {
+function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   // Render land tiles at 24 screen-units per 32-unit source tile — the
   // midpoint between the former 16-unit and 32-unit sizes. Player scale stays
   // separate at 0.78; tile/world coordinates remain native.
@@ -387,7 +387,7 @@ function drawLandGround(w, h, ground, s, frame, zoom) {
   }
   landCtx.imageSmoothingEnabled = false;
   const span = WORLD_PX_W;
-  const camX = ((Math.floor(frame.x) % span) + span) % span;
+  const camX = ((Math.floor(cameraWorldX) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
   renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
@@ -455,22 +455,22 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
   });
 }
 
-/* Every hill band follows accumulated player travel immediately — no
-   waiting until the player reaches a world edge. All layers are half the
-   previous speeds: hill1 = 0.5x, hill2 = 0.25x, hill3 = 0.125x. */
-function hillOffsetsNow(w, h, s, frame) {
+/* Hill bands derive their offset from the live camera position every frame.
+   Keep the camera-relative direction consistent as the player reverses, and
+   never clamp travel at the edge of the decorative weather scene. */
+function hillOffsetsNow(w, h, s, cameraWorldX) {
   const r = state.weatherRenderer;
   if (!r || !r.hillSpeeds?.size) return new Map();
   const cfg = r.cfg;
   const pxPerSceneUnit = Math.max(w / cfg.w, h / cfg.h);   /* the renderer's COVER scale */
   const offsets = new Map();
   for (const [sheetIndex, speed] of r.hillSpeeds) {
-    offsets.set(sheetIndex, hillSceneOffset(frame.x, s, pxPerSceneUnit, speed));
+    offsets.set(sheetIndex, hillSceneOffset(-cameraWorldX, s, pxPerSceneUnit, speed));
   }
   // A single sprite sheet can contain multiple independent parallax bands.
   // Arid's two desert_wobbly groups follow their nearest desert hill layer.
   for (const [track, speed] of (r.hillTrackSpeeds ?? new Map())) {
-    offsets.set(track, hillSceneOffset(frame.x, s, pxPerSceneUnit, speed));
+    offsets.set(track, hillSceneOffset(-cameraWorldX, s, pxPerSceneUnit, speed));
   }
   return offsets;
 }
@@ -501,21 +501,25 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   renderAvatar();
   const b = state.avatarBounds;
   const lift = result.lift?.y ?? 0;
-  /* the singular camera: player-centered zoom — the pivot is the ground point
-     under the player, and there are no clamps, pans or post-zoom shifts, so
-     for a fixed pose every position below is identical at every zoom */
-  const camera = computeCameraLayout({ width: w, height: h, scale: s, frameY: frame.y, zoom });
+  /* Track the player continuously in world X/Y. The camera has no edge clamps;
+     the foreground and parallax layers consume this live camera position. */
+  const camera = computeCameraLayout({
+    width: w, height: h, scale: s, frameX: frame.x, frameY: frame.y, zoom
+  });
   const { ground, rootX, rootY, cameraPivotX, cameraPivotY } = camera;
-  state.view = { rootX, rootY, s, lift, cameraZoom: zoom, cameraPivotX, cameraPivotY };
+  state.view = {
+    rootX, rootY, s, lift, cameraZoom: zoom, cameraPivotX, cameraPivotY,
+    cameraWorldX: camera.cameraWorldX, cameraWorldY: camera.cameraWorldY
+  };
 
   c.imageSmoothingEnabled = false;
   // Backdrop remains viewport-filling; otherwise zoom-out would reveal blanks.
   if (state.weatherRenderer) {
     const now = performance.now();
     const t = now < state.weatherAnimAt ? state.weatherT0 : state.weatherT0 + now - state.weatherAnimAt;
-    /* hill weathers drift with the player's travel beyond the rendered world
-       region (see hillSceneOffset); every other weather ignores it */
-    state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, frame));
+    /* Hill offsets use the camera's live world X; other weather elements keep
+       their own animation timeline. */
+    state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, camera.cameraWorldX));
     c.drawImage(weatherBG, 0, 0, w, h);
   } else if (state.weatherStill) {
     c.drawImage(state.weatherStill, 0, 0, w, h);
@@ -534,24 +538,18 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(motion.facing);
-  // Keep the shadow in screen space: it follows the zoom-projected player
-  // position, but neither its 12px offset nor its silhouette size scales.
-  const shadowScreenCenterX = cameraPivotX +
-    (playerRect.x + playerRect.width / 2 - cameraPivotX) * zoom;
-  const shadowScreenBottomY = cameraPivotY +
-    (playerRect.y + playerRect.height - cameraPivotY) * zoom;
-  const shadowScreenX = shadowScreenCenterX - playerRect.width / 2 + shadowOffset.x;
-  const shadowScreenY = shadowScreenBottomY - playerRect.height + shadowOffset.y;
-  // Render order: the shadow is behind land, while the player and clothing
-  // remain in front of land as in the original preview.
+  // Draw the silhouette with the exact same camera transform and dimensions as
+  // the avatar. Its relative size and 12-unit directional drop therefore stay
+  // consistent at every zoom level instead of shrinking/growing against it.
+  // Render order: shadow behind land; player and clothing in front of land.
   c.imageSmoothingEnabled = false;
   c.save();
-  c.setTransform(1, 0, 0, 1, 0, 0);
   c.globalAlpha = PLAYER_SHADOW_OPACITY;
-  c.drawImage(avatarShadow, shadowScreenX, shadowScreenY,
+  c.drawImage(avatarShadow,
+    playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom);
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX);
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   // Scale the player and all clothing around rig feet (16,32). Land tiles use
   // the full 32-unit world scale; the character remains at 0.78 scale.
