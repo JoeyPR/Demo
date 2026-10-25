@@ -77,6 +77,8 @@ test("preview uses the shadow mask, removes the circular floor shadow, and draws
   assert.match(app, /shadowScreenCenterX/);
   assert.match(app, /shadowScreenBottomY/);
   assert.match(app, /c\.drawImage\(avatarShadow, shadowScreenX, shadowScreenY,/);
+  assert.match(app, /playerRect\.width, playerRect\.height\);/,
+    "shadow dimensions are not multiplied by camera zoom");
   assert.match(app, /const landS = s \* \(24 \/ 32\);/, "land tiles render at the 24-unit midpoint scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
   const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)");
