@@ -194,7 +194,7 @@ async function trimLargeCanvas(source) {
   return output;
 }
 
-async function renderWebsiteLayers(layers) {
+async function renderWebsiteLayers(layers, skin = null) {
   if (!Array.isArray(layers) || !layers.length) return null;
   // Mirrors Set Planner GT's iconLayers placement data locally; no remote
   // renderer/runtime is used. The original source sheets are in Demo's assets.
@@ -217,7 +217,7 @@ async function renderWebsiteLayers(layers) {
       const cropCtx = crop.getContext("2d", { alpha: true });
       cropCtx.imageSmoothingEnabled = false;
       cropCtx.drawImage(image, sx, sy, sw, sh, 0, 0, crop.width, crop.height);
-      const tinted = tintFrame(crop, parseTint(layer.t, null));
+      const tinted = tintFrame(crop, parseTint(layer.t, skin));
       const [kx0, ky0] = Array.isArray(layer.k) ? layer.k : [1, 1];
       const kx = Number(kx0) || 1, ky = Number(ky0) || 1;
       const [flipX, flipY] = Array.isArray(layer.f) ? layer.f : [0, 0];
@@ -237,7 +237,7 @@ async function renderWebsiteLayers(layers) {
   return drew ? trimLargeCanvas(work) : null;
 }
 
-async function renderProfileLayers(record, candidates) {
+async function renderProfileLayers(record, candidates, skin = null) {
   const layers = record.profileLayers;
   if (!Array.isArray(layers) || !layers.length) return null;
   const frame = blankFrame();
@@ -254,7 +254,7 @@ async function renderProfileLayers(record, candidates) {
       if (cellX * fw + fw > image.naturalWidth || cellY * fh + fh > image.naturalHeight) continue;
       const crop = blankFrame();
       crop.getContext("2d", { alpha: true }).drawImage(image, cellX * fw, cellY * fh, fw, fh, 0, 0, 32, 32);
-      compositeFrame(frame, tintFrame(crop, parseTint(layer.color, null)));
+      compositeFrame(frame, tintFrame(crop, parseTint(layer.color ?? layer.tint, skin)));
     } catch {}
   }
   return hasPixels(frame) ? frame : null;
@@ -285,7 +285,7 @@ async function renderPairedFeet(candidate) {
 
 async function makeFrame(record, fallbackItem, skin) {
   if (record?.iconLayers?.length) {
-    const composed = await renderWebsiteLayers(record.iconLayers);
+    const composed = await renderWebsiteLayers(record.iconLayers, skin);
     if (composed && hasPixels(composed)) return composed;
   }
   const candidates = Array.isArray(record?.candidates) ? record.candidates : [];
@@ -297,7 +297,7 @@ async function makeFrame(record, fallbackItem, skin) {
   }
   if (record?.iconRule === "apk-fitting-room.feet-icon" && record.profileLayers?.length) {
     try {
-      const composite = await renderProfileLayers(record, candidates);
+      const composite = await renderProfileLayers(record, candidates, skin);
       if (composite && hasPixels(composite)) return composite;
     } catch {}
   }
@@ -376,7 +376,10 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
     if (canvas.__demoIconToken !== token) return;
     const record = items.get(String(Number(item.id)));
     const skinKey = Array.isArray(skin) ? skin.slice(0, 3).join(",") : "";
-    const cacheKey = String(Number(item.id)) + (record?.iconTints?.includes("s") ? "|" + skinKey : "");
+    const hasSkinTint = record?.iconTints?.includes("s")
+      || record?.iconLayers?.some(layer => layer.t === "s")
+      || record?.profileLayers?.some(layer => layer.color === "s" || layer.tint === "s");
+    const cacheKey = String(Number(item.id)) + (hasSkinTint ? "|" + skinKey : "");
     let frame = renderedCache.get(cacheKey);
     if (!frame) {
       frame = await makeFrame(record, item, skin);

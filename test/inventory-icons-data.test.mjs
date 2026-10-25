@@ -32,9 +32,23 @@ test("Set Planner tint and layered-icon indicators remain represented", () => {
   assert.ok(index.items.some(item => item.iconRule), "Planner's per-item icon indication rules must be present");
 });
 
+test("authored icon sheets, local tint sources, and item overrides are used", () => {
+  const byId = new Map(index.items.map(item => [Number(item.id), item]));
+  for (const id of [1800, 2074]) {
+    assert.ok(byId.get(id).tintCandidate?.file.endsWith("_icon.png"), id + ": tint source must be an icon sheet");
+  }
+  for (const [id, file] of [[5020, "d_aura_icon.png"], [5208, "player_feet6_icon.png"],
+    [10338, "bf_begchmp_icon.png"], [14552, "player_cosmetics3_icon.png"]]) {
+    assert.ok(byId.get(id).candidates.some(candidate => candidate.file === file), id + ": missing " + file);
+  }
+  assert.deepEqual([byId.get(5020).tintCandidate.sx, byId.get(5020).tintCandidate.sy], [0, 0],
+    "standalone icon sheets must use their own origin rather than the worn-atlas coordinates");
+  assert.ok(index.stats.tintSourcesUsingIconSheets >= 208);
+});
+
 test("vertical icon sources retain 32px per-frame stride", () => {
   const vertical = index.items.flatMap(item => item.candidates ?? [])
-    .filter(candidate => candidate.kind === "setplanner-icon-data" && candidate.vertical);
+    .filter(candidate => candidate.vertical);
   for (const candidate of vertical) {
     assert.equal(candidate.strideY, 32);
     assert.ok(candidate.cellHeight >= 1);
