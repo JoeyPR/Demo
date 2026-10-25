@@ -38,10 +38,12 @@ const state = {
   landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0
 };
 let player, motion, lastTimestamp = 0;
-/* Player pixels and land tiles share the same logical 32×32 unit.
-   Keep the feet pivot fixed at (16,32), but do not enlarge the avatar
-   separately from the world when camera zoom changes. */
-const PS = 1;
+/* The base actor is calibrated to the 32-unit tile grid. Transparent margins
+   in the visible base frame make the silhouette slightly shorter than a tile
+   at 1.0. Pixel measurement of the supplied capture (229px actor / 160px
+   tile at PS=1.5625) gives PS=(160*1.5625)/229 ≈ 1.092. This multiplier is
+   shared by all camera zoom levels; the land stays at 32 world units. */
+const PS = 1.092;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
 
 /* ---------------- atlas loading (from the Demo renderer) ---------------- */

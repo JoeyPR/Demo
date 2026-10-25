@@ -1,8 +1,9 @@
 /* Adapter for Demo's inventory grid that reuses Planner's authoritative
-   icon renderer and inventory-index metadata. The deployed repos share the
-   GitHub Pages origin, so icon assets remain under /Planner/ rather than being
-   forked into a second, drifting icon implementation. */
-const PLANNER_ROOT = new URL("/Planner/", window.location.origin);
+   icon renderer and inventory-index metadata. Planner is a source repository,
+   not a /Planner/ directory on the Demo site's Pages origin, so use jsDelivr
+   to serve the real ES modules, catalog, and icon source assets with proper
+   JavaScript MIME types and cross-origin access. */
+const PLANNER_ROOT = new URL("https://cdn.jsdelivr.net/gh/JoeyPR/Planner@main/");
 let runtimePromise = null;
 let warningShown = false;
 
