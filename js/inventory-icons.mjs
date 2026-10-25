@@ -295,7 +295,9 @@ async function makeFrame(record, fallbackItem, skin) {
       if (tinted && hasPixels(tinted)) return tinted;
     } catch {}
   }
-  if (record?.iconRule === "apk-fitting-room.feet-icon" && record.profileLayers?.length) {
+  if (record?.profileLayers?.length) {
+    // Profile-layer instructions are per-item icon metadata compiled into
+    // Demo's manifest, so compose any explicitly declared local profile layers.
     try {
       const composite = await renderProfileLayers(record, candidates, skin);
       if (composite && hasPixels(composite)) return composite;
