@@ -26,11 +26,21 @@ Read this after `ARCHIVE_MOUNT_PET_REVISION.md` and `STATE_ROUTING_REVISION.md`.
 
 `advancePet(item, timeMs, motion)` reads `worldX/worldY` (feet line; the engine hosts at rig top-left, center = `[x+16, y+32]`), `dtMs` (clamped to 50ms like the source step), `vx/vy`, `facing`, `ground`, `punch.ageMs/.target`, `events` (punch ids), `petBareHead`, `petLift`, `armAngle`, `petWorld.solidAt`, and publishes `motion.pet`, `motion.petState`, `motion.petVars` (flat `PetFlyWalk.*` keys) for the FX layer and scripted renderers.
 
+## Draw-band duplicate fix (idle capture overlaying the animation)
+
+**Symptom**: most pets played their walk animation while a frozen copy of their captured idle sprite sat exactly on top of the animated one.
+
+**Cause**: planner `gameIcon`s capture a pet sprite once per draw band, so 314 of 392 pet items listed the identical sprite twice (behind `u:0` and in front `u:12`; 589 duplicate records total). `normalizeCatalogItem` turned both into pet pieces, but `advancePet`'s cell override (`applyPetCell`) animates only the main piece — the duplicate kept its captured idle cell and drew after (over) the animated one. This was the risk flagged in the previous revision's Remaining-work item on `u:0`/`u:12` pairs; the catalog ships identical cells per band (verified: every duplicate pair matches on all authored fields except `u`), so the dedupe is safe.
+
+**Fix**: `normalizeCatalogItem` now keeps one record per distinct pet sprite — equality is every authored field except the draw band (`u`). Multi-part pets are untouched (their pieces differ in cell or position; e.g. Dragon of Legend keeps its two wing positions plus back sprite, the silkworms keep all segments). Non-pet records are untouched — behind/in-front band pairs there are authored layering.
+
 ## Verification status
 
-- `npm test`: **111/111 pass** (was 102; +9 pet tests).
+- `npm test`: **113/113 pass** (was 111; +2 pet tests: catalog-wide no-duplicate-pet-pieces audit, and 5480 walking with a single animated piece cycling cells 3-5 with no frozen idle cell).
 - `demo/test` suite: 65/72, with the **same 7 failures as commit `4fb7669`** (pre-existing: floating vehicle delta, default-state fixtures, texture edge clamping/pet wrapping, Riding Cloud, horse-sit mounts, XML emitter hooks, generic float). No new failures.
 - Engine behavior verified empirically in Node (spawn points, trail flush, cell sampling, machine cells, PunchDelay) and against live-site measurements taken earlier (wolf 298×174 px at 5.558 px/unit, 64×64 machine pieces at absolute cells).
+- Browser QA after the fix (proxy-deployed shipped UI, Calf Leash equipped, holding right): exactly one `RenderPet` draw call, and its cell cycles `(0,0)/(32,0)/(64,0)` while walking — the animation plays with no frozen overlay.
+- **Inventory icons** (same session, `css/inv.css`): `.box .ic` inset widened 18% → 10.2% so item icons scale up to the inner edge of the box's white border (the border art spans pixels 7-24 of the 256px `box-white.png`, so 26/256 ≈ 10.16% is the largest clean square inset; 10.2% stays just inside), and the rule's `border-radius` was removed so square icons are not corner-clipped. Tool boxes keep their explicit 18% inset. Verified in-browser: computed inset 10.2%, radius 0px, icon fills 79.6% of the box (was 64%), icons do not touch the white border.
 
 ## Render verification follow-up (browser QA)
 
@@ -48,5 +58,5 @@ A later session ran local browser QA of the shipped UI against the local server 
 1. **Live-site visual comparison**: the pet rendering was QA'd on a local server driving the shipped UI; a side-by-side comparison against the live SetPlannerGT planner — especially the arm anchor during active punching and pet motion at speed — is still open.
 2. **Legendary Owl (11142) data gap**: its `parts` record lacks `pet:1` and it has no `gameIcon` pet records, so no pet pieces exist and no engine runs — the live client gates the same way (`drawsPet` requires slot-script RenderPet rules). If official data or a catalog update ships pet records, the engine will pick them up unchanged. Do not invent records.
 3. **Pre-existing `demo/test` failures (7)**: unrelated to pets (lift/gait/fixture drift). Separate cleanup; do not bundle into a pet commit.
-4. **u:0/u:12 gameIcon pairs**: pet items ship two identical records (u:0 and u:12); both become pieces exactly as the source pushes them (the group pin average is unaffected). Visually identical stacking; if a future catalog ships differing cells per band, verify against the source's record selection before changing the adapter.
+4. **u:0/u:12 gameIcon pairs**: resolved — the adapter now dedupes identical per-band pet records (see the draw-band duplicate fix above). If a future catalog ships genuinely differing cells per band, re-verify against the source's record selection before changing the adapter.
 5. **`solidAt` world query**: the preview supplies a flat floor; the source queries real tiles for platform edges (trail pets walking off ledges). A world-aware `solidAt` can be wired when the demo grows real terrain.

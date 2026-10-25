@@ -123,3 +123,50 @@ test("pet pieces and leash lines stay bounded across long runs",()=>{
   assert.ok([...line.line.from,...line.line.to,line.line.width??1].every(Number.isFinite),
     "leash string geometry stays finite");
 });
+
+test("draw-band duplicate pet captures do not double-draw over the animation",()=>{
+  // Planner gameIcons capture a pet sprite once per draw band (u=0 behind,
+  // u=12 in front), so one pet's records could list the identical sprite
+  // twice. The pet engine animates only its main piece; the leftover copy
+  // stayed frozen on the captured idle cell and drew over the animation.
+  // 314 of 392 pet items carried such duplicates (589 records removed).
+  let petItems=0,removed=0;
+  for(const raw of catalog.items){
+    const records=(raw.gameIcon??[]).filter(r=>r.pet);
+    if(!records.length)continue;
+    petItems++;
+    const i=item(raw.id);
+    const pieces=i.pieces.filter(p=>p.pet);
+    removed+=records.length-pieces.length;
+    const keys=pieces.map(p=>JSON.stringify(Object.fromEntries(Object.keys(p).filter(k=>k!=="u").sort().map(k=>[k,p[k]]))));
+    assert.equal(new Set(keys).size,keys.length,
+      `${raw.id} keeps duplicate pet pieces across draw bands`);
+  }
+  assert.ok(petItems>300,"catalog pet coverage");
+  assert.ok(removed>500,"the known duplicate records are removed");
+  // Calf Leash: two identical captures collapse to one animated calf.
+  const calf=item(870);
+  assert.equal(calf.pieces.filter(p=>p.pet).length,1);
+  // Dragon of Legend keeps its genuinely distinct parts (two positions of the
+  // wing cell plus the back sprite) — dedupe must not eat multipart pets.
+  const dragon=item(1782);
+  assert.equal(dragon.pieces.filter(p=>p.pet).length,3);
+});
+
+test("Rayman's Fist pet animates with no idle capture frozen over it",()=>{
+  // 5480 shipped blogox.png twice (u=0 and u=12) at the same authored place;
+  // the frozen copy sat exactly on the animated one. After dedupe one piece
+  // remains and it cycles the kind-8 move cells [3,4,5]x[0] while walking.
+  const i=item(5480);
+  let m,hx=0;
+  const seen=new Set();
+  for(let k=0;k<40;k++){
+    hx+=90/60;
+    m=frame(k,"walk",1,hx);advanceCatalogItem(i,k*1000/60,m);
+    const pet=i.pieces.filter(p=>p.pet&&!p.petLine);
+    assert.equal(pet.length,1,"exactly one pet piece draws");
+    if(k>21)seen.add(pet[0].sx); // past the 20-tick trail flush
+  }
+  assert.deepEqual([...seen].sort((a,b)=>a-b),[96,128,160],"move cells 3-5 only");
+  assert.ok(!seen.has(32),"the captured idle cell no longer overlays the walk cycle");
+});

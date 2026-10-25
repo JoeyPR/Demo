@@ -64,7 +64,11 @@
 .box.sel .ck.o{display:block}
 .box.sel.art .ck.o{display:none}
 .box.sel.art .ck.p{display:block}
-.box .ic{position:absolute;inset:18%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:var(--radius);
+/* Icon fills the box up to the inner edge of the white border: the border art
+   spans pixels 7-24 of the 256px box image, so the largest clean square inset
+   is 26/256 ~ 10.16%; 10.2% stays just inside it. No corner radius: item
+   icons are square and must not be clipped. Tool boxes keep their own inset. */
+.box .ic{position:absolute;inset:10.2%;display:flex;align-items:center;justify-content:center;overflow:hidden;
   font-size:calc(46*var(--u));text-shadow:0 2px 0 rgba(0,0,0,.45)}
 .box .n{display:none}   /* item names never show — kept in the DOM as metadata only */
 .box .fv{position:absolute;right:calc(2% - 1px);top:calc(2% - 1px);width:74%;height:74%;object-fit:fill;display:none;z-index:2}   /* fav-box.png: box-sized overlay, star top-right (moved 1px up-right) */

@@ -27,7 +27,7 @@ export function normalizeCatalogItem(raw,catalog) {
     if(key&&item.staticArmPose[key]===undefined)item.staticArmPose[key]=arm.r??0;
   }
   item.pose={...item.staticArmPose};
-  const source=records.some(r=>r.a)?records.filter(r=>r.a):samplePublicParts(item,0,catalog);
+  let source=records.some(r=>r.a)?records.filter(r=>r.a):samplePublicParts(item,0,catalog);
   // Machine pets (kind 200) can ship without a gameIcon: their whole draw is a
   // single rect part flagged pet:1. The live client expands that rect into a
   // 64x64 piece reading the cell at (rect.x, rect.y-32) — the bottom half of
@@ -40,6 +40,22 @@ export function normalizeCatalogItem(raw,catalog) {
         x:part.at?.[0]??0,y:part.at?.[1]??0,ax:.5,ay:.5,u:part.front?12:0,pet:true});
     }
   }
+  // Pet sprites are captured once per planner draw band, so one pet's gameIcon
+  // can list the same sprite twice — behind (u=0) and in front (u=12). The pet
+  // engine animates only its main piece, so an identical duplicate stays frozen
+  // on the captured idle cell and draws over the animation. Keep one record per
+  // distinct pet sprite: equality is every authored field except the draw band.
+  const seenPet=new Set();
+  source=source.filter(r=>{
+    if(!r.pet)return true;
+    const {u:band,...rest}=r;
+    // Canonical key: sort the top-level fields into a fresh object and stringify
+    // without a replacer — a key whitelist would also strip nested arrays (f/k)
+    // and merge records that differ only by flip.
+    const key=JSON.stringify(Object.fromEntries(Object.keys(rest).sort().map(k=>[k,rest[k]])));
+    if(seenPet.has(key))return false;
+    seenPet.add(key);return true;
+  });
   item.pieces=source.filter(r=>!(r.a==="player_arm.png"&&r.skin)).map(record=>{
     let attachment="body";
     let pass=({0:"RenderHat",1:"RenderShirt",2:"RenderPants",3:"RenderShoes",4:"RenderFaceItem",
