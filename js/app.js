@@ -34,16 +34,10 @@ const state = {
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
-  ancestralMap: null, abilities: null, hiddenPasses: new Set(), contentTop: 0,
+  ancestralMap: null, abilities: null, hiddenPasses: new Set(),
   landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0
 };
 let player, motion, lastTimestamp = 0;
-/* The base actor is calibrated to the 32-unit tile grid. Transparent margins
-   in the visible base frame make the silhouette slightly shorter than a tile
-   at 1.0. Pixel measurement of the supplied capture (229px actor / 160px
-   tile at PS=1.5625) gives PS=(160*1.5625)/229 ≈ 1.092. This multiplier is
-   shared by all camera zoom levels; the land stays at 32 world units. */
-const PS = 1.092;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
 
 /* ---------------- atlas loading (from the Demo renderer) ---------------- */
@@ -130,13 +124,16 @@ function step(dt) {
   const gesturePunch = state.punchHold || state.clock < state.gesturePunchUntil;
   if (gesturePunch && state.aim && state.view) {
     const { rootX, rootY, s, lift } = state.view;
-    /* the visual feet pivot — screen→rig conversion inverts the PS scale,
-       so the arm reaches to where the finger actually is */
+    /* Unproject the pointer through the camera scope before aiming in the
+       player's fixed 32-unit rig coordinates. */
+    const zoom = Math.max(0.5, state.view.cameraZoom ?? 1);
+    const aimX = state.view.cameraPivotX + (state.aim.x - state.view.cameraPivotX) / zoom;
+    const aimY = state.view.cameraPivotY + (state.aim.y - state.view.cameraPivotY) / zoom;
     const cx = rootX + 16 * s, cy = rootY + 32 * s;
-    motion.facing = state.aim.x >= cx ? 1 : -1;
-    let x = 16 + (state.aim.x - cx) / (s * PS);
+    motion.facing = aimX >= cx ? 1 : -1;
+    let x = 16 + (aimX - cx) / s;
     if (motion.facing < 0) x = 32 - x;
-    input.punchTarget = [x, 32 + (state.aim.y - cy) / (s * PS) - (lift ?? 0)];
+    input.punchTarget = [x, 32 + (aimY - cy) / s - (lift ?? 0)];
   }
   const frame = motion.step(dt, input);
   if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
@@ -243,21 +240,6 @@ function renderAvatar() {
   avatarCtx.clearRect(0, 0, width, height);
   state.avatarBounds = bounds;
   drawCanvas(avatarCtx, calls, atlases, { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
-  /* tight top of the actually-drawn pixels: the bounds box keeps a 128-unit
-     floor with big empty margins (a bare player's body is ~0..32), and the
-     camera clamp must follow the real head — at PS scale the box's margins
-     would over-scroll the camera at high zoom */
-  {
-    const sc = state.resolution / 32;
-    const data = avatarCtx.getImageData(0, 0, width, height).data;
-    let topPx = height;
-    outer: for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        if (data[(y * width + x) * 4 + 3] > 8) { topPx = y; break outer; }
-      }
-    }
-    state.contentTop = bounds.y + topPx / sc;
-  }
   return calls.length;
 }
 
@@ -335,21 +317,23 @@ function setLand(id) {
 }
 P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame) {
-  const lw = Math.ceil(w / s), lh = Math.max(1, Math.ceil((h - ground) / s) + 2);
-  if (landCanvas.width !== lw || landCanvas.height !== lh) { landCanvas.width = lw; landCanvas.height = lh; }
-  landCtx.imageSmoothingEnabled = false;   /* re-set after every resize (resize resets context state) */
+  // Tile/world coordinates remain native. Render enough surface for the
+  // viewport at every zoom, rather than scaling a screen-width strip.
+  const zoom = Math.max(0.5, P.camZoom?.v ?? 1);
+  const lw = Math.ceil(w / (s * zoom));
+  const lh = Math.max(1, Math.ceil(h / (s * zoom)) + 2);
+  if (landCanvas.width !== lw || landCanvas.height !== lh) {
+    landCanvas.width = lw; landCanvas.height = lh;
+  }
+  landCtx.imageSmoothingEnabled = false;
   const span = WORLD_W * TILE;
-  /* snap the camera to whole world pixels — tiles always land on the 32x32
-     pixel grid, so moving and zooming can never open seams between them */
-  const camX = Math.floor(((frame.x % span) + span) % span);
+  const camX = ((Math.floor(frame.x) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
   renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * TILE, lw, lh, state.clock);
-  /* the world is only WORLD_W tiles wide — when the viewport runs past its
-     right edge, draw the wrapped columns again on the right (the ground is a
-     uniform fill, so the seam is invisible) */
   if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * TILE, lw, lh, state.clock);
-  ctx.drawImage(landCanvas, 0, 0, lw, lh, 0, ground, lw * s, lh * s);
+  const dx = (w - lw * s) / 2;
+  ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * s, lh * s);
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -367,30 +351,23 @@ async function loadAncestrals() {
 }
 const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
 const ancestralTint = new TintCache();
-function drawAncestralAura(s, rootX, ground, frame, layer) {
+function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraPivotY, zoom) {
   const item = state.equipped.get(9);
   if (!item || !state.ancestralMap) return;
   const info = state.ancestralMap.get(item.id);
   if (!info) return;
   const lift = state.lastResult.lift?.y ?? 0;
-  /* base must map the fx anchor (16,32) onto the character's CURRENT canvas
-     position. `ground` is already the camera-adjusted ground line
-     (groundCam), so the aura shares the avatar's transform exactly — no
-     extra camera offset. frame.y is the root's world-space movement
-     (unscaled, like rootY), while lift is a body shift baked into the
-     avatar canvas — magnified by PS like every rig-space offset, so a
-     mounted or floating character keeps its effects anchored to it.
-     The fx are drawn in character-following mode: NO motion path is passed,
-     so fxEntries never world-anchors the particles — world-anchored fx
-     freeze at their birth positions and trail stale frames behind the
-     walking player (the "old sprite" the effects showed). The orbiting
-     artifacts follow the character instead, like the real game. */
-  const base = [s * PS, 0, 0, s * PS,
-    rootX + (16 - 16 * PS) * s,
-    ground - 32 * s + frame.y * s + (32 - 32 * PS + lift * PS) * s];
+  // The effect renderer writes absolute transforms, so compose the same
+  // camera mapping explicitly into its base matrix.
+  const baseX = rootX;
+  const baseY = ground - 32 * s + (frame.y + lift) * s;
+  const base = [
+    s * zoom, 0, 0, s * zoom,
+    cameraPivotX + (baseX - cameraPivotX) * zoom,
+    cameraPivotY + (baseY - cameraPivotY) * zoom
+  ];
   drawAncestral(ctx, info.level, state.clock, {
     facing: motion.facing,
-    /* the ancestral renderer reads sheets as a plain object keyed by name */
     sheets: Object.fromEntries(images),
     tint: ancestralTint,
     base, layer
@@ -416,79 +393,63 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   while (state.remainder >= 1000 / 60) { step(1000 / 60); state.remainder -= 1000 / 60; }
 
   const frame = state.lastFrame, result = state.lastResult;
-  /* camera zoom (100% by default — close to the player): scales the player,
-     land and plate inside the preview — the weather backdrop always fills
-     the canvas */
-  const s = Math.min(4, Math.max(3, w / 480)) * P.camZoom.v;
-  /* ground line: player centered in the frame (Growtopia keeps the actor
-     mid-screen; the inventory overlays the lower part of the world) */
-  const ground = h / 2 + 16 * PS * s;   /* visible body (~32*PS world units) centered: body center = h/2 */
+  // Logical draw scale never includes zoom. Only the camera transform changes.
+  const s = Math.min(4, Math.max(3, w / 480));
+  const zoom = Math.max(0.5, Math.min(2, P.camZoom?.v ?? 1));
+  const ground = h / 2 + 16 * s;
   const scroll = frame.x * s;
 
-  /* render the avatar FIRST so the current frame's bounds (which include
-     hats, hair and item lift) drive the camera */
   renderAvatar();
   const b = state.avatarBounds;
-  /* vertical camera: the player may rise freely until the top of the plate +
-     head reaches the preview's top border, then the camera follows so the
-     player is never cut off — the ground strip and shadow move with it */
   const lift = result.lift?.y ?? 0;
-  const topUnits = Math.min(state.contentTop ?? b?.y ?? 0, lift - 12);   /* name plate above the head */
-  const freeTop = ground - 32 * s + frame.y * s + (32 + (topUnits - 32) * PS) * s;
+  const topUnits = Math.min(b?.y ?? 0, lift - 17);
+  const freeTop = ground - 32 * s + frame.y * s + topUnits * s;
   const cameraY = Math.min(0, freeTop - 6);
   const groundCam = ground - cameraY;
-  const rootX = w / 2 - 16 * s, rootY = groundCam - 32 * s + frame.y * s;
-  /* published for the touch-punch aim (used by the next step) */
-  state.view = { rootX, rootY, s, lift };
+  const rootX = w / 2 - 16 * s;
+  const rootY = groundCam - 32 * s + frame.y * s;
+  const cameraPivotX = rootX + 16 * s;
+  const cameraPivotY = rootY + 16 * s;
+  state.view = { rootX, rootY, s, lift, cameraZoom: zoom, cameraPivotX, cameraPivotY };
 
   c.imageSmoothingEnabled = false;
-  /* background: the weather scene (plain sky only if it failed to load) —
-     static fully-rendered preview first, then animated from that frame */
+  // Backdrop remains viewport-filling; otherwise zoom-out would reveal blanks.
   if (state.weatherRenderer) {
     const now = performance.now();
     if (now < state.weatherAnimAt) state.weatherRenderer.render(state.weatherT0);
     else state.weatherRenderer.render(state.weatherT0 + now - state.weatherAnimAt);
     c.drawImage(weatherBG, 0, 0, w, h);
   } else if (state.weatherStill) {
-    c.imageSmoothingEnabled = false;
     c.drawImage(state.weatherStill, 0, 0, w, h);
   } else {
     drawScene(w, h, ground, s, scroll);
   }
-  /* shadow */
+
+  // Apply one player-centered scope transform to all foreground world art.
+  // Physics positions, tile coordinates and the avatar's source pixels do not
+  // change when zooming; all scene elements share the exact same camera map.
+  c.save();
+  c.translate(cameraPivotX, cameraPivotY);
+  c.scale(zoom, zoom);
+  c.translate(-cameraPivotX, -cameraPivotY);
+
   c.fillStyle = "rgba(37,61,53,0.17)";
   const shadow = Math.max(0.3, 1 + frame.y / 150);
   c.beginPath();
-  c.ellipse(w / 2, groundCam + 2, 16 * PS * s * shadow, 3 * PS * s * shadow, 0, 0, Math.PI * 2);
+  c.ellipse(w / 2, groundCam + 2, 16 * s * shadow, 3 * s * shadow, 0, 0, Math.PI * 2);
   c.fill();
-  /* ground strip over the weather scene so the player is anchored; the land
-     system always renders it (Dirt by default) */
+
   if (state.landWorld) drawLandGround(w, h, groundCam, s, frame);
-  /* avatar + ancestral aura: the orbiting fx pass behind the player first,
-     then the avatar, then the front fx (Growtopia's orbiting artifacts circle
-     behind the player on the far side of their orbit) */
-  drawAncestralAura(s, rootX, groundCam, frame, "behind");
-  /* the avatar canvas is scaled by PS around the feet pivot (rig 16,32):
-     rig point (16,32) lands on (rootX + 16*s, groundCam) — planted on the
-     ground line, centered — and every other point follows proportionally */
+  drawAncestralAura(s, rootX, groundCam, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   c.save();
   c.imageSmoothingEnabled = true;
   c.imageSmoothingQuality = "high";
-  c.drawImage(avatar,
-    rootX + (16 - 16 * PS) * s + b.x * PS * s,
-    rootY + (32 - 32 * PS) * s + b.y * PS * s,
-    b.width * PS * s, b.height * PS * s);
+  c.drawImage(avatar, rootX + b.x * s, rootY + b.y * s, b.width * s, b.height * s);
   c.restore();
-  /* ancestral aura (front fx) */
-  drawAncestralAura(s, rootX, groundCam, frame, "front");
-  /* name plate above the head (Website plate system, drawn at world scale).
-     The plate's animations expect MILLISECONDS — state.clock is already ms.
-     A touch smaller than the world scale, nudged a touch left of center. */
-  if (P.plate) {
-    P.plate.draw(c, w / 2 - 2 * s, rootY + (32 + (lift - 38) * PS) * s, s * 0.9, state.clock);
-  }
-  /* weather foreground layer (rain, snow, particles in front) */
+  drawAncestralAura(s, rootX, groundCam, frame, "front", cameraPivotX, cameraPivotY, zoom);
+  if (P.plate) P.plate.draw(c, w / 2, rootY + lift * s - 6 * s, s, state.clock);
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
+  c.restore();
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
   } catch (err) {

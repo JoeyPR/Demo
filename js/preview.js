@@ -7,7 +7,7 @@
   const root = P.$('#preview'), cv = P.$('#pv'), ctx = cv.getContext('2d');
   const mq = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
   const pv = P.preview = { w: 1920, h: 1080, ctx, scale: 1, mobile: false };
-  P.camZoom = { v: 1.25, min: 0.5, max: 2 };   /* player/world camera zoom, 100% by default — close to the player */
+  P.camZoom = { v: 0.5, min: 0.5, max: 2 };   /* player/world camera zoom, 50% by default */
   const Z = P.camZoom;
 
   function fit() {

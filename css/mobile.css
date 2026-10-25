@@ -22,15 +22,14 @@ body{background:#212226}
 #quick{grid-template-columns:repeat(4,calc(106.5*var(--u)));gap:calc(3*var(--u));padding-top:calc(3.3*var(--u))}
 #handle{left:calc(397.5*var(--u));top:calc(-80*var(--u));width:calc(128*var(--u))}
 
-/* tabs scaled to reach the screen's left edge (the mobile stage IS the
-   screen), staying attached to the main drawer's left border at 100u */
+/* Original baked tab artwork, scaled proportionally and attached to the drawer. */
 #tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(740*var(--u) - var(--dy));
   display:flex;flex-direction:column}
-.tab{width:100%;height:auto;flex:1 1 0;min-height:0}
-.tab img{right:0;left:auto;top:auto;bottom:0;transform:none;width:100%;height:auto;max-height:100%;
-  object-fit:contain;object-position:right bottom;image-rendering:pixelated}
+.tab{width:100%;height:auto;flex:1 1 0;min-height:0;overflow:visible}
+.tab img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  object-position:right bottom;image-rendering:pixelated}
 
-/* main drawer: search row + 5-column grid */
+/* main drawer: search row + 5-column grid *//* main drawer: search row + 5-column grid */
 #main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}
 #s-icon{left:calc(14*var(--u));top:calc(26*var(--u));width:calc(65*var(--u))}
 #q{left:calc(94*var(--u));top:calc(26*var(--u));width:calc(548*var(--u));height:calc(67*var(--u));font-size:calc(34*var(--u));padding:0 calc(14*var(--u))}
