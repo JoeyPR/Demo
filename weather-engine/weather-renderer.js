@@ -343,7 +343,7 @@ export class WeatherRenderer {
 export function hillSheetIndices(cfg) {
   const out = new Set();
   const sheets = cfg.sheets || [];
-  const hasDesertHills = sheets.some(name => /^desert_hills(?:\\.|$)/i.test(name));
+  const hasDesertHills = sheets.some(name => /^desert_hills(?:\.|$)/i.test(name));
   sheets.forEach((name, i) => {
     if (/hill/i.test(name) || (/desert_wobbly/i.test(name) && hasDesertHills)) out.add(i);
   });
@@ -358,13 +358,13 @@ export function hillSheetIndices(cfg) {
 export function hillScrollSpeeds(cfg) {
   const sheets = cfg.sheets || [];
   const speeds = new Map();
-  const desertBase = sheets.findIndex(name => /^desert_hills(?:\\.|$)/i.test(name));
+  const desertBase = sheets.findIndex(name => /^desert_hills(?:\.|$)/i.test(name));
 
   for (let i = 0; i < sheets.length; i++) {
     const name = sheets[i];
     if (/desert_wobbly/i.test(name)) continue;
-    if (/^desert_hills2(?:\\.|$)/i.test(name)) speeds.set(i, 0.5);
-    else if (/^desert_hills(?:\\.|$)/i.test(name)) speeds.set(i, 0.25);
+    if (/^desert_hills2(?:\.|$)/i.test(name)) speeds.set(i, 0.5);
+    else if (/^desert_hills(?:\.|$)/i.test(name)) speeds.set(i, 0.25);
     else if (/hills?1/i.test(name)) speeds.set(i, 1);
     else if (/hills?2/i.test(name)) speeds.set(i, 0.5);
     else if (/hills?3/i.test(name)) speeds.set(i, 0.25);
@@ -415,7 +415,7 @@ export function hillPeriods(cfg) {
   // Arid's desert_wobbly sprites are a companion texture to desert_hills.
   // Reuse its wrap period so all wobbling accents drift seamlessly in lockstep.
   const sheets = cfg.sheets || [];
-  const desertBase = sheets.findIndex(name => /^desert_hills(?:\\.|$)/i.test(name));
+  const desertBase = sheets.findIndex(name => /^desert_hills(?:\.|$)/i.test(name));
   const desertWobbly = sheets.findIndex(name => /desert_wobbly/i.test(name));
   if (desertBase >= 0 && desertWobbly >= 0 && periods.has(desertBase)) {
     periods.set(desertWobbly, periods.get(desertBase));
