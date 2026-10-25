@@ -58,3 +58,14 @@ test("shadow projection is black and falls down-right or down-left with facing",
   assert.deepEqual(playerShadowOffset(4, -1), { x: -5, y: 5 });
   assert.equal(PLAYER_SHADOW_OFFSET, 1.25);
 });
+
+
+test("preview uses the shadow mask, removes the circular floor shadow, and draws a smaller feet-pinned avatar", async () => {
+  const { readFileSync } = await import("node:fs");
+  const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+  assert.match(app, /getPlayerShadowCalls\(calls/);
+  assert.match(app, /drawImage\(avatarShadow/);
+  assert.match(app, /playerVisualRect\(b, rootX, rootY, s\)/);
+  assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
+  assert.match(app, /PLAYER_VISUAL_SCALE \* zoom/);
+});
