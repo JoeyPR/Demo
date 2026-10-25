@@ -3,7 +3,9 @@
  * offset. Effects are deliberately filtered before this projection.
  */
 export const PLAYER_VISUAL_SCALE = 0.78; // 32-unit rig becomes 1.56 half-size land tiles tall
-export const PLAYER_SHADOW_OFFSET = 1.25; // logical units; crisp, unblurred shader-style offset
+export const PLAYER_SHADOW_OFFSET = 1.25; // horizontal logical units, mirrored by facing
+export const PLAYER_SHADOW_DROP = 2.5; // farther downward than the lateral offset
+export const PLAYER_SHADOW_OPACITY = 0.5; // 50% opacity
 export const PLAYER_SHADOW_COLOR = Object.freeze([0, 0, 0]);
 
 const excludedPass = /punch|aura|pet|particle|effect|visual|\bfx\b/i;
@@ -50,6 +52,6 @@ export function playerVisualRect(bounds, rootX, rootY, unitScale) {
 export function playerShadowOffset(unitScale, facing) {
   return {
     x: (facing < 0 ? -1 : 1) * PLAYER_SHADOW_OFFSET * unitScale,
-    y: PLAYER_SHADOW_OFFSET * unitScale,
+    y: PLAYER_SHADOW_DROP * unitScale,
   };
 }
