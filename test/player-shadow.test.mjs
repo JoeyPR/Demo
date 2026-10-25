@@ -73,7 +73,7 @@ test("preview keeps the shadow proportional to the player during camera zoom", a
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
   assert.match(app, /c\.drawImage\(avatarShadow,\s*playerRect\.x \+ shadowOffset\.x, playerRect\.y \+ shadowOffset\.y,\s*playerRect\.width, playerRect\.height\)/,
     "shadow uses the player's same zoom transform and relative dimensions");
-  assert.doesNotMatch(app, /shadowScreenCenterX|shadowScreenBottomY|setTransform\(1, 0, 0, 1, 0, 0\)/,
+  assert.doesNotMatch(app, /shadowScreenCenterX|shadowScreenBottomY|c\.setTransform\(1, 0, 0, 1, 0, 0\)/,
     "shadow is not reset to identity screen space before drawing");
   assert.match(app, /const landS = s \* \(24 \/ 32\);/, "land tiles render at the 24-unit midpoint scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
