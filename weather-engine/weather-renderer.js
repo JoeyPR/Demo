@@ -82,6 +82,10 @@ export class WeatherRenderer {
     this.hillSheets = hillSheetIndices(cfg);
     this.hillPeriods = hillPeriods(cfg);
     this.hillSpeeds = hillScrollSpeeds(cfg);
+    // Arid's desert_wobbly sheet contains two separate track bands, each of
+    // which inherits its own desert hill band's speed and period.
+    this.hillTrackSpeeds = hillTrackScrollSpeeds(cfg, this.hillSpeeds);
+    this.hillTrackPeriods = hillTrackPeriods(cfg, this.hillPeriods);
     this.hillOffsets = new Map();
     // The engine derives the true layer ("near" = foreground) from the raw
     // `l` field: an l=1 track is only foreground if EVERY keyframe is either
@@ -283,9 +287,10 @@ export class WeatherRenderer {
 
   /** Wrapped draw positions using this sheet's independent parallax offset. */
   _hillDrawXs(track, x) {
-    const offset = this.hillOffsets.get(track.s) ?? 0;
+    const offset = this.hillOffsets.get(track) ?? this.hillOffsets.get(track.s) ?? 0;
     if (!offset || !this.hillSheets.has(track.s)) return [x];
-    return hillDrawXs(x, offset, this.hillPeriods.get(track.s));
+    const period = this.hillTrackPeriods.get(track) ?? this.hillPeriods.get(track.s);
+    return hillDrawXs(x, offset, period);
   }
 
   /** linear interpolation of keyframe field `i` between `a` and `b`. */
@@ -351,32 +356,77 @@ export function hillSheetIndices(cfg) {
 }
 
 /**
- * Relative motion per sheet: hill1 follows player travel at 1x, hill2 at 0.5x,
- * hill3 at 0.25x. Arid has two main bands: desert_hills at 0.25x and
- * desert_hills2 at 0.5x; desert_wobbly inherits desert_hills' speed.
+ * Relative motion per sheet, now half as fast as the previous tuning:
+ * hill1 = 0.5x, hill2 = 0.25x, hill3 = 0.125x. In Arid, desert_hills is
+ * 0.125x and desert_hills2 is 0.25x. Wobble groups inherit their matching
+ * parent layer in hillTrackScrollSpeeds().
  */
 export function hillScrollSpeeds(cfg) {
   const sheets = cfg.sheets || [];
   const speeds = new Map();
-  const desertBase = sheets.findIndex(name => /^desert_hills(?:\.|$)/i.test(name));
 
   for (let i = 0; i < sheets.length; i++) {
     const name = sheets[i];
-    if (/desert_wobbly/i.test(name)) continue;
-    if (/^desert_hills2(?:\.|$)/i.test(name)) speeds.set(i, 0.5);
-    else if (/^desert_hills(?:\.|$)/i.test(name)) speeds.set(i, 0.25);
-    else if (/hills?1/i.test(name)) speeds.set(i, 1);
-    else if (/hills?2/i.test(name)) speeds.set(i, 0.5);
-    else if (/hills?3/i.test(name)) speeds.set(i, 0.25);
-    else if (/hill/i.test(name)) speeds.set(i, 0.25);
-  }
-
-  for (let i = 0; i < sheets.length; i++) {
-    if (/desert_wobbly/i.test(sheets[i])) {
-      speeds.set(i, desertBase >= 0 ? (speeds.get(desertBase) ?? 0.25) : 0.25);
-    }
+    if (/desert_wobbly/i.test(name)) {
+      speeds.set(i, 0.125); // fallback; each Arid wobble track gets an override
+    } else if (/^desert_hills2(?:\.|$)/i.test(name)) speeds.set(i, 0.25);
+    else if (/^desert_hills(?:\.|$)/i.test(name)) speeds.set(i, 0.125);
+    else if (/hills?1/i.test(name)) speeds.set(i, 0.5);
+    else if (/hills?2/i.test(name)) speeds.set(i, 0.25);
+    else if (/hills?3/i.test(name)) speeds.set(i, 0.125);
+    else if (/hill/i.test(name)) speeds.set(i, 0.125);
   }
   return speeds;
+}
+
+/** First drawable Y coordinate for assigning a wobble track to its hill band. */
+function firstTrackY(track) {
+  const first = (track.k || []).find(kf => kf.length > 1);
+  return first ? first[2] : Infinity;
+}
+
+/** Arid's two desert_wobbly groups are layered at different heights. Match
+ * each wobble track to the closest desert_hills/desert_hills2 track so its
+ * speed follows the landscape that it decorates. Map keys are track objects.
+ */
+export function hillTrackScrollSpeeds(cfg, sheetSpeeds = hillScrollSpeeds(cfg)) {
+  const sheets = cfg.sheets || [];
+  const tracks = cfg.tracks || [];
+  const parentTracks = tracks.filter(track =>
+    /^desert_hills2?(?:\.|$)/i.test(sheets[track.s] || ""));
+  const result = new Map();
+  if (!parentTracks.length) return result;
+
+  for (const track of tracks) {
+    if (!/desert_wobbly/i.test(sheets[track.s] || "")) continue;
+    const y = firstTrackY(track);
+    const parent = parentTracks.reduce((best, candidate) =>
+      Math.abs(firstTrackY(candidate) - y) < Math.abs(firstTrackY(best) - y) ? candidate : best
+    );
+    result.set(track, sheetSpeeds.get(parent.s) ?? 0.125);
+  }
+  return result;
+}
+
+/** Same nearest-parent pairing for seamless repeat periods on Arid wobble bands. */
+export function hillTrackPeriods(cfg, sheetPeriods = hillPeriods(cfg)) {
+  const sheets = cfg.sheets || [];
+  const tracks = cfg.tracks || [];
+  const parentTracks = tracks.filter(track =>
+    /^desert_hills2?(?:\.|$)/i.test(sheets[track.s] || ""));
+  const result = new Map();
+  if (!parentTracks.length) return result;
+
+  for (const track of tracks) {
+    if (!/desert_wobbly/i.test(sheets[track.s] || "")) continue;
+    const y = firstTrackY(track);
+    const parent = parentTracks.reduce((best, candidate) =>
+      Math.abs(firstTrackY(candidate) - y) < Math.abs(firstTrackY(best) - y) ? candidate : best
+    );
+    const period = sheetPeriods.get(parent.s);
+    if (Number.isFinite(period)) result.set(track, period);
+  }
+  return result;
 }
 
 /**
