@@ -77,7 +77,7 @@ test("preview keeps the shadow proportional to the player during camera zoom", a
     "shadow is not reset to identity screen space before drawing");
   assert.match(app, /const landS = s \* \(24 \/ 32\);/, "land tiles render at the 24-unit midpoint scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
-  const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom)");
+  const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX)");
   const player = app.indexOf("c.drawImage(avatar, playerRect.x");
   assert.ok(shadow < land && land < player,
     "shadow is behind the land and land is behind the player");
