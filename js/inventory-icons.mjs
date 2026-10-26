@@ -375,7 +375,7 @@ function prehistoricCell(item) {
 
   // Name matching is a fallback for catalogs that remap item IDs.
   const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
-  if (!name.includes("pet") || name.includes("seed")) return null;
+  if (name.includes("seed")) return null;
   const row = PREHISTORIC_SPECIES.findIndex(species => name.includes(species));
   if (row < 0) return null;
   const color = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
@@ -502,7 +502,7 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
       paintContained(canvas, frame);
       return;
     } catch (error) {
-      if (warnings++ < 8) console.error("Prehistoric pet sprite icon failed; trying catalog icon.", {
+      if (warnings++ < 8) console.error("Prehistoric sprite failed; showing clean generated dinosaur icon.", {
         id: item.id, name: item.name, error
       });
       // Never render the old atlas/debug marker. If the supplied sprite fails
