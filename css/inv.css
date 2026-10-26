@@ -37,8 +37,8 @@
   width:calc(57.7*var(--u));height:calc(57.7*var(--u));display:flex;align-items:center;justify-content:center;
   padding:0;background:transparent;border:var(--bd) solid var(--line);border-radius:var(--radius);outline:0;
   box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000;z-index:4}
-#filter-button span{width:0;height:0;border-left:calc(8*var(--u)) solid transparent;
-  border-right:calc(8*var(--u)) solid transparent;border-top:calc(9*var(--u)) solid #dfdfdf;
+#filter-button span{width:0;height:0;border-left:calc(11*var(--u)) solid transparent;
+  border-right:calc(11*var(--u)) solid transparent;border-top:calc(12*var(--u)) solid #dfdfdf;
   transform:translateY(calc(2*var(--u)))}
 #filter-button[aria-expanded=true] span{transform:translateY(calc(-2*var(--u))) rotate(180deg)}
 #filter-button:focus-visible{border-color:#dfdfdf}
@@ -46,7 +46,7 @@
   width:calc(420*var(--u));max-width:calc(100% - 40*var(--u));max-height:calc(430*var(--u));
   overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;
   background:#277d9f;border:var(--bd) solid var(--line);border-radius:var(--radius);
-  box-shadow:inset var(--sh) var(--sh) 0 rgba(0,0,0,.32),var(--sh) var(--sh) 0 #000;padding:calc(5*var(--u))}
+  box-shadow:var(--sh) var(--sh) 0 #000;padding:calc(5*var(--u))}
 #filter-panel[hidden]{display:none}
 .filter-option{width:100%;min-height:calc(42*var(--u));display:flex;align-items:center;text-align:left;
   padding:calc(8*var(--u)) calc(12*var(--u));background:transparent;border:0;border-radius:var(--radius);
