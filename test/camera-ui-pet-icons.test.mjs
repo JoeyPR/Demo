@@ -42,14 +42,17 @@ test("filter panel keeps its inner and outer shadows but selected text has no in
   assert.ok(panelRule.length > 0);
   assert.ok(selectedRule.length > 0);
   assert.match(panelRule, /inset\s/);
-  assert.match(panelRule, /box-shadow:[^;]*#000/);
+  assert.match(panelRule, /calc\(5\*var\(--u\)\) calc\(5\*var\(--u\)\) 0 #000/);
   assert.doesNotMatch(selectedRule, /box-shadow|inset/);
 });
 
 test("inventory handle tracks pointers at window level and permits both directions", () => {
-  assert.match(handle, /const baseTop = rect\.top - dy/);
+  assert.match(handle, /const applied = parseFloat\(getComputedStyle\(root\)\.getPropertyValue\('--dy'\)\) \|\| 0/);
+  assert.match(handle, /const baseTop = rect\.top - applied/);
   assert.match(handle, /const maxUp = Math\.max\(0, baseTop - topLimit\)/);
-  assert.match(handle, /const maxDown = Math\.max\(0, innerHeight - baseBottom - edgeGap\)/);
+  assert.match(handle, /baseTop >= previewRect\.bottom/);
+  assert.match(handle, /const H = ui\.offsetHeight \|\| innerHeight/);
+  assert.match(handle, /const maxDown = Math\.max\(0, H \* \(606 - 130\) \/ 894\)/);
   assert.match(handle, /return \[-maxUp, maxDown\]/);
   assert.match(handle, /window\.addEventListener\('pointermove'/);
   assert.match(handle, /setPointerCapture\(e\.pointerId\)/);
@@ -68,6 +71,12 @@ test("land and weather dropdown controls are reduced in size", () => {
   assert.match(dropdowns, /\.dd-btn \.dd-thumb\s*\{\s*width: 24px; height: 24px/);
   assert.match(dropdowns, /\.dd-btn \.dd-thumb \{ width: 20px; height: 20px; \}/);
   assert.match(dropdowns, /font: 600 11px\/1/);
+});
+
+test("filter dropdown arrow is larger while the nameplate remains at 0.80 scale", () => {
+  assert.match(inventoryCss, /border-left:calc\(12\*var\(--u\)\) solid transparent/);
+  assert.match(inventoryCss, /border-right:calc\(12\*var\(--u\)\) solid transparent;border-top:calc\(13\*var\(--u\)\) solid #dfdfdf/);
+  assert.match(app, /P\.plate\.draw\(c, plateX, plateY, s \* 0\.80 \* zoom, state\.clock\)/);
 });
 
 test("prehistoric pet icons use the clean 128x512 sheet, exact ID mapping, and no debug atlas fallback", () => {
