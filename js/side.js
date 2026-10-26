@@ -3,7 +3,7 @@
    Customization tab; EXPORT saves a player PNG. */
 (function(){
   const side = P.$('#side'), sw = P.$('#sw'), main = P.$('#main'), q = P.$('#q');
-  const nonSearchableTabs = new Set(['custom']);
+  const nonSearchableTabs = new Set(['custom', 'player', 'makeup']);
 
   const setSw = on => {
     on = !!on && !nonSearchableTabs.has(P.tabs.cur);
