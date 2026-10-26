@@ -297,9 +297,9 @@ function prehistoricSources(item, record) {
 }
 
 function isPrehistoricIcon(item, record) {
-  return prehistoricSources(item, record).some(value =>
-    value.toLowerCase().includes("prehistoric")
-  );
+  const sourceText = prehistoricSources(item, record).join(" ").toLowerCase();
+  return ["prehistoric", "dinosaur", "dino", "raptor", "tyrannosaur",
+    "pterodactyl", "t-rex", "trex", "t_rex"].some(term => sourceText.includes(term));
 }
 
 function prehistoricColorColumn(item) {
