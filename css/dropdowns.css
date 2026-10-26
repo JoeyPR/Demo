@@ -37,8 +37,8 @@
 /* desktop: bottom corners of the screen; panels sit above their button */
 #dd-weather-btn { right: 14px; bottom: 14px; }
 #dd-land-btn { left: 14px; bottom: 14px; }
-#dd-weather-panel { right: 14px; bottom: 43px; }
-#dd-land-panel { left: 14px; bottom: 43px; }
+#dd-weather-panel { right: 14px; bottom: 48px; }
+#dd-land-panel { left: 14px; bottom: 48px; }
 
 .dd-panel {
   position: fixed;
