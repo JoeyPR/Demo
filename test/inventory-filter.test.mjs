@@ -14,7 +14,8 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
   assert.match(topSection, /id="top"[\s\S]*id="handle"[\s\S]*<\/div>\s*<\/div>\s*$/);
   assert.doesNotMatch(inv, /#top,#handle,#tabs,#main,#side\s*\{/);
   assert.match(inv, /#handle\{left:calc\(181\.2\*var\(--u\)\);top:calc\(-66\.9\*var\(--u\)\)/);
-  assert.match(mobile, /#handle\{left:calc\(156\*var\(--u\)\);top:calc\(-17\*var\(--u\)\)/);
+  assert.match(mobile, /#handle\{left:calc\(160\*var\(--u\)\);top:calc\(-97\*var\(--u\)\)/,
+    "mobile handle preserves its intended stage position after being nested in #top");
 });
 
 test("Fist and Wrench use the same icon inset as inventory item icons", () => {
@@ -42,4 +43,11 @@ test("filter categories are derived from catalog item slots and filter the visib
   assert.match(grid, /P\.store\.set\('filterCategory', activeFilter\)/);
   assert.match(grid, /setFilterOpen\(filterPanel\.hidden\)/);
   assert.match(grid, /e\.key === 'Escape'/);
+});
+
+
+test("inventory icons appear at full opacity with no scrolling fade or scale transition", () => {
+  assert.match(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:1;transform:none;transition:none\}/);
+  assert.doesNotMatch(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:0/);
+  assert.doesNotMatch(inv, /transition:opacity \.18s ease-out,transform/);
 });
