@@ -26,32 +26,37 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
   assert.deepEqual(p, { x: 150, y: 110 });
   assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
   assert.match(app, /w \/ 2 - 3, playerTop - 6 \* s/);
-  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.86 \* zoom/);
+  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.80 \* zoom/);
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
 
-test("filter panel retains its inner shadow and outer border shadow", () => {
-  const panelRule = inventoryCss.match(/#filter-panel\{([^}]*)\}/)?.[1] ?? "";
-  const selectedRule = inventoryCss.match(/\.filter-option\[aria-pressed=true\]\{([^}]*)\}/)?.[1] ?? "";
+test("filter panel retains a visible outer drop shadow without an inset shadow", () => {
+  const panelRule = inventoryCss.match(/#filter-panel\\{([^}]*)\\}/)?.[1] ?? "";
+  const selectedRule = inventoryCss.match(/\\.filter-option\\[aria-pressed=true\\]\\{([^}]*)\\}/)?.[1] ?? "";
   assert.ok(panelRule.length > 0, "filter panel style exists");
   assert.ok(selectedRule.length > 0, "selected category style exists");
-  assert.match(panelRule, /inset\s/);
+  assert.doesNotMatch(panelRule, /inset\\s/);
   assert.doesNotMatch(selectedRule, /box-shadow|inset/);
   assert.match(panelRule, /box-shadow:[^;]*#000/);
 });
 
-test("inventory drag range allows downward movement and caps upward movement", () => {
-  assert.match(handle, /return \[-maxUp, maxDown\]/);
-  assert.match(handle, /const maxDown = H \* \(606 - 130\) \/ 894/);
-  assert.match(handle, /const preview = P\.\$\('#preview'\)/);
-  assert.match(handle, /baseBottom - previewTop \+ edgeGap/);
+test("inventory drag range allows downward movement and caps upward movement at preview", () => {
+  assert.match(handle, /return \\[-maxUp, maxDown\\]/);
+  assert.match(handle, /const H = ui\\.offsetHeight/);
+  assert.match(handle, /const maxDown = H \\* \\(606 - 130\\) \\/ 894/);
+  assert.match(handle, /const preview = P\\.\\$\\('#preview'\\)/);
+  assert.match(handle, /const baseTop = handleRect\\.top - applied/);
+  assert.match(handle, /const previewCap = Math\\.max\\(0, baseTop - previewTop - edgeGap\\)/);
 });
 
-test("land and weather dropdown controls are reduced in size", () => {
-  assert.match(dropdowns, /\.dd-btn \.dd-thumb\s*\{\s*width: 24px; height: 24px/);
-  assert.match(dropdowns, /\.dd-btn \.dd-thumb \{ width: 20px; height: 20px; \}/);
-  assert.match(dropdowns, /font: 600 11px\/1/);
+
+test("land and weather dropdown controls are reduced in size and filter arrow is larger", () => {
+  assert.match(dropdowns, /\\.dd-btn \\.dd-thumb\\s*\\{\\s*width: 24px; height: 24px/);
+  assert.match(dropdowns, /\\.dd-btn \\.dd-thumb \\{ width: 20px; height: 20px; \\}/);
+  assert.match(dropdowns, /font: 600 11px\\/1/);
+  assert.match(inventoryCss, /#filter-button span\\{[^}]*border-left:calc\\(11\\*var\\(--u\\)\\)[^}]*border-right:calc\\(11\\*var\\(--u\\)\\)[^}]*border-top:calc\\(12\\*var\\(--u\\)\\)/);
 });
+
 
 test("prehistoric pet icons map color variants per species row", () => {
   assert.equal(prehistoricPng.readUInt32BE(16), 128);
