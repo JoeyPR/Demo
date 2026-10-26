@@ -3,8 +3,8 @@
    to cameraWorldX/cameraWorldY. Zoom pivots at the player's feet, so scaling the
    scene does not detach the character from the camera focus. */
 
-export const CAMERA_ZOOM_MIN = 0.5;
-export const CAMERA_ZOOM_MAX = 2;
+export const CAMERA_ZOOM_MIN = 1 / 1.28; // at most 1.28× farther out than default
+export const CAMERA_ZOOM_MAX = 4; // close-up zoom for detailed inspection
 export const CAMERA_ZOOM_DEFAULT = 1;
 
 export function clampCameraZoom(value) {
