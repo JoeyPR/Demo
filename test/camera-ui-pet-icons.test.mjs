@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX, clampCameraZoom, projectCameraPoint } from "../js/camera.mjs";
+import { CAMERA_ZOOM_MIN, CAMERA_ZOOM_MAX, clampCameraZoom } from "../js/camera.mjs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const app = read("../js/app.js");
@@ -13,7 +13,7 @@ const inventoryCss = read("../css/inv.css");
 const plate = read("../js/plate.js");
 const prehistoricPng = readFileSync(new URL("../demo/assets/p_prehistoric.png", import.meta.url));
 
-test("camera supports a closer close-up and a capped 1.28x zoom-out", () => {
+test("camera still clamps its close and zoom-out limits", () => {
   assert.equal(CAMERA_ZOOM_MAX, 4);
   assert.ok(Math.abs(CAMERA_ZOOM_MIN - 1 / 1.28) < 1e-10);
   assert.equal(clampCameraZoom(99), 4);
@@ -21,12 +21,12 @@ test("camera supports a closer close-up and a capped 1.28x zoom-out", () => {
   assert.equal(preview.includes("min: 1 / 1.28, max: 4"), true);
 });
 
-test("nameplate tracks camera zoom, uses 0.82 scale, and is offset left", () => {
-  const p = projectCameraPoint(100, 80, 50, 50, 2);
-  assert.deepEqual(p, { x: 150, y: 110 });
-  assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
-  assert.match(app, /w \/ 2 - 3, playerTop - 6 \* s/);
-  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.82 \* zoom/);
+test("player and nameplate remain fixed-size while the nameplate tracks lift", () => {
+  assert.match(app, /function drawZoomedBackdrop[\s\S]*c\.scale\(zoom, zoom\)/);
+  assert.doesNotMatch(app, /c\.translate\(cameraPivotX, cameraPivotY\);\s*c\.scale\(zoom, zoom\)/);
+  assert.match(app, /const playerTop = ground \+ frame\.y \* s - 32 \* PLAYER_VISUAL_SCALE \* s \+ lift \* PLAYER_VISUAL_SCALE \* s/);
+  assert.match(app, /P\.plate\.draw\(c, w \/ 2 - 3, playerTop - 6 \* s, s \* 0\.80, state\.clock\)/);
+  assert.doesNotMatch(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y,[\s\S]{0,80}zoom/);
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
 
@@ -40,12 +40,22 @@ test("filter panel keeps its inner and outer shadows but selected text has no in
   assert.doesNotMatch(selectedRule, /box-shadow|inset/);
 });
 
-test("inventory handle initializes and permits both directions with an upward cap", () => {
-  assert.match(handle, /const H = ui\.offsetHeight \|\| 894/);
-  assert.match(handle, /const maxDown = H \* \(606 - 130\) \/ 894/);
+test("inventory handle tracks pointers at window level and permits both directions", () => {
+  assert.match(handle, /const baseTop = rect\.top - dy/);
+  assert.match(handle, /const maxUp = Math\.max\(0, baseTop - topLimit\)/);
+  assert.match(handle, /const maxDown = Math\.max\(0, innerHeight - baseBottom - edgeGap\)/);
   assert.match(handle, /return \[-maxUp, maxDown\]/);
+  assert.match(handle, /window\.addEventListener\('pointermove'/);
   assert.match(handle, /setPointerCapture\(e\.pointerId\)/);
-  assert.match(handle, /baseBottom - previewTop \+ edgeGap/);
+  assert.match(handle, /P\.store\.set\('dy', Math\.round\(dy\)\)/);
+});
+
+test("land tiles remain fixed-size at the requested 32 world units", () => {
+  assert.match(app, /function drawLandGround\(w, h, ground, s, frame, cameraWorldX = frame\.x\)/);
+  assert.match(app, /const landS = s; \/\/ Native Growtopia tile size: 32 world units per block\./);
+  assert.match(app, /ctx\.setTransform\(1, 0, 0, 1, 0, 0\)/);
+  assert.match(app, /drawLandGround\(w, h, ground, s, frame, camera\.cameraWorldX\)/);
+  assert.doesNotMatch(app, /const landGround = cameraPivotY \+ \(ground - cameraPivotY\) \* zoom/);
 });
 
 test("land and weather dropdown controls are reduced in size", () => {
@@ -54,25 +64,18 @@ test("land and weather dropdown controls are reduced in size", () => {
   assert.match(dropdowns, /font: 600 11px\/1/);
 });
 
-test("land renders at a fixed scale outside the camera zoom transform", () => {
-  assert.match(app, /function drawLandGround\(w, h, ground, s, frame, cameraWorldX = frame\.x\)/);
-  assert.match(app, /const lw = Math\.ceil\(w \/ landS\)/);
-  assert.match(app, /ctx\.setTransform\(1, 0, 0, 1, 0, 0\)/);
-  assert.match(app, /const landGround = cameraPivotY \+ \(ground - cameraPivotY\) \* zoom/);
-  assert.match(app, /drawLandGround\(w, h, landGround, s, frame, camera\.cameraWorldX\)/);
-});
-
-test("prehistoric pet icons use the clean RGBA 128x512 sprite sheet and correct color/species mapping", () => {
+test("prehistoric pet icons use the clean 128x512 sheet, exact ID mapping, and no debug atlas fallback", () => {
   assert.equal(prehistoricPng.readUInt32BE(16), 128);
   assert.equal(prehistoricPng.readUInt32BE(20), 512);
-  assert.equal(prehistoricPng.readUInt8(25), 6, "sprite must be RGBA, not palette-transparency PNG");
+  assert.equal(prehistoricPng.readUInt8(25), 6, "sprite must be RGBA");
   assert.match(icons, /const PREHISTORIC_SPRITE = "p_prehistoric\.png"/);
-  assert.match(icons, /assetURL\.searchParams\.set\("v", "3"\)/);
-  assert.match(icons, /const PREHISTORIC_SPECIES = Object\.freeze\(\[/);
-  assert.match(icons, /"pteranodon"[\s\S]*"triceratops"/);
-  assert.match(icons, /const petIndex = offset \/ 2;[\s\S]*const row = petIndex % 16;[\s\S]*const column = Math\.floor\(petIndex \/ 16\)/);
-  assert.match(icons, /image\.naturalWidth < 128 \|\| image\.naturalHeight < 512/);
+  assert.match(icons, /new URL\("\.\.\/demo\/assets\/p_prehistoric\.png", import\.meta\.url\)/);
+  assert.match(icons, /new URL\("\.\.\/img\/p_prehistoric\.png", import\.meta\.url\)/);
+  assert.match(icons, /url\.searchParams\.set\("v", "pet-icons-v4"\)/);
+  assert.match(icons, /const petIndex = \(id - 3952\) \/ 2;[\s\S]*return \{ column: Math\.floor\(petIndex \/ 16\), row: petIndex % 16 \}/);
   assert.match(icons, /ctx\.drawImage\(image, cell\.column \* 32, cell\.row \* 32, 32, 32, 0, 0, 32, 32\)/);
-  assert.match(icons, /if \(!hasPixels\(frame\)\) throw new Error\("Prehistoric sprite cell is transparent:/);
+  assert.match(icons, /fallbackPrehistoricFrame\(cell\)/);
+  assert.match(icons, /Never render the old atlas\/debug marker/);
+  assert.doesNotMatch(icons, /Prehistoric pet sprite icon failed; trying catalog icon/);
   assert.match(app, /renderDemoInventoryIcon\(canvas, raw, state\.skin\)/);
 });
