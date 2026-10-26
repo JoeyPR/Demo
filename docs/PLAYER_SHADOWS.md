@@ -15,7 +15,7 @@ Public Growtopia depot manifests list a `Shaders` directory with `DropShadow.fs.
 - The mask shifts 12 player-space units toward the facing side and 12 units downward: right-facing characters project bottom-right, left-facing characters bottom-left. It uses the same camera transform and destination dimensions as the avatar, so its proportions and offset remain locked to the character at every zoom level.
 - Ancestral slot sprites, aura/FX calls, additive visuals, pets, lines, particles, and punch-arm/hand projections are filtered out. During a punch, arm/hand calls and the triggering punch item are also excluded; the torso and unrelated clothing keep their shadows.
 - Shadow color is #000000 with no blur, preserving crisp pixels.
-- The base 32-unit player rig is scaled to 0.78 and land tiles render at 24 screen-units per 32-unit source tile — the midpoint between 16 and 32. The feet pivot remains fixed.
+- The base 32-unit player rig is scaled to 0.78 and land tiles render at 20 screen-units per 32-unit source tile — the midpoint between 16 and 24. The feet pivot remains fixed.
 
 The silhouette is built from each eligible draw call using its own matrix. The shared mask is only a rendering optimization; the projected shape remains the combined set of individual player/clothing sprite silhouettes.
 
