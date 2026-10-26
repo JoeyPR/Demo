@@ -1,9 +1,7 @@
 /* GRID: the Demo catalog + the planner's eight custom placeholders, filtered
    by the planner tabs (Equipped / Favorites / Clothing / Custom).
-   The clothing grid is VIRTUALIZED: only the boxes inside (or cut off by)
-   the visible drawer are in the DOM, and each box's thumbnail + name only
-   render when it is actually seen — content pops in while scrolling. This
-   keeps the 4000+-item catalog light and lag-free.
+   The clothing grid is VIRTUALIZED: only nearby rows are mounted, and boxes
+   shared between scroll windows keep their existing thumbnail DOM to avoid blinking.
    Box-focus flow (every item box, quick drawer included):
      click 1 -> box-focus | click 2 -> equipped (focus consumed)
      equipped: click 1 -> box-focus | click 2 -> unequipped (focus consumed) */
@@ -23,6 +21,7 @@
   inner.append(win); g.append(inner);
   let m = null;            /* column metrics */
   let firstRow = -1, lastRow = -1;
+  const mounted = new Map();  /* item index -> persistent box element */
 
   /* the planner's custom clothing placeholders — present in the Custom tab,
      not wearable by the Demo engine (official catalog items only) */
@@ -50,7 +49,9 @@
       const value = String(it.slot);
       if (!bySlot.has(value)) {
         const names = P.dat?.slots || {};
-        bySlot.set(value, { value, label: names[value] || ('Slot ' + value) });
+        const rawLabel = names[value] || ('Slot ' + value);
+        const label = ({ Hat: 'Hats', Shirt: 'Shirts', Hair: 'Hairs', Ancestral: 'Artifacts' })[rawLabel] || rawLabel;
+        bySlot.set(value, { value, label });
       }
     }
     return [
@@ -71,10 +72,6 @@
       P.store.set('filterCategory', activeFilter);
     }
     filterPanel.replaceChildren();
-    const heading = document.createElement('div');
-    heading.className = 'filter-heading';
-    heading.textContent = 'CLOTHING CATEGORY';
-    filterPanel.append(heading);
     for (const option of options) {
       const b = document.createElement('button');
       b.type = 'button';
@@ -136,7 +133,7 @@
     for (const b of P.$('#quick').querySelectorAll('.box')) if (b.dataset.id) b.classList.toggle('sel', eq.has(+b.dataset.id));
   }
 
-  function boxEl(it, lazy) {
+  function boxEl(it) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '') +
@@ -153,7 +150,7 @@
       const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/fav-box.png'; fv.alt = '';
       b.append(fv);
     }
-    if (!lazy) fillBox(b);
+    fillBox(b);
     return b;
   }
 
@@ -170,31 +167,6 @@
     const n = b.querySelector('.n');
     if (n && !n.textContent) n.textContent = it.name;   /* kept as metadata; the label itself is hidden (names never show) */
   }
-  /* unmount the thumbnail (keep the light name) — keeps memory bounded */
-  function unfillBox(b) {
-    const ic = b.querySelector('.ic');
-    if (ic) ic.replaceChildren();
-  }
-
-  /* boxes pop in exactly when they become visible — even when cut off by the
-     drawer's edge. Zero margin: nothing renders before it is actually seen. */
-  const io = new IntersectionObserver(entries => {
-    for (const e of entries) {
-      const b = e.target;
-      if (e.isIntersecting) {
-        if (!b.classList.contains('vis')) { b.classList.add('vis'); fillBox(b); }
-      } else if (b.classList.contains('vis')) {
-        b.classList.remove('vis');
-        unfillBox(b);
-      }
-    }
-  }, { root: g, rootMargin: '0px' });
-  /* stop observing boxes before they leave the window (both paths) so the
-     observer never holds references to detached nodes */
-  function releaseWindow() {
-    for (const b of win.querySelectorAll('.box')) io.unobserve(b);
-  }
-
   function layoutMetrics() {
     const cs = getComputedStyle(win);
     let spec = cs.gridTemplateColumns;
@@ -215,7 +187,7 @@
 
   function renderWindow(force) {
     if (!render.length) {
-      releaseWindow();
+      mounted.clear();
       win.replaceChildren();
       inner.style.height = '0px';
       const empty = document.createElement('div');
@@ -233,24 +205,70 @@
     const l = Math.min(rows - 1, Math.ceil((st + vh - m.padTop) / m.rowH) + 2);
     if (!force && f === firstRow && l === lastRow) return;
     firstRow = f; lastRow = l;
-    win.style.top = (firstRow * m.rowH) + 'px';   /* the window keeps its own padding-top */
-    const frag = document.createDocumentFragment();
-    for (let row = firstRow; row <= lastRow; row++)
+    win.style.top = (firstRow * m.rowH) + 'px';   /* retain overlap between scroll windows */
+    if (win.firstElementChild?.classList.contains('empty')) win.replaceChildren();
+
+    const wanted = new Set();
+    const ordered = [];
+    for (let row = firstRow; row <= lastRow; row++) {
       for (let col = 0; col < m.n; col++) {
         const idx = row * m.n + col;
         if (idx >= render.length) break;
-        const b = boxEl(render[idx], true);
-        io.observe(b);
-        frag.append(b);
+        let b = mounted.get(idx);
+        if (b && +b.dataset.id !== render[idx].id) {
+          b.remove();
+          mounted.delete(idx);
+          b = null;
+        }
+        if (!b) {
+          b = boxEl(render[idx]);
+          mounted.set(idx, b);
+        } else {
+          syncBox(b, render[idx]);
+        }
+        wanted.add(idx);
+        ordered.push(b);
       }
-    releaseWindow();
-    win.replaceChildren(frag);
+    }
+
+    for (const [idx, b] of mounted) {
+      if (!wanted.has(idx)) {
+        b.remove();
+        mounted.delete(idx);
+      }
+    }
+    /* Insert only new or misplaced nodes. Shared rows keep the same canvas and
+       thumbnail DOM, avoiding a remove/recreate flash on every scroll step. */
+    for (let i = 0; i < ordered.length; i++) {
+      const b = ordered[i];
+      const current = win.children[i];
+      if (current !== b) win.insertBefore(b, current || null);
+    }
     markEquipped();
     markFocus();
   }
 
   g.addEventListener('scroll', () => renderWindow(false), { passive: true });
   if (window.ResizeObserver) new ResizeObserver(() => { m = null; renderWindow(true); }).observe(g);
+
+  function syncBox(b, it) {
+    b._it = it;
+    b.classList.toggle('gone', !!it.gone);
+    b.classList.toggle('fav', favs.has(it.id));
+    b.classList.toggle('art', !!(P.ancestralIds && P.ancestralIds.has(it.id)));
+    if (it.slot != null) b.dataset.slot = it.slot;
+    else delete b.dataset.slot;
+    const fv = b.querySelector('.fv');
+    if (favs.has(it.id)) {
+      if (!fv) {
+        const star = document.createElement('img');
+        star.className = 'fv'; star.src = 'img/fav-box.png'; star.alt = '';
+        b.append(star);
+      }
+    } else if (fv) fv.remove();
+    const n = b.querySelector('.n');
+    if (n) n.textContent = it.name;
+  }
 
   /* ---------------- box-focus activation (the four-click state machine) --- */
   function activate(item) {
