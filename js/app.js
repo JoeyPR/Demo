@@ -375,12 +375,12 @@ function setLand(id) {
   state.landWorld = uniformLandWorld(resolved);
 }
 P.on("land", id => setLand(id));
-function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
-  // Render land blocks at 20 screen-units per 32-unit source tile: the
-  // midpoint between 16 and 24. Grid coordinates stay native at 32 per tile.
+function drawLandGround(w, h, ground, s, frame, cameraWorldX = frame.x) {
+  // Land keeps a constant screen-space scale while the player camera zooms.
+  // Horizontal world travel still scrolls the tile field behind the player.
   const landS = s * (20 / 32);
-  const lw = Math.ceil(w / (landS * zoom));
-  const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
+  const lw = Math.ceil(w / landS);
+  const lh = Math.max(1, Math.ceil(h / landS) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
     landCanvas.width = lw; landCanvas.height = lh;
   }
@@ -392,7 +392,11 @@ function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
   if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
   const dx = (w - lw * landS) / 2;
+  // Called during the zoomed world pass, but terrain must remain unzoomed.
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS);
+  ctx.restore();
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -548,7 +552,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX);
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame, camera.cameraWorldX);
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   // Scale the player and all clothing around rig feet (16,32). Land tiles use
   // the full 32-unit world scale; the character remains at 0.78 scale.
@@ -563,7 +567,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const platePoint = projectCameraPoint(
       w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.86 * zoom, state.clock);
+    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.82 * zoom, state.clock);
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
