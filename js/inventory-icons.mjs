@@ -296,35 +296,51 @@ function prehistoricCell(item) {
   // stores colors as X columns (red/green/brown/grey) and species as Y rows.
   // Seed IDs are odd and deliberately excluded from this pet-icon override.
   const id = Number(item?.id ?? item?.raw?.id);
+  const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
+  const isPetName = name.includes("pet") && !name.includes("seed");
+  const namedRow = isPetName
+    ? PREHISTORIC_SPECIES.findIndex(species => name.includes(species))
+    : -1;
+  const namedColor = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
+
+  // Prefer exact catalog names when present. The sprite uses 16 species rows
+  // and four color columns; each official color block contains 16 even-ID pets.
+  if (namedRow >= 0) {
+    return { column: namedColor ? PREHISTORIC_COLORS[namedColor] : 0, row: namedRow };
+  }
+
+  const id = Number(item?.id ?? item?.raw?.id);
   if (Number.isInteger(id) && id >= 3952 && id <= 4078 && id % 2 === 0) {
     const offset = id - 3952;
-    // IDs are grouped four at a time per species: red, green, brown, grey.
-    const row = Math.floor(offset / 8);
-    const column = Math.floor((offset % 8) / 2);
+    const petIndex = offset / 2;
+    const row = petIndex % 16;
+    const column = Math.floor(petIndex / 16);
     if (column >= 0 && column < 4 && row >= 0 && row < PREHISTORIC_SPECIES.length)
       return { column, row };
   }
-
-  // Name-based fallback allows equivalent catalogs to use different item IDs.
-  const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
-  if (!name.includes("pet") || name.includes("seed")) return null;
-  const row = PREHISTORIC_SPECIES.findIndex(species => name.includes(species));
-  if (row < 0) return null;
-  const color = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
-  return { column: color ? PREHISTORIC_COLORS[color] : 0, row };
+  return null;
 }
 
+const prehistoricIconCache = new Map();
 async function renderPrehistoricIcon(cell) {
   if (!cell) return null;
-  // The sprite's original 32×32 cells contain complete, clean icons. Crop only
-  // the requested species row and color column; the live PetEngine is untouched.
-  return cropCandidate({
-    file: PREHISTORIC_SPRITE,
-    sx: cell.column * 32,
-    sy: cell.row * 32,
-    w: 32,
-    h: 32,
-  });
+  const key = cell.column + ":" + cell.row;
+  if (prehistoricIconCache.has(key)) return prehistoricIconCache.get(key);
+  const promise = (async () => {
+    const image = await loadSprite(PREHISTORIC_SPRITE);
+    if (!image?.naturalWidth || image.naturalWidth < 128 || image.naturalHeight < 512)
+      throw new Error("Prehistoric sprite sheet must be 128×512: " + PREHISTORIC_SPRITE);
+    const frame = blankFrame();
+    const ctx = frame.getContext("2d", { alpha: true });
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 32, 32);
+    ctx.drawImage(image, cell.column * 32, cell.row * 32, 32, 32, 0, 0, 32, 32);
+    if (!hasPixels(frame)) throw new Error("Prehistoric sprite cell is transparent: " + key);
+    return frame;
+  })();
+  prehistoricIconCache.set(key, promise);
+  try { return await promise; }
+  catch (error) { prehistoricIconCache.delete(key); throw error; }
 }
 
 async function makeFrame(record, fallbackItem, skin) {
@@ -419,12 +435,28 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
 
   const prehistoric = prehistoricCell(item);
   if (prehistoric) {
-    const frame = await renderPrehistoricIcon(prehistoric);
-    if (canvas.__demoIconToken !== token) return;
-    // Dinosaur pet icons always use the provided clean sprite sheet; don't fall
-    // back to the marked game atlas if that image fails to load.
-    paintContained(canvas, frame ?? blankFrame());
-    return;
+    try {
+      const frame = await renderPrehistoricIcon(prehistoric);
+      if (canvas.__demoIconToken !== token) return;
+      paintContained(canvas, frame);
+      return;
+    } catch (error) {
+      if (warnings++ < 8) console.error("Prehistoric pet sprite icon failed; trying catalog icon.", {
+        id: item.id, name: item.name, error
+      });
+      // Keep a visible fallback if the dedicated sprite fails to load.
+      try {
+        const rows = await loadMetadata();
+        if (canvas.__demoIconToken !== token) return;
+        const record = rows.get(String(Number(item.id)));
+        const fallback = await makeFrame(record, item, skin);
+        if (canvas.__demoIconToken !== token) return;
+        paintContained(canvas, fallback && hasPixels(fallback) ? fallback : blankFrame());
+      } catch {
+        if (canvas.__demoIconToken === token) paintContained(canvas, blankFrame());
+      }
+      return;
+    }
   }
 
   try {
