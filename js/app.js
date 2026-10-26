@@ -242,16 +242,27 @@ function drawScene(w, h) {
   /* plain sky fallback — only shown if the weather fails to load */
   ctx.fillStyle = PALETTE.sky; ctx.fillRect(0, 0, w, h);
 }
-function drawZoomedBackdrop(c, image, w, h, zoom, pivotX, pivotY) {
-  // Camera zoom changes only the distant scenery. Foreground land tiles,
-  // the player and the nameplate keep a constant on-screen size.
+function drawZoomedWeatherLayer(c, image, w, h, zoom, pivotX, pivotY, fillSky = false) {
+  // Weather scenes are cover-fitted before zoom. Zoom-out receives overscan,
+  // keeping the weather flush to the preview's edges at every allowed zoom.
+  if (fillSky) {
+    c.save();
+    c.fillStyle = PALETTE.sky;
+    c.fillRect(0, 0, w, h);
+    c.restore();
+  }
+  if (!image) return;
+  const iw = image.naturalWidth || image.width || w;
+  const ih = image.naturalHeight || image.height || h;
+  const fit = Math.max(w / iw, h / ih) * Math.max(1, 1 / zoom);
+  const dw = iw * fit, dh = ih * fit;
+  const cx = pivotX + (w / 2 - pivotX) / zoom;
+  const cy = pivotY + (h / 2 - pivotY) / zoom;
   c.save();
-  c.fillStyle = PALETTE.sky;
-  c.fillRect(0, 0, w, h);
   c.translate(pivotX, pivotY);
   c.scale(zoom, zoom);
   c.translate(-pivotX, -pivotY);
-  c.drawImage(image, 0, 0, w, h);
+  c.drawImage(image, cx - dw / 2, cy - dh / 2, dw, dh);
   c.restore();
 }
 function renderAvatar() {
@@ -532,9 +543,9 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     /* Hill offsets use the camera's live world X; other weather elements keep
        their own animation timeline. */
     state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, camera.cameraWorldX));
-    drawZoomedBackdrop(c, weatherBG, w, h, zoom, cameraPivotX, cameraPivotY);
+    drawZoomedWeatherLayer(c, weatherBG, w, h, zoom, cameraPivotX, cameraPivotY, true);
   } else if (state.weatherStill) {
-    drawZoomedBackdrop(c, state.weatherStill, w, h, zoom, cameraPivotX, cameraPivotY);
+    drawZoomedWeatherLayer(c, state.weatherStill, w, h, zoom, cameraPivotX, cameraPivotY, true);
   } else {
     drawScene(w, h);
   }
