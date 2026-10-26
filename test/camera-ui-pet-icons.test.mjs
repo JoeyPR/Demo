@@ -31,32 +31,30 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
 });
 
 test("filter panel retains a visible outer drop shadow without an inset shadow", () => {
-  const panelRule = inventoryCss.match(/#filter-panel\\{([^}]*)\\}/)?.[1] ?? "";
-  const selectedRule = inventoryCss.match(/\\.filter-option\\[aria-pressed=true\\]\\{([^}]*)\\}/)?.[1] ?? "";
+  const panelRule = inventoryCss.match(/#filter-panel\{([^}]*)\}/)?.[1] ?? "";
+  const selectedRule = inventoryCss.match(/\.filter-option\[aria-pressed=true\]\{([^}]*)\}/)?.[1] ?? "";
   assert.ok(panelRule.length > 0, "filter panel style exists");
   assert.ok(selectedRule.length > 0, "selected category style exists");
-  assert.doesNotMatch(panelRule, /inset\\s/);
+  assert.doesNotMatch(panelRule, /inset\s/);
   assert.doesNotMatch(selectedRule, /box-shadow|inset/);
   assert.match(panelRule, /box-shadow:[^;]*#000/);
 });
 
 test("inventory drag range allows downward movement and caps upward movement at preview", () => {
-  assert.match(handle, /return \\[-maxUp, maxDown\\]/);
-  assert.match(handle, /const H = ui\\.offsetHeight/);
-  assert.match(handle, /const maxDown = H \\* \\(606 - 130\\) \\/ 894/);
-  assert.match(handle, /const preview = P\\.\\$\\('#preview'\\)/);
-  assert.match(handle, /const baseTop = handleRect\\.top - applied/);
-  assert.match(handle, /const previewCap = Math\\.max\\(0, baseTop - previewTop - edgeGap\\)/);
+  assert.match(handle, /return \[-maxUp, maxDown\]/);
+  assert.match(handle, /const H = ui\.offsetHeight/);
+  assert.match(handle, /const maxDown = H \* \(606 - 130\) \/ 894/);
+  assert.match(handle, /const preview = P\.\$\('#preview'\)/);
+  assert.match(handle, /const baseTop = handleRect\.top - applied/);
+  assert.match(handle, /const previewCap = Math\.max\(0, baseTop - previewTop - edgeGap\)/);
 });
-
 
 test("land and weather dropdown controls are reduced in size and filter arrow is larger", () => {
-  assert.match(dropdowns, /\\.dd-btn \\.dd-thumb\\s*\\{\\s*width: 24px; height: 24px/);
-  assert.match(dropdowns, /\\.dd-btn \\.dd-thumb \\{ width: 20px; height: 20px; \\}/);
-  assert.match(dropdowns, /font: 600 11px\\/1/);
-  assert.match(inventoryCss, /#filter-button span\\{[^}]*border-left:calc\\(11\\*var\\(--u\\)\\)[^}]*border-right:calc\\(11\\*var\\(--u\\)\\)[^}]*border-top:calc\\(12\\*var\\(--u\\)\\)/);
+  assert.match(dropdowns, /\.dd-btn \.dd-thumb\s*\{\s*width: 24px; height: 24px/);
+  assert.match(dropdowns, /\.dd-btn \.dd-thumb \{ width: 20px; height: 20px; \}/);
+  assert.match(dropdowns, /font: 600 11px\/1/);
+  assert.match(inventoryCss, /#filter-button span\{[^}]*border-left:calc\(11\*var\(--u\)\)[^}]*border-right:calc\(11\*var\(--u\)\)[^}]*border-top:calc\(12\*var\(--u\)\)/);
 });
-
 
 test("prehistoric pet icons map color variants per species row", () => {
   assert.equal(prehistoricPng.readUInt32BE(16), 128);
