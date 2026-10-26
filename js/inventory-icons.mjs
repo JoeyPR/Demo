@@ -58,9 +58,7 @@ function loadSprite(filename) {
         reject(new Error("Demo icon asset failed to load: " + name));
       };
       const assetURL = new URL(name, ASSET_ROOT);
-      // This sheet replaced an earlier palette PNG at the same path; bust any
-      // cached copy so the browser always loads the RGBA sprite revision.
-      if (name === PREHISTORIC_SPRITE) assetURL.searchParams.set("v", "3");
+      if (name === PREHISTORIC_SPRITE) assetURL.searchParams.set("v", "pet-icons-v4");
       image.src = assetURL.href;
     }));
   }
@@ -295,33 +293,93 @@ const PREHISTORIC_SPECIES = Object.freeze([
   "triceradon", "tripatosaurus", "tricerus rex", "triceratops",
 ]);
 
+let prehistoricSpritePromise = null;
+function loadPrehistoricSprite() {
+  if (!prehistoricSpritePromise) {
+    prehistoricSpritePromise = (async () => {
+      const urls = [
+        new URL("../demo/assets/p_prehistoric.png", import.meta.url),
+        new URL("../img/p_prehistoric.png", import.meta.url),
+      ];
+      let lastError = null;
+      for (const source of urls) {
+        const url = new URL(source.href);
+        // Always request the current sprite revision, even on long-lived mobile caches.
+        url.searchParams.set("v", "pet-icons-v4");
+        try {
+          const image = await new Promise((resolve, reject) => {
+            const el = new Image();
+            el.crossOrigin = "anonymous";
+            el.decoding = "async";
+            el.onload = () => resolve(el);
+            el.onerror = () => reject(new Error("Could not load " + url.pathname));
+            el.src = url.href;
+          });
+          if (image.naturalWidth >= 128 && image.naturalHeight >= 512) return image;
+          throw new Error("Prehistoric sprite has unexpected size " +
+            image.naturalWidth + "x" + image.naturalHeight);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError ?? new Error("Prehistoric sprite sheet is unavailable");
+    })().catch(error => {
+      prehistoricSpritePromise = null;
+      throw error;
+    });
+  }
+  return prehistoricSpritePromise;
+}
+
+function fallbackPrehistoricFrame(cell) {
+  // Never fall back to the marked in-game atlas. If both static URLs fail,
+  // paint a small, unmistakably colored dinosaur instead of an empty icon.
+  const frame = blankFrame();
+  const ctx = frame.getContext("2d", { alpha: true });
+  const colors = [
+    ["#9e1e20", "#d62d30", "#f3d6c5"],
+    ["#176d1d", "#31ad36", "#f2edce"],
+    ["#5b4224", "#987341", "#f0dca9"],
+    ["#546f72", "#9bb9bc", "#f4f3e9"],
+  ];
+  const [shade, base, highlight] = colors[cell?.column ?? 0];
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = shade;
+  ctx.fillRect(5, 15, 4, 3);   // tail
+  ctx.fillRect(7, 13, 12, 9);  // body
+  ctx.fillRect(16, 8, 5, 9);   // neck
+  ctx.fillRect(18, 6, 8, 5);   // head
+  ctx.fillRect(23, 9, 6, 3);   // snout
+  ctx.fillRect(9, 21, 4, 7);   // rear leg
+  ctx.fillRect(16, 21, 4, 7);  // front leg
+  ctx.fillStyle = base;
+  ctx.fillRect(7, 14, 11, 7);
+  ctx.fillRect(17, 9, 3, 7);
+  ctx.fillRect(19, 7, 6, 3);
+  ctx.fillRect(24, 9, 4, 2);
+  ctx.fillStyle = highlight;
+  ctx.fillRect(22, 7, 2, 2);
+  ctx.fillStyle = "#172024";
+  ctx.fillRect(23, 7, 1, 1);
+  return frame;
+}
+
 function prehistoricCell(item) {
-  // Official dinosaur pets have sixteen species IDs per color. The sprite sheet
-  // stores colors as X columns (red/green/brown/grey) and species as Y rows.
-  // Seed IDs are odd and deliberately excluded from this pet-icon override.
-  const id = Number(item?.id ?? item?.raw?.id);
-  const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
-  const isPetName = name.includes("pet") && !name.includes("seed");
-  const namedRow = isPetName
-    ? PREHISTORIC_SPECIES.findIndex(species => name.includes(species))
-    : -1;
-  const namedColor = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
-
-  // Prefer exact catalog names when present. The sprite uses 16 species rows
-  // and four color columns; each official color block contains 16 even-ID pets.
-  if (namedRow >= 0) {
-    return { column: namedColor ? PREHISTORIC_COLORS[namedColor] : 0, row: namedRow };
-  }
-
+  // Official dinosaur item IDs are authoritative. Every color block contains
+  // sixteen even-ID pets; each sprite column is a color and each row a species.
+  const id = Number(item?.id ?? item?.raw?.id ?? item?.itemId ?? item?.item_id);
   if (Number.isInteger(id) && id >= 3952 && id <= 4078 && id % 2 === 0) {
-    const offset = id - 3952;
-    const petIndex = offset / 2;
-    const row = petIndex % 16;
-    const column = Math.floor(petIndex / 16);
-    if (column >= 0 && column < 4 && row >= 0 && row < PREHISTORIC_SPECIES.length)
-      return { column, row };
+    const petIndex = (id - 3952) / 2;
+    return { column: Math.floor(petIndex / 16), row: petIndex % 16 };
   }
-  return null;
+
+  // Name matching is a fallback for catalogs that remap item IDs.
+  const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
+  if (!name.includes("pet") || name.includes("seed")) return null;
+  const row = PREHISTORIC_SPECIES.findIndex(species => name.includes(species));
+  if (row < 0) return null;
+  const color = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
+  return { column: color ? PREHISTORIC_COLORS[color] : 0, row };
 }
 
 const prehistoricIconCache = new Map();
@@ -330,7 +388,7 @@ async function renderPrehistoricIcon(cell) {
   const key = cell.column + ":" + cell.row;
   if (prehistoricIconCache.has(key)) return prehistoricIconCache.get(key);
   const promise = (async () => {
-    const image = await loadSprite(PREHISTORIC_SPRITE);
+    const image = await loadPrehistoricSprite();
     if (!image?.naturalWidth || image.naturalWidth < 128 || image.naturalHeight < 512)
       throw new Error("Prehistoric sprite sheet must be 128×512: " + PREHISTORIC_SPRITE);
     const frame = blankFrame();
@@ -447,17 +505,10 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
       if (warnings++ < 8) console.error("Prehistoric pet sprite icon failed; trying catalog icon.", {
         id: item.id, name: item.name, error
       });
-      // Keep a visible fallback if the dedicated sprite fails to load.
-      try {
-        const rows = await loadMetadata();
-        if (canvas.__demoIconToken !== token) return;
-        const record = rows.get(String(Number(item.id)));
-        const fallback = await makeFrame(record, item, skin);
-        if (canvas.__demoIconToken !== token) return;
-        paintContained(canvas, fallback && hasPixels(fallback) ? fallback : blankFrame());
-      } catch {
-        if (canvas.__demoIconToken === token) paintContained(canvas, blankFrame());
-      }
+      // Never render the old atlas/debug marker. If the supplied sprite fails
+      // from either URL, show a colored dinosaur fallback instead of emptiness.
+      if (canvas.__demoIconToken === token)
+        paintContained(canvas, fallbackPrehistoricFrame(prehistoric));
       return;
     }
   }
