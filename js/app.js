@@ -398,7 +398,7 @@ P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame, cameraWorldX = frame.x) {
   // Land keeps a constant screen-space scale while the player camera zooms.
   // Horizontal world travel still scrolls the tile field behind the player.
-  const landS = s; // Native Growtopia tile size: 32 world units per block.
+  const landS = s * (20 / 32); // Restore the previous on-screen land tile scale.
   const lw = Math.ceil(w / landS);
   const lh = Math.max(1, Math.ceil(h / landS) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
