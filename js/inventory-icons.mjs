@@ -298,15 +298,16 @@ function prehistoricCell(item) {
   const id = Number(item?.id ?? item?.raw?.id);
   if (Number.isInteger(id) && id >= 3952 && id <= 4078 && id % 2 === 0) {
     const offset = id - 3952;
-    const column = Math.floor(offset / 32);
-    const row = Math.floor((offset % 32) / 2);
+    // IDs are grouped four at a time per species: red, green, brown, grey.
+    const row = Math.floor(offset / 8);
+    const column = Math.floor((offset % 8) / 2);
     if (column >= 0 && column < 4 && row >= 0 && row < PREHISTORIC_SPECIES.length)
       return { column, row };
   }
 
   // Name-based fallback allows equivalent catalogs to use different item IDs.
   const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
-  if (!/\\bpet\\b/.test(name) || /\\bseed\\b/.test(name)) return null;
+  if (!name.includes("pet") || name.includes("seed")) return null;
   const row = PREHISTORIC_SPECIES.findIndex(species => name.includes(species));
   if (row < 0) return null;
   const color = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
