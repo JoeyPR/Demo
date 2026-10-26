@@ -12,7 +12,7 @@ import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
-import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
+import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
 
 const $ = s => document.querySelector(s);
@@ -245,6 +245,18 @@ function drawScene(w, h) {
   /* plain sky fallback — only shown if the weather fails to load */
   ctx.fillStyle = PALETTE.sky; ctx.fillRect(0, 0, w, h);
 }
+function drawZoomedBackdrop(c, image, w, h, zoom, pivotX, pivotY) {
+  // Camera zoom changes only the distant scenery. Foreground land tiles,
+  // the player and the nameplate keep a constant on-screen size.
+  c.save();
+  c.fillStyle = PALETTE.sky;
+  c.fillRect(0, 0, w, h);
+  c.translate(pivotX, pivotY);
+  c.scale(zoom, zoom);
+  c.translate(-pivotX, -pivotY);
+  c.drawImage(image, 0, 0, w, h);
+  c.restore();
+}
 function renderAvatar() {
   /* dynamically load any atlas a draw call references but we have not
      registered yet (same as the Demo boot) — pieces appear next frame */
@@ -378,7 +390,7 @@ P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame, cameraWorldX = frame.x) {
   // Land keeps a constant screen-space scale while the player camera zooms.
   // Horizontal world travel still scrolls the tile field behind the player.
-  const landS = s * (20 / 32);
+  const landS = s; // Native Growtopia tile size: 32 world units per block.
   const lw = Math.ceil(w / landS);
   const lh = Math.max(1, Math.ceil(h / landS) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
@@ -523,21 +535,16 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     /* Hill offsets use the camera's live world X; other weather elements keep
        their own animation timeline. */
     state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, camera.cameraWorldX));
-    c.drawImage(weatherBG, 0, 0, w, h);
+    drawZoomedBackdrop(c, weatherBG, w, h, zoom, cameraPivotX, cameraPivotY);
   } else if (state.weatherStill) {
-    c.drawImage(state.weatherStill, 0, 0, w, h);
+    drawZoomedBackdrop(c, state.weatherStill, w, h, zoom, cameraPivotX, cameraPivotY);
   } else {
     drawScene(w, h);
   }
 
-  // Apply the one player-centered scope transform to all foreground world art:
-  // zoom scales the actor's position, jump displacement, ground and land
-  // together around the player's ground point. Physics positions, tile
-  // coordinates and the avatar's source pixels do not change when zooming.
+  // Foreground layer is deliberately not camera-scaled: tile size, player
+  // pixels, shadow and wearable effects remain stable at every zoom setting.
   c.save();
-  c.translate(cameraPivotX, cameraPivotY);
-  c.scale(zoom, zoom);
-  c.translate(-cameraPivotX, -cameraPivotY);
 
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(motion.facing);
@@ -552,24 +559,18 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  const landGround = cameraPivotY + (ground - cameraPivotY) * zoom;
-  if (state.landWorld) drawLandGround(w, h, landGround, s, frame, camera.cameraWorldX);
-  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
+  if (state.landWorld) drawLandGround(w, h, ground, s, frame, camera.cameraWorldX);
+  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, 1);
   // Scale the player and all clothing around rig feet (16,32). Land tiles use
   // the full 32-unit world scale; the character remains at 0.78 scale.
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
-  drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
+  drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, 1);
   const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
-  // The plate renderer resets the canvas transform internally, so project its
-  // head-height anchor explicitly and scale its lettering with the camera.
-  if (P.plate) {
-    const platePoint = projectCameraPoint(
-      w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
-    );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.82 * zoom, state.clock);
-  }
+  // Preserve the player's screen-space anchor and scale while zooming the
+  // backdrop; lift still moves the plate with a floating/jumping player.
+  if (P.plate) P.plate.draw(c, w / 2 - 3, playerTop - 6 * s, s * 0.80, state.clock);
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
