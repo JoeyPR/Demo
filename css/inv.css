@@ -5,7 +5,7 @@
 #handle,#tabs{position:absolute;pointer-events:auto}
 
 /* 4. top drawer + handle (desktop handle by default, tab handle on touch devices) */
-#top{left:calc(660.3*var(--u));top:calc(100.9*var(--u));width:calc(677.4*var(--u));height:calc(181.4*var(--u));transform:translateY(var(--dy)) scale(1.06);transform-origin:center top}
+#top{left:calc(660.3*var(--u));top:calc(100.9*var(--u));width:calc(677.4*var(--u));height:calc(181.4*var(--u));z-index:12;transform:translateY(var(--dy)) scale(1.06);transform-origin:center top}
 #quick{display:grid;grid-template-columns:repeat(4,calc(164*var(--u)));gap:calc(4.7*var(--u));padding-top:calc(5*var(--u))}
 #handle{left:calc(181.2*var(--u));top:calc(-66.9*var(--u));width:calc(315*var(--u));z-index:4;cursor:grab;touch-action:none;outline:0}
 #handle.drag{cursor:grabbing}
