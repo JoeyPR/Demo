@@ -563,7 +563,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const platePoint = projectCameraPoint(
       w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.88 * zoom, state.clock);
+    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.86 * zoom, state.clock);
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
