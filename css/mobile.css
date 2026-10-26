@@ -20,7 +20,7 @@ body{background:#212226}
 /* top drawer keeps its desktop look, scaled, sitting on the main drawer; the tab handle sits on top of it */
 #top{left:calc(241.5*var(--u));top:calc(23*var(--u));width:calc(440*var(--u));height:calc(118*var(--u))}
 #quick{grid-template-columns:repeat(4,calc(106.5*var(--u)));gap:calc(3*var(--u));padding-top:calc(3.3*var(--u))}
-#handle{left:calc(397.5*var(--u));top:calc(-80*var(--u));width:calc(128*var(--u))}
+#handle{left:calc(156*var(--u));top:calc(-17*var(--u));width:calc(128*var(--u))}
 
 /* Original baked tab artwork, scaled proportionally and attached to the drawer. */
 #tabs{left:0;top:calc(145*var(--u));width:calc(100*var(--u));height:calc(600*var(--u));
@@ -35,7 +35,10 @@ body{background:#212226}
 /* main drawer: search row + 5-column grid *//* main drawer: search row + 5-column grid */
 #main{left:calc(100*var(--u));top:calc(145*var(--u));width:calc(662*var(--u));height:calc(740*var(--u) - var(--dy))}
 #s-icon{left:calc(14*var(--u));top:calc(26*var(--u));width:calc(65*var(--u))}
-#q{left:calc(94*var(--u));top:calc(26*var(--u));width:calc(548*var(--u));height:calc(67*var(--u));font-size:calc(34*var(--u));padding:0 calc(14*var(--u))}
+#q{left:calc(94*var(--u));top:calc(26*var(--u));width:calc(471*var(--u));height:calc(67*var(--u));font-size:calc(34*var(--u));padding:0 calc(14*var(--u))}
+#filter-button{right:calc(20*var(--u));top:calc(26*var(--u));width:calc(67*var(--u));height:calc(67*var(--u))}
+#filter-button span{border-left-width:calc(9*var(--u));border-right-width:calc(9*var(--u));border-top-width:calc(10*var(--u))}
+#filter-panel{right:calc(20*var(--u));top:calc(104*var(--u));width:calc(420*var(--u));max-height:calc(430*var(--u))}
 #grid{top:calc(110*var(--u))}
 #grid-window{grid-template-columns:repeat(5,calc(113.8*var(--u)));gap:calc(10.2*var(--u));padding:calc(14*var(--u)) 0 calc(30*var(--u)) calc(21.3*var(--u))}
 .box .ic{font-size:calc(30*var(--u))}
