@@ -9,6 +9,9 @@ const preview = read("../js/preview.js");
 const handle = read("../js/handle.js");
 const dropdowns = read("../css/dropdowns.css");
 const icons = read("../js/inventory-icons.mjs");
+const inventoryCss = read("../css/inv.css");
+const plate = read("../js/plate.js");
+const prehistoricPng = readFileSync(new URL("../demo/assets/p_prehistoric.png", import.meta.url));
 
 test("camera supports a closer close-up and a capped 1.28x zoom-out", () => {
   assert.equal(CAMERA_ZOOM_MAX, 4);
@@ -18,14 +21,23 @@ test("camera supports a closer close-up and a capped 1.28x zoom-out", () => {
   assert.equal(preview.includes("min: 1 / 1.28, max: 4"), true);
 });
 
-test("nameplate anchor and scale follow the same camera zoom as the player", () => {
+test("nameplate anchor and scale follow the camera and requested offsets", () => {
   const p = projectCameraPoint(100, 80, 50, 50, 2);
   assert.deepEqual(p, { x: 150, y: 110 });
   assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
-  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.9 \* zoom/);
+  assert.match(app, /w \/ 2 - 2, playerTop - 6 \* s/);
+  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.88 \* zoom/);
+  assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
 
-test("inventory drag range clamps downward movement and has an upward cap", () => {
+test("filter dropdown has no inset shadow at its top-left", () => {
+  const panelRule = inventoryCss.match(/#filter-panel\{([^}]*)\}/)?.[1] ?? "";
+  assert.ok(panelRule.length > 0, "filter panel style exists");
+  assert.doesNotMatch(panelRule, /inset\s/);
+  assert.match(panelRule, /box-shadow:[^;]*#000/);
+});
+
+test("inventory drag range clamps downward movement and caps upward movement", () => {
   assert.match(handle, /return \[-maxUp, 0\]/);
   assert.match(handle, /const preview = P\.\$\('#preview'\)/);
   assert.match(handle, /baseBottom - previewTop \+ edgeGap/);
@@ -37,10 +49,12 @@ test("land and weather dropdown controls are reduced in size", () => {
   assert.match(dropdowns, /font: 600 11px\/1/);
 });
 
-test("pet icons are reconstructed from final composed pet draw calls and never fall back to marked atlas icons", () => {
-  assert.match(icons, /normalizeCatalogItem\(rawItem, catalog\)/);
-  assert.match(icons, /call\.owner === owner && call\.pet && !call\.line/);
-  assert.match(icons, /drawCanvas\(workCtx, calls, atlases/);
-  assert.match(icons, /if \(isPetCompositeItem\(item\)\)[\s\S]*paintContained\(canvas, frame \?\? blankFrame\(\)\)[\s\S]*return;/);
-  assert.match(app, /renderDemoInventoryIcon\(canvas, raw, state\.skin, state\.catalog\)/);
+test("prehistoric pet icons use the clean four-variant sprite strip", () => {
+  assert.equal(prehistoricPng.readUInt32BE(16), 128);
+  assert.equal(prehistoricPng.readUInt32BE(20), 32);
+  assert.match(icons, /const PREHISTORIC_SPRITE = "p_prehistoric\.png"/);
+  assert.match(icons, /value\.toLowerCase\(\)\.includes\("prehistoric"\)/);
+  assert.match(icons, /return cropCandidate\(\{[\s\S]*file: PREHISTORIC_SPRITE,[\s\S]*sx: column \* 32,[\s\S]*sy: 0,[\s\S]*w: 32,[\s\S]*h: 32/);
+  assert.doesNotMatch(icons, /new PlannerPlayer|normalizeCatalogItem|renderPetComposition|drawCanvas\(workCtx/);
+  assert.match(app, /renderDemoInventoryIcon\(canvas, raw, state\.skin\)/);
 });
