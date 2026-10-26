@@ -21,12 +21,18 @@ test("camera still clamps its close and zoom-out limits", () => {
   assert.equal(preview.includes("min: 1 / 1.28, max: 4"), true);
 });
 
-test("player and nameplate remain fixed-size while the nameplate tracks lift", () => {
-  assert.match(app, /function drawZoomedBackdrop[\s\S]*c\.scale\(zoom, zoom\)/);
-  assert.doesNotMatch(app, /c\.translate\(cameraPivotX, cameraPivotY\);\s*c\.scale\(zoom, zoom\)/);
-  assert.match(app, /const playerTop = ground \+ frame\.y \* s - 32 \* PLAYER_VISUAL_SCALE \* s \+ lift \* PLAYER_VISUAL_SCALE \* s/);
-  assert.match(app, /P\.plate\.draw\(c, w \/ 2 - 3, playerTop - 6 \* s, s \* 0\.80, state\.clock\)/);
-  assert.doesNotMatch(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y,[\s\S]{0,80}zoom/);
+test("camera zoom follows player and weather, while land tiles stay fixed-size", () => {
+  assert.match(app, /function drawZoomedWeatherLayer[\s\S]*Math\.max\(1, 1 \/ zoom\)/);
+  assert.match(app, /function drawZoomedWeatherLayer[\s\S]*pivotX \+ \(w \/ 2 - pivotX\) \/ zoom/);
+  assert.match(app, /drawZoomedWeatherLayer\(c, weatherBG, w, h, zoom, cameraPivotX, cameraPivotY, true\)/);
+  assert.match(app, /drawZoomedWeatherLayer\(c, weatherFG, w, h, zoom, cameraPivotX, cameraPivotY, false, false\)/);
+  assert.match(app, /const applyCameraZoom = \(\) => \{[\s\S]*c\.scale\(zoom, zoom\)/);
+  assert.match(app, /applyCameraZoom\(\);[\s\S]*c\.drawImage\(avatar, playerRect\.x, playerRect\.y/);
+  assert.match(app, /const landGround = cameraPivotY \+ \(ground - cameraPivotY\) \* zoom/);
+  assert.match(app, /const landS = s; \/\/ Native Growtopia tile size: 32 world units per block\./);
+  assert.match(app, /const plateX = cameraPivotX \+ \(w \/ 2 - 3 - cameraPivotX\) \* zoom/);
+  assert.match(app, /const plateY = cameraPivotY \+ \(playerTop - 6 \* s - cameraPivotY\) \* zoom/);
+  assert.match(app, /P\.plate\.draw\(c, plateX, plateY, s \* 0\.80 \* zoom, state\.clock\)/);
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
 
