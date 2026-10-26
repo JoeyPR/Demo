@@ -4,6 +4,7 @@
   let dy = P.store.get('dy', NaN);
 
   const range = () => {
+    const H = ui.offsetHeight || 894;
     const handleRect = h.getBoundingClientRect();
     const applied = parseFloat(getComputedStyle(root).getPropertyValue('--dy')) || 0;
     const baseBottom = handleRect.bottom - applied;
@@ -37,10 +38,12 @@
 
   let y0, d0, last;
   h.addEventListener('pointerdown', e => {
+    e.preventDefault();
     h.setPointerCapture(e.pointerId); h.classList.add('drag'); y0 = last = e.clientY; d0 = dy;
   });
   h.addEventListener('pointermove', e => {
     if (!h.classList.contains('drag')) return;
+    e.preventDefault();
     apply(d0 + e.clientY - y0);
     if (e.clientY !== last) { h.classList.toggle('up', e.clientY < last); h.classList.toggle('dn', e.clientY > last); last = e.clientY; }
   });
