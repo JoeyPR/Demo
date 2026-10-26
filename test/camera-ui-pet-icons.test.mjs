@@ -67,6 +67,7 @@ test("prehistoric pet icons use the clean RGBA 128x512 sprite sheet and correct 
   assert.equal(prehistoricPng.readUInt32BE(20), 512);
   assert.equal(prehistoricPng.readUInt8(25), 6, "sprite must be RGBA, not palette-transparency PNG");
   assert.match(icons, /const PREHISTORIC_SPRITE = "p_prehistoric\.png"/);
+  assert.match(icons, /assetURL\.searchParams\.set\("v", "3"\)/);
   assert.match(icons, /const PREHISTORIC_SPECIES = Object\.freeze\(\[/);
   assert.match(icons, /"pteranodon"[\s\S]*"triceratops"/);
   assert.match(icons, /const petIndex = offset \/ 2;[\s\S]*const row = petIndex % 16;[\s\S]*const column = Math\.floor\(petIndex \/ 16\)/);
