@@ -1,58 +1,76 @@
-/* HANDLE: drag up/down moves the whole inventory (and pads); where you let go is where it stays. */
-(function(){
+/* HANDLE: drag the inventory up or down; the upper limit keeps the handle visible near the preview. */
+(function () {
   const ui = P.$('#ui'), h = P.$('#handle'), root = document.documentElement;
-  let dy = P.store.get('dy', NaN);
+  const stored = Number(P.store.get('dy', 0));
+  let dy = Number.isFinite(stored) ? stored : 0;
 
+  // dy is a viewport-pixel translate. Remove it from the measured rect to get
+  // the handle's stable home position, so the range doesn't drift while dragging.
   const range = () => {
-    const H = ui.offsetHeight || 894;
-    const handleRect = h.getBoundingClientRect();
-    const applied = parseFloat(getComputedStyle(root).getPropertyValue('--dy')) || 0;
-    const baseBottom = handleRect.bottom - applied;
+    const rect = h.getBoundingClientRect();
+    const baseTop = rect.top - dy;
+    const baseBottom = rect.bottom - dy;
     const edgeGap = 8;
-
-    // The handle can move upward only, and never past the top of the viewport.
-    let maxUp = Math.max(0, baseBottom - edgeGap);
-
-    // If the handle starts below the preview's top edge, stop just short of it
-    // rather than letting the handle collide with the preview boundary.
     const preview = P.$('#preview');
-    if (preview) {
-      const previewTop = preview.getBoundingClientRect().top;
-      if (baseBottom > previewTop) {
-        maxUp = Math.min(maxUp, Math.max(0, baseBottom - previewTop + edgeGap));
-      }
-    }
-    const maxDown = H * (606 - 130) / 894;
-    return [-maxUp, maxDown];   // upward cap at preview; normal downward range remains
+    const previewTop = preview ? preview.getBoundingClientRect().top : 0;
+    const topLimit = Math.max(edgeGap, previewTop + edgeGap);
+    const maxUp = Math.max(0, baseTop - topLimit);
+    // Let it come down freely until its handle reaches the bottom screen edge.
+    const maxDown = Math.max(0, innerHeight - baseBottom - edgeGap);
+    return [-maxUp, maxDown];
   };
-  const apply = v => {
-    const [lo, hi] = range(); dy = Math.min(hi, Math.max(lo, v));
+
+  const apply = value => {
+    const [lo, hi] = range();
+    dy = Math.max(lo, Math.min(hi, Number(value) || 0));
     root.style.setProperty('--dy', dy + 'px');
   };
-  /* default: neutral position — inventory open with the search bar and a few
-     rows visible, pads sitting over the game view like the in-game HUD */
-  if (Number.isNaN(dy)) { dy = 0; }
+
   P.drawer = { get dy() { return dy; }, set: apply };
   apply(dy);
   addEventListener('resize', () => apply(dy));
 
-  let y0, d0, last;
+  let pointerId = null, y0 = 0, d0 = 0, last = 0;
   h.addEventListener('pointerdown', e => {
+    if (pointerId !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
     e.preventDefault();
-    h.setPointerCapture(e.pointerId); h.classList.add('drag'); y0 = last = e.clientY; d0 = dy;
+    pointerId = e.pointerId;
+    y0 = last = e.clientY;
+    d0 = dy;
+    h.classList.add('drag');
+    try { h.setPointerCapture(e.pointerId); } catch { /* window listeners still track the drag */ }
   });
-  h.addEventListener('pointermove', e => {
-    if (!h.classList.contains('drag')) return;
+
+  // Track on window as well as through pointer capture. The drag won't stop
+  // merely because the handle shifts beneath a finger or a layer overlaps it.
+  window.addEventListener('pointermove', e => {
+    if (pointerId !== e.pointerId) return;
     e.preventDefault();
     apply(d0 + e.clientY - y0);
-    if (e.clientY !== last) { h.classList.toggle('up', e.clientY < last); h.classList.toggle('dn', e.clientY > last); last = e.clientY; }
-  });
-  const end = () => {
-    if (!h.classList.contains('drag')) return;
-    h.classList.remove('drag', 'up', 'dn'); P.store.set('dy', Math.round(dy)); P.emit('drawer', dy);
+    if (e.clientY !== last) {
+      h.classList.toggle('up', e.clientY < last);
+      h.classList.toggle('dn', e.clientY > last);
+      last = e.clientY;
+    }
+  }, { passive: false });
+
+  const end = e => {
+    if (pointerId === null || (e?.pointerId !== undefined && e.pointerId !== pointerId)) return;
+    pointerId = null;
+    h.classList.remove('drag', 'up', 'dn');
+    P.store.set('dy', Math.round(dy));
+    P.emit('drawer', dy);
   };
-  ['pointerup', 'pointercancel'].forEach(t => h.addEventListener(t, end));
-  h.addEventListener('keydown', e => {                // keyboard: arrows nudge
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { apply(dy + (e.key === 'ArrowUp' ? -30 : 30)); P.store.set('dy', Math.round(dy)); e.preventDefault(); e.stopPropagation(); }
+  window.addEventListener('pointerup', end);
+  window.addEventListener('pointercancel', end);
+  window.addEventListener('blur', end);
+
+  h.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      apply(dy + (e.key === 'ArrowUp' ? -30 : 30));
+      P.store.set('dy', Math.round(dy));
+      e.preventDefault();
+      e.stopPropagation();
+    }
   });
 })();
