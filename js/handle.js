@@ -8,8 +8,11 @@
   // the handle's stable home position, so the range doesn't drift while dragging.
   const range = () => {
     const rect = h.getBoundingClientRect();
-    const baseTop = rect.top - dy;
-    const baseBottom = rect.bottom - dy;
+    // Read the CSS-applied position, not the stored variable: on first boot
+    // the saved dy has not been applied yet, so subtracting dy here breaks bounds.
+    const applied = parseFloat(getComputedStyle(root).getPropertyValue('--dy')) || 0;
+    const baseTop = rect.top - applied;
+    const baseBottom = rect.bottom - applied;
     const edgeGap = 8;
     const preview = P.$('#preview');
     const previewTop = preview ? preview.getBoundingClientRect().top : 0;
