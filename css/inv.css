@@ -1,13 +1,13 @@
 /* INV: top drawer, handle, tabs, main drawer, boxes, side panel. All y values move with --dy.
    Positions are measured from `ui reference.png` (2000-unit stage; y' = reference y - 260). */
 #inv{position:absolute;inset:0}
-#top,#handle,#tabs,#main,#side{transform:translateY(var(--dy))}
+#top,#tabs,#main,#side{transform:translateY(var(--dy))}
 #handle,#tabs{position:absolute;pointer-events:auto}
 
 /* 4. top drawer + handle (desktop handle by default, tab handle on touch devices) */
 #top{left:calc(660.3*var(--u));top:calc(100.9*var(--u));width:calc(677.4*var(--u));height:calc(181.4*var(--u));transform:translateY(var(--dy)) scale(1.06);transform-origin:center top}
 #quick{display:grid;grid-template-columns:repeat(4,calc(164*var(--u)));gap:calc(4.7*var(--u));padding-top:calc(5*var(--u))}
-#handle{left:calc(842.5*var(--u));top:calc(30*var(--u));width:calc(315*var(--u));cursor:grab;touch-action:none;outline:0}
+#handle{left:calc(181.2*var(--u));top:calc(-66.9*var(--u));width:calc(315*var(--u));z-index:4;cursor:grab;touch-action:none;outline:0}
 #handle.drag{cursor:grabbing}
 #handle .hm{display:none;width:100%}
 #handle .hd{position:absolute;left:0;top:0;width:100%;opacity:0}
@@ -28,11 +28,34 @@
 #main{left:calc(84*var(--u));top:calc(286.2*var(--u));width:calc(1657*var(--u));
   height:calc(607.8*var(--u) - var(--dy));overflow:hidden}
 #s-icon{position:absolute;left:calc(19.7*var(--u));top:calc(19.7*var(--u));width:calc(60*var(--u));z-index:1;transition:opacity .12s}
-#q{position:absolute;left:calc(99.2*var(--u));top:calc(18.4*var(--u));width:calc(1539.7*var(--u));height:calc(57.7*var(--u));
+#q{position:absolute;left:calc(99.2*var(--u));top:calc(18.4*var(--u));width:calc(1470*var(--u));height:calc(57.7*var(--u));
   background:transparent;border:var(--bd) solid var(--line);border-radius:var(--radius);outline:0;
   box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000;transition:opacity .12s;
   padding:0 calc(22*var(--u));font:inherit;font-size:calc(34*var(--u));color:#fff}
 #q::placeholder{color:#dfdfdf;opacity:1}
+#filter-button{position:absolute;right:calc(19.7*var(--u));top:calc(18.4*var(--u));
+  width:calc(57.7*var(--u));height:calc(57.7*var(--u));display:flex;align-items:center;justify-content:center;
+  padding:0;background:transparent;border:var(--bd) solid var(--line);border-radius:var(--radius);outline:0;
+  box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000;z-index:4}
+#filter-button span{width:0;height:0;border-left:calc(8*var(--u)) solid transparent;
+  border-right:calc(8*var(--u)) solid transparent;border-top:calc(9*var(--u)) solid #dfdfdf;
+  transform:translateY(calc(2*var(--u)))}
+#filter-button[aria-expanded=true] span{transform:translateY(calc(-2*var(--u))) rotate(180deg)}
+#filter-button:focus-visible{border-color:#dfdfdf}
+#filter-panel{position:absolute;z-index:5;right:calc(19.7*var(--u));top:calc(84*var(--u));
+  width:calc(420*var(--u));max-width:calc(100% - 40*var(--u));max-height:calc(430*var(--u));
+  overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;
+  background:#277d9f;border:var(--bd) solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--sh) var(--sh) 0 #000,inset var(--sh) var(--sh) 0 #000;padding:calc(5*var(--u))}
+#filter-panel[hidden]{display:none}
+.filter-heading{padding:calc(10*var(--u)) calc(12*var(--u));color:#dfdfdf;
+  font:400 calc(23*var(--u))/1.2 var(--font-rt);letter-spacing:calc(1*var(--u));
+  border-bottom:var(--bd) solid rgba(0,0,0,.4)}
+.filter-option{width:100%;min-height:calc(42*var(--u));display:flex;align-items:center;text-align:left;
+  padding:calc(8*var(--u)) calc(12*var(--u));background:transparent;border:0;border-radius:var(--radius);
+  color:#dfdfdf;font:400 calc(26*var(--u))/1.15 var(--font-rt);cursor:pointer}
+.filter-option:hover{background:rgba(0,0,0,.18)}
+.filter-option[aria-pressed=true]{background:rgba(0,0,0,.25);color:#fff;box-shadow:inset var(--sh) var(--sh) 0 #000}
 #main.search-disabled #q,#main.search-disabled #s-icon{opacity:.5;pointer-events:none}
 #grid{position:absolute;left:0;right:0;top:calc(95*var(--u));bottom:0;overflow-y:auto;overflow-x:hidden;
   touch-action:pan-y;scrollbar-width:none}
@@ -84,15 +107,13 @@
 #quick .box.art{background-image:url(../img/box-blue.png)}
 #quick .box.sel.art .ck.p{display:block}
 
-/* the protected first quick box (Fist/Wrench tool): icon-only, never equips.
-   The icon art has transparent margins baked into its canvas, so the image
-   is scaled past 100% — the VISIBLE artwork fills the space inside the
-   box's border and only the invisible margins overflow.
-   art bounds: fist 162/192 of its canvas, wrench 169/192. */
-.box.tool .ic{inset:18%;overflow:hidden}
+/* Fist/Wrench visible artwork matches the footprint of ordinary item icons.
+   Source images have transparent margins: compensate with source-specific
+   scale factors while centering the art in the standard 10.2% icon inset. */
+.box.tool .ic{inset:10.2%;overflow:visible}
 .box.tool .ic img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:calc(100% + 4px);height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
-.box.tool .ic img.art-wrench{width:calc(96% + 4px)}
+  width:118.5%;height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
+.box.tool .ic img.art-wrench{width:113.6%}
 
 /* 3. tabs — the PNGs already contain their own outlines, corners and shadows.
    The button adds no background/border and never clips the baked drop shadow. */
