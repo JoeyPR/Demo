@@ -9,6 +9,9 @@
      equipped: click 1 -> box-focus | click 2 -> unequipped (focus consumed) */
 (function(){
   const g = P.$('#grid');
+  const filterButton = P.$('#filter-button');
+  const filterPanel = P.$('#filter-panel');
+  let activeFilter = String(P.store.get('filterCategory', 'all'));
   let searchOn = P.store.get('searchOn', true);
   let favs = new Set(P.store.get('favs', []));
   let all = [];            /* decorated items: tab / eq / fav flags */
@@ -37,6 +40,72 @@
     const eq = P.equippedIds || new Set();
     for (const it of all) { it.eq = eq.has(it.id); it.fav = favs.has(it.id); }
   }
+
+  /* Category list derives from slot values present in the loaded catalog.
+     P.dat supplies display labels; actual filter membership comes from items. */
+  function filterOptions() {
+    const bySlot = new Map();
+    for (const it of all) {
+      if (it.tab === 'custom' || !Number.isInteger(it.slot)) continue;
+      const value = String(it.slot);
+      if (!bySlot.has(value)) {
+        const names = P.dat?.slots || {};
+        bySlot.set(value, { value, label: names[value] || ('Slot ' + value) });
+      }
+    }
+    return [
+      { value: 'all', label: 'All Categories' },
+      ...[...bySlot.values()].sort((a, b) => Number(a.value) - Number(b.value))
+    ];
+  }
+
+  function setFilterOpen(open) {
+    filterPanel.hidden = !open;
+    filterButton.setAttribute('aria-expanded', String(open));
+  }
+
+  function renderFilterOptions() {
+    const options = filterOptions();
+    if (!options.some(option => option.value === activeFilter)) {
+      activeFilter = 'all';
+      P.store.set('filterCategory', activeFilter);
+    }
+    filterPanel.replaceChildren();
+    const heading = document.createElement('div');
+    heading.className = 'filter-heading';
+    heading.textContent = 'CLOTHING CATEGORY';
+    filterPanel.append(heading);
+    for (const option of options) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'filter-option';
+      b.dataset.filter = option.value;
+      b.setAttribute('aria-pressed', String(option.value === activeFilter));
+      b.textContent = option.label;
+      b.addEventListener('click', () => {
+        activeFilter = option.value;
+        P.store.set('filterCategory', activeFilter);
+        renderFilterOptions();
+        setFilterOpen(false);
+        P.inv.refresh();
+      });
+      filterPanel.append(b);
+    }
+    filterButton.title = 'Filter clothing categories — ' +
+      (options.find(option => option.value === activeFilter)?.label || 'All Categories');
+  }
+
+  filterButton.addEventListener('click', () => setFilterOpen(filterPanel.hidden));
+  document.addEventListener('pointerdown', e => {
+    if (!filterPanel.hidden && !filterPanel.contains(e.target) && !filterButton.contains(e.target))
+      setFilterOpen(false);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !filterPanel.hidden) {
+      setFilterOpen(false);
+      filterButton.focus();
+    }
+  });
   /* donor visibility rule: equip shows equipped, fav shows favorites,
      cloth/custom show items belonging to the tab */
   function visible(it) {
@@ -54,6 +123,7 @@
       const q = (searchOn ? P.$('#q').value : '').trim().toLowerCase();
       syncFlags();
       render = all.filter(it => !it.gone && visible(it) &&
+        (activeFilter === 'all' || String(it.slot) === activeFilter) &&
         (!q || it.name.toLowerCase().includes(q) || String(it.id) === q));
       g.scrollTop = 0;
       renderWindow(true);
@@ -290,7 +360,7 @@
   P.on('equip-state', markEquipped);
   P.on('equip-state', renderQuick);
   P.on('plate-update', renderQuick);
-  P.on('catalog', () => { build(); P.inv.refresh(); renderQuick(); });
+  P.on('catalog', () => { build(); renderFilterOptions(); P.inv.refresh(); renderQuick(); });
   P.on('tab', () => P.inv.refresh());
   P.on('searchOn', on => {
     searchOn = on;
@@ -308,6 +378,7 @@
   P.$('#q').addEventListener('input', () => P.inv.refresh());
 
   build();
+  renderFilterOptions();
   renderQuick();
   P.inv.refresh();
 })();
