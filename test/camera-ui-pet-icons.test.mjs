@@ -26,22 +26,23 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
   assert.deepEqual(p, { x: 150, y: 110 });
   assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
   assert.match(app, /w \/ 2 - 3, playerTop - 6 \* s/);
-  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.88 \* zoom/);
+  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.86 \* zoom/);
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
 
-test("filter dropdown buttons have no top-left inset shadow", () => {
+test("filter panel retains its inner shadow and outer border shadow", () => {
   const panelRule = inventoryCss.match(/#filter-panel\{([^}]*)\}/)?.[1] ?? "";
   const selectedRule = inventoryCss.match(/\.filter-option\[aria-pressed=true\]\{([^}]*)\}/)?.[1] ?? "";
   assert.ok(panelRule.length > 0, "filter panel style exists");
   assert.ok(selectedRule.length > 0, "selected category style exists");
-  assert.doesNotMatch(panelRule, /inset\s/);
+  assert.match(panelRule, /inset\s/);
   assert.doesNotMatch(selectedRule, /box-shadow|inset/);
   assert.match(panelRule, /box-shadow:[^;]*#000/);
 });
 
-test("inventory drag range clamps downward movement and caps upward movement", () => {
-  assert.match(handle, /return \[-maxUp, 0\]/);
+test("inventory drag range allows downward movement and caps upward movement", () => {
+  assert.match(handle, /return \[-maxUp, maxDown\]/);
+  assert.match(handle, /const maxDown = H \* \(606 - 130\) \/ 894/);
   assert.match(handle, /const preview = P\.\$\('#preview'\)/);
   assert.match(handle, /baseBottom - previewTop \+ edgeGap/);
 });
@@ -52,13 +53,13 @@ test("land and weather dropdown controls are reduced in size", () => {
   assert.match(dropdowns, /font: 600 11px\/1/);
 });
 
-test("prehistoric pet icons map 16 species rows to the four color columns", () => {
+test("prehistoric pet icons map color variants per species row", () => {
   assert.equal(prehistoricPng.readUInt32BE(16), 128);
   assert.equal(prehistoricPng.readUInt32BE(20), 512);
   assert.match(icons, /const PREHISTORIC_SPRITE = "p_prehistoric\.png"/);
   assert.match(icons, /const PREHISTORIC_SPECIES = Object\.freeze\(\[/);
   assert.match(icons, /"pteranodon"[\s\S]*"triceratops"/);
-  assert.match(icons, /const offset = id - 3952;[\s\S]*const column = Math\.floor\(offset \/ 32\);[\s\S]*const row = Math\.floor\(\(offset % 32\) \/ 2\)/);
+  assert.match(icons, /const offset = id - 3952;[\s\S]*const row = Math\.floor\(offset \/ 8\);[\s\S]*const column = Math\.floor\(\(offset % 8\) \/ 2\)/);
   assert.match(icons, /sx: cell\.column \* 32,[\s\S]*sy: cell\.row \* 32,[\s\S]*w: 32,[\s\S]*h: 32/);
   assert.match(icons, /if \(prehistoric\) \{[\s\S]*paintContained\(canvas, frame \?\? blankFrame\(\)\);[\s\S]*return;/);
   assert.match(app, /renderDemoInventoryIcon\(canvas, raw, state\.skin\)/);
