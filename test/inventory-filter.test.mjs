@@ -7,6 +7,7 @@ const html = read("../index.html");
 const inv = read("../css/inv.css");
 const mobile = read("../css/mobile.css");
 const grid = read("../js/grid.js");
+const side = read("../js/side.js");
 
 test("top drawer handle is a child of the drawer and does not apply a second drawer offset", () => {
   const topSection = html.slice(html.indexOf('<div id="top"'), html.indexOf("<!-- 3. TABS -->"));
@@ -32,7 +33,7 @@ test("search row reserves room for a matching square filter button on desktop an
   assert.match(inv, /#filter-button\{[^}]*width:calc\(57\.7\*var\(--u\)\);height:calc\(57\.7\*var\(--u\)\)/);
   assert.match(mobile, /#q\{[^}]*width:calc\(471\*var\(--u\)\);height:calc\(67\*var\(--u\)\)/);
   assert.match(mobile, /#filter-button\{[^}]*width:calc\(67\*var\(--u\)\);height:calc\(67\*var\(--u\)\)/);
-  assert.match(inv, /border-top:calc\(9\*var\(--u\)\) solid #dfdfdf/);
+  assert.match(inv, /border-top:calc\(16\*var\(--u\)\) solid #dfdfdf/);
 });
 
 test("filter categories are derived from catalog item slots and filter the visible grid", () => {
@@ -63,4 +64,30 @@ test("inventory icons appear at full opacity with no scrolling fade or scale tra
   assert.match(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:1;transform:none;transition:none\}/);
   assert.doesNotMatch(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:0/);
   assert.doesNotMatch(inv, /transition:opacity \.18s ease-out,transform/);
+});
+
+
+test("filter arrow is larger and the panel keeps both inner and outer shadows", () => {
+  assert.match(inv, /#filter-button span\{[^}]*border-left:calc\(15\*var\(--u\)\) solid transparent;[\s\S]*border-right:calc\(15\*var\(--u\)\) solid transparent;border-top:calc\(16\*var\(--u\)\)/);
+  const panel = inv.match(/#filter-panel\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(panel, /box-shadow:inset var\(--sh\) var\(--sh\) 0 rgba\(0,0,0,\.32\),var\(--sh\) var\(--sh\) 0 #000/);
+});
+
+test("Makeup and Player Customization hide category filters and keep search switched off", () => {
+  assert.match(inv, /#main\[data-t="player"\] #filter-button,[\s\S]*#main\[data-t="makeup"\] #filter-panel\{display:none!important\}/);
+  assert.match(side, /const nonSearchableTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
+  assert.match(side, /on = !!on && !nonSearchableTabs\.has\(P\.tabs\.cur\)/);
+});
+
+test("equipped artifact boxes show the dedicated chk-art checkmark", () => {
+  assert.match(grid, /const ckArt = document\.createElement\('img'\); ckArt\.className = 'ck p'; ckArt\.src = 'img\/chk-art\.png'/);
+  assert.match(grid, /P\.ancestralIds && P\.ancestralIds\.has\(it\.id\)/);
+  assert.match(inv, /\.box\.sel \.ck\.o\{display:block\}/);
+  assert.match(inv, /\.box\.sel\.art \.ck\.o\{display:none\}/);
+  assert.match(inv, /\.box\.sel\.art \.ck\.p\{display:block\}/);
+});
+
+test("Fist and Wrench icon source assets are easy to locate", () => {
+  assert.match(grid, /on \? 'img\/wrench-quick\.png' : 'img\/fist\.png'/);
+  assert.match(grid, /function toolBox\(\)/);
 });
