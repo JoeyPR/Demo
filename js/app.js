@@ -561,9 +561,9 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   // head-height anchor explicitly and scale its lettering with the camera.
   if (P.plate) {
     const platePoint = projectCameraPoint(
-      w / 2, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
+      w / 2 - 2, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.9 * zoom, state.clock);
+    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.88 * zoom, state.clock);
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
