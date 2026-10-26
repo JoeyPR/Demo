@@ -647,7 +647,7 @@ P.thumb = function (raw, size = 64) {
   canvas.style.height = "100%";
   canvas.setAttribute("aria-hidden", "true");
   canvas.__demoItem = raw;
-  renderDemoInventoryIcon(canvas, raw, state.skin, state.catalog);
+  renderDemoInventoryIcon(canvas, raw, state.skin);
   return canvas;
 };
 
