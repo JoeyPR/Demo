@@ -284,44 +284,43 @@ async function renderPairedFeet(candidate) {
 
 const PREHISTORIC_SPRITE = "p_prehistoric.png";
 const PREHISTORIC_COLORS = Object.freeze({ red: 0, green: 1, brown: 2, grey: 3, gray: 3 });
+const PREHISTORIC_SPECIES = Object.freeze([
+  "pteranodon", "pterosaurus", "pteranus rex", "pteratops",
+  "apatodon", "apatosaurus", "apatos rex", "apatoceratops",
+  "tyranodon", "tyranopatos", "tyrannosaurus", "tyranotops",
+  "triceradon", "tripatosaurus", "tricerus rex", "triceratops",
+]);
 
-function prehistoricSources(item, record) {
-  return [
-    item?.name, item?.atlas, item?.texture, item?.textureFile, item?.icon,
-    ...(item?.parts ?? []).map(part => part?.atlas),
-    ...(item?.gameIcon ?? []).map(part => part?.a),
-    ...(record?.candidates ?? []).map(candidate => candidate?.file),
-    ...(record?.iconLayers ?? []).map(layer => layer?.a),
-    ...(record?.profileLayers ?? []).map(layer => layer?.path),
-  ].filter(value => typeof value === "string");
-}
-
-function isPrehistoricIcon(item, record) {
-  const sourceText = prehistoricSources(item, record).join(" ").toLowerCase();
-  return ["prehistoric", "dinosaur", "dino", "raptor", "tyrannosaur",
-    "pterodactyl", "t-rex", "trex", "t_rex"].some(term => sourceText.includes(term));
-}
-
-function prehistoricColorColumn(item) {
-  const description = [
-    item?.name, item?.variant, item?.color, item?.colour, item?.skinName,
-    item?.version, item?.raw?.name,
-  ].filter(value => typeof value === "string").join(" ").toLowerCase();
-  for (const color of ["red", "green", "brown", "grey", "gray"]) {
-    if (description.includes(color)) return PREHISTORIC_COLORS[color];
+function prehistoricCell(item) {
+  // Official dinosaur pets have sixteen species IDs per color. The sprite sheet
+  // stores colors as X columns (red/green/brown/grey) and species as Y rows.
+  // Seed IDs are odd and deliberately excluded from this pet-icon override.
+  const id = Number(item?.id ?? item?.raw?.id);
+  if (Number.isInteger(id) && id >= 3952 && id <= 4078 && id % 2 === 0) {
+    const offset = id - 3952;
+    const column = Math.floor(offset / 32);
+    const row = Math.floor((offset % 32) / 2);
+    if (column >= 0 && column < 4 && row >= 0 && row < PREHISTORIC_SPECIES.length)
+      return { column, row };
   }
-  return 0;
+
+  // Name-based fallback allows equivalent catalogs to use different item IDs.
+  const name = String(item?.name ?? item?.raw?.name ?? "").toLowerCase();
+  if (!/\\bpet\\b/.test(name) || /\\bseed\\b/.test(name)) return null;
+  const row = PREHISTORIC_SPECIES.findIndex(species => name.includes(species));
+  if (row < 0) return null;
+  const color = Object.keys(PREHISTORIC_COLORS).find(key => name.includes(key));
+  return { column: color ? PREHISTORIC_COLORS[color] : 0, row };
 }
 
-async function renderPrehistoricIcon(item) {
-  const column = prehistoricColorColumn(item);
-  // Each 32x32 cell in the first sprite row is a complete color variant:
-  // red, green, brown, grey. Keep nearest-neighbor pixel art and crop away
-  // surrounding animation rows so the inventory shows a clean static icon.
+async function renderPrehistoricIcon(cell) {
+  if (!cell) return null;
+  // The sprite's original 32×32 cells contain complete, clean icons. Crop only
+  // the requested species row and color column; the live PetEngine is untouched.
   return cropCandidate({
     file: PREHISTORIC_SPRITE,
-    sx: column * 32,
-    sy: 0,
+    sx: cell.column * 32,
+    sy: cell.row * 32,
     w: 32,
     h: 32,
   });
@@ -417,6 +416,16 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
   const token = Symbol("demo-inventory-icon");
   canvas.__demoIconToken = token;
 
+  const prehistoric = prehistoricCell(item);
+  if (prehistoric) {
+    const frame = await renderPrehistoricIcon(prehistoric);
+    if (canvas.__demoIconToken !== token) return;
+    // Dinosaur pet icons always use the provided clean sprite sheet; don't fall
+    // back to the marked game atlas if that image fails to load.
+    paintContained(canvas, frame ?? blankFrame());
+    return;
+  }
+
   try {
     const items = await loadMetadata();
     if (canvas.__demoIconToken !== token) return;
@@ -428,9 +437,7 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
     const cacheKey = String(Number(item.id)) + (hasSkinTint ? "|" + skinKey : "");
     let frame = renderedCache.get(cacheKey);
     if (!frame) {
-      frame = isPrehistoricIcon(item, record)
-        ? await renderPrehistoricIcon(item)
-        : await makeFrame(record, item, skin);
+      frame = await makeFrame(record, item, skin);
       if (canvas.__demoIconToken !== token) return;
       renderedCache.set(cacheKey, frame ?? blankFrame());
       if (renderedCache.size > MAX_RENDERED) renderedCache.delete(renderedCache.keys().next().value);
