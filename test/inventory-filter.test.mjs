@@ -14,7 +14,7 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
   assert.match(topSection, /id="top"[\s\S]*id="handle"[\s\S]*<\/div>\s*<\/div>\s*$/);
   assert.doesNotMatch(inv, /#top,#handle,#tabs,#main,#side\s*\{/);
   assert.match(inv, /#handle\{left:calc\(181\.2\*var\(--u\)\);top:calc\(-66\.9\*var\(--u\)\)/);
-  assert.match(mobile, /#handle\{left:calc\(160\*var\(--u\)\);top:calc\(-97\*var\(--u\)\)/,
+  assert.match(mobile, /#handle\{left:calc\(160\*var\(--u\)\);top:calc\(-96\*var\(--u\)\)/,
     "mobile handle preserves its intended stage position after being nested in #top");
 });
 
@@ -45,6 +45,19 @@ test("filter categories are derived from catalog item slots and filter the visib
   assert.match(grid, /e\.key === 'Escape'/);
 });
 
+
+test("scrolling keeps overlapping inventory item boxes mounted to prevent icon flicker", () => {
+  assert.match(grid, /const mounted = new Map\(\)/);
+  assert.match(grid, /let b = mounted\.get\(idx\)/);
+  assert.match(grid, /win\.insertBefore\(b, current \|\| null\)/);
+  assert.doesNotMatch(grid, /new IntersectionObserver|function unfillBox|releaseWindow/);
+});
+
+test("filter menu uses requested category labels and selected highlight", () => {
+  assert.doesNotMatch(grid, /CLOTHING CATEGORY|filter-heading/);
+  assert.match(grid, /Hat: 'Hats', Shirt: 'Shirts', Hair: 'Hairs', Ancestral: 'Artifacts'/);
+  assert.match(inv, /filter-option\[aria-pressed=true\]\{background:#A5E3FB;color:#FFFFFF/);
+});
 
 test("inventory icons appear at full opacity with no scrolling fade or scale transition", () => {
   assert.match(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:1;transform:none;transition:none\}/);
