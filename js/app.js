@@ -376,10 +376,9 @@ function setLand(id) {
 }
 P.on("land", id => setLand(id));
 function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
-  // Render land tiles at 24 screen-units per 32-unit source tile — the
-  // midpoint between the former 16-unit and 32-unit sizes. Player scale stays
-  // separate at 0.78; tile/world coordinates remain native.
-  const landS = s * (24 / 32);
+  // Render land blocks at 20 screen-units per 32-unit source tile: the
+  // midpoint between 16 and 24. Grid coordinates stay native at 32 per tile.
+  const landS = s * (20 / 32);
   const lw = Math.ceil(w / (landS * zoom));
   const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
@@ -455,9 +454,9 @@ function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraP
   });
 }
 
-/* Hill bands derive their offset from live camera travel every frame. Their
-   screen drift follows player travel and reverses immediately when the player
-   changes direction; travel is never clamped at the decorative scene's edge. */
+/* Hill bands use the inverse of camera travel so the landscape moves opposite
+   the player, reversing naturally when the player changes direction. Travel
+   is never clamped at the decorative scene's edge. */
 function hillOffsetsNow(w, h, s, cameraWorldX) {
   const r = state.weatherRenderer;
   if (!r || !r.hillSpeeds?.size) return new Map();
@@ -465,12 +464,12 @@ function hillOffsetsNow(w, h, s, cameraWorldX) {
   const pxPerSceneUnit = Math.max(w / cfg.w, h / cfg.h);   /* the renderer's COVER scale */
   const offsets = new Map();
   for (const [sheetIndex, speed] of r.hillSpeeds) {
-    offsets.set(sheetIndex, hillSceneOffset(cameraWorldX, s, pxPerSceneUnit, speed));
+    offsets.set(sheetIndex, hillSceneOffset(-cameraWorldX, s, pxPerSceneUnit, speed));
   }
   // A single sprite sheet can contain multiple independent parallax bands.
   // Arid's two desert_wobbly groups follow their nearest desert hill layer.
   for (const [track, speed] of (r.hillTrackSpeeds ?? new Map())) {
-    offsets.set(track, hillSceneOffset(cameraWorldX, s, pxPerSceneUnit, speed));
+    offsets.set(track, hillSceneOffset(-cameraWorldX, s, pxPerSceneUnit, speed));
   }
   return offsets;
 }
