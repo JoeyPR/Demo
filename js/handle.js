@@ -21,7 +21,8 @@
         maxUp = Math.min(maxUp, Math.max(0, baseBottom - previewTop + edgeGap));
       }
     }
-    return [-maxUp, 0];   // [max up, no downward drag]
+    const maxDown = H * (606 - 130) / 894;
+    return [-maxUp, maxDown];   // upward cap at preview; normal downward range remains
   };
   const apply = v => {
     const [lo, hi] = range(); dy = Math.min(hi, Math.max(lo, v));
