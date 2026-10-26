@@ -30,12 +30,12 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
 
-test("filter panel retains a visible outer drop shadow without an inset shadow", () => {
+test("filter panel retains its inner and outer drop shadows", () => {
   const panelRule = inventoryCss.match(/#filter-panel\{([^}]*)\}/)?.[1] ?? "";
   const selectedRule = inventoryCss.match(/\.filter-option\[aria-pressed=true\]\{([^}]*)\}/)?.[1] ?? "";
   assert.ok(panelRule.length > 0, "filter panel style exists");
   assert.ok(selectedRule.length > 0, "selected category style exists");
-  assert.doesNotMatch(panelRule, /inset\s/);
+  assert.match(panelRule, /inset\s/);
   assert.doesNotMatch(selectedRule, /box-shadow|inset/);
   assert.match(panelRule, /box-shadow:[^;]*#000/);
 });
@@ -53,7 +53,7 @@ test("land and weather dropdown controls are reduced in size and filter arrow is
   assert.match(dropdowns, /\.dd-btn \.dd-thumb\s*\{\s*width: 24px; height: 24px/);
   assert.match(dropdowns, /\.dd-btn \.dd-thumb \{ width: 20px; height: 20px; \}/);
   assert.match(dropdowns, /font: 600 11px\/1/);
-  assert.match(inventoryCss, /#filter-button span\{[^}]*border-left:calc\(11\*var\(--u\)\)[^}]*border-right:calc\(11\*var\(--u\)\)[^}]*border-top:calc\(12\*var\(--u\)\)/);
+  assert.match(inventoryCss, /#filter-button span\{[^}]*border-left:calc\(15\*var\(--u\)\)[^}]*border-right:calc\(15\*var\(--u\)\)[^}]*border-top:calc\(16\*var\(--u\)\)/);
 });
 
 test("prehistoric pet icons map color variants per species row", () => {
