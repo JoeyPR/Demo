@@ -4,25 +4,28 @@
   let dy = P.store.get('dy', NaN);
 
   const range = () => {
+    const H = ui.offsetHeight;
     const handleRect = h.getBoundingClientRect();
     const applied = parseFloat(getComputedStyle(root).getPropertyValue('--dy')) || 0;
-    const baseBottom = handleRect.bottom - applied;
+    const baseTop = handleRect.top - applied;
     const edgeGap = 8;
 
-    // The handle can move upward only, and never past the top of the viewport.
-    let maxUp = Math.max(0, baseBottom - edgeGap);
+    // Keep the handle on-screen as an absolute safety limit.
+    let maxUp = Math.max(0, baseTop - edgeGap);
 
-    // If the handle starts below the preview's top edge, stop just short of it
-    // rather than letting the handle collide with the preview boundary.
+    // Cap only upward travel: the handle may approach the preview, but cannot
+    // cross completely past its top edge. Downward travel is independent.
     const preview = P.$('#preview');
     if (preview) {
       const previewTop = preview.getBoundingClientRect().top;
-      if (baseBottom > previewTop) {
-        maxUp = Math.min(maxUp, Math.max(0, baseBottom - previewTop + edgeGap));
+      if (baseTop > previewTop) {
+        const previewCap = Math.max(0, baseTop - previewTop - edgeGap);
+        maxUp = Math.min(maxUp, previewCap);
       }
     }
+
     const maxDown = H * (606 - 130) / 894;
-    return [-maxUp, maxDown];   // upward cap at preview; normal downward range remains
+    return [-maxUp, maxDown];
   };
   const apply = v => {
     const [lo, hi] = range(); dy = Math.min(hi, Math.max(lo, v));
