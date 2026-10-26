@@ -12,7 +12,7 @@ import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
-import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
+import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
 
 const $ = s => document.querySelector(s);
@@ -555,11 +555,16 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
-  if (P.plate) {
-    const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
-    P.plate.draw(c, w / 2, playerTop - 6 * s, s * 0.9, state.clock);
-  }
+  const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
+  // The plate renderer resets the canvas transform internally, so project its
+  // head-height anchor explicitly and scale its lettering with the camera.
+  if (P.plate) {
+    const platePoint = projectCameraPoint(
+      w / 2, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
+    );
+    P.plate.draw(c, platePoint.x, platePoint.y, s * 0.9 * zoom, state.clock);
+  }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
   if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
@@ -642,7 +647,7 @@ P.thumb = function (raw, size = 64) {
   canvas.style.height = "100%";
   canvas.setAttribute("aria-hidden", "true");
   canvas.__demoItem = raw;
-  renderDemoInventoryIcon(canvas, raw, state.skin);
+  renderDemoInventoryIcon(canvas, raw, state.skin, state.catalog);
   return canvas;
 };
 
