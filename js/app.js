@@ -561,7 +561,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   // head-height anchor explicitly and scale its lettering with the camera.
   if (P.plate) {
     const platePoint = projectCameraPoint(
-      w / 2 - 1, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
+      w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
     P.plate.draw(c, platePoint.x, platePoint.y, s * 0.88 * zoom, state.clock);
   }
