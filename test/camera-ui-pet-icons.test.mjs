@@ -25,7 +25,7 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
   const p = projectCameraPoint(100, 80, 50, 50, 2);
   assert.deepEqual(p, { x: 150, y: 110 });
   assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
-  assert.match(app, /w \/ 2 - 1, playerTop - 6 \* s/);
+  assert.match(app, /w \/ 2 - 3, playerTop - 6 \* s/);
   assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.88 \* zoom/);
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
 });
