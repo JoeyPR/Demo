@@ -53,7 +53,7 @@ test("prehistoric pet icons use the clean four-variant sprite strip", () => {
   assert.equal(prehistoricPng.readUInt32BE(16), 128);
   assert.equal(prehistoricPng.readUInt32BE(20), 32);
   assert.match(icons, /const PREHISTORIC_SPRITE = "p_prehistoric\.png"/);
-  assert.match(icons, /value\.toLowerCase\(\)\.includes\("prehistoric"\)/);
+  assert.match(icons, /"prehistoric", "dinosaur", "dino", "raptor"/);
   assert.match(icons, /return cropCandidate\(\{[\s\S]*file: PREHISTORIC_SPRITE,[\s\S]*sx: column \* 32,[\s\S]*sy: 0,[\s\S]*w: 32,[\s\S]*h: 32/);
   assert.doesNotMatch(icons, /new PlannerPlayer|normalizeCatalogItem|renderPetComposition|drawCanvas\(workCtx/);
   assert.match(app, /renderDemoInventoryIcon\(canvas, raw, state\.skin\)/);
