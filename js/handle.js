@@ -8,18 +8,28 @@
   // the handle's stable home position, so the range doesn't drift while dragging.
   const range = () => {
     const rect = h.getBoundingClientRect();
-    // Read the CSS-applied position, not the stored variable: on first boot
-    // the saved dy has not been applied yet, so subtracting dy here breaks bounds.
+    // Remove the applied translation to measure the handle's stable home position.
     const applied = parseFloat(getComputedStyle(root).getPropertyValue('--dy')) || 0;
     const baseTop = rect.top - applied;
     const baseBottom = rect.bottom - applied;
     const edgeGap = 8;
     const preview = P.$('#preview');
-    const previewTop = preview ? preview.getBoundingClientRect().top : 0;
-    const topLimit = Math.max(edgeGap, previewTop + edgeGap);
+    const previewRect = preview?.getBoundingClientRect();
+
+    // Moving upward may approach the preview, but must not cross through it.
+    // If the handle is below the preview, stop at its lower edge plus a gap.
+    // If it already overlaps the preview, don't allow further upward travel.
+    let topLimit = edgeGap;
+    if (previewRect && baseTop >= previewRect.bottom) {
+      topLimit = previewRect.bottom + edgeGap;
+    } else if (previewRect && baseBottom > previewRect.top) {
+      topLimit = baseTop;
+    }
     const maxUp = Math.max(0, baseTop - topLimit);
-    // Let it come down freely until its handle reaches the bottom screen edge.
-    const maxDown = Math.max(0, innerHeight - baseBottom - edgeGap);
+
+    // Keep the normal downward travel range independent of the upward preview cap.
+    const H = ui.offsetHeight || innerHeight;
+    const maxDown = Math.max(0, H * (606 - 130) / 894);
     return [-maxUp, maxDown];
   };
 
