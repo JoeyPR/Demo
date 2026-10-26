@@ -552,7 +552,8 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, camera.cameraWorldX);
+  const landGround = cameraPivotY + (ground - cameraPivotY) * zoom;
+  if (state.landWorld) drawLandGround(w, h, landGround, s, frame, camera.cameraWorldX);
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   // Scale the player and all clothing around rig feet (16,32). Land tiles use
   // the full 32-unit world scale; the character remains at 0.78 scale.
