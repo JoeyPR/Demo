@@ -242,7 +242,7 @@ function drawScene(w, h) {
   /* plain sky fallback — only shown if the weather fails to load */
   ctx.fillStyle = PALETTE.sky; ctx.fillRect(0, 0, w, h);
 }
-function drawZoomedWeatherLayer(c, image, w, h, zoom, pivotX, pivotY, fillSky = false) {
+function drawZoomedWeatherLayer(c, image, w, h, zoom, pivotX, pivotY, fillSky = false, overscanOnZoomOut = true) {
   // Weather scenes are cover-fitted before zoom. Zoom-out receives overscan,
   // keeping the weather flush to the preview's edges at every allowed zoom.
   if (fillSky) {
@@ -254,7 +254,7 @@ function drawZoomedWeatherLayer(c, image, w, h, zoom, pivotX, pivotY, fillSky = 
   if (!image) return;
   const iw = image.naturalWidth || image.width || w;
   const ih = image.naturalHeight || image.height || h;
-  const fit = Math.max(w / iw, h / ih) * Math.max(1, 1 / zoom);
+  const fit = Math.max(w / iw, h / ih) * (overscanOnZoomOut ? Math.max(1, 1 / zoom) : 1);
   const dw = iw * fit, dh = ih * fit;
   const cx = pivotX + (w / 2 - pivotX) / zoom;
   const cy = pivotY + (h / 2 - pivotY) / zoom;
@@ -589,7 +589,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 
   // Foreground weather (rain, snow, effects) zooms with the background too.
   if (state.weatherRenderer)
-    drawZoomedWeatherLayer(c, weatherFG, w, h, zoom, cameraPivotX, cameraPivotY);
+    drawZoomedWeatherLayer(c, weatherFG, w, h, zoom, cameraPivotX, cameraPivotY, false, false);
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
   } catch (err) {
