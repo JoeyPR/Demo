@@ -145,7 +145,8 @@
     const ic = document.createElement('span'); ic.className = 'ic';
     const n = document.createElement('span'); n.className = 'n';
     const ck = document.createElement('img'); ck.className = 'ck o'; ck.src = 'img/chk.png'; ck.alt = '';
-    b.append(ic, n, ck);
+    const ckArt = document.createElement('img'); ckArt.className = 'ck p'; ckArt.src = 'img/chk-art.png'; ckArt.alt = '';
+    b.append(ic, n, ck, ckArt);
     if (favs.has(it.id)) {
       const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/fav-box.png'; fv.alt = '';
       b.append(fv);
