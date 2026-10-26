@@ -39,12 +39,12 @@
     <!-- 4. TOP DRAWER: handle + 4 quick boxes -->
     <div id="top" class="panel">
       <div id="quick"></div>
-    </div>
-    <div id="handle" role="slider" aria-label="Drag inventory up or down" tabindex="0">
+      <div id="handle" role="slider" aria-label="Drag inventory up or down" tabindex="0">
       <img class="hm" src="img/handle-m.png"  alt="" draggable="false">
       <img class="hd hd-n" src="img/handle-d.png"  alt="" draggable="false">
       <img class="hd hd-u" src="img/handle-du.png" alt="" draggable="false">
       <img class="hd hd-d" src="img/handle-dd.png" alt="" draggable="false">
+      </div>
     </div>
 
     <!-- 3. TABS -->
@@ -54,6 +54,8 @@
     <div id="main" class="panel">
       <img id="s-icon" src="img/search.png" alt="" draggable="false">
       <input id="q" type="text" placeholder="Enter Item Name" autocomplete="off" spellcheck="false" aria-label="Search items">
+      <button id="filter-button" type="button" aria-label="Filter clothing categories" aria-expanded="false" aria-controls="filter-panel" title="Filter clothing categories"><span aria-hidden="true"></span></button>
+      <div id="filter-panel" hidden aria-label="Clothing categories"></div>
       <div id="custom-tools" hidden aria-live="polite"></div>
       <div id="grid"></div>
     </div>
