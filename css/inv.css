@@ -57,8 +57,8 @@
 #grid{position:absolute;left:0;right:0;top:calc(95*var(--u));bottom:0;overflow-y:auto;overflow-x:hidden;
   touch-action:pan-y;scrollbar-width:none}
 #grid::-webkit-scrollbar{display:none}
-/* virtualized grid: inner keeps the full scroll height, window holds only the
-   visible rows. Boxes' thumbnails pop in when they become visible. */
+/* virtualized grid: inner keeps full scroll height; the viewport and nearby rows
+   are mounted, and shared boxes retain their thumbnails between scroll steps. */
 #grid-inner{position:relative;width:100%}
 #grid-window{position:absolute;left:0;right:0;top:0;display:grid;
   grid-template-columns:repeat(9,calc(171*var(--u)));gap:calc(5.9*var(--u)) calc(5.2*var(--u));
