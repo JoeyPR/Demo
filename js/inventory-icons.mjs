@@ -1,8 +1,3 @@
-import { PlannerPlayer } from "../demo/engine/player.mjs";
-import { normalizeCatalogItem } from "../demo/engine/catalog-adapter.mjs";
-import { drawCanvas } from "../demo/engine/render.mjs";
-import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
-import { petKindFor } from "../demo/engine/pet-system.mjs";
 
 /* Demo-native inventory icon renderer.
    All runtime images are loaded from ../demo/assets/ and all per-item choices
@@ -15,8 +10,6 @@ let metadataPromise = null;
 const imageCache = new Map();
 const renderedCache = new Map();
 const MAX_RENDERED = 512;
-const petFrameCache = new Map();
-const petAtlasCache = new Map();
 let warnings = 0;
 
 function blankFrame() {
@@ -289,125 +282,47 @@ async function renderPairedFeet(candidate) {
   return output;
 }
 
-function isPetCompositeItem(item) {
-  return petKindFor(Number(item?.id)) !== 0
-    || !!item?.petCells
-    || !!item?.parts?.some(part => part.pet || part.orbit)
-    || !!item?.gameIcon?.some(part => part.pet);
+const PREHISTORIC_SPRITE = "p_prehistoric.png";
+const PREHISTORIC_COLORS = Object.freeze({ red: 0, green: 1, brown: 2, grey: 3, gray: 3 });
+
+function prehistoricSources(item, record) {
+  return [
+    item?.name, item?.atlas, item?.texture, item?.textureFile, item?.icon,
+    ...(item?.parts ?? []).map(part => part?.atlas),
+    ...(item?.gameIcon ?? []).map(part => part?.a),
+    ...(record?.candidates ?? []).map(candidate => candidate?.file),
+    ...(record?.iconLayers ?? []).map(layer => layer?.a),
+    ...(record?.profileLayers ?? []).map(layer => layer?.path),
+  ].filter(value => typeof value === "string");
 }
 
-function petBounds(calls) {
-  let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
-  for (const call of calls) {
-    const m = call.matrix;
-    if (!Array.isArray(m) || m.length < 6) continue;
-    const ppu = Math.max(0.0001, Number(call.sourcePixelsPerUnit ?? 1));
-    const w = Number(call.sw) / ppu, h = Number(call.sh) / ppu;
-    for (const [x, y] of [[0, 0], [w, 0], [0, h], [w, h]]) {
-      const px = m[0] * x + m[2] * y + m[4];
-      const py = m[1] * x + m[3] * y + m[5];
-      if (!Number.isFinite(px) || !Number.isFinite(py)) continue;
-      left = Math.min(left, px);
-      top = Math.min(top, py);
-      right = Math.max(right, px);
-      bottom = Math.max(bottom, py);
-    }
-  }
-  if (![left, top, right, bottom].every(Number.isFinite) || right <= left || bottom <= top) return null;
-  return { left, top, right, bottom, width: right - left, height: bottom - top };
-}
-
-async function buildPetComposition(rawItem, catalog, skin) {
-  if (!catalog || !Array.isArray(catalog.items)) return null;
-  const item = normalizeCatalogItem(rawItem, catalog);
-  if (!item.pieces?.some(piece => piece.pet)) return null;
-
-  // Use the actual planner pet engine to settle its pose, pick its animation
-  // cell and compose every sprite piece; don't crop the atlas debug/anchor icon.
-  const player = new PlannerPlayer(catalog, [item]);
-  const dtMs = 1000 / 60;
-  const motion = {
-    x: 0, y: 0, worldX: 0, worldY: 0, vx: 0, vy: 0,
-    facing: 1, ground: true, punch: false, clockMs: 0, moveMs: 0,
-    locomotion: "idle", events: [], dtMs, armAngle: 0,
-    petBareHead: true, petLift: 0, petWorld: { solidAt: () => true },
-  };
-
-  let result = null;
-  for (let frame = 0; frame <= 60; frame++) {
-    motion.clockMs = frame * dtMs;
-    result = player.step(motion, dtMs, { skin, effects: false, xmlParticles: false });
-  }
-
-  const owner = Number(rawItem.id);
-  const calls = (result?.calls ?? []).filter(call =>
-    call.owner === owner && call.pet && !call.line &&
-    !!call.atlas && Number(call.sw) > 0 && Number(call.sh) > 0
+function isPrehistoricIcon(item, record) {
+  return prehistoricSources(item, record).some(value =>
+    /prehistoric/i.test(value) || /p[_\\/-]prehistoric(?:\\.png)?/i.test(value)
   );
-  if (!calls.length) return null;
-
-  const densities = new Map();
-  for (const call of calls) {
-    const name = assetName(call.atlas);
-    const ppu = Number(call.sourcePixelsPerUnit ?? 1);
-    if (densities.has(name) && densities.get(name) !== ppu) return null;
-    densities.set(name, ppu);
-  }
-
-  const atlases = new Map();
-  await Promise.all([...densities].map(async ([name, ppu]) => {
-    const cacheKey = name + "|" + ppu;
-    let atlas = petAtlasCache.get(cacheKey);
-    if (!atlas) {
-      const image = await loadSprite(name);
-      atlas = registerAtlas(image, { pixelsPerUnit: ppu });
-      petAtlasCache.set(cacheKey, atlas);
-      if (petAtlasCache.size > 128) petAtlasCache.delete(petAtlasCache.keys().next().value);
-    }
-    atlases.set(name, atlas);
-  }));
-
-  const bounds = petBounds(calls);
-  if (!bounds) return null;
-  const gutter = 2;
-  const work = document.createElement("canvas");
-  work.width = Math.max(1, Math.ceil(bounds.width + gutter * 2));
-  work.height = Math.max(1, Math.ceil(bounds.height + gutter * 2));
-  const workCtx = work.getContext("2d", { alpha: true });
-  if (!workCtx) return null;
-  workCtx.imageSmoothingEnabled = false;
-  drawCanvas(workCtx, calls, atlases, {
-    tilePixels: 32, camera: [bounds.left - gutter, bounds.top - gutter]
-  });
-
-  const frame = blankFrame();
-  const out = frame.getContext("2d", { alpha: true });
-  if (!out) return null;
-  out.imageSmoothingEnabled = false;
-  const fit = Math.min(28 / work.width, 28 / work.height);
-  const width = work.width * fit, height = work.height * fit;
-  out.drawImage(work, 0, 0, work.width, work.height,
-    (32 - width) / 2, (32 - height) / 2, width, height);
-  return hasPixels(frame) ? frame : null;
 }
 
-async function renderPetComposition(rawItem, catalog, skin) {
-  const skinKey = Array.isArray(skin) ? skin.slice(0, 3).join(",") : "";
-  const key = String(Number(rawItem.id)) + "|" + skinKey;
-  let pending = petFrameCache.get(key);
-  if (!pending) {
-    pending = buildPetComposition(rawItem, catalog, skin).catch(error => {
-      if (warnings++ < 5) console.warn("Pet inventory composition failed.", {
-        id: rawItem?.id, name: rawItem?.name, error
-      });
-      return null;
-    });
-    petFrameCache.set(key, pending);
-  }
-  const frame = await pending;
-  if (!frame) petFrameCache.delete(key);
-  else if (petFrameCache.size > 256) petFrameCache.delete(petFrameCache.keys().next().value);
-  return frame;
+function prehistoricColorColumn(item) {
+  const description = [
+    item?.name, item?.variant, item?.color, item?.colour, item?.skinName,
+    item?.version, item?.raw?.name,
+  ].filter(value => typeof value === "string").join(" ").toLowerCase();
+  const match = description.match(/\\b(red|green|brown|grey|gray)\\b/);
+  return match ? PREHISTORIC_COLORS[match[1]] : 0;
+}
+
+async function renderPrehistoricIcon(item) {
+  const column = prehistoricColorColumn(item);
+  // The supplied 128x512 sheet is arranged as four 32px-wide color columns
+  // (red, green, brown, grey), with poses down the Y axis. Use its first
+  // stable 32x32 icon cell; unlike the old path, this art has no debug X.
+  return cropCandidate({
+    file: PREHISTORIC_SPRITE,
+    sx: column * 32,
+    sy: 0,
+    w: 32,
+    h: 32,
+  });
 }
 
 async function makeFrame(record, fallbackItem, skin) {
@@ -483,7 +398,7 @@ function paintContained(canvas, frame) {
   ctx.drawImage(frame, 0, 0, 32, 32, 0, 0, 64, 64);
 }
 
-export async function renderDemoInventoryIcon(canvas, item, skin = null, catalog = null) {
+export async function renderDemoInventoryIcon(canvas, item, skin = null) {
   if (!(canvas instanceof HTMLCanvasElement) || !item) return;
   // A 2× internal canvas gives the 32×32 source a crisp inventory-sized output.
   if (canvas.width !== 64 || canvas.height !== 64) {
@@ -519,13 +434,15 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null, catalog
     const cacheKey = String(Number(item.id)) + (hasSkinTint ? "|" + skinKey : "");
     let frame = renderedCache.get(cacheKey);
     if (!frame) {
-      frame = await makeFrame(record, item, skin);
+      frame = isPrehistoricIcon(item, record)
+        ? await renderPrehistoricIcon(item)
+        : await makeFrame(record, item, skin);
       if (canvas.__demoIconToken !== token) return;
-      renderedCache.set(cacheKey, frame);
+      renderedCache.set(cacheKey, frame ?? blankFrame());
       if (renderedCache.size > MAX_RENDERED) renderedCache.delete(renderedCache.keys().next().value);
     }
     if (canvas.__demoIconToken !== token) return;
-    paintContained(canvas, frame);
+    paintContained(canvas, frame ?? blankFrame());
   } catch (error) {
     if (warnings++ < 5) console.error("Demo inventory icon metadata failed to load.", error);
     // Use the local item's atlas as a fallback if metadata is unavailable.
