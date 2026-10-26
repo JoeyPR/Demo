@@ -550,38 +550,46 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     drawScene(w, h);
   }
 
-  // Foreground layer is deliberately not camera-scaled: tile size, player
-  // pixels, shadow and wearable effects remain stable at every zoom setting.
-  c.save();
-
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(motion.facing);
-  // Draw the silhouette with the exact same camera transform and dimensions as
-  // the avatar. Its relative size and 12-unit directional drop therefore stay
-  // consistent at every zoom level instead of shrinking/growing against it.
-  // Render order: shadow behind land; player and clothing in front of land.
+  const applyCameraZoom = () => {
+    c.translate(cameraPivotX, cameraPivotY);
+    c.scale(zoom, zoom);
+    c.translate(-cameraPivotX, -cameraPivotY);
+  };
+
+  // Shadow zooms with the actor, then the unscaled land tile layer is drawn
+  // over its lower edge so the feet still appear grounded.
   c.imageSmoothingEnabled = false;
   c.save();
+  applyCameraZoom();
   c.globalAlpha = PLAYER_SHADOW_OPACITY;
   c.drawImage(avatarShadow,
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, camera.cameraWorldX);
-  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, 1);
-  // Scale the player and all clothing around rig feet (16,32). Land tiles use
-  // the full 32-unit world scale; the character remains at 0.78 scale.
+
+  // Land follows the camera's ground line but retains native 32u tile size.
+  const landGround = cameraPivotY + (ground - cameraPivotY) * zoom;
+  if (state.landWorld) drawLandGround(w, h, landGround, s, frame, camera.cameraWorldX);
+
+  // The player's equipment/effects share the same camera zoom as the avatar.
+  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
+  c.save();
+  applyCameraZoom();
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
-  drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, 1);
-  const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
-  // Preserve the player's screen-space anchor and scale while zooming the
-  // backdrop; lift still moves the plate with a floating/jumping player.
-  if (P.plate) P.plate.draw(c, w / 2 - 3, playerTop - 6 * s, s * 0.80, state.clock);
-  // Foreground weather is viewport-space, as it was before camera-scope
-  // rendering; zooming the world must not move or scale rain/snow overlays.
-  if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
+  drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
+
+  const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
+  const plateX = cameraPivotX + (w / 2 - 3 - cameraPivotX) * zoom;
+  const plateY = cameraPivotY + (playerTop - 6 * s - cameraPivotY) * zoom;
+  if (P.plate) P.plate.draw(c, plateX, plateY, s * 0.80 * zoom, state.clock);
+
+  // Foreground weather (rain, snow, effects) zooms with the background too.
+  if (state.weatherRenderer)
+    drawZoomedWeatherLayer(c, weatherFG, w, h, zoom, cameraPivotX, cameraPivotY);
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
   } catch (err) {
