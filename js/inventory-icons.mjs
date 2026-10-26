@@ -336,7 +336,7 @@ async function buildPetComposition(rawItem, catalog, skin) {
   let result = null;
   for (let frame = 0; frame <= 60; frame++) {
     motion.clockMs = frame * dtMs;
-    result = player.step(motion, dtMs, { skin, effects: false });
+    result = player.step(motion, dtMs, { skin, effects: false, xmlParticles: false });
   }
 
   const owner = Number(rawItem.id);
