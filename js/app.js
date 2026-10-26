@@ -12,7 +12,7 @@ import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
-import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
+import { clampCameraZoom, computeCameraLayout } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
 
 const $ = s => document.querySelector(s);
@@ -149,12 +149,9 @@ function step(dt) {
   const gesturePunch = state.punchHold || state.clock < state.gesturePunchUntil;
   if (gesturePunch && state.aim && state.view) {
     const { rootX, rootY, s, lift } = state.view;
-    /* Unproject the pointer through the camera scope before aiming in the
-       player's fixed 32-unit rig coordinates. */
-    const { x: aimX, y: aimY } = unprojectCameraPoint(
-      state.aim.x, state.aim.y,
-      state.view.cameraPivotX, state.view.cameraPivotY, state.view.cameraZoom
-    );
+    /* The player stays fixed-size; camera zoom only affects the backdrop.
+       Aim directly from the pointer's preview coordinates. */
+    const aimX = state.aim.x, aimY = state.aim.y;
     const cx = rootX + 16 * s, cy = rootY + 32 * s;
     motion.facing = aimX >= cx ? 1 : -1;
     let x = 16 + (aimX - cx) / s;
