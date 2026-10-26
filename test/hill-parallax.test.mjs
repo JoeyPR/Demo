@@ -29,13 +29,15 @@ test("parallax starts immediately with travel and reverses with the player", () 
   assert.equal(hillSceneOffset(0, 4, 2, 1), 0);
 });
 
-test("hill draw positions follow player travel direction and reverse when travel reverses", () => {
+test("hills move opposite the player and reverse when player direction changes", () => {
   const idle = hillDrawXs(0, 0, 100);
-  const rightOffset = hillSceneOffset(10, 1, 1, 0.5);
-  const leftOffset = hillSceneOffset(-10, 1, 1, 0.5);
+  const rightwardCamera = hillSceneOffset(-10, 1, 1, 0.5);
+  const leftwardCamera = hillSceneOffset(10, 1, 1, 0.5);
   assert.deepEqual(idle, [0]);
-  assert.deepEqual(hillDrawXs(0, rightOffset, 100), [-95, 5]);
-  assert.deepEqual(hillDrawXs(0, leftOffset, 100), [-5, 95]);
+  assert.deepEqual(hillDrawXs(0, rightwardCamera, 100), [-5, 95],
+    "walking right shifts the scenery left");
+  assert.deepEqual(hillDrawXs(0, leftwardCamera, 100), [-95, 5],
+    "walking left shifts the scenery right");
 });
 
 test("Arid wobble groups follow their matching desert hill layers", () => {
@@ -87,9 +89,9 @@ test("each sheet draws using its own offset rather than a shared hill offset", (
 test("live app derives hill parallax from the camera without edge thresholds", async () => {
   const { readFileSync: readApp } = await import("node:fs");
   const app = readApp(new URL("../js/app.js", import.meta.url), "utf8");
-  assert.match(app, /hillSceneOffset\(cameraWorldX, s, pxPerSceneUnit, speed\)/);
+  assert.match(app, /hillSceneOffset\(-cameraWorldX, s, pxPerSceneUnit, speed\)/);
   assert.match(app, /hillOffsetsNow\(w, h, s, camera\.cameraWorldX\)/);
-  assert.match(app, /offsets\.set\(track, hillSceneOffset\(cameraWorldX, s, pxPerSceneUnit, speed\)\)/);
+  assert.match(app, /offsets\.set\(track, hillSceneOffset\(-cameraWorldX, s, pxPerSceneUnit, speed\)\)/);
   assert.match(app, /frameX: frame\.x, frameY: frame\.y/);
   assert.doesNotMatch(app, /hillTravelExcess\(frame\.x/);
 });
