@@ -309,7 +309,6 @@ function prehistoricCell(item) {
     return { column: namedColor ? PREHISTORIC_COLORS[namedColor] : 0, row: namedRow };
   }
 
-  const id = Number(item?.id ?? item?.raw?.id);
   if (Number.isInteger(id) && id >= 3952 && id <= 4078 && id % 2 === 0) {
     const offset = id - 3952;
     const petIndex = offset / 2;
