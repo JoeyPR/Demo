@@ -57,7 +57,11 @@ function loadSprite(filename) {
         imageCache.delete(name);
         reject(new Error("Demo icon asset failed to load: " + name));
       };
-      image.src = new URL(name, ASSET_ROOT).href;
+      const assetURL = new URL(name, ASSET_ROOT);
+      // This sheet replaced an earlier palette PNG at the same path; bust any
+      // cached copy so the browser always loads the RGBA sprite revision.
+      if (name === PREHISTORIC_SPRITE) assetURL.searchParams.set("v", "3");
+      image.src = assetURL.href;
     }));
   }
   return imageCache.get(name);
