@@ -66,9 +66,9 @@
 #grid-window{position:absolute;left:0;right:0;top:0;display:grid;
   grid-template-columns:repeat(9,calc(171*var(--u)));gap:calc(5.9*var(--u)) calc(5.2*var(--u));
   align-content:start;padding:calc(8*var(--u)) 0 calc(30*var(--u)) calc(33.2*var(--u))}
-#grid-window .box .ic,#grid-window .box .n{opacity:0;transform:translateY(8px) scale(.8);
-  transition:opacity .18s ease-out,transform .18s cubic-bezier(.2,1.5,.4,1)}
-#grid-window .box.vis .ic,#grid-window .box.vis .n{opacity:1;transform:none}
+/* Inventory icons render at full opacity immediately; virtualization still keeps
+   offscreen items unmounted, but scrolling never animates their thumbnails in. */
+#grid-window .box .ic,#grid-window .box .n{opacity:1;transform:none;transition:none}
 
 /* item boxes: white = default, art = pink, blue = quick slots.
    click = .focus (yellow brackets) | click again = .sel (box-sel + check) = equipped */
