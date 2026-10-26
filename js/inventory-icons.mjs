@@ -298,7 +298,7 @@ function prehistoricSources(item, record) {
 
 function isPrehistoricIcon(item, record) {
   return prehistoricSources(item, record).some(value =>
-    /prehistoric/i.test(value) || /p[_\\/-]prehistoric(?:\\.png)?/i.test(value)
+    value.toLowerCase().includes("prehistoric")
   );
 }
 
@@ -307,15 +307,17 @@ function prehistoricColorColumn(item) {
     item?.name, item?.variant, item?.color, item?.colour, item?.skinName,
     item?.version, item?.raw?.name,
   ].filter(value => typeof value === "string").join(" ").toLowerCase();
-  const match = description.match(/\\b(red|green|brown|grey|gray)\\b/);
-  return match ? PREHISTORIC_COLORS[match[1]] : 0;
+  for (const color of ["red", "green", "brown", "grey", "gray"]) {
+    if (description.includes(color)) return PREHISTORIC_COLORS[color];
+  }
+  return 0;
 }
 
 async function renderPrehistoricIcon(item) {
   const column = prehistoricColorColumn(item);
-  // The supplied 128x512 sheet is arranged as four 32px-wide color columns
-  // (red, green, brown, grey), with poses down the Y axis. Use its first
-  // stable 32x32 icon cell; unlike the old path, this art has no debug X.
+  // Each 32x32 cell in the first sprite row is a complete color variant:
+  // red, green, brown, grey. Keep nearest-neighbor pixel art and crop away
+  // surrounding animation rows so the inventory shows a clean static icon.
   return cropCandidate({
     file: PREHISTORIC_SPRITE,
     sx: column * 32,
@@ -414,14 +416,6 @@ export async function renderDemoInventoryIcon(canvas, item, skin = null) {
   context.clearRect(0, 0, 64, 64);
   const token = Symbol("demo-inventory-icon");
   canvas.__demoIconToken = token;
-
-  if (isPetCompositeItem(item)) {
-    const frame = await renderPetComposition(item, catalog, skin);
-    if (canvas.__demoIconToken !== token) return;
-    // Known pet icons must never fall back to the raw marked atlas cell.
-    paintContained(canvas, frame ?? blankFrame());
-    return;
-  }
 
   try {
     const items = await loadMetadata();
