@@ -4,8 +4,24 @@
   let dy = P.store.get('dy', NaN);
 
   const range = () => {
-    const H = ui.offsetHeight;                        // 894 units, in px
-    return [-Math.max(0, innerHeight - H - 12), H * (606 - 130) / 894];   // [max up, max down]
+    const handleRect = h.getBoundingClientRect();
+    const applied = parseFloat(getComputedStyle(root).getPropertyValue('--dy')) || 0;
+    const baseBottom = handleRect.bottom - applied;
+    const edgeGap = 8;
+
+    // The handle can move upward only, and never past the top of the viewport.
+    let maxUp = Math.max(0, baseBottom - edgeGap);
+
+    // If the handle starts below the preview's top edge, stop just short of it
+    // rather than letting the handle collide with the preview boundary.
+    const preview = P.$('#preview');
+    if (preview) {
+      const previewTop = preview.getBoundingClientRect().top;
+      if (baseBottom > previewTop) {
+        maxUp = Math.min(maxUp, Math.max(0, baseBottom - previewTop + edgeGap));
+      }
+    }
+    return [-maxUp, 0];   // [max up, no downward drag]
   };
   const apply = v => {
     const [lo, hi] = range(); dy = Math.min(hi, Math.max(lo, v));
