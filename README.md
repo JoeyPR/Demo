@@ -1,4 +1,4 @@
-# Growtopia player rendering handoff
+# Growtopia Planner Handoff
 
 This package is a researched, editable starting point for Claude to implement player, clothing, and movement rendering in a Growtopia planner. It contains readable ES modules, a source-cited technical guide, a 4,081-item coverage inventory, and a numerical test suite.
 
