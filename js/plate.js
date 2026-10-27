@@ -223,11 +223,13 @@
 
   /* draw(ctx, cx, baselineY, scale, t): cx = character center x on canvas,
      baselineY = the plate's text baseline. Returns the measured width. */
-  function draw(k, p, cx, baselineY, measureOnly) {
+  function draw(k, p, cx, baselineY, measureOnly, textScale = 1) {
     const built = buildParts();
     if (!built) return 0;
     const parts = built.parts;
-    const PR = built.size * p;                 /* text font size */
+    const factor = Number.isFinite(textScale) && textScale > 0 ? textScale : 1;
+    const iconPR = built.size * p;             /* icon size basis */
+    const PR = iconPR * factor;                /* text font size only */
     const Pq = 1.6 * p;                       /* icon line gap */
     k.save();
     k.setTransform(1, 0, 0, 1, 0, 0);
@@ -235,10 +237,14 @@
     k.textBaseline = 'alphabetic';
     const joined = parts.filter(x => x.text !== undefined).map(x => x.text).join(' ');
     const PN = descenderPenalty(joined) / 21;
-    const PG = PR * 1.25 * PN;                /* title icon height */
+    const PG = iconPR * 1.25 * PN;            /* title icon height stays full-size */
     const Pt = k.measureText(joined);
     const PA = Pt.actualBoundingBoxAscent + Pt.actualBoundingBoxDescent;
-    const PI = k.measureText('A').actualBoundingBoxAscent / 14;  /* pixel unit */
+    const scaledFont = k.font;
+    k.font = "700 " + iconPR + "px 'Century Gothic GT', 'Century Gothic', sans-serif";
+    const PI = k.measureText('A').actualBoundingBoxAscent / 14;  /* icon pixel unit */
+    k.font = scaledFont;
+    const textPI = k.measureText('A').actualBoundingBoxAscent / 14; /* text pixel unit */
     const PB = descenderPenalty(joined) * PI; /* icon size unit */
     const L1 = 13.125 * PI;
     const iconCenterY = () => baselineY - 19 * PI + PB / 2;
@@ -256,7 +262,7 @@
     const LE = parts.findIndex(x => x.flag || x.badge || x.guild);
     const LP = parts[LE];
     const LL = !!LP?.guild;                    /* has guild banner */
-    const LC = PR * 1.226 * 1.2;              /* wrench size */
+    const LC = iconPR * 1.226 * 1.2;          /* wrench icon stays full-size */
     const widths = parts.map(part => {
       if (part.wrench) return LC;
       if (part.tag) return tagWidth(k, part.text, PR);
@@ -308,7 +314,7 @@
         }
         k.restore();
       } else if (part.text !== undefined) {
-        const outline = Math.max(1, p * 0.5);
+        const outline = Math.max(1, p * factor * 0.5);
         const paint = (text, x, color) => {
           k.fillStyle = 'rgba(0,0,0,.5)';
           k.fillText(text, x + outline, baselineY + outline);
@@ -328,18 +334,18 @@
           /* shadow pass at offset (at·PI, at·PI), then the fill pass at 0 —
              exactly the site's LN(yOffset, colorFn) */
           const renderText = (offset, colorFn) => {
-            const ax = LO + offset * PI, ay = baselineY - 19 * PI + offset * PI;
+            const ax = LO + offset * textPI, ay = baselineY - 19 * textPI + offset * textPI;
             k.save();
             if (part.scale !== 1) { k.translate(ax, ay); k.scale(part.scale, part.scale); k.translate(-ax, -ay); }
             k.fillStyle = rgba(colorFn(0, 0));
             if (!perLetter) {
-              k.fillText(part.text, ax, ay + 19 * PI);
+              k.fillText(part.text, ax, ay + 19 * textPI);
             } else {
               let x = ax, seen = 0;
               chars.forEach((ch, ci) => {
                 if (ch !== ' ') {
                   k.fillStyle = rgba(colorFn(ci, seen));
-                  k.fillText(ch, x, ay + 19 * PI);
+                  k.fillText(ch, x, ay + 19 * textPI);
                   seen++;
                 }
                 x += k.measureText(ch).width;
@@ -410,11 +416,11 @@
 
   /* ---------------- public API ---------------- */
   P.plate = {
-    draw(ctx, cx, baselineY, scale, t) {
+    draw(ctx, cx, baselineY, scale, t, textScale = 1) {
       clock = t ?? clock;
-      return draw(ctx, scale, cx, baselineY, false);
+      return draw(ctx, scale, cx, baselineY, false, textScale);
     },
-    measure(ctx, cx, baselineY, scale) { return draw(ctx, scale, cx, baselineY, true); },
+    measure(ctx, cx, baselineY, scale, textScale = 1) { return draw(ctx, scale, cx, baselineY, true, textScale); },
     titles: TITLES, conflicts: CONFLICTS, guildRoles: GUILD_ROLES, baseWrenchId: BASE_WRENCH,
     get wrenchData() { return wrenchData; }
   };
