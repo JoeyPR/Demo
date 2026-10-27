@@ -36,6 +36,10 @@
     const it = P.inv.focus || P.inv.sel;
     /* the Fist/Wrench tool focus is protected — it is not an item */
     if (!it || it.tool) return P.toast('Select an item first');
+    if (b.dataset.a === 'drop') {
+      P.emit('drop-request', it);
+      return;
+    }
     A[b.dataset.a](it);
     if (it.gone) P.inv.focus = null;
     P.inv.refresh();

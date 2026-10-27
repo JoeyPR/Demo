@@ -14,6 +14,7 @@ import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROU
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
+import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_COLLECTION_DURATION, pickupPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -23,6 +24,8 @@ const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarS
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
 const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
+const pickupSprite = new Image();
+pickupSprite.src = moduleURL("../img/pickup.png").href;
 
 const SKINS = [
   { name: "Warm peach", rgb: [255, 206, 180, 255] },
@@ -38,7 +41,8 @@ const state = {
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0
+  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
+  pickups: [], nextPickupId: 1
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -167,6 +171,7 @@ function step(dt) {
   state.lastResult = player.step(
     withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
     { skin: state.skin, effects: true });
+  updatePickupLifecycle(frame);
 }
 P.on("pad", pad => {
   if (pad.k === "jump" && pad.down) { motion.lastJump = false; state.jumpUntil = state.clock + 150; }
@@ -215,7 +220,7 @@ function punchOverDrawer(e) {
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   });
 }
-const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, [data-dd]");
+const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, [data-dd]");
 document.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
   if (punchOverUI(e.target) || punchOverDrawer(e)) return;
@@ -555,6 +560,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
+  drawPickups(c, frame, ground, s, cameraPivotX);
   const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
   // The plate renderer resets the canvas transform internally, so project its
@@ -650,6 +656,133 @@ P.thumb = function (raw, size = 64) {
   renderDemoInventoryIcon(canvas, raw, state.skin);
   return canvas;
 };
+
+function unequipDroppedItem(item) {
+  let removed = false;
+  for (const [slot, worn] of state.equipped) {
+    if (worn.id === item.id) {
+      state.equipped.delete(slot);
+      removed = true;
+    }
+  }
+  if (!removed) return;
+  const wornItems = [...state.equipped.values()];
+  player.equip(wornItems);
+  syncAuraPass();
+  state.abilities = resolveAbilities(wornItems, state.abilityRegistry);
+  motion?.setAbilities(state.abilities);
+  P.equippedIds = new Set(wornItems.map(worn => worn.id));
+  P.emit("equip-state");
+  updateHUD();
+}
+
+function dropWorldItem(item, amount) {
+  if (!state.ready || !state.lastFrame || !item || item.gone) {
+    P.toast("This item cannot be dropped right now.");
+    return;
+  }
+  const frame = state.lastFrame;
+  const facing = Math.sign(frame.facing || motion?.facing || 1) || 1;
+  const pickup = {
+    id: state.nextPickupId++,
+    item,
+    amount,
+    icon: P.thumb(item, 64),
+    spawnedAt: state.clock,
+    startX: frame.x + facing * 8,
+    targetX: frame.x + facing * 28,
+    startY: frame.y - 5,
+    targetY: 0,
+    collectAt: null,
+    collectStartX: null,
+    collectStartY: null
+  };
+  state.pickups.push(pickup);
+  item.gone = true;
+  if (P.inv.focus?.id === item.id) P.inv.focus = null;
+  if (P.inv.sel?.id === item.id) P.inv.sel = null;
+  unequipDroppedItem(item);
+  P.inv.refresh();
+  P.emit("item-dropped", { item, amount, pickupId: pickup.id });
+  P.toast("Dropped " + (amount > 1 ? amount + " × " : "") + item.name);
+}
+
+function updatePickupLifecycle(frame) {
+  let inventoryChanged = false;
+  for (let i = state.pickups.length - 1; i >= 0; i--) {
+    const pickup = state.pickups[i];
+    if (pickup.collectAt == null && pickupShouldCollect(pickup, state.clock, frame)) {
+      pickup.collectAt = state.clock;
+      pickup.collectStartX = pickup.targetX;
+      pickup.collectStartY = pickup.targetY;
+      P.emit("pickup-collect-start", { item: pickup.item, pickupId: pickup.id });
+      continue;
+    }
+    if (pickup.collectAt != null &&
+        state.clock - pickup.collectAt >= PICKUP_COLLECTION_DURATION) {
+      pickup.item.gone = false;
+      state.pickups.splice(i, 1);
+      inventoryChanged = true;
+      P.emit("item-picked-up", { item: pickup.item, amount: pickup.amount, pickupId: pickup.id });
+      P.toast("Picked up " + (pickup.amount > 1 ? pickup.amount + " × " : "") + pickup.item.name);
+    }
+  }
+  if (inventoryChanged) P.inv.refresh();
+}
+
+function drawPickups(c, frame, ground, scale, cameraPivotX) {
+  if (!state.pickups.length) return;
+  c.imageSmoothingEnabled = false;
+  for (const pickup of state.pickups) {
+    const pose = pickupPose(pickup, state.clock, frame);
+    const size = PICKUP_SIZE * scale * pose.scale;
+    if (size < 0.5) continue;
+    const left = cameraPivotX + (pose.x - frame.x) * scale - size / 2;
+    const top = ground + (pose.y - pose.bob) * scale - size;
+    c.save();
+    // The item is drawn first and tucked inside the white frame; the atlas cell overlays its edges.
+    if (pickup.icon) {
+      const iconSize = size * 0.64;
+      const inset = (size - iconSize) / 2;
+      c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
+    }
+    if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
+      c.drawImage(
+        pickupSprite,
+        PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
+        PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
+        left, top, size, size
+      );
+    } else {
+      c.strokeStyle = "#fff";
+      c.lineWidth = Math.max(1, scale);
+      c.strokeRect(left + scale, top + scale, size - 2 * scale, size - 2 * scale);
+    }
+    if (pickup.amount > 1 && pose.scale > 0.25) {
+      const label = String(pickup.amount);
+      const fontSize = Math.max(8, Math.min(size * 0.27, scale * 5.5));
+      c.font = "700 " + fontSize + "px 'Main CG', sans-serif";
+      c.textAlign = "right";
+      c.textBaseline = "bottom";
+      c.lineWidth = Math.max(1, scale * 0.7);
+      c.strokeStyle = "rgba(0,0,0,.9)";
+      c.fillStyle = "#fff";
+      c.strokeText(label, left + size - scale * 1.4, top + size - scale * 1.2);
+      c.fillText(label, left + size - scale * 1.4, top + size - scale * 1.2);
+    }
+    c.restore();
+  }
+}
+
+P.on("drop-confirm", payload => {
+  const amount = Number(payload?.amount);
+  if (!payload?.item || !Number.isSafeInteger(amount) || amount < 1 || amount > 999999) {
+    P.toast("Enter a valid drop amount.");
+    return;
+  }
+  dropWorldItem(payload.item, amount);
+});
+
 
 /* ---------------- boot -------------------------------------------------- */
 window.plannerApp = state;   /* debug/QA hook */

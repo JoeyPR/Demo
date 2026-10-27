@@ -1,0 +1,75 @@
+/* DROP dialog: inventory palette, typography, borders and pixel-style shadows. */
+.drop-overlay {
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center; padding: 12px;
+  background: rgba(0,0,0,.08); touch-action: manipulation;
+}
+.drop-overlay[hidden] { display: none !important; }
+.drop-dialog {
+  position: relative; display: flex; flex-direction: column;
+  width: min(560px, calc(100vw - 24px));
+  padding: clamp(16px, 3.8vw, 28px) clamp(18px, 5vw, 30px) clamp(14px, 3.4vw, 22px);
+  color: #fff; background: rgba(39,125,159,.98);
+  border: 4px solid #7BBAD2; border-radius: 6px;
+  box-shadow: 3px 3px 0 #000, inset 2px 2px 0 rgba(0,0,0,.55);
+  font-family: var(--font-main);
+}
+.drop-dialog::after {
+  content: ""; position: absolute; inset: 2px;
+  border: 2px solid rgba(0,0,0,.84); border-radius: 2px; pointer-events: none;
+}
+.drop-item-row {
+  position: relative; z-index: 1; display: flex; align-items: center;
+  gap: clamp(12px, 3.5vw, 24px); min-width: 0;
+  margin-bottom: clamp(10px, 2.7vw, 16px);
+}
+.drop-item-icon {
+  flex: 0 0 clamp(34px, 7.5vw, 48px);
+  width: clamp(34px, 7.5vw, 48px); height: clamp(34px, 7.5vw, 48px);
+  display: grid; place-items: center;
+}
+.drop-item-icon canvas { display:block; width:100%; height:100%; image-rendering:pixelated; }
+.drop-title {
+  min-width: 0; overflow-wrap: anywhere; font-size: clamp(26px, 7.4vw, 52px);
+  font-weight: 700; line-height: 1.03; text-shadow: 1px 2px 0 rgba(0,0,0,.25);
+}
+.drop-prompt {
+  position: relative; z-index: 1; margin: 0 0 clamp(12px, 2.8vw, 17px);
+  color: #FCE6BA; font-size: clamp(20px, 5.5vw, 36px);
+  line-height: 1.1; font-weight: 700;
+}
+.drop-amount {
+  position: relative; z-index: 1; width: min(190px, 70%);
+  height: clamp(48px, 10vw, 62px); margin: 0 0 clamp(14px, 3vw, 20px);
+  padding: 0 10px; border: 3px solid #7BBAD2; border-radius: 5px;
+  background: #287F9F; box-shadow: 2px 2px 0 #000, inset 2px 2px 0 rgba(0,0,0,.6);
+  color: #fff; font: 700 clamp(24px, 5.2vw, 36px)/1 var(--font-main);
+  appearance: textfield; outline: none;
+}
+.drop-amount:focus { border-color: #FCE6BA; }
+.drop-amount::-webkit-inner-spin-button,.drop-amount::-webkit-outer-spin-button { margin:0; appearance:none; }
+.drop-error {
+  position: relative; z-index: 1; margin: -10px 0 12px;
+  color: #ffe2b4; font-size: 14px; font-weight: 700;
+}
+.drop-actions {
+  position: relative; z-index: 1; display: flex; align-items: stretch;
+  gap: clamp(12px, 5vw, 36px);
+}
+.drop-actions button {
+  min-width: 104px; min-height: clamp(48px, 10vw, 60px);
+  padding: 4px clamp(14px, 3vw, 22px); border-radius: 6px;
+  box-shadow: 2px 2px 0 #000; font: 700 clamp(25px, 6.3vw, 42px)/1 var(--font-main);
+  text-shadow: 1px 1px 0 rgba(0,0,0,.12); cursor: pointer;
+}
+.drop-actions button:active { transform: translate(2px,2px); box-shadow:none; }
+.drop-cancel { flex: 1 1 auto; background: #FFCC00; color:#fff; }
+.drop-confirm { flex:0 0 auto; min-width:clamp(84px,16vw,108px)!important; background:#7BBAD2; color:#fff; }
+@media (max-width: 420px) {
+  .drop-dialog { padding: 14px 14px 16px; }
+  .drop-item-row { gap: 10px; }
+  .drop-title { font-size: clamp(23px, 6.6vw, 30px); }
+  .drop-actions { gap: 12px; }
+  .drop-actions button { min-width:0; font-size:clamp(22px,6vw,29px); }
+  .drop-confirm { min-width:74px!important; }
+}
