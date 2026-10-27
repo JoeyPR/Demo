@@ -21,7 +21,7 @@
   cursor: pointer;
   outline: 0;
 }
-.dd-btn:hover { background: #2a333a; color: #fff; }
+.dd-btn:hover { background: #277D9F; color: #fff; }
 .dd-btn .dd-thumb {
   width: 24px; height: 24px;
   border-radius: 3px;
