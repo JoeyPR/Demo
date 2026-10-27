@@ -93,7 +93,7 @@ test("Land and Weather buttons and dropdown panels use #277D9F with white text",
   assert.match(dropdowns, /background: #277D9F;\s*color: #FFFFFF;/);
   assert.match(dropdowns, /\.dd-panel \{[\s\S]*background: #277D9F;[\s\S]*color: #FFFFFF;/);
   assert.match(dropdowns, /\.dd-head strong \{ font: 700 13px\/1 var\(--font-rt\);[^}]*color:#FFFFFF/);
-  assert.match(dropdowns, /\.dd-tile\{[\s\S]*background: #277D9F;[\s\S]*color: #FFFFFF;/);
+  assert.match(dropdowns, /\.dd-tile \{[\s\S]*background: #277D9F;[\s\S]*color: #FFFFFF;/);
 });
 
 test("the planner routes UI text to the bundled cg.ttf font", () => {
@@ -101,8 +101,10 @@ test("the planner routes UI text to the bundled cg.ttf font", () => {
   assert.match(base, /src:url\(\.\.\/font\/cg\.ttf\) format\("truetype"\)/);
   assert.match(base, /--font-web:"RTFont CenturyGothic",sans-serif/);
   assert.match(base, /--font-rt:"RTFont CenturyGothic",sans-serif/);
+  assert.match(base, /font-synthesis:weight/);
   assert.match(systems, /font: 700 18px var\(--font-rt\)/);
   assert.match(systems, /font: 600 12px\/1 var\(--font-rt\)/);
   assert.match(customization, /font-family: var\(--font-rt\)/);
   assert.match(dropdowns, /font: 600 11px\/1 var\(--font-rt\)/);
+  assert.doesNotMatch(base + systems + dropdowns + customization, /Webfont CenturyGothic|Century Gothic GT|"Century Gothic", system-ui|monospace/);
 });
