@@ -18,10 +18,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 describe('camera zoom limits and defaults', () => {
   it('clamps zoom into [min, max]', () => {
-    assert.equal(CAMERA_ZOOM_MIN, 0.5);
-    assert.equal(CAMERA_ZOOM_MAX, 2);
+    assert.equal(CAMERA_ZOOM_MIN, 1 / 1.28);
+    assert.equal(CAMERA_ZOOM_MAX, 4);
     assert.equal(clampCameraZoom(0), CAMERA_ZOOM_MIN);
-    assert.equal(clampCameraZoom(4), CAMERA_ZOOM_MAX);
+    assert.equal(clampCameraZoom(99), CAMERA_ZOOM_MAX);
     assert.equal(clampCameraZoom(1.2), 1.2);
   });
 
@@ -34,11 +34,8 @@ describe('camera zoom limits and defaults', () => {
 
   it('keeps js/preview.js in sync with the camera defaults', () => {
     const src = readFileSync(join(here, '../js/preview.js'), 'utf8');
-    const m = src.match(/P\.camZoom = \{ v: ([\d.]+), min: ([\d.]+), max: ([\d.]+) \}/);
-    assert.ok(m, 'P.camZoom literal not found in js/preview.js');
-    assert.equal(+m[1], CAMERA_ZOOM_DEFAULT, 'default zoom must be close to the player');
-    assert.equal(+m[2], CAMERA_ZOOM_MIN);
-    assert.equal(+m[3], CAMERA_ZOOM_MAX);
+    assert.match(src, /P\.camZoom = \{ v: 1, min: 1 \/ 1\.28, max: 4 \}/);
+    assert.equal(CAMERA_ZOOM_DEFAULT, 1, 'default zoom must be close to the player');
   });
 });
 
@@ -52,10 +49,12 @@ describe('computeCameraLayout — the singular camera', () => {
     assert.equal(layout.rootY, layout.ground - 32 * 4);
   });
 
-  it('pivots on the ground point under the player (their midline)', () => {
+  it('pivots on the player midpoint while the ground stays below it', () => {
     const layout = computeCameraLayout(base);
     assert.equal(layout.cameraPivotX, base.width / 2);
-    assert.equal(layout.cameraPivotY, layout.ground);
+    assert.equal(layout.cameraPivotY, base.height / 2);
+    assert.equal(layout.ground, layout.cameraPivotY + 16 * base.scale);
+    assert.equal(layout.rootY + 16 * base.scale, layout.cameraPivotY);
   });
 
   it('has no camera-pan, head-clamp or post-zoom shift machinery', () => {
@@ -66,7 +65,7 @@ describe('computeCameraLayout — the singular camera', () => {
 
   it('zooming does not move anything: fixed pose, identical positions at every zoom', () => {
     const poses = [];
-    for (const zoom of [0.5, 0.75, 1, 1.5, 2]) {
+    for (const zoom of [CAMERA_ZOOM_MIN, 0.9, 1, 1.5, 2, CAMERA_ZOOM_MAX]) {
       const l = computeCameraLayout({ ...base, zoom });
       poses.push(l);
       assert.equal(l.zoom, zoom);
@@ -86,10 +85,10 @@ describe('computeCameraLayout — the singular camera', () => {
     const jumping = computeCameraLayout({ ...base, frameY: -18 });
     // pre-transform positions are the same jump at every zoom...
     assert.equal(jumping.rootY - standing.rootY, -18 * base.scale);
-    for (const zoom of [0.5, 1, 2]) {
+    for (const zoom of [CAMERA_ZOOM_MIN, 1, CAMERA_ZOOM_MAX]) {
       const a = computeCameraLayout({ ...base, zoom });
       const b = computeCameraLayout({ ...base, zoom, frameY: -18 });
-      // ...and on screen the separation scales with zoom (pivot is the ground line)
+      // ...and on screen the separation scales with zoom (pivot is the player's center)
       assert.ok(Math.abs((b.rootY - a.rootY) * zoom - (-18 * base.scale) * zoom) < 1e-9);
     }
   });
@@ -102,8 +101,8 @@ describe('computeCameraLayout — the singular camera', () => {
 });
 
 test('camera-space touch aiming is the inverse of the draw transform', () => {
-  const pivotX = 960, pivotY = 604;   /* viewport midline, ground line */
-  for (const zoom of [0.5, 0.75, 1, 1.5, 2]) {
+  const pivotX = 960, pivotY = 540;   /* viewport midline and player's center */
+  for (const zoom of [CAMERA_ZOOM_MIN, 0.9, 1, 1.5, 2, CAMERA_ZOOM_MAX]) {
     const source = { x: 123.25, y: 987.5 };
     const screen = projectCameraPoint(source.x, source.y, pivotX, pivotY, zoom);
     const restored = unprojectCameraPoint(screen.x, screen.y, pivotX, pivotY, zoom);
@@ -115,8 +114,8 @@ test('camera-space touch aiming is the inverse of the draw transform', () => {
 test('zoom is applied around the pivot only — the draw transform has no translation side effects', () => {
   // The world transform is translate(p); scale(z); translate(-p): a point AT the
   // pivot is invariant at every zoom; every other point scales toward it.
-  for (const zoom of [0.5, 1, 2]) {
-    const p = { x: 960, y: 604 };
+  for (const zoom of [CAMERA_ZOOM_MIN, 1, CAMERA_ZOOM_MAX]) {
+    const p = { x: 960, y: 540 };
     const at = projectCameraPoint(p.x, p.y, p.x, p.y, zoom);
     assert.equal(at.x, p.x);
     assert.equal(at.y, p.y);
