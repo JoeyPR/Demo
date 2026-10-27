@@ -56,7 +56,7 @@
   padding:calc(8*var(--u)) calc(12*var(--u));background:transparent;border:0;border-radius:var(--radius);
   color:#dfdfdf;font:400 calc(26*var(--u))/1.15 var(--font-rt);cursor:pointer}
 .filter-option:hover{background:rgba(0,0,0,.18)}
-.filter-option[aria-pressed=true]{background:#A5E3FB;color:#FFFFFF}
+.filter-option[aria-pressed=true]{background:#A5E3FB;color:#FFFFFF;text-shadow:1px 1px 0 #000}
 #main.search-disabled #q,#main.search-disabled #s-icon{opacity:.5;pointer-events:none}
 #grid{position:absolute;left:0;right:0;top:calc(95*var(--u));bottom:0;overflow-y:auto;overflow-x:hidden;
   touch-action:pan-y;scrollbar-width:none}
@@ -113,8 +113,8 @@
    scale factors while centering the art in the standard 10.2% icon inset. */
 .box.tool .ic{inset:10.2%;overflow:visible}
 .box.tool .ic img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:118.5%;height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
-.box.tool .ic img.art-wrench{width:113.6%}
+  width:calc(118.5% - 2px);height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
+.box.tool .ic img.art-wrench{width:calc(113.6% - 2px)}
 
 /* 3. tabs — the PNGs already contain their own outlines, corners and shadows.
    The button adds no background/border and never clips the baked drop shadow. */
