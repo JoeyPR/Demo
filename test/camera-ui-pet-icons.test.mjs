@@ -26,8 +26,12 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
   assert.deepEqual(p, { x: 150, y: 110 });
   assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
   assert.match(app, /w \/ 2 - 3, playerTop - 6 \* s/);
-  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* 0\.80 \* zoom/);
-  assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild;[\s\S]*\+ \(iconPart \? 1 : 0\)/);
+  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom, state\.clock, 0\.80/);
+  assert.match(plate, /const iconPR = built\.size \* p;[\s\S]*const PR = iconPR \* factor/);
+  assert.match(plate, /const PG = iconPR \* 1\.25 \* PN/);
+  assert.match(plate, /const LC = iconPR \* 1\.226 \* 1\.2/);
+  assert.match(plate, /textScale = 1/);
+  assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild/);
 });
 
 test("filter panel retains its inner and outer drop shadows", () => {
