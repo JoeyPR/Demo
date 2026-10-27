@@ -1,13 +1,7 @@
 /* SYSTEMS: categorical options row, weather buttons, wrench menus and the
    customization panel — extensions to the NewPlanner UI. */
 
-/* ---------- fonts ---------- */
-@font-face {
-  font-family: "Century Gothic GT";
-  src: url("../font/plate.ttf") format("truetype");
-  font-weight: 400 700;
-  font-display: swap;
-}
+/* All UI text uses the bundled CG font declared in base.css. */
 
 /* ---------- placeholder thumbs ---------- */
 .ph {
