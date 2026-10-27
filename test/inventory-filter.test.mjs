@@ -22,8 +22,8 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
 test("Fist and Wrench use the same icon inset as inventory item icons", () => {
   assert.match(inv, /\.box \.ic\{position:absolute;inset:10\.2%/);
   assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:visible\}/);
-  assert.match(inv, /\.box\.tool \.ic img\{[\s\S]*width:118\.5%/);
-  assert.match(inv, /\.box\.tool \.ic img\.art-wrench\{width:113\.6%\}/);
+  assert.match(inv, /\.box\.tool \.ic img\{[\s\S]*width:calc\(118\.5% - 2px\)/);
+  assert.match(inv, /\.box\.tool \.ic img\.art-wrench\{width:calc\(113\.6% - 2px\)\}/);
 });
 
 test("search row reserves room for a matching square filter button on desktop and mobile", () => {
@@ -90,4 +90,20 @@ test("equipped artifact boxes show the dedicated chk-art checkmark", () => {
 test("Fist and Wrench icon source assets are easy to locate", () => {
   assert.match(grid, /on \? 'img\/wrench-quick\.png' : 'img\/fist\.png'/);
   assert.match(grid, /function toolBox\(\)/);
+});
+
+
+test("equipped items are kept out of the three top-drawer item boxes", () => {
+  const start = grid.indexOf("function renderQuick()");
+  const end = grid.indexOf("/* mark the focused box", start);
+  assert.ok(start >= 0 && end > start, "quick drawer renderer exists");
+  const quick = grid.slice(start, end);
+  assert.match(quick, /quick\.append\(toolBox\(\)\)/);
+  assert.match(quick, /for \(let i = 0; i < 3; i\+\+\)/);
+  assert.match(quick, /className = 'box reg empty qbox'/);
+  assert.doesNotMatch(quick, /const eq =|map\(id => P\.inv\.itemById|boxEl\(it\)/);
+});
+
+test("selected filter option text has a 1px bottom-right shadow", () => {
+  assert.match(inv, /\.filter-option\[aria-pressed=true\]\{[^}]*text-shadow:1px 1px 0 #000/);
 });
