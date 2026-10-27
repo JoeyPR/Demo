@@ -1,13 +1,6 @@
 /* BASE: tokens, font, stage, panel look. Nothing else lives here. */
 /* All planner text uses the bundled Growtopia CG font (font/cg.ttf). */
 @font-face{
-  font-family:"Webfont CenturyGothic";
-  src:local("Century Gothic"),local("CenturyGothic");
-  font-style:normal;
-  font-weight:400;
-  font-display:swap;
-}
-@font-face{
   font-family:"RTFont CenturyGothic";
   src:url(../font/cg.ttf) format("truetype");
   font-style:normal;
