@@ -106,7 +106,8 @@
   });
   document.addEventListener("keydown", event => {
     if (overlay.hidden) return;
-    if (event.key === "Escape") { event.preventDefault(); close(); }
+    if (event.key === "Escape") { event.preventDefault(); close(); return; }
+    event.stopPropagation(); // while the dialog is open, movement keys must not reach the preview controller
   });
   P.on("drop-request", open);
 })();

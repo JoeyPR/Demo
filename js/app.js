@@ -14,7 +14,7 @@ import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROU
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
-import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_COLLECTION_DURATION, pickupPose, pickupShouldCollect } from "./drop-world.mjs";
+import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_DURATION, pickupPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -691,8 +691,8 @@ function dropWorldItem(item, amount) {
     spawnedAt: state.clock,
     startX: frame.x + facing * 8,
     targetX: frame.x + facing * 28,
-    startY: frame.y - 5,
-    targetY: 0,
+    startY: frame.y + PICKUP_HOVER_HEIGHT - 2,
+    targetY: PICKUP_HOVER_HEIGHT,
     collectAt: null,
     collectStartX: null,
     collectStartY: null

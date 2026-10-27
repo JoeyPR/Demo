@@ -31,6 +31,7 @@ test("world pickup draws the item behind the atlas frame and follows camera spac
   assert.match(app,/const iconSize = size \* 0\.64/);
   assert.ok(app.lastIndexOf("c.drawImage(pickup.icon")<app.lastIndexOf("PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y"));
   assert.match(world,/x: 160, y: 0, width: 20, height: 20/);
+  assert.match(world,/PICKUP_HOVER_HEIGHT = -10/);
   assert.match(world,/pickupPose\(pickup, state\.clock, frame\)/);
   assert.match(world,/pickupShouldCollect\(pickup, state\.clock, frame\)/);
 });

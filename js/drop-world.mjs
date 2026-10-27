@@ -1,10 +1,11 @@
 /* Pickup-box animation helpers. World positions use the preview's 32-unit coordinates. */
 export const PICKUP_ATLAS_RECT = Object.freeze({ x: 160, y: 0, width: 20, height: 20 }); // X8, Y0
 export const PICKUP_SIZE = 20;
+export const PICKUP_HOVER_HEIGHT = -10;
 export const PICKUP_SPAWN_DURATION = 400;
 export const PICKUP_COLLECTION_DURATION = 360;
 export const PICKUP_FLOAT_AMPLITUDE = 1.45;
-export const PICKUP_FLOAT_PERIOD = 1280;
+export const PICKUP_FLOAT_PERIOD = 1600;
 
 const clamp01 = value => Math.min(1, Math.max(0, value));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -16,7 +17,7 @@ export function pickupPose(pickup, now, playerFrame) {
     const eased = progress * progress * (3 - 2 * progress);
     return {
       x: lerp(pickup.collectStartX ?? pickup.targetX, playerFrame.x, eased),
-      y: lerp(pickup.collectStartY ?? pickup.targetY ?? 0, playerFrame.y ?? 0, eased),
+      y: lerp(pickup.collectStartY ?? pickup.targetY ?? 0, (playerFrame.y ?? 0) + PICKUP_HOVER_HEIGHT, eased),
       scale: 1 - eased,
       bob: 0,
       progress,
@@ -49,5 +50,5 @@ export function pickupShouldCollect(pickup, now, playerFrame, reach = 18) {
   const playerY = Number(playerFrame.y ?? 0);
   const targetY = Number(pickup.targetY ?? 0);
   return Math.abs(playerFrame.x - pickup.targetX) <= reach &&
-    Math.abs(playerY - targetY) <= 4;
+    Math.abs(playerY + PICKUP_HOVER_HEIGHT - targetY) <= 14;
 }
