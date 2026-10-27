@@ -9,6 +9,7 @@
   const g = P.$('#grid');
   const filterButton = P.$('#filter-button');
   const filterPanel = P.$('#filter-panel');
+  const filterDisabledTabs = new Set(['custom', 'player', 'makeup']);
   let activeFilter = String(P.store.get('filterCategory', 'all'));
   let searchOn = P.store.get('searchOn', true);
   let favs = new Set(P.store.get('favs', []));
@@ -61,8 +62,16 @@
   }
 
   function setFilterOpen(open) {
+    if (open && filterDisabledTabs.has(P.tabs.cur)) open = false;
     filterPanel.hidden = !open;
     filterButton.setAttribute('aria-expanded', String(open));
+  }
+
+  function updateFilterAvailability(tab = P.tabs.cur) {
+    const disabled = filterDisabledTabs.has(tab);
+    filterButton.disabled = disabled;
+    filterButton.setAttribute('aria-disabled', String(disabled));
+    if (disabled) setFilterOpen(false);
   }
 
   function renderFilterOptions() {
@@ -88,11 +97,17 @@
       });
       filterPanel.append(b);
     }
-    filterButton.title = 'Filter clothing categories — ' +
-      (options.find(option => option.value === activeFilter)?.label || 'All Categories');
+    filterButton.title = filterDisabledTabs.has(P.tabs.cur)
+      ? 'Category filters are unavailable on this tab'
+      : 'Filter clothing categories — ' +
+        (options.find(option => option.value === activeFilter)?.label || 'All Categories');
   }
 
-  filterButton.addEventListener('click', () => setFilterOpen(filterPanel.hidden));
+  filterButton.addEventListener('click', () => {
+    if (!filterButton.disabled) setFilterOpen(filterPanel.hidden);
+  });
+  P.on('tab', id => updateFilterAvailability(id));
+  updateFilterAvailability();
   document.addEventListener('pointerdown', e => {
     if (!filterPanel.hidden && !filterPanel.contains(e.target) && !filterButton.contains(e.target))
       setFilterOpen(false);
@@ -119,8 +134,9 @@
     refresh() {
       const q = (searchOn ? P.$('#q').value : '').trim().toLowerCase();
       syncFlags();
+      const categoryFilterActive = !filterDisabledTabs.has(P.tabs.cur);
       render = all.filter(it => !it.gone && visible(it) &&
-        (activeFilter === 'all' || String(it.slot) === activeFilter) &&
+        (!categoryFilterActive || activeFilter === 'all' || String(it.slot) === activeFilter) &&
         (!q || it.name.toLowerCase().includes(q) || String(it.id) === q));
       g.scrollTop = 0;
       renderWindow(true);

@@ -12,16 +12,16 @@
   padding: 4px 7px;
   max-width: min(148px, calc(50vw - 24px));
   white-space: nowrap;
-  background: #1c2226;
-  color: #cfe3c0;
+  background: #277D9F;
+  color: #fff;
   border: 1px solid #7BBAD2;
   border-radius: 6px;
   box-shadow: 1px 1px 0 #000;
-  font: 600 11px/1 "Century Gothic", system-ui, sans-serif;
+  font: 600 11px/1 var(--font-main);
   cursor: pointer;
   outline: 0;
 }
-.dd-btn:hover { background: #2a333a; color: #fff; }
+.dd-btn:hover { background: #277D9F; color: #fff; }
 .dd-btn .dd-thumb {
   width: 24px; height: 24px;
   border-radius: 3px;
@@ -61,12 +61,12 @@
   background: rgba(16, 20, 24, .85);
   border-bottom: 1px solid #ffffff22;
 }
-.dd-head strong { font: 700 13px/1 "Century Gothic", system-ui, sans-serif; letter-spacing: .5px; }
+.dd-head strong { font: 700 13px/1 var(--font-main); letter-spacing: .5px; }
 .dd-head select {
   flex: 1 1 auto; min-width: 0;
   background: #14181c; color: #e8f4d9;
   border: 1px solid #ffffff22; border-radius: 6px;
-  font: 600 12px/1 "Century Gothic", system-ui, sans-serif;
+  font: 600 12px/1 var(--font-main);
   padding: 6px 8px; outline: none; cursor: pointer;
 }
 .dd-body {
@@ -92,7 +92,7 @@
   cursor: pointer;
   outline: 0;
   color: #cfe3c0;
-  font: 600 10px/1.2 "Century Gothic", system-ui, sans-serif;
+  font: 600 10px/1.2 var(--font-main);
   transition: background .12s;
 }
 .dd-tile:hover { background: #2a333a; }

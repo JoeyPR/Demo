@@ -1,11 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const html = read("../index.html");
 const inv = read("../css/inv.css");
 const mobile = read("../css/mobile.css");
+const base = read("../css/base.css");
+const dropdowns = read("../css/dropdowns.css");
+const systems = read("../css/systems.css");
+const customization = read("../css/customization.css");
+const plate = read("../js/plate.js");
 const grid = read("../js/grid.js");
 const side = read("../js/side.js");
 
@@ -19,11 +24,11 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
     "mobile handle preserves its intended stage position after being nested in #top");
 });
 
-test("Fist and Wrench use the same icon inset as inventory item icons", () => {
+test("Fist and Wrench use the same icon area and scale as inventory item icons", () => {
   assert.match(inv, /\.box \.ic\{position:absolute;inset:10\.2%/);
-  assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:visible\}/);
-  assert.match(inv, /\.box\.tool \.ic img\{[\s\S]*width:calc\(118\.5% - 2px\)/);
-  assert.match(inv, /\.box\.tool \.ic img\.art-wrench\{width:calc\(113\.6% - 2px\)\}/);
+  assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:hidden\}/);
+  assert.match(inv, /\.box\.tool \.ic img\{width:100%;height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;flex:none\}/);
+  assert.doesNotMatch(inv, /width:calc\((118\.5|113\.6)% - 2px\)/);
 });
 
 test("search row reserves room for a matching square filter button on desktop and mobile", () => {
@@ -73,8 +78,13 @@ test("filter arrow is larger and the panel keeps both inner and outer shadows", 
   assert.match(panel, /box-shadow:inset var\(--sh\) var\(--sh\) 0 rgba\(0,0,0,\.32\),var\(--sh\) var\(--sh\) 0 #000/);
 });
 
-test("Makeup and Player Customization hide category filters and keep search switched off", () => {
-  assert.match(inv, /#main\[data-t="player"\] #filter-button,[\s\S]*#main\[data-t="makeup"\] #filter-panel\{display:none!important\}/);
+test("Custom, Makeup, and Player Customization keep a visible but disabled filter control", () => {
+  assert.match(grid, /const filterDisabledTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
+  assert.match(grid, /filterButton\.disabled = disabled/);
+  assert.match(grid, /if \(disabled\) setFilterOpen\(false\)/);
+  assert.match(grid, /!categoryFilterActive \|\| activeFilter === 'all'/);
+  assert.match(inv, /#filter-button:disabled\{opacity:\.5;cursor:default;pointer-events:none\}/);
+  assert.doesNotMatch(inv, /#main\[data-t="player"\] #filter-button,[\s\S]*display:none!important/);
   assert.match(side, /const nonSearchableTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
   assert.match(side, /on = !!on && !nonSearchableTabs\.has\(P\.tabs\.cur\)/);
 });
@@ -106,4 +116,20 @@ test("equipped items are kept out of the three top-drawer item boxes", () => {
 
 test("selected filter option text has a 1px bottom-right shadow", () => {
   assert.match(inv, /\.filter-option\[aria-pressed=true\]\{[^}]*text-shadow:1px 1px 0 #000/);
+});
+
+test("main_cg.ttf is the shared font across the planner UI", () => {
+  assert.equal(existsSync(new URL("../font/main_cg.ttf", import.meta.url)), true);
+  assert.equal(existsSync(new URL("../font/cg.ttf", import.meta.url)), false);
+  assert.equal(existsSync(new URL("../font/plate.ttf", import.meta.url)), false);
+  assert.match(base, /src:url\(\.\.\/font\/main_cg\.ttf\)/);
+  assert.match(base, /--font-main:"Main CG",sans-serif/);
+  assert.match(plate, /px 'Main CG', sans-serif/);
+  assert.doesNotMatch([base, dropdowns, systems, customization, plate].join("\n"),
+    /font\/(?:cg|plate)\.ttf|"Century Gothic", system-ui|Century Gothic GT|ui-monospace/);
+});
+
+test("Land and Weather buttons use the requested blue panel and white text", () => {
+  assert.match(dropdowns, /\.dd-btn \{[\s\S]*?background: #277D9F;[\s\S]*?color: #fff;/);
+  assert.match(dropdowns, /\.dd-btn:hover \{ background: #277D9F; color: #fff; \}/);
 });
