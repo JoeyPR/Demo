@@ -12,16 +12,16 @@
   padding: 4px 7px;
   max-width: min(148px, calc(50vw - 24px));
   white-space: nowrap;
-  background: #1c2226;
-  color: #cfe3c0;
+  background: #277D9F;
+  color: #FFFFFF;
   border: 1px solid #7BBAD2;
   border-radius: 6px;
   box-shadow: 1px 1px 0 #000;
-  font: 600 11px/1 "Century Gothic", system-ui, sans-serif;
+  font: 600 11px/1 var(--font-rt);
   cursor: pointer;
   outline: 0;
 }
-.dd-btn:hover { background: #2a333a; color: #fff; }
+.dd-btn:hover { background: #277D9F; color: #FFFFFF; }
 .dd-btn .dd-thumb {
   width: 24px; height: 24px;
   border-radius: 3px;
@@ -47,27 +47,28 @@
   max-height: min(52vh, 460px);
   display: none;
   flex-direction: column;
-  background: #14181cee;
+  background: #277D9F;
   border: 2px solid #7BBAD2;
   border-radius: 10px;
   box-shadow: 3px 3px 0 #000;
-  color: #dcecc9;
+  color: #FFFFFF;
   overflow: hidden;
 }
 .dd-panel.open { display: flex; }
 .dd-head {
   display: flex; align-items: center; gap: 8px;
   padding: 8px 10px;
-  background: rgba(16, 20, 24, .85);
+  background: #277D9F;
   border-bottom: 1px solid #ffffff22;
 }
-.dd-head strong { font: 700 13px/1 "Century Gothic", system-ui, sans-serif; letter-spacing: .5px; }
+.dd-head strong { font: 700 13px/1 var(--font-rt); letter-spacing: .5px; color:#FFFFFF; }
 .dd-head select {
   flex: 1 1 auto; min-width: 0;
-  background: #14181c; color: #e8f4d9;
+  background: #277D9F; color: #FFFFFF;
   border: 1px solid #ffffff22; border-radius: 6px;
-  font: 600 12px/1 "Century Gothic", system-ui, sans-serif;
+  font: 600 12px/1 var(--font-rt);
   padding: 6px 8px; outline: none; cursor: pointer;
+  font-family:var(--font-rt);
 }
 .dd-body {
   overflow-y: auto;
@@ -85,17 +86,17 @@
 }
 .dd-tile {
   display: flex; flex-direction: column; align-items: stretch; gap: 4px;
-  background: #1c2226;
+  background: #277D9F;
   border: 1px solid #ffffff1e;
   border-radius: 8px;
   padding: 4px;
   cursor: pointer;
   outline: 0;
-  color: #cfe3c0;
-  font: 600 10px/1.2 "Century Gothic", system-ui, sans-serif;
+  color: #FFFFFF;
+  font: 600 10px/1.2 var(--font-rt);
   transition: background .12s;
 }
-.dd-tile:hover { background: #2a333a; }
+.dd-tile:hover { background: #277D9F; color:#FFFFFF; }
 .dd-tile.on { border-color: #b3e37e; box-shadow: 0 0 0 1px #7fb64a; }
 .dd-tile .dd-sq {
   aspect-ratio: 1 / 1;           /* 1:1 fully rendered square */
