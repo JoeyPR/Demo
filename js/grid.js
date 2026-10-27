@@ -338,35 +338,25 @@
     const quick = P.$('#quick');
     quick.replaceChildren();
     quick.append(toolBox());
-    const eq = [...(P.equippedIds || new Set())]
-      .map(id => P.inv.itemById(id)).filter(Boolean)
-      .sort((a, b) => (a.slot ?? 99) - (b.slot ?? 99));
+
+    // Equipped items stay in the main inventory grid only. Keep the three
+    // top-drawer item boxes empty rather than duplicating the equipped gear.
     for (let i = 0; i < 3; i++) {
-      const it = eq[i];
-      if (it) {
-        const b = boxEl(it);
-        b.classList.add('sel', 'qbox');
-        b.classList.remove('art');   /* the top drawer always shows regular boxes */
-        b.addEventListener('click', () => activate(it));
-        quick.append(b);
-      } else {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'box reg empty qbox';
-        b.setAttribute('aria-label', 'Empty quick slot — browse clothing to equip an item');
-        b.addEventListener('click', () => {
-          P.tabs.open('cloth');
-          P.$('#q').focus();
-          P.toast('Choose an item from Clothing to equip it.');
-        });
-        quick.append(b);
-      }
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'box reg empty qbox';
+      b.setAttribute('aria-label', 'Empty quick slot — equipped items stay in the inventory');
+      b.addEventListener('click', () => {
+        P.tabs.open('cloth');
+        if (!P.$('#q').disabled) P.$('#q').focus();
+        P.toast('Equipped items are listed in the inventory.');
+      });
+      quick.append(b);
     }
     markFocus();
   }
 
-  /* mark the focused box (yellow brackets) in the grid, the quick drawer's
-     tool box and the quick drawer's equipped item boxes */
+  /* mark the focused box (yellow brackets) in the inventory and quick drawer tool box */
   function markFocus() {
     const f = P.inv.focus;
     for (const b of win.querySelectorAll('.box')) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
