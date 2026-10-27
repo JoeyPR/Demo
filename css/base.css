@@ -1,13 +1,5 @@
 /* BASE: tokens, font, stage, panel look. Nothing else lives here. */
-/* Generic page text uses Century Gothic when the local webfont is available.
-   The bundled RTFont is used across the planner UI. */
-@font-face{
-  font-family:"Webfont CenturyGothic";
-  src:local("Century Gothic"),local("CenturyGothic");
-  font-style:normal;
-  font-weight:400;
-  font-display:swap;
-}
+/* The planner uses one text family everywhere: the bundled RTFont Century Gothic. */
 @font-face{
   font-family:"RTFont CenturyGothic";
   src:url(../font/cg.ttf) format("truetype");
@@ -16,8 +8,7 @@
   font-display:swap;
 }
 :root{
-  --font-web:"Webfont CenturyGothic","Century Gothic",sans-serif;
-  --font-rt:"RTFont CenturyGothic","Webfont CenturyGothic","Century Gothic",sans-serif;
+  --font-rt:"RTFont CenturyGothic";
 }
 
 :root{
@@ -34,7 +25,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-body{background:#000;font:400 calc(28*var(--u))/1 var(--font-web);font-synthesis:none;
+body{background:#000;font:400 calc(28*var(--u))/1 var(--font-rt);font-synthesis:weight;
   color:#fff;user-select:none;-webkit-user-select:none;touch-action:none}
 button,input,select{font-synthesis:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
