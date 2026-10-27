@@ -130,7 +130,7 @@
 }
 .dye-rgb code {
   color: #fff;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--font-rt);
   font-size: calc(17*var(--u));
   overflow-wrap: anywhere;
   text-align: right;
