@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, it } from 'node:test';
+import { PLAYER_VISUAL_SCALE } from "../js/player-shadow.mjs";
 import {
   clampCameraZoom,
   computeCameraLayout,
@@ -52,9 +53,9 @@ describe('computeCameraLayout — the singular camera', () => {
   it('pivots on the player midpoint while the ground stays below it', () => {
     const layout = computeCameraLayout(base);
     assert.equal(layout.cameraPivotX, base.width / 2);
-    assert.equal(layout.cameraPivotY, base.height / 2);
-    assert.equal(layout.ground, layout.cameraPivotY + 16 * base.scale);
-    assert.equal(layout.rootY + 16 * base.scale, layout.cameraPivotY);
+    assert.equal(layout.cameraPivotY, base.height / 2 + (16 - 16 * PLAYER_VISUAL_SCALE) * base.scale);
+    assert.equal(layout.ground, layout.cameraPivotY + 16 * PLAYER_VISUAL_SCALE * base.scale);
+    assert.equal(layout.rootY + 32 * base.scale - 16 * PLAYER_VISUAL_SCALE * base.scale, layout.cameraPivotY);
   });
 
   it('has no camera-pan, head-clamp or post-zoom shift machinery', () => {
@@ -84,7 +85,7 @@ describe('computeCameraLayout — the singular camera', () => {
     const standing = computeCameraLayout(base);
     const jumping = computeCameraLayout({ ...base, frameY: -18 });
     assert.equal(jumping.rootY, standing.rootY, "camera tracking keeps the player at center");
-    assert.equal(jumping.rootY + 16 * base.scale, jumping.cameraPivotY);
+    assert.equal(jumping.rootY + 32 * base.scale - 16 * PLAYER_VISUAL_SCALE * base.scale, jumping.cameraPivotY);
     assert.equal(jumping.ground - standing.ground, 18 * base.scale);
     for (const zoom of [CAMERA_ZOOM_MIN, 1, CAMERA_ZOOM_MAX]) {
       const a = computeCameraLayout({ ...base, zoom });
@@ -103,7 +104,7 @@ describe('computeCameraLayout — the singular camera', () => {
 });
 
 test('camera-space touch aiming is the inverse of the draw transform', () => {
-  const pivotX = 960, pivotY = 540;   /* viewport midline and player's center */
+  const pivotX = 960, pivotY = 540 + (16 - 16 * PLAYER_VISUAL_SCALE) * 4;   /* rendered player center */
   for (const zoom of [CAMERA_ZOOM_MIN, 0.9, 1, 1.5, 2, CAMERA_ZOOM_MAX]) {
     const source = { x: 123.25, y: 987.5 };
     const screen = projectCameraPoint(source.x, source.y, pivotX, pivotY, zoom);
@@ -117,7 +118,7 @@ test('zoom is applied around the pivot only — the draw transform has no transl
   // The world transform is translate(p); scale(z); translate(-p): a point AT the
   // pivot is invariant at every zoom; every other point scales toward it.
   for (const zoom of [CAMERA_ZOOM_MIN, 1, CAMERA_ZOOM_MAX]) {
-    const p = { x: 960, y: 540 };
+    const p = { x: 960, y: 540 + (16 - 16 * PLAYER_VISUAL_SCALE) * 4 };
     const at = projectCameraPoint(p.x, p.y, p.x, p.y, zoom);
     assert.equal(at.x, p.x);
     assert.equal(at.y, p.y);
