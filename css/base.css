@@ -1,6 +1,5 @@
 /* BASE: tokens, font, stage, panel look. Nothing else lives here. */
-/* Generic page text uses Century Gothic when the local webfont is available.
-   The bundled RTFont is used across the planner UI. */
+/* All planner text uses the bundled Growtopia CG font (font/cg.ttf). */
 @font-face{
   font-family:"Webfont CenturyGothic";
   src:local("Century Gothic"),local("CenturyGothic");
@@ -16,8 +15,8 @@
   font-display:swap;
 }
 :root{
-  --font-web:"Webfont CenturyGothic","Century Gothic",sans-serif;
-  --font-rt:"RTFont CenturyGothic","Webfont CenturyGothic","Century Gothic",sans-serif;
+  --font-web:"RTFont CenturyGothic",sans-serif;
+  --font-rt:"RTFont CenturyGothic",sans-serif;
 }
 
 :root{
