@@ -1,7 +1,9 @@
+import { PLAYER_VISUAL_SCALE } from "./player-shadow.mjs";
+
 /* THE CAMERA — follow the player's live world position without edge clamps.
-   The avatar's visual center remains the zoom focus while world layers move
-   relative to cameraWorldX/cameraWorldY. The ground line stays 16 units below
-   this center so zooming does not swing the player's body away from the focus. */
+   The rendered avatar's actual visual midpoint remains the zoom focus while
+   world layers move relative to cameraWorldX/cameraWorldY. The ground line stays
+   below that midpoint according to the player's rendered scale. */
 
 export const CAMERA_ZOOM_MIN = 1 / 1.28; // at most 1.28× farther out than default
 export const CAMERA_ZOOM_MAX = 4; // close-up zoom for detailed inspection
@@ -46,12 +48,12 @@ export function computeCameraLayout({ width, height, scale, frameX = 0, frameY, 
 
   const z = clampCameraZoom(zoom);
   const cameraPivotX = width / 2;
-  const cameraPivotY = height / 2;
+  const cameraPivotY = height / 2 + (16 - 16 * PLAYER_VISUAL_SCALE) * scale;
   const cameraWorldX = frameX;
   const cameraWorldY = frameY;
-  // Keep the original ground position, but pivot zoom through the player's
-  // midpoint instead of the feet: feet = center + 16 logical units.
-  const ground = cameraPivotY + 16 * scale - cameraWorldY * scale;
+  // The avatar is scaled around its feet. Keep the ground line unchanged and
+  // place the zoom pivot at the center of the rendered (0.78-scale) character.
+  const ground = cameraPivotY + 16 * PLAYER_VISUAL_SCALE * scale - cameraWorldY * scale;
   const rootX = cameraPivotX - 16 * scale;
   // Compensate for ground-line travel so the avatar stays attached to the
   // camera focus even while its world Y coordinate changes.
