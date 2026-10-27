@@ -48,9 +48,15 @@
   background:#277d9f;border:var(--bd) solid var(--line);border-radius:var(--radius);
   box-shadow:inset var(--sh) var(--sh) 0 rgba(0,0,0,.32),calc(5*var(--u)) calc(5*var(--u)) 0 #000;padding:calc(5*var(--u))}
 #filter-panel[hidden]{display:none}
+#main[data-t="custom"] #filter-button,
+#main[data-t="custom"] #filter-panel,
+#main[data-t="makeup"] #filter-button,
+#main[data-t="makeup"] #filter-panel,
+#main[data-t="player"] #filter-button,
+#main[data-t="player"] #filter-panel{display:none!important}
 .filter-option{width:100%;min-height:calc(42*var(--u));display:flex;align-items:center;text-align:left;
   padding:calc(8*var(--u)) calc(12*var(--u));background:transparent;border:0;border-radius:var(--radius);
-  color:#dfdfdf;font:400 calc(26*var(--u))/1.15 var(--font-rt);cursor:pointer}
+  color:#dfdfdf;font:400 calc(26*var(--u))/1.15 var(--font-rt);text-shadow:1px 1px 0 #000;cursor:pointer}
 .filter-option:hover{background:rgba(0,0,0,.18)}
 .filter-option[aria-pressed=true]{background:#A5E3FB;color:#FFFFFF}
 #main.search-disabled #q,#main.search-disabled #s-icon{opacity:.5;pointer-events:none}
@@ -107,10 +113,9 @@
 /* Fist/Wrench visible artwork matches the footprint of ordinary item icons.
    Source images have transparent margins: compensate with source-specific
    scale factors while centering the art in the standard 10.2% icon inset. */
-.box.tool .ic{inset:10.2%;overflow:visible}
-.box.tool .ic img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:118.5%;height:auto;max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
-.box.tool .ic img.art-wrench{width:113.6%}
+.box.tool .ic{inset:10.2%;overflow:hidden}
+.box.tool .ic img{position:absolute;inset:0;width:100%;height:100%;
+  max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
 
 /* 3. tabs — the PNGs already contain their own outlines, corners and shadows.
    The button adds no background/border and never clips the baked drop shadow. */
