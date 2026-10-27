@@ -100,12 +100,16 @@
     growLabel.htmlFor = 'player-grow-id';
     const growInput = el('input', 'custom-input');
     growInput.id = 'player-grow-id';
-    growInput.type = 'text'; growInput.maxLength = 18;
+    growInput.type = 'text'; growInput.maxLength = 54; // 18 visible characters plus RTFont color markers
     growInput.autocomplete = 'off'; growInput.spellcheck = false;
     growInput.placeholder = 'Enter your GrowID';
-    growInput.value = P.plateConfig.get().growId;
+    growInput.value = P.rtfont.truncate(P.plateConfig.get().growId, 18);
     growInput.setAttribute('aria-label', 'Player GrowID');
-    growInput.addEventListener('input', () => P.plateConfig.setGrowId(growInput.value));
+    growInput.addEventListener('input', () => {
+      const formatted = P.rtfont.truncate(growInput.value, 18);
+      if (growInput.value !== formatted) growInput.value = formatted;
+      P.plateConfig.setGrowId(formatted);
+    });
     growInput.addEventListener('keydown', e => e.stopPropagation());
     growWrap.append(growLabel, growInput);
     fields.append(growWrap);

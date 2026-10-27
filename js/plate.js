@@ -179,7 +179,7 @@
 
   /* ---------------- buildParts (R$ on the site) ---------------- */
   function buildParts() {
-    if (!state.growId.trim()) return null;
+    if (!P.rtfont.strip(state.growId).trim()) return null;
     const sel = state.titles.map(k => titleByKey[k]).filter(Boolean);
     const parts = [];
     if (state.role) parts.push({ img: FLAGS_DIR + 'role-' + state.role + '.png', role: true });
@@ -204,8 +204,11 @@
     const hasTextOrStyle = !!styleKey || sel.some(t => t.prefix || t.suffix);
     const guildRole = GUILD_ROLES[state.guildRole];
     const tagSeparate = guildRole && !hasTextOrStyle;
+    const rawGrowId = P.rtfont.truncate(state.growId.trim(), 18);
+    const rawName = prefix + rawGrowId + suffix + (guildRole && !tagSeparate ? ' ' + guildRole.text : '');
     parts.push({
-      text: prefix + state.growId.trim() + suffix + (guildRole && !tagSeparate ? ' ' + guildRole.text : ''),
+      text: P.rtfont.strip(rawName),
+      formatText: rawName,
       style: styleKey, colour: [255, 255, 255], alpha: 1,
       scale: swell ? swell[0] + swell[1] * osc(8000, EPOCH + clock) : 1,
       grow: swell ? swell[0] + swell[1] - 1 : 0,
@@ -294,6 +297,8 @@
     k.imageSmoothingEnabled = false;
     parts.forEach((part, i) => {
       const Ld = widths[i];
+      const hasFormatting = part.formatText !== undefined && P.rtfont.hasCodes(part.formatText);
+      const formattedChars = hasFormatting ? P.rtfont.characters(part.formatText) : null;
       if (part.wrench) {
         const LD = Ld, Lu = LO + LD / 2, Ln = baselineY - PR * 0.393 - Ld / 2 + LD / 2;
         const entry = state.wrenchStyle !== BASE_WRENCH ? wrenchEntry('styles', state.wrenchStyle) : null;
@@ -333,18 +338,19 @@
           const rgba = c => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + c[3] / 255 + ')';
           /* shadow pass at offset (at·PI, at·PI), then the fill pass at 0 —
              exactly the site's LN(yOffset, colorFn) */
-          const renderText = (offset, colorFn) => {
+          const renderText = (offset, colorFn, applyFormatting = false) => {
             const ax = LO + offset * textPI, ay = baselineY - 19 * textPI + offset * textPI;
             k.save();
             if (part.scale !== 1) { k.translate(ax, ay); k.scale(part.scale, part.scale); k.translate(-ax, -ay); }
-            k.fillStyle = rgba(colorFn(0, 0));
-            if (!perLetter) {
+            if (!perLetter && !hasFormatting) {
+              k.fillStyle = rgba(colorFn(0, 0));
               k.fillText(part.text, ax, ay + 19 * textPI);
             } else {
               let x = ax, seen = 0;
               chars.forEach((ch, ci) => {
                 if (ch !== ' ') {
-                  k.fillStyle = rgba(colorFn(ci, seen));
+                  const explicit = applyFormatting ? formattedChars[ci]?.rgb : null;
+                  k.fillStyle = rgba(explicit ? [...explicit, 255] : colorFn(ci, seen));
                   k.fillText(ch, x, ay + 19 * textPI);
                   seen++;
                 }
@@ -355,15 +361,27 @@
           };
           const shadow = st.shadow;
           if (shadow) renderText(shadow.at, shadow.same ? colorAt : shadow.code ? () => [...part.code, 255] : () => shadow.rgba);
-          renderText(0, colorAt);
+          renderText(0, colorAt, hasFormatting);
         } else if (part.tag) {
-          let x = LO;
+          let x = LO, ci = 0;
           for (const [ch, cap] of withCaps(part.text)) {
             k.font = '700 ' + (cap ? PR * CAPS : PR) + "px 'Main CG', sans-serif";
-            paint(ch, x, part.colour);
+            paint(ch, x, formattedChars?.[ci]?.rgb || part.colour);
             x += k.measureText(ch).width;
+            ci++;
           }
           k.font = '700 ' + PR + "px 'Main CG', sans-serif";
+        } else if (hasFormatting) {
+          const outline = Math.max(1, p * factor * 0.5);
+          k.fillStyle = 'rgba(0,0,0,.5)';
+          k.fillText(part.text, LO + outline, baselineY + outline);
+          let x = LO;
+          for (const entry of formattedChars) {
+            const color = entry.rgb || part.colour;
+            k.fillStyle = 'rgba(' + color.join(',') + ',' + part.alpha + ')';
+            k.fillText(entry.char, x, baselineY);
+            x += k.measureText(entry.char).width;
+          }
         } else {
           paint(part.text, LO, part.colour);
         }
@@ -427,7 +445,7 @@
   P.plateConfig = {
     get: () => state,
     set(patch) { state = Object.assign({}, DEFAULTS, state, patch); save(); },
-    setGrowId(v) { state.growId = String(v ?? '').slice(0, 18); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
+    setGrowId(v) { state.growId = P.rtfont.truncate(String(v ?? ''), 18); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
     setRole(v) { state.role = v; save(); },
     setFlag(v) { state.flag = v; save(); },
     setGuildRole(v) { state.guildRole = v; save(); },
