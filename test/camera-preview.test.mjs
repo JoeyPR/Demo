@@ -80,16 +80,18 @@ describe('computeCameraLayout — the singular camera', () => {
     }
   });
 
-  it('preserves real jump displacement and scales it with zoom around the pivot', () => {
+  it('keeps the player midpoint fixed while zoom scales ground movement', () => {
     const standing = computeCameraLayout(base);
     const jumping = computeCameraLayout({ ...base, frameY: -18 });
-    // pre-transform positions are the same jump at every zoom...
-    assert.equal(jumping.rootY - standing.rootY, -18 * base.scale);
+    assert.equal(jumping.rootY, standing.rootY, "camera tracking keeps the player at center");
+    assert.equal(jumping.rootY + 16 * base.scale, jumping.cameraPivotY);
+    assert.equal(jumping.ground - standing.ground, 18 * base.scale);
     for (const zoom of [CAMERA_ZOOM_MIN, 1, CAMERA_ZOOM_MAX]) {
       const a = computeCameraLayout({ ...base, zoom });
       const b = computeCameraLayout({ ...base, zoom, frameY: -18 });
-      // ...and on screen the separation scales with zoom (pivot is the player's center)
-      assert.ok(Math.abs((b.rootY - a.rootY) * zoom - (-18 * base.scale) * zoom) < 1e-9);
+      const screenA = projectCameraPoint(0, a.ground, a.cameraPivotX, a.cameraPivotY, zoom);
+      const screenB = projectCameraPoint(0, b.ground, b.cameraPivotX, b.cameraPivotY, zoom);
+      assert.ok(Math.abs(screenB.y - screenA.y - 18 * base.scale * zoom) < 1e-9);
     }
   });
 
