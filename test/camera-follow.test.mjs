@@ -16,17 +16,20 @@ test("camera follows continuous player world coordinates without edge clamps", (
   assert.equal(far.cameraPivotX, near.cameraPivotX);
 });
 
-test("camera follows vertical motion while keeping the player's feet on its focus", () => {
+test("camera pivot stays at the player's center while the ground line follows vertical motion", () => {
   const idle = computeCameraLayout({
     width: 960, height: 540, scale: 3, frameX: 0, frameY: 0, zoom: 1
   });
   const jumping = computeCameraLayout({
     width: 960, height: 540, scale: 3, frameX: 0, frameY: -18, zoom: 1
   });
+  assert.equal(idle.cameraPivotY, 270);
+  assert.equal(idle.rootY + 16 * 3, idle.cameraPivotY, "player midpoint is the zoom focus");
   assert.equal(jumping.cameraWorldY, -18);
   assert.equal(jumping.ground, idle.ground + 54, "the world ground follows opposite player vertical travel");
   assert.equal(jumping.rootY, idle.rootY, "player stays pinned to the camera focus");
-  assert.equal(jumping.rootY + 32 * 3, jumping.cameraPivotY);
+  assert.equal(jumping.rootY + 16 * 3, jumping.cameraPivotY);
+  assert.equal(jumping.ground, jumping.cameraPivotY + 16 * 3 - jumping.cameraWorldY * 3);
 });
 
 test("live app passes current player position into camera and scenery", () => {
