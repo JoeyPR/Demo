@@ -5,6 +5,10 @@ import { readFileSync } from "node:fs";
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const html = read("../index.html");
 const inv = read("../css/inv.css");
+const base = read("../css/base.css");
+const systems = read("../css/systems.css");
+const dropdowns = read("../css/dropdowns.css");
+const customization = read("../css/customization.css");
 const mobile = read("../css/mobile.css");
 const grid = read("../js/grid.js");
 
@@ -20,9 +24,9 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
 
 test("Fist and Wrench use the same icon inset as inventory item icons", () => {
   assert.match(inv, /\.box \.ic\{position:absolute;inset:10\.2%/);
-  assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:visible\}/);
-  assert.match(inv, /\.box\.tool \.ic img\{[\s\S]*width:118\.5%/);
-  assert.match(inv, /\.box\.tool \.ic img\.art-wrench\{width:113\.6%\}/);
+  assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:hidden\}/);
+  assert.match(inv, /\.box\.tool \.ic img\{position:absolute;inset:0;width:100%;height:100%/);
+  assert.doesNotMatch(inv, /\.box\.tool \.ic img\.art-wrench\{/);
 });
 
 test("search row reserves room for a matching square filter button on desktop and mobile", () => {
@@ -32,7 +36,7 @@ test("search row reserves room for a matching square filter button on desktop an
   assert.match(inv, /#filter-button\{[^}]*width:calc\(57\.7\*var\(--u\)\);height:calc\(57\.7\*var\(--u\)\)/);
   assert.match(mobile, /#q\{[^}]*width:calc\(471\*var\(--u\)\);height:calc\(67\*var\(--u\)\)/);
   assert.match(mobile, /#filter-button\{[^}]*width:calc\(67\*var\(--u\)\);height:calc\(67\*var\(--u\)\)/);
-  assert.match(inv, /border-top:calc\(9\*var\(--u\)\) solid #dfdfdf/);
+  assert.match(inv, /border-top:calc\(13\*var\(--u\)\) solid #dfdfdf/);
 });
 
 test("filter categories are derived from catalog item slots and filter the visible grid", () => {
@@ -63,4 +67,42 @@ test("inventory icons appear at full opacity with no scrolling fade or scale tra
   assert.match(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:1;transform:none;transition:none\}/);
   assert.doesNotMatch(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:0/);
   assert.doesNotMatch(inv, /transition:opacity \.18s ease-out,transform/);
+});
+
+
+test("every filter category label has a 1px down-right text shadow", () => {
+  assert.match(inv, /\.filter-option\{[^}]*text-shadow:1px 1px 0 #000/);
+  assert.doesNotMatch(inv, /\.filter-option\[aria-pressed=true\]\{[^}]*text-shadow/);
+});
+
+test("filter dropdown is hidden on Custom, Makeup, and Player Customization", () => {
+  assert.match(inv, /#main\[data-t="custom"\] #filter-button/);
+  assert.match(inv, /#main\[data-t="custom"\] #filter-panel/);
+  assert.match(inv, /#main\[data-t="makeup"\] #filter-button/);
+  assert.match(inv, /#main\[data-t="makeup"\] #filter-panel/);
+  assert.match(inv, /#main\[data-t="player"\] #filter-button/);
+  assert.match(inv, /#main\[data-t="player"\] #filter-panel/);
+});
+
+test("Fist and Wrench assets use the same inset footprint as inventory item thumbnails", () => {
+  assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:hidden\}/);
+  assert.match(inv, /\.box\.tool \.ic img\{position:absolute;inset:0;width:100%;height:100%/);
+});
+
+test("Land and Weather buttons and dropdown panels use #277D9F with white text", () => {
+  assert.match(dropdowns, /background: #277D9F;\s*color: #FFFFFF;/);
+  assert.match(dropdowns, /\.dd-panel \{[\s\S]*background: #277D9F;[\s\S]*color: #FFFFFF;/);
+  assert.match(dropdowns, /\.dd-head strong \{ font: 700 13px\/1 var\(--font-rt\);[^}]*color:#FFFFFF/);
+  assert.match(dropdowns, /\.dd-tile\{[\s\S]*background: #277D9F;[\s\S]*color: #FFFFFF;/);
+});
+
+test("the planner routes UI text to the bundled cg.ttf font", () => {
+  assert.match(base, /font-family:"RTFont CenturyGothic"/);
+  assert.match(base, /src:url\(\.\.\/font\/cg\.ttf\) format\("truetype"\)/);
+  assert.match(base, /--font-web:"RTFont CenturyGothic",sans-serif/);
+  assert.match(base, /--font-rt:"RTFont CenturyGothic",sans-serif/);
+  assert.match(systems, /font: 700 18px var\(--font-rt\)/);
+  assert.match(systems, /font: 600 12px\/1 var\(--font-rt\)/);
+  assert.match(customization, /font-family: var\(--font-rt\)/);
+  assert.match(dropdowns, /font: 600 11px\/1 var\(--font-rt\)/);
 });
