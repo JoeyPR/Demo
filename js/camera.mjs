@@ -1,7 +1,7 @@
 /* THE CAMERA — follow the player's live world position without edge clamps.
-   The avatar stays on a stable screen focus while world layers move relative
-   to cameraWorldX/cameraWorldY. Zoom pivots at the player's feet, so scaling the
-   scene does not detach the character from the camera focus. */
+   The avatar's visual center remains the zoom focus while world layers move
+   relative to cameraWorldX/cameraWorldY. The ground line stays 16 units below
+   this center so zooming does not swing the player's body away from the focus. */
 
 export const CAMERA_ZOOM_MIN = 1 / 1.28; // at most 1.28× farther out than default
 export const CAMERA_ZOOM_MAX = 4; // close-up zoom for detailed inspection
@@ -46,10 +46,12 @@ export function computeCameraLayout({ width, height, scale, frameX = 0, frameY, 
 
   const z = clampCameraZoom(zoom);
   const cameraPivotX = width / 2;
-  const cameraPivotY = height / 2 + 16 * scale;
+  const cameraPivotY = height / 2;
   const cameraWorldX = frameX;
   const cameraWorldY = frameY;
-  const ground = cameraPivotY - cameraWorldY * scale;
+  // Keep the original ground position, but pivot zoom through the player's
+  // midpoint instead of the feet: feet = center + 16 logical units.
+  const ground = cameraPivotY + 16 * scale - cameraWorldY * scale;
   const rootX = cameraPivotX - 16 * scale;
   // Compensate for ground-line travel so the avatar stays attached to the
   // camera focus even while its world Y coordinate changes.
