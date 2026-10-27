@@ -170,10 +170,10 @@
   function tagWidth(ctx, text, size) {
     let w = 0;
     for (const [ch, cap] of withCaps(text)) {
-      ctx.font = '700 ' + (cap ? size * CAPS : size) + "px 'Century Gothic GT', 'Century Gothic', sans-serif";
+      ctx.font = '700 ' + (cap ? size * CAPS : size) + "px 'RTFont CenturyGothic', sans-serif";
       w += ctx.measureText(ch).width;
     }
-    ctx.font = '700 ' + size + "px 'Century Gothic GT', 'Century Gothic', sans-serif";
+    ctx.font = '700 ' + size + "px 'RTFont CenturyGothic', sans-serif";
     return w;
   }
 
@@ -231,7 +231,7 @@
     const Pq = 1.6 * p;                       /* icon line gap */
     k.save();
     k.setTransform(1, 0, 0, 1, 0, 0);
-    k.font = "700 " + PR + "px 'Century Gothic GT', 'Century Gothic', sans-serif";
+    k.font = "700 " + PR + "px 'RTFont CenturyGothic', sans-serif";
     k.textBaseline = 'alphabetic';
     const joined = parts.filter(x => x.text !== undefined).map(x => x.text).join(' ');
     const PN = descenderPenalty(joined) / 21;
@@ -353,11 +353,11 @@
         } else if (part.tag) {
           let x = LO;
           for (const [ch, cap] of withCaps(part.text)) {
-            k.font = '700 ' + (cap ? PR * CAPS : PR) + "px 'Century Gothic GT', 'Century Gothic', sans-serif";
+            k.font = '700 ' + (cap ? PR * CAPS : PR) + "px 'RTFont CenturyGothic', sans-serif";
             paint(ch, x, part.colour);
             x += k.measureText(ch).width;
           }
-          k.font = '700 ' + PR + "px 'Century Gothic GT', 'Century Gothic', sans-serif";
+          k.font = '700 ' + PR + "px 'RTFont CenturyGothic', sans-serif";
         } else {
           paint(part.text, LO, part.colour);
         }
