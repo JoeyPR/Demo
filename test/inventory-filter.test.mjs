@@ -7,6 +7,11 @@ const html = read("../index.html");
 const inv = read("../css/inv.css");
 const mobile = read("../css/mobile.css");
 const grid = read("../js/grid.js");
+const base = read("../css/base.css");
+const dropdowns = read("../css/dropdowns.css");
+const customization = read("../css/customization.css");
+const systems = read("../css/systems.css");
+const plate = read("../js/plate.js");
 
 test("top drawer handle is a child of the drawer and does not apply a second drawer offset", () => {
   const topSection = html.slice(html.indexOf('<div id="top"'), html.indexOf("<!-- 3. TABS -->"));
@@ -21,8 +26,8 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
 test("Fist and Wrench use the same icon inset as inventory item icons", () => {
   assert.match(inv, /\.box \.ic\{position:absolute;inset:10\.2%/);
   assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:visible\}/);
-  assert.match(inv, /\.box\.tool \.ic img\{[\s\S]*width:118\.5%/);
-  assert.match(inv, /\.box\.tool \.ic img\.art-wrench\{width:113\.6%\}/);
+  assert.match(inv, /\.box\.tool \.ic img\{[\s\S]*width:100%;height:100%/);
+  assert.doesNotMatch(inv, /\.box\.tool \.ic img\.art-wrench\{width:/);
 });
 
 test("search row reserves room for a matching square filter button on desktop and mobile", () => {
@@ -32,7 +37,7 @@ test("search row reserves room for a matching square filter button on desktop an
   assert.match(inv, /#filter-button\{[^}]*width:calc\(57\.7\*var\(--u\)\);height:calc\(57\.7\*var\(--u\)\)/);
   assert.match(mobile, /#q\{[^}]*width:calc\(471\*var\(--u\)\);height:calc\(67\*var\(--u\)\)/);
   assert.match(mobile, /#filter-button\{[^}]*width:calc\(67\*var\(--u\)\);height:calc\(67\*var\(--u\)\)/);
-  assert.match(inv, /border-top:calc\(9\*var\(--u\)\) solid #dfdfdf/);
+  assert.match(inv, /border-top:calc\(13\*var\(--u\)\) solid #dfdfdf/);
 });
 
 test("filter categories are derived from catalog item slots and filter the visible grid", () => {
@@ -63,4 +68,35 @@ test("inventory icons appear at full opacity with no scrolling fade or scale tra
   assert.match(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:1;transform:none;transition:none\}/);
   assert.doesNotMatch(inv, /#grid-window \.box \.ic,#grid-window \.box \.n\{opacity:0/);
   assert.doesNotMatch(inv, /transition:opacity \.18s ease-out,transform/);
+});
+
+
+test("filter category labels use the 1px down-right shadow in every state", () => {
+  assert.match(inv, /\.filter-option\{[^}]*text-shadow:1px 1px 0 #000/);
+  assert.match(inv, /\.filter-option\[aria-pressed=true\]\{background:#A5E3FB;color:#FFFFFF\}/);
+  assert.doesNotMatch(inv.match(/\.filter-option\[aria-pressed=true\]\{([^}]*)\}/)?.[1] ?? "", /text-shadow/);
+});
+
+test("filter box is hidden on Custom, Makeup, and Player Customization tabs", () => {
+  assert.match(inv, /#main\[data-t="custom"\] #filter-button,#main\[data-t="custom"\] #filter-panel,[\s\S]*#main\[data-t="player"\] #filter-button,#main\[data-t="player"\] #filter-panel,[\s\S]*#main\[data-t="makeup"\] #filter-button,#main\[data-t="makeup"\] #filter-panel\{display:none!important\}/);
+});
+
+test("Land and Weather panels use the planner blue and white text", () => {
+  assert.match(dropdowns, /\.dd-btn\s*\{[\s\S]*background: #277D9F;[\s\S]*color: #fff/);
+  assert.match(dropdowns, /\.dd-panel\s*\{[\s\S]*background: #277D9F;[\s\S]*color: #fff/);
+  assert.match(dropdowns, /\.dd-head\s*\{[\s\S]*background: #277D9F/);
+  assert.match(dropdowns, /\.dd-head select\s*\{[\s\S]*background: #277D9F; color: #fff/);
+  assert.match(dropdowns, /\.dd-tile\s*\{[\s\S]*color: #fff/);
+  assert.match(dropdowns, /\.dd-btn:hover\s*\{ background: #277D9F; color: #fff; \}/);
+});
+
+test("all website text uses RTFont Century Gothic", () => {
+  assert.match(base, /font-family:"RTFont CenturyGothic"/);
+  assert.match(base, /body\{[^}]*var\(--font-rt\)/);
+  assert.doesNotMatch(base, /Webfont CenturyGothic|--font-web/);
+  assert.doesNotMatch(systems, /@font-face|Century Gothic GT|monospace|system-ui/);
+  assert.doesNotMatch(dropdowns, /Century Gothic["']|system-ui|monospace/);
+  assert.doesNotMatch(customization, /ui-monospace|SFMono-Regular|Menlo|Consolas/);
+  assert.doesNotMatch(plate, /Century Gothic GT|Century Gothic', sans-serif/);
+  assert.match(plate, /'RTFont CenturyGothic'/);
 });
