@@ -100,13 +100,13 @@
     growLabel.htmlFor = 'player-grow-id';
     const growInput = el('input', 'custom-input');
     growInput.id = 'player-grow-id';
-    growInput.type = 'text'; growInput.maxLength = 54; // 18 visible characters plus RTFont color markers
+    growInput.type = 'text'; growInput.maxLength = 80; // Legacy Planner raw-input limit; max 19 visible characters.
     growInput.autocomplete = 'off'; growInput.spellcheck = false;
     growInput.placeholder = 'Enter your GrowID';
-    growInput.value = P.rtfont.truncate(P.plateConfig.get().growId, 18);
+    growInput.value = P.rtfont.sanitizeGrowId(P.plateConfig.get().growId, 19);
     growInput.setAttribute('aria-label', 'Player GrowID');
     growInput.addEventListener('input', () => {
-      const formatted = P.rtfont.truncate(growInput.value, 18);
+      const formatted = P.rtfont.sanitizeGrowId(growInput.value, 19);
       if (growInput.value !== formatted) growInput.value = formatted;
       P.plateConfig.setGrowId(formatted);
     });

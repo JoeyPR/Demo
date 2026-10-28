@@ -38,6 +38,15 @@ test('visible length counts rendered characters, not color markers', () => {
   assert.equal(rtfont.visibleLength(rtfont.truncate(input, 7)), 7);
 });
 
+test('GrowID sanitizer follows the older Planner input rules', () => {
+  assert.equal(rtfont.sanitizeGrowId('dr.Joey', 19), 'Joey');
+  assert.equal(rtfont.sanitizeGrowId('DR.Joey', 19), 'Joey');
+  const formatted = MARK + '2' + 'ABCDEFGHIJKLMNOPQRSTUV';
+  assert.equal(rtfont.strip(rtfont.sanitizeGrowId(formatted, 19)), 'ABCDEFGHIJKLMNOPQRS');
+  assert.equal(rtfont.sanitizeGrowId('X'.repeat(100), 19), 'X'.repeat(19));
+  assert.equal(rtfont.sanitizeGrowId('[]{}!@#_-+='), '[]{}!@#_-+=', 'ordinary punctuation is allowed');
+});
+
 test('unknown backtick pairs are preserved as ordinary text', () => {
   const input = MARK + 'z' + 'plain';
   assert.equal(rtfont.strip(input), input);
@@ -52,6 +61,7 @@ test('the markup parser is connected to both the global app and canvas nameplate
   assert.match(source, /root\.MutationObserver/);
   assert.match(plate, /P\.rtfont\.characters\(part\.formatText\)/);
   assert.match(plate, /formatText: rawName/);
-  assert.match(customization, /growInput\.maxLength = 54/);
-  assert.match(customization, /P\.rtfont\.truncate\(growInput\.value, 18\)/);
+  assert.match(customization, /growInput\.maxLength = 80/);
+  assert.match(customization, /P\.rtfont\.sanitizeGrowId\(growInput\.value, 19\)/);
+  assert.match(plate, /P\.rtfont\.sanitizeGrowId\(state\.growId\.trim\(\), 19\)/);
 });

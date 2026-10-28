@@ -71,6 +71,25 @@
   function visibleLength(value) {
     return [...strip(value)].length;
   }
+  // Match the older JoeyPR/Planner GrowID rules:
+  // cap raw input at 80; remove "dr." case-insensitively; preserve valid color
+  // codes without counting them toward the 19 visible characters.
+  function sanitizeGrowId(value, maxVisible = 19) {
+    let output = '';
+    let visible = 0;
+    const input = String(value == null ? '' : value).replace(/dr\./gi, '').slice(0, 80);
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      if (char === MARKER && i + 1 < input.length && KEYS.has(input[i + 1])) {
+        output += char + input[++i];
+        continue;
+      }
+      if (visible >= maxVisible) continue;
+      output += char;
+      visible++;
+    }
+    return output;
+  }
   function truncate(value, maxVisible) {
     const text = String(value == null ? '' : value);
     const limit = Math.max(0, Math.floor(Number(maxVisible) || 0));
@@ -152,6 +171,7 @@
     hasCodes: hasCodes,
     characters: characters,
     visibleLength: visibleLength,
+    sanitizeGrowId: sanitizeGrowId,
     truncate: truncate,
     color: color,
     renderNode: renderNode,

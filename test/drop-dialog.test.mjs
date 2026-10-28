@@ -11,6 +11,7 @@ test("DROP opens a confirmation dialog for the focused item",()=>{
   assert.match(drop,/iconBox\.append\(P\.thumb\(item, 64\)\)/);
 });
 test("dialog follows text content and keeps a reference-sized starting footprint",()=>{
+  assert.match(drop,/const scale = 0\.92 \* Math\.max/);
   assert.match(drop,/dialog\.style\.setProperty\("--drop-min-width"/);
   assert.match(drop,/dialog\.style\.setProperty\("--drop-max-width", rect\.width \* 0\.96/);
   assert.match(css,/max-width: min\(96%, var\(--drop-max-width, 96%\)\)/);
@@ -42,13 +43,14 @@ test("OK creates a local pickup and restores the catalog item on collection",()=
   assert.match(app,/pickup\.item\.gone = false/);
 });
 test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
-  assert.match(world,/PICKUP_SIZE = 10/);
+  assert.match(world,/PICKUP_SIZE = 12/);
   assert.match(world,/PICKUP_HOVER_HEIGHT = -9/);
   assert.match(app,/startX: frame\.x \+ facing \* 5/);
   assert.match(app,/targetX: frame\.x \+ facing \* 18/);
+  assert.match(app,/P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom, state\.clock, 0\.75\)/);
   assert.match(app,/PLAYER_SHADOW_OPACITY/);
   assert.match(app,/PLAYER_SHADOW_COLOR/);
-  assert.match(app,/playerShadowOffset\(frame\.facing/);
+  assert.match(app,/playerShadowOffset\(1\)/);
 });
 test("the item is behind the pickup frame and the popup stays in the preview rectangle",()=>{
   assert.match(app,/artCtx\.drawImage\(pickup\.icon/);
