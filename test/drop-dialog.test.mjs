@@ -12,7 +12,11 @@ test("DROP opens a confirmation dialog for the focused item",()=>{
 });
 test("dialog matches the reference proportions and the search-box border treatment",()=>{
   assert.match(drop,/const preview = document\.getElementById\("preview"\)/);
-  assert.match(css,/width: min\(88%, 1260px, 116\.9cqh\)/);
+  assert.match(drop,/const ratio = 565 \/ 356/);
+  assert.match(drop,/rect\.height \* 0\.737 \* ratio/);
+  assert.match(drop,/dialog\.style\.height = width \/ ratio/);
+  assert.match(drop,/positionOverlay/);
+  assert.match(css,/top: 12\.2%/);
   assert.match(css,/aspect-ratio: 565 \/ 356/);
   assert.match(css,/background: var\(--fill\)/);
   assert.match(css,/border: var\(--bd\) solid var\(--line\)/);

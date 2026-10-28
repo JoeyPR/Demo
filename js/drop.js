@@ -40,7 +40,25 @@
   dialog.append(row, prompt, amountInput, error, actions);
   overlay.append(dialog);
   const preview = document.getElementById("preview");
-  (preview || document.body).append(overlay);
+  document.body.append(overlay);
+
+  // Anchor the modal to the rendered preview rectangle while keeping it in the
+  // top document layer, so the inventory cannot cover its lower edge.
+  function positionOverlay() {
+    if (!preview) return;
+    const rect = preview.getBoundingClientRect();
+    const ratio = 565 / 356;
+    const width = Math.max(0, Math.min(rect.width * 0.88, rect.height * 0.737 * ratio));
+    overlay.style.left = rect.left + "px";
+    overlay.style.top = rect.top + "px";
+    overlay.style.width = rect.width + "px";
+    overlay.style.height = rect.height + "px";
+    dialog.style.width = width + "px";
+    dialog.style.height = width / ratio + "px";
+  }
+  window.addEventListener("resize", positionOverlay);
+  P.on("preview", positionOverlay);
+  positionOverlay();
 
   let currentItem = null;
   let previousFocus = null;

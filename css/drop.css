@@ -1,25 +1,23 @@
 /* DROP dialog: dimensions follow the supplied in-game reference proportions.
-   Mounted inside #preview so it scales and moves with the world viewport. */
+   It is placed over the preview's rectangle, but in the top layer so the inventory
+   cannot cover the panel. */
 .drop-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding-top: 12.2%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
   pointer-events: auto;
   touch-action: manipulation;
 }
 .drop-overlay[hidden] { display: none !important; }
 .drop-dialog {
-  position: relative;
-  flex: 0 1 auto;
-  width: min(88%, 1260px, 116.9cqh);
-  aspect-ratio: 565 / 356;
-  max-height: 73.7%;
+  position: absolute;
+  top: 12.2%;
+  left: 50%;
+  transform: translateX(-50%);
   padding: 0;
   overflow: visible;
+  box-sizing: border-box;
   container-type: inline-size;
 
   color: #fff;
