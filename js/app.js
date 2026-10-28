@@ -569,7 +569,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const platePoint = projectCameraPoint(
       w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.80);
+    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.75);
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
@@ -778,7 +778,7 @@ function drawPickups(c, frame, ground, scale, cameraPivotX, playerHeight) {
     ensurePickupArt(pickup);
 
     // Scale the shared player-shadow offset down in proportion to the pickup's silhouette.
-    const shadowDirection = playerShadowOffset(frame.facing || motion?.facing || 1);
+    const shadowDirection = playerShadowOffset(1); // Pickup shadows always project right, independent of player facing.
     const shadowScale = size / Math.max(1, playerHeight || 1);
     if (pickup.shadowCanvas) {
       c.save();

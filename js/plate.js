@@ -204,7 +204,7 @@
     const hasTextOrStyle = !!styleKey || sel.some(t => t.prefix || t.suffix);
     const guildRole = GUILD_ROLES[state.guildRole];
     const tagSeparate = guildRole && !hasTextOrStyle;
-    const rawGrowId = P.rtfont.truncate(state.growId.trim(), 18);
+    const rawGrowId = P.rtfont.sanitizeGrowId(state.growId.trim(), 19);
     const rawName = prefix + rawGrowId + suffix + (guildRole && !tagSeparate ? ' ' + guildRole.text : '');
     parts.push({
       text: P.rtfont.strip(rawName),
@@ -273,7 +273,8 @@
       return sizeOf(part)[0];
     });
     const gaps = parts.map((part, i) => {
-      if (part.flag || part.badge || part.guild) return L1;
+      if (part.flag) return 8.5 * PI;
+      if (part.badge || part.guild) return L1;
       if (part.role) return !LP ? L1 : LL ? 0.15 * PB + L1 : L1 + widths[i] / 2 - widths[LE] / 2;
       return Pq;
     });
@@ -445,7 +446,7 @@
   P.plateConfig = {
     get: () => state,
     set(patch) { state = Object.assign({}, DEFAULTS, state, patch); save(); },
-    setGrowId(v) { state.growId = P.rtfont.truncate(String(v ?? ''), 18); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
+    setGrowId(v) { state.growId = P.rtfont.sanitizeGrowId(String(v ?? ''), 19); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
     setRole(v) { state.role = v; save(); },
     setFlag(v) { state.flag = v; save(); },
     setGuildRole(v) { state.guildRole = v; save(); },

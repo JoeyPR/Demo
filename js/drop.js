@@ -49,7 +49,7 @@
   function positionOverlay() {
     if (!preview) return;
     const rect = preview.getBoundingClientRect();
-    const scale = Math.max(0.12, Math.min(rect.width / 643, rect.height / 480));
+    const scale = 0.92 * Math.max(0.12, Math.min(rect.width / 643, rect.height / 480));
     uiScale = scale;
     overlay.style.left = rect.left + "px";
     overlay.style.top = rect.top + "px";
