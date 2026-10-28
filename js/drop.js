@@ -39,7 +39,8 @@
   actions.append(cancelButton, confirmButton);
   dialog.append(row, prompt, amountInput, error, actions);
   overlay.append(dialog);
-  document.body.append(overlay);
+  const preview = document.getElementById("preview");
+  (preview || document.body).append(overlay);
 
   let currentItem = null;
   let previousFocus = null;

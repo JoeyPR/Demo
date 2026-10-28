@@ -1,10 +1,10 @@
 /* Pickup-box animation helpers. World positions use the preview's 32-unit coordinates. */
 export const PICKUP_ATLAS_RECT = Object.freeze({ x: 160, y: 0, width: 20, height: 20 }); // X8, Y0
-export const PICKUP_SIZE = 20;
-export const PICKUP_HOVER_HEIGHT = -10;
+export const PICKUP_SIZE = 5.5;
+export const PICKUP_HOVER_HEIGHT = -17.5;
 export const PICKUP_SPAWN_DURATION = 400;
 export const PICKUP_COLLECTION_DURATION = 360;
-export const PICKUP_FLOAT_AMPLITUDE = 1.45;
+export const PICKUP_FLOAT_AMPLITUDE = 0.8;
 export const PICKUP_FLOAT_PERIOD = 1600;
 
 const clamp01 = value => Math.min(1, Math.max(0, value));

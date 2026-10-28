@@ -10,13 +10,18 @@ test("DROP opens a confirmation dialog for the focused item",()=>{
   assert.match(drop,/title\.textContent = "Drop " \+ item\.name/);
   assert.match(drop,/iconBox\.append\(P\.thumb\(item, 64\)\)/);
 });
-test("dialog has quantity input, Cancel and OK controls with inventory styling",()=>{
-  assert.match(drop,/make\("input", "drop-amount", "drop-amount"\)/);
-  assert.match(drop,/make\("button", "drop-cancel", "drop-cancel", "Cancel"\)/);
-  assert.match(drop,/make\("button", "drop-confirm", "drop-confirm", "OK"\)/);
-  assert.match(css,/background: #FFCC00/);
-  assert.match(css,/background: #7BBAD2/);
-  assert.match(css,/var\(--font-main\)/);
+test("dialog matches the reference proportions and the search-box border treatment",()=>{
+  assert.match(drop,/const preview = document\.getElementById\("preview"\)/);
+  assert.match(css,/width: min\(88%, 1260px, 116\.9cqh\)/);
+  assert.match(css,/aspect-ratio: 565 \/ 356/);
+  assert.match(css,/background: var\(--fill\)/);
+  assert.match(css,/border: var\(--bd\) solid var\(--line\)/);
+  assert.match(css,/box-shadow: var\(--sh\) var\(--sh\) 0 0 #000, inset var\(--sh\) var\(--sh\) 0 0 #000/);
+  assert.match(css,/top: 70\.8%/);
+  assert.match(css,/width: 60\.6%/);
+  assert.match(css,/width: 28\.1% !important/);
+  assert.match(css,/drop-title[\s\S]*text-shadow: none/);
+  assert.match(css,/drop-amount[\s\S]*border: var\(--bd\) solid var\(--line\)/);
 });
 test("OK creates a local pickup, removes the item while dropped, and returns it after collection",()=>{
   assert.match(drop,/P\.emit\("drop-confirm", \{ item, amount \}\)/);
@@ -26,12 +31,16 @@ test("OK creates a local pickup, removes the item while dropped, and returns it 
   assert.match(app,/pickup\.item\.gone = false/);
   assert.match(app,/P\.inv\.refresh\(\)/);
 });
-test("world pickup draws the item behind the atlas frame and follows camera space",()=>{
+test("world pickup is small, level-correct, and uses the player shadow system",()=>{
   assert.match(app,/PICKUP_ATLAS_RECT, PICKUP_SIZE/);
-  assert.match(app,/const iconSize = size \* 0\.64/);
-  assert.ok(app.lastIndexOf("c.drawImage(pickup.icon")<app.lastIndexOf("PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y"));
+  assert.match(app,/PLAYER_SHADOW_OPACITY/);
+  assert.match(app,/PLAYER_SHADOW_COLOR/);
+  assert.match(app,/playerShadowOffset\(frame\.facing/);
+  assert.match(app,/pickup\.shadowCanvas/);
+  assert.match(app,/drawPickups\(c, frame, ground, s, cameraPivotX, playerRect\.height\)/);
   assert.match(world,/x: 160, y: 0, width: 20, height: 20/);
-  assert.match(world,/PICKUP_HOVER_HEIGHT = -10/);
+  assert.match(world,/PICKUP_SIZE = 5\.5/);
+  assert.match(world,/PICKUP_HOVER_HEIGHT = -17\.5/);
   assert.match(world,/pickupPose\(pickup, state\.clock, frame\)/);
   assert.match(world,/pickupShouldCollect\(pickup, state\.clock, frame\)/);
 });

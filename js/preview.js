@@ -32,7 +32,7 @@
     P.emit('camzoom', Z.v);
   }
 
-  const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, [data-dd]');
+  const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, #drop-overlay, [data-dd]');
   /* Growtopia-style camera zoom: scroll wheel over the world (outside the
      inventory panels and the dropdown buttons) zooms the camera in/out. */
   document.addEventListener('wheel', e => {

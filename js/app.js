@@ -13,7 +13,7 @@ import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers
 import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
-import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
+import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
 import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_DURATION, pickupPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
@@ -560,7 +560,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
-  drawPickups(c, frame, ground, s, cameraPivotX);
+  drawPickups(c, frame, ground, s, cameraPivotX, playerRect.height);
   const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
   // The plate renderer resets the canvas transform internally, so project its
@@ -695,7 +695,9 @@ function dropWorldItem(item, amount) {
     targetY: PICKUP_HOVER_HEIGHT,
     collectAt: null,
     collectStartX: null,
-    collectStartY: null
+    collectStartY: null,
+    artCanvas: null,
+    shadowCanvas: null
   };
   state.pickups.push(pickup);
   item.gone = true;
@@ -730,7 +732,40 @@ function updatePickupLifecycle(frame) {
   if (inventoryChanged) P.inv.refresh();
 }
 
-function drawPickups(c, frame, ground, scale, cameraPivotX) {
+function ensurePickupArt(pickup) {
+  if (pickup.artCanvas && pickup.shadowCanvas) return;
+  if (!pickupSprite.complete || pickupSprite.naturalWidth < PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) return;
+
+  const art = document.createElement("canvas");
+  art.width = art.height = 64;
+  const artCtx = art.getContext("2d");
+  artCtx.imageSmoothingEnabled = false;
+
+  // Render the item first, inside the frame's transparent centre.
+  if (pickup.icon) {
+    const iconSize = art.width * 0.64;
+    artCtx.drawImage(pickup.icon,
+      (art.width - iconSize) / 2, (art.height - iconSize) / 2, iconSize, iconSize);
+  }
+  artCtx.drawImage(pickupSprite,
+    PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
+    PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
+    0, 0, art.width, art.height);
+
+  // The exact same alpha-mask approach as the player's silhouette shadow:
+  // preserve the composed pickup's alpha and recolor its pixels to solid black.
+  const shadow = document.createElement("canvas");
+  shadow.width = shadow.height = 64;
+  const shadowCtx = shadow.getContext("2d");
+  shadowCtx.drawImage(art, 0, 0);
+  shadowCtx.globalCompositeOperation = "source-in";
+  shadowCtx.fillStyle = "rgba(" + PLAYER_SHADOW_COLOR.join(",") + ",1)";
+  shadowCtx.fillRect(0, 0, shadow.width, shadow.height);
+  pickup.artCanvas = art;
+  pickup.shadowCanvas = shadow;
+}
+
+function drawPickups(c, frame, ground, scale, cameraPivotX, playerHeight) {
   if (!state.pickups.length) return;
   c.imageSmoothingEnabled = false;
   for (const pickup of state.pickups) {
@@ -740,35 +775,51 @@ function drawPickups(c, frame, ground, scale, cameraPivotX) {
     const left = cameraPivotX + (pose.x - frame.x) * scale - size / 2;
     const top = ground + (pose.y - pose.bob) * scale - size;
     c.save();
-    // The item is drawn first and tucked inside the white frame; the atlas cell overlays its edges.
-    if (pickup.icon) {
-      const iconSize = size * 0.64;
-      const inset = (size - iconSize) / 2;
-      c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
+    ensurePickupArt(pickup);
+
+    // Scale the shared player-shadow offset down in proportion to the pickup's silhouette.
+    const shadowDirection = playerShadowOffset(frame.facing || motion?.facing || 1);
+    const shadowScale = size / Math.max(1, playerHeight || 1);
+    if (pickup.shadowCanvas) {
+      c.save();
+      c.globalAlpha = PLAYER_SHADOW_OPACITY;
+      c.drawImage(pickup.shadowCanvas,
+        left + shadowDirection.x * shadowScale,
+        top + shadowDirection.y * shadowScale, size, size);
+      c.restore();
     }
-    if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
-      c.drawImage(
-        pickupSprite,
-        PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
-        PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
-        left, top, size, size
-      );
+
+    if (pickup.artCanvas) {
+      c.drawImage(pickup.artCanvas, left, top, size, size);
     } else {
-      c.strokeStyle = "#fff";
-      c.lineWidth = Math.max(1, scale);
-      c.strokeRect(left + scale, top + scale, size - 2 * scale, size - 2 * scale);
+      // Loading fallback; the sprite-composed art replaces this on the next frame.
+      if (pickup.icon) {
+        const iconSize = size * 0.64;
+        const inset = (size - iconSize) / 2;
+        c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
+      }
+      if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
+        c.drawImage(pickupSprite,
+          PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
+          PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
+          left, top, size, size);
+      } else {
+        c.strokeStyle = "#fff";
+        c.lineWidth = Math.max(1, size * 0.06);
+        c.strokeRect(left + size * 0.08, top + size * 0.08, size * 0.84, size * 0.84);
+      }
     }
     if (pickup.amount > 1 && pose.scale > 0.25) {
       const label = String(pickup.amount);
-      const fontSize = Math.max(8, Math.min(size * 0.27, scale * 5.5));
+      const fontSize = Math.max(3, Math.min(size * 0.27, scale * 5.5));
       c.font = "700 " + fontSize + "px 'Main CG', sans-serif";
       c.textAlign = "right";
       c.textBaseline = "bottom";
-      c.lineWidth = Math.max(1, scale * 0.7);
+      c.lineWidth = Math.max(0.5, fontSize * 0.12);
       c.strokeStyle = "rgba(0,0,0,.9)";
       c.fillStyle = "#fff";
-      c.strokeText(label, left + size - scale * 1.4, top + size - scale * 1.2);
-      c.fillText(label, left + size - scale * 1.4, top + size - scale * 1.2);
+      c.strokeText(label, left + size - size * 0.07, top + size - size * 0.06);
+      c.fillText(label, left + size - size * 0.07, top + size - size * 0.06);
     }
     c.restore();
   }

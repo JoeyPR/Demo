@@ -8,8 +8,8 @@ const sample = () => ({ spawnedAt:0, startX:0, targetX:28, startY:-5, targetY:0,
 
 test("white pickup frame uses atlas cell X8 Y0 and a 20x20 source rect", () => {
   assert.deepEqual(PICKUP_ATLAS_RECT, {x:160,y:0,width:20,height:20});
-  assert.equal(PICKUP_SIZE,20);
-  assert.equal(PICKUP_HOVER_HEIGHT,-10);
+  assert.equal(PICKUP_SIZE,5.5);
+  assert.equal(PICKUP_HOVER_HEIGHT,-17.5);
 });
 test("drop animation grows a tiny item box to full size over 400ms", () => {
   const pickup=sample();
@@ -30,7 +30,7 @@ test("pickup floats continuously after its spawn animation", () => {
   assert.equal(a.bob,0);
   assert.ok(b.bob>0);
   assert.ok(c.bob<0);
-  assert.equal(PICKUP_FLOAT_AMPLITUDE,1.45);
+  assert.equal(PICKUP_FLOAT_AMPLITUDE,0.8);
 });
 test("collection pulls the pickup toward the player and shrinks it over time", () => {
   const pickup=sample();
