@@ -47,6 +47,14 @@ test('GrowID sanitizer follows the older Planner input rules', () => {
   assert.equal(rtfont.sanitizeGrowId('[]{}!@#_-+='), '[]{}!@#_-+=', 'ordinary punctuation is allowed');
 });
 
+test('formatting codes do not count as names and punctuation-only input is ignored', () => {
+  assert.equal(rtfont.hasVisibleName('@'), false);
+  assert.equal(rtfont.hasVisibleName(MARK + '6' + '@'), false);
+  assert.equal(rtfont.hasVisibleName(MARK + '6'), false);
+  assert.equal(rtfont.hasVisibleName(MARK + '6' + 'Joe@'), true);
+  assert.equal(rtfont.visibleLength(MARK + '6' + 'Joe'), 3);
+});
+
 test('unknown backtick pairs are preserved as ordinary text', () => {
   const input = MARK + 'z' + 'plain';
   assert.equal(rtfont.strip(input), input);
@@ -64,4 +72,8 @@ test('the markup parser is connected to both the global app and canvas nameplate
   assert.match(customization, /growInput\.maxLength = 80/);
   assert.match(customization, /P\.rtfont\.sanitizeGrowId\(growInput\.value, 19\)/);
   assert.match(plate, /P\.rtfont\.sanitizeGrowId\(state\.growId\.trim\(\), 19\)/);
+  assert.match(plate, /P\.rtfont\.hasVisibleName\(state\.growId\)/);
+  assert.match(plate, /drPrefixColour/);
+  assert.match(plate, /usedFormatCode \?\? '4'/);
+  assert.match(plate, /titleKeys\.map\(k => titleByKey\[k\]\)/);
 });

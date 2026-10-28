@@ -8,8 +8,8 @@ const sample = () => ({ spawnedAt:0, startX:0, targetX:18, startY:PICKUP_HOVER_H
 
 test("white pickup frame uses atlas cell X8 Y0 and a 20x20 source rect", () => {
   assert.deepEqual(PICKUP_ATLAS_RECT, {x:160,y:0,width:20,height:20});
-  assert.equal(PICKUP_SIZE,10);
-  assert.equal(PICKUP_HOVER_HEIGHT,-9);
+  assert.equal(PICKUP_SIZE,12);
+  assert.equal(PICKUP_HOVER_HEIGHT,-8.25);
 });
 test("drop animation grows a tiny item box to full size over 400ms", () => {
   const pickup=sample();
@@ -21,6 +21,8 @@ test("drop animation grows a tiny item box to full size over 400ms", () => {
   assert.equal(end.scale,1);
   assert.equal(end.phase,"floating");
   assert.ok(first.x<end.x);
+  const afterPlayerMoves = pickupPose(pickup,PICKUP_SPAWN_DURATION + 1000,{x:200,y:0});
+  assert.equal(afterPlayerMoves.x,pickup.targetX, "settled pickup keeps its captured world X");
 });
 test("pickup floats continuously after its spawn animation", () => {
   const pickup=sample();
@@ -48,6 +50,8 @@ test("collection starts only when the player is grounded and close enough", () =
   const pickup=sample();
   assert.equal(pickupShouldCollect(pickup,399,{x:20,y:0,ground:true}),false);
   assert.equal(pickupShouldCollect(pickup,400,{x:20,y:-10,ground:false}),false);
+  assert.equal(pickupShouldCollect(pickup,400,{x:0,y:0,ground:true}),false, "stays dropped until the player actually approaches");
+  assert.equal(pickupShouldCollect(pickup,400,{x:9,y:0,ground:true}),true);
   assert.equal(pickupShouldCollect(pickup,400,{x:20,y:0,ground:true}),true);
   assert.equal(pickupShouldCollect(pickup,400,{x:-20,y:0,ground:true}),false);
 });

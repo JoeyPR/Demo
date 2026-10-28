@@ -71,6 +71,12 @@
   function visibleLength(value) {
     return [...strip(value)].length;
   }
+  // Punctuation is allowed in a GrowID, but punctuation-only input is not a name.
+  // RTFont control markers are removed before checking for at least one letter/number.
+  function hasVisibleName(value) {
+    const visible = strip(value).replace(/dr\./gi, '').trim();
+    return /[\p{L}\p{N}]/u.test(visible);
+  }
   // Match the older JoeyPR/Planner GrowID rules:
   // cap raw input at 80; remove "dr." case-insensitively; preserve valid color
   // codes without counting them toward the 19 visible characters.
@@ -171,6 +177,7 @@
     hasCodes: hasCodes,
     characters: characters,
     visibleLength: visibleLength,
+    hasVisibleName: hasVisibleName,
     sanitizeGrowId: sanitizeGrowId,
     truncate: truncate,
     color: color,
