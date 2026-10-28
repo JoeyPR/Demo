@@ -4,7 +4,7 @@ import {
   PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION, PICKUP_COLLECTION_DURATION,
   PICKUP_FLOAT_AMPLITUDE, PICKUP_FLOAT_PERIOD, pickupPose, pickupShouldCollect
 } from "../js/drop-world.mjs";
-const sample = () => ({ spawnedAt:0, startX:0, targetX:28, startY:-5, targetY:0, collectAt:null, collectStartX:null, collectStartY:null });
+const sample = () => ({ spawnedAt:0, startX:0, targetX:28, startY:PICKUP_HOVER_HEIGHT-2, targetY:PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
 
 test("white pickup frame uses atlas cell X8 Y0 and a 20x20 source rect", () => {
   assert.deepEqual(PICKUP_ATLAS_RECT, {x:160,y:0,width:20,height:20});
