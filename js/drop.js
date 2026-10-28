@@ -42,19 +42,40 @@
   const preview = document.getElementById("preview");
   document.body.append(overlay);
 
+  let uiScale = 1;
+
   // Anchor the modal to the rendered preview rectangle while keeping it in the
   // top document layer, so the inventory cannot cover its lower edge.
   function positionOverlay() {
     if (!preview) return;
     const rect = preview.getBoundingClientRect();
-    const ratio = 565 / 356;
-    const width = Math.max(0, Math.min(rect.width * 0.88, rect.height * 0.737 * ratio));
+    const scale = Math.max(0.12, Math.min(rect.width / 643, rect.height / 480));
+    uiScale = scale;
     overlay.style.left = rect.left + "px";
     overlay.style.top = rect.top + "px";
     overlay.style.width = rect.width + "px";
     overlay.style.height = rect.height + "px";
-    dialog.style.width = width + "px";
-    dialog.style.height = width / ratio + "px";
+
+    // The dialog starts at the reference footprint but grows naturally for
+    // unusually long names and quantities, up to the preview's content bounds.
+    dialog.style.setProperty("--drop-scale", String(scale));
+    dialog.style.setProperty("--drop-min-width", Math.min(rect.width * 0.88, 565 * scale) + "px");
+    dialog.style.setProperty("--drop-max-width", rect.width * 0.88 + "px");
+    dialog.style.setProperty("--drop-pad-x", 34 * scale + "px");
+    dialog.style.setProperty("--drop-pad-top", 28 * scale + "px");
+    dialog.style.setProperty("--drop-pad-bottom", 18 * scale + "px");
+    dialog.style.setProperty("--drop-row-gap", 12 * scale + "px");
+    dialog.style.setProperty("--drop-title-size", 65 * scale + "px");
+    dialog.style.setProperty("--drop-prompt-size", 43 * scale + "px");
+    dialog.style.setProperty("--drop-icon-size", 48 * scale + "px");
+    dialog.style.setProperty("--drop-input-height", 68 * scale + "px");
+    dialog.style.setProperty("--drop-input-font", 36 * scale + "px");
+    dialog.style.setProperty("--drop-button-height", 84 * scale + "px");
+    dialog.style.setProperty("--drop-button-font", 52 * scale + "px");
+    dialog.style.setProperty("--drop-cancel-width", 226 * scale + "px");
+    dialog.style.setProperty("--drop-ok-width", 104 * scale + "px");
+    dialog.style.setProperty("--drop-button-gap", 40 * scale + "px");
+    syncAmountWidth();
   }
   window.addEventListener("resize", positionOverlay);
   P.on("preview", positionOverlay);
@@ -62,6 +83,13 @@
 
   let currentItem = null;
   let previousFocus = null;
+
+  function syncAmountWidth() {
+    const digits = Math.max(1, String(amountInput.value || "1").length);
+    const base = 190 * uiScale;
+    const needed = (digits * 33 + 30) * uiScale;
+    amountInput.style.width = Math.max(base, needed) + "px";
+  }
 
   function close() {
     overlay.hidden = true;
@@ -83,6 +111,7 @@
     title.textContent = "Drop " + item.name;
     prompt.textContent = P.rtfont?.color("o", "How many to drop?") || "How many to drop?";
     amountInput.value = "1";
+    syncAmountWidth();
     error.hidden = true;
     error.textContent = "";
     iconBox.replaceChildren();
@@ -110,6 +139,7 @@
   cancelButton.addEventListener("click", close);
   confirmButton.addEventListener("click", confirm);
   amountInput.addEventListener("input", () => {
+    syncAmountWidth();
     error.hidden = true;
     error.textContent = "";
   });

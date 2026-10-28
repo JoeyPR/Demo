@@ -1,6 +1,4 @@
-/* DROP dialog: dimensions follow the supplied in-game reference proportions.
-   It is placed over the preview's rectangle, but in the top layer so the inventory
-   cannot cover the panel. */
+/* DROP dialog: content-sized layout with the search field's exact border treatment. */
 .drop-overlay {
   position: fixed;
   left: 0;
@@ -10,17 +8,26 @@
   touch-action: manipulation;
 }
 .drop-overlay[hidden] { display: none !important; }
+
 .drop-dialog {
   position: absolute;
   top: 12.2%;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0;
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--drop-row-gap, 12px);
+  width: max-content;
+  min-width: min(88%, var(--drop-min-width, 565px));
+  max-width: min(88%, var(--drop-max-width, 565px));
+  max-height: 75%;
+  overflow: auto;
   box-sizing: border-box;
-  container-type: inline-size;
+  padding: var(--drop-pad-top, 28px) var(--drop-pad-x, 34px) var(--drop-pad-bottom, 18px);
 
   color: #fff;
+  text-align: left;
   background: var(--fill);
   border: var(--bd) solid var(--line);
   border-radius: var(--radius);
@@ -28,20 +35,16 @@
   font-family: var(--font-main);
 }
 .drop-item-row {
-  position: absolute;
-  top: 7.5%;
-  left: 8.5%;
-  right: 4%;
-  height: 19%;
   display: flex;
   align-items: center;
-  gap: 8.5%;
+  justify-content: flex-start;
+  gap: calc(var(--drop-icon-size, 48px) * 0.35);
   min-width: 0;
 }
 .drop-item-icon {
-  flex: 0 0 10%;
-  width: 10%;
-  height: 100%;
+  flex: 0 0 var(--drop-icon-size, 48px);
+  width: var(--drop-icon-size, 48px);
+  height: var(--drop-icon-size, 48px);
   display: grid;
   place-items: center;
 }
@@ -52,74 +55,74 @@
   image-rendering: pixelated;
 }
 .drop-title {
+  flex: 0 1 auto;
   min-width: 0;
+  margin: 0;
   overflow-wrap: anywhere;
-  font-size: 11.6cqw;
+  font-size: var(--drop-title-size, 52px);
   font-weight: 700;
   line-height: 1.02;
+  text-align: left;
   text-shadow: none;
 }
 .drop-prompt {
-  position: absolute;
-  top: 30.5%;
-  left: 6.5%;
-  right: 4%;
+  max-width: 100%;
   margin: 0;
   color: #FCE6BA;
-  font-size: 7.5cqw;
+  font-size: var(--drop-prompt-size, 36px);
   line-height: 1.1;
   font-weight: 700;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 .drop-amount {
-  position: absolute;
-  top: 47.2%;
-  left: 8.2%;
-  width: 33.7%;
-  height: 19.6%;
+  display: block;
+  flex: 0 0 auto;
+  width: var(--drop-amount-width, 190px);
+  max-width: 100%;
+  height: var(--drop-input-height, 68px);
   margin: 0;
-  padding: 0 2.1%;
+  padding: 0 10px;
   border: var(--bd) solid var(--line);
   border-radius: var(--radius);
   outline: 0;
   background: rgba(39,125,159,.4);
   box-shadow: var(--sh) var(--sh) 0 0 #000, inset var(--sh) var(--sh) 0 0 #000;
   color: #fff;
-  font: 700 6.4cqw/1 var(--font-main);
+  font: 700 var(--drop-input-font, 36px)/1 var(--font-main);
+  text-align: left;
   appearance: textfield;
 }
 .drop-amount:focus { border-color: var(--line); }
 .drop-amount::-webkit-inner-spin-button,
 .drop-amount::-webkit-outer-spin-button { margin: 0; appearance: none; }
 .drop-error {
-  position: absolute;
-  top: 66.8%;
-  left: 8.2%;
+  max-width: 100%;
   margin: 0;
   color: #ffe2b4;
-  font-size: 2.7cqw;
+  font-size: calc(var(--drop-scale, 1) * 14px);
   font-weight: 700;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 .drop-actions {
-  position: absolute;
-  top: 70.8%;
-  left: 6.4%;
-  width: 66.2%;
-  height: 23.7%;
   display: flex;
   align-items: stretch;
-  gap: 11.2%;
+  justify-content: flex-start;
+  gap: var(--drop-button-gap, 40px);
+  max-width: 100%;
 }
 .drop-actions button {
   flex: 0 0 auto;
   min-width: 0;
-  width: 60.6%;
-  height: 100%;
-  padding: 0 2%;
+  height: var(--drop-button-height, 84px);
+  padding: 0 calc(var(--drop-scale, 1) * 10px);
   border: 0;
   border-radius: var(--radius);
   box-shadow: var(--sh) var(--sh) 0 0 #000;
-  font: 700 7.5cqw/1 var(--font-main);
-  text-shadow: none;
+  font: 700 var(--drop-button-font, 52px)/1 var(--font-main);
+  text-align: left;
+  text-shadow: 1px 1px 0 #000;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -127,5 +130,18 @@
   transform: translate(var(--sh),var(--sh));
   box-shadow: none;
 }
-.drop-cancel { background: #FFCC00; color: #fff; }
-.drop-confirm { width: 28.1% !important; background: #7BBAD2; color: #fff; }
+.drop-cancel {
+  width: var(--drop-cancel-width, 226px);
+  background: #FFCC00;
+  color: #fff;
+}
+.drop-confirm {
+  width: var(--drop-ok-width, 104px);
+  background: #7BBAD2;
+  color: #fff;
+}
+@media (max-width: 420px) {
+  .drop-dialog { max-height: 82%; }
+  .drop-actions { flex-wrap: wrap; }
+  .drop-actions button { max-width: 100%; }
+}

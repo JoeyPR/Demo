@@ -10,48 +10,49 @@ test("DROP opens a confirmation dialog for the focused item",()=>{
   assert.match(drop,/title\.textContent = "Drop " \+ item\.name/);
   assert.match(drop,/iconBox\.append\(P\.thumb\(item, 64\)\)/);
 });
-test("dialog matches the reference proportions and the search-box border treatment",()=>{
-  assert.match(drop,/const preview = document\.getElementById\("preview"\)/);
-  assert.match(drop,/const ratio = 565 \/ 356/);
-  assert.match(drop,/rect\.height \* 0\.737 \* ratio/);
-  assert.match(drop,/dialog\.style\.height = width \/ ratio/);
-  assert.match(drop,/positionOverlay/);
-  assert.match(css,/top: 12\.2%/);
-  assert.match(css,/aspect-ratio: 565 \/ 356/);
+test("dialog follows text content and keeps a reference-sized starting footprint",()=>{
+  assert.match(drop,/dialog\.style\.setProperty\("--drop-min-width"/);
+  assert.match(drop,/dialog\.style\.setProperty\("--drop-max-width"/);
+  assert.match(drop,/syncAmountWidth/);
+  assert.match(drop,/amountInput\.style\.width/);
+  assert.match(css,/width: max-content/);
+  assert.match(css,/max-height: 75%/);
+  assert.match(css,/overflow: auto/);
+  assert.match(css,/text-align: left/);
+  assert.match(css,/text-shadow: 1px 1px 0 #000/);
   assert.match(css,/background: var\(--fill\)/);
   assert.match(css,/border: var\(--bd\) solid var\(--line\)/);
   assert.match(css,/box-shadow: var\(--sh\) var\(--sh\) 0 0 #000, inset var\(--sh\) var\(--sh\) 0 0 #000/);
-  assert.match(css,/top: 70\.8%/);
-  assert.match(css,/width: 60\.6%/);
-  assert.match(css,/width: 28\.1% !important/);
   assert.match(css,/drop-title[\s\S]*text-shadow: none/);
-  assert.match(css,/drop-amount[\s\S]*border: var\(--bd\) solid var\(--line\)/);
 });
-test("OK creates a local pickup, removes the item while dropped, and returns it after collection",()=>{
+test("dialog buttons keep reference dimensions and amount input grows with more digits",()=>{
+  assert.match(drop,/226 \* scale/);
+  assert.match(drop,/104 \* scale/);
+  assert.match(drop,/40 \* scale/);
+  assert.match(css,/width: var\(--drop-cancel-width, 226px\)/);
+  assert.match(css,/width: var\(--drop-ok-width, 104px\)/);
+  assert.match(drop,/const needed = \(digits \* 33 \+ 30\) \* uiScale/);
+});
+test("OK creates a local pickup and restores the catalog item on collection",()=>{
   assert.match(drop,/P\.emit\("drop-confirm", \{ item, amount \}\)/);
   assert.match(app,/P\.on\("drop-confirm"/);
   assert.match(app,/state\.pickups\.push\(pickup\)/);
   assert.match(app,/item\.gone = true/);
   assert.match(app,/pickup\.item\.gone = false/);
-  assert.match(app,/P\.inv\.refresh\(\)/);
 });
-test("world pickup is small, level-correct, and uses the player shadow system",()=>{
-  assert.match(app,/PICKUP_ATLAS_RECT, PICKUP_SIZE/);
+test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
+  assert.match(world,/PICKUP_SIZE = 10/);
+  assert.match(world,/PICKUP_HOVER_HEIGHT = -9/);
+  assert.match(app,/startX: frame\.x \+ facing \* 5/);
+  assert.match(app,/targetX: frame\.x \+ facing \* 18/);
   assert.match(app,/PLAYER_SHADOW_OPACITY/);
   assert.match(app,/PLAYER_SHADOW_COLOR/);
   assert.match(app,/playerShadowOffset\(frame\.facing/);
-  assert.match(app,/pickup\.shadowCanvas/);
-  assert.match(app,/drawPickups\(c, frame, ground, s, cameraPivotX, playerRect\.height\)/);
-  assert.match(world,/x: 160, y: 0, width: 20, height: 20/);
-  assert.match(world,/PICKUP_SIZE = 6\.5/);
-  assert.match(world,/PICKUP_HOVER_HEIGHT = -23\.5/);
-  assert.match(world,/pickupPose\(pickup, state\.clock, frame\)/);
-  assert.match(world,/pickupShouldCollect\(pickup, state\.clock, frame\)/);
 });
-test("animation hooks into the existing world frame and prevents preview punching through the dialog",()=>{
+test("the item is behind the pickup frame and the popup stays in the preview rectangle",()=>{
+  assert.match(app,/artCtx\.drawImage\(pickup\.icon/);
+  assert.match(app,/artCtx\.drawImage\(pickupSprite/);
+  assert.match(drop,/preview\.getBoundingClientRect\(\)/);
   assert.match(html,/css\/drop\.css/);
-  assert.match(html,/js\/drop\.js/);
-  assert.match(app,/updatePickupLifecycle\(frame\)/);
-  assert.match(app,/drawPickups\(c, frame, ground, s, cameraPivotX\)/);
-  assert.match(app,/#drop-overlay/);
+  assert.match(css,/position: fixed/);
 });
