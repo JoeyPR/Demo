@@ -560,7 +560,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
-  drawPickups(c, frame, ground, s, cameraPivotX, playerRect.height);
+  drawPickups(c, frame, ground, s, cameraPivotX, zoom);
   const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
   // The plate renderer resets the canvas transform internally, so project its
@@ -569,7 +569,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const platePoint = projectCameraPoint(
       w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.75);
+    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom * 0.92, state.clock, 0.75);
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
@@ -765,27 +765,28 @@ function ensurePickupArt(pickup) {
   pickup.shadowCanvas = shadow;
 }
 
-function drawPickups(c, frame, ground, scale, cameraPivotX, playerHeight) {
+function drawPickups(c, frame, ground, scale, cameraPivotX, zoom) {
   if (!state.pickups.length) return;
   c.imageSmoothingEnabled = false;
   for (const pickup of state.pickups) {
     const pose = pickupPose(pickup, state.clock, frame);
-    const size = PICKUP_SIZE * scale * pose.scale;
+    const safeZoom = Math.max(0.01, zoom || 1);
+    const size = PICKUP_SIZE * scale * pose.scale + pose.scale / safeZoom;
     if (size < 0.5) continue;
     const left = cameraPivotX + (pose.x - frame.x) * scale - size / 2;
     const top = ground + (pose.y - pose.bob) * scale - size;
     c.save();
     ensurePickupArt(pickup);
 
-    // Scale the shared player-shadow offset down in proportion to the pickup's silhouette.
-    const shadowDirection = playerShadowOffset(1); // Pickup shadows always project right, independent of player facing.
-    const shadowScale = size / Math.max(1, playerHeight || 1);
+    // Use the player's exact shadow distance (12px right/left, 12px down)
+    // under the same camera transform, but force the pickup shadow LEFT always.
+    const shadowDirection = playerShadowOffset(-1);
     if (pickup.shadowCanvas) {
       c.save();
       c.globalAlpha = PLAYER_SHADOW_OPACITY;
       c.drawImage(pickup.shadowCanvas,
-        left + shadowDirection.x * shadowScale,
-        top + shadowDirection.y * shadowScale, size, size);
+        left + shadowDirection.x,
+        top + shadowDirection.y, size, size);
       c.restore();
     }
 

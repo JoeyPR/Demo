@@ -17,7 +17,7 @@
     legend: { shadow: { at: 2, code: true } },
     l125:   { rgba: [0, 255, 255, 150], shadow: { at: 2, rgba: [3, 98, 134, 150] }, swell: [1, 0.175] },
     mentor: { rgba: [247, 148, 30, 255], shadow: { at: 2, rgba: [249, 240, 111, 200] } },
-    dr:     { rgba: [255, 0, 0, 255] },
+    dr:     { rgba: [255, 39, 29, 255] },
     party:  { letters: [[255, 11, 223], [255, 217, 11], [133, 255, 169]], shadow: { at: 2, rgba: [0, 0, 0, 50] } },
     g4g:    { shadow: { at: 1.2, same: true }, swell: [0.9, 0.175] }
   };
@@ -179,8 +179,9 @@
 
   /* ---------------- buildParts (R$ on the site) ---------------- */
   function buildParts() {
-    if (!P.rtfont.strip(state.growId).trim()) return null;
-    const sel = state.titles.map(k => titleByKey[k]).filter(Boolean);
+    if (!P.rtfont.hasVisibleName(state.growId)) return null;
+    const titleKeys = state.titles.map(k => String(k ?? '').toLowerCase());
+    const sel = titleKeys.map(k => titleByKey[k]).filter(Boolean);
     const parts = [];
     if (state.role) parts.push({ img: FLAGS_DIR + 'role-' + state.role + '.png', role: true });
     for (const t of sel) if (t.left) parts.push({ img: TITLES_DIR + t.left + '.png' });
@@ -195,7 +196,7 @@
     for (const t of both) parts.push({ img: TITLES_DIR + t.both + '.png' });
     const prefix = sel.find(t => t.prefix)?.prefix ?? '';
     const suffix = sel.find(t => t.suffix)?.suffix ?? '';
-    const has = k => state.titles.includes(k);
+    const has = k => titleKeys.includes(String(k).toLowerCase());
     const legendary = sel.some(t => t.legendary);
     const styleKey = has('g4g') ? 'g4g' : legendary ? 'legend' : has('l125') ? 'l125' : has('mentor') ? 'mentor' : has('dr') ? 'dr' : has('party') ? 'party' : null;
     const style = styleKey ? STYLES[styleKey] : null;
@@ -206,9 +207,14 @@
     const tagSeparate = guildRole && !hasTextOrStyle;
     const rawGrowId = P.rtfont.sanitizeGrowId(state.growId.trim(), 19);
     const rawName = prefix + rawGrowId + suffix + (guildRole && !tagSeparate ? ' ' + guildRole.text : '');
+    const drTitle = has('dr');
+    const usedFormatCode = P.rtfont.characters(rawGrowId).find(char => char.code)?.code ?? null;
+    const drPrefixColour = drTitle ? (P.rtfont.colors[usedFormatCode ?? '4'] ?? P.rtfont.colors['4']) : null;
     parts.push({
       text: P.rtfont.strip(rawName),
       formatText: rawName,
+      drPrefixLength: drTitle ? [...prefix].length : 0,
+      drPrefixColour,
       style: styleKey, colour: [255, 255, 255], alpha: 1,
       scale: swell ? swell[0] + swell[1] * osc(8000, EPOCH + clock) : 1,
       grow: swell ? swell[0] + swell[1] - 1 : 0,
@@ -281,7 +287,8 @@
     const yOf = (part, h) => {
       if (part.guild) return iconCenterY() - 0.875 * PB;
       if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2;
-      if (part.flag || part.badge) return iconCenterY() - h / 2;
+      if (part.flag) return iconCenterY() - h / 2 + 1.2 * PI;
+      if (part.badge) return iconCenterY() - h / 2;
       return baselineY - PR * 0.8 - (h - PR * 0.8) / 2;
     };
     const firstText = parts.findIndex(x => x.text !== undefined);
@@ -298,7 +305,7 @@
     k.imageSmoothingEnabled = false;
     parts.forEach((part, i) => {
       const Ld = widths[i];
-      const hasFormatting = part.formatText !== undefined && P.rtfont.hasCodes(part.formatText);
+      const hasFormatting = part.formatText !== undefined && (P.rtfont.hasCodes(part.formatText) || !!part.drPrefixColour);
       const formattedChars = hasFormatting ? P.rtfont.characters(part.formatText) : null;
       if (part.wrench) {
         const LD = Ld, Lu = LO + LD / 2, Ln = baselineY - PR * 0.393 - Ld / 2 + LD / 2;
@@ -351,7 +358,8 @@
               chars.forEach((ch, ci) => {
                 if (ch !== ' ') {
                   const explicit = applyFormatting ? formattedChars[ci]?.rgb : null;
-                  k.fillStyle = rgba(explicit ? [...explicit, 255] : colorFn(ci, seen));
+                  const prefixColour = part.drPrefixColour && ci < part.drPrefixLength ? part.drPrefixColour : null;
+                  k.fillStyle = rgba(explicit ? [...explicit, 255] : prefixColour ? [...prefixColour, 255] : colorFn(ci, seen));
                   k.fillText(ch, x, ay + 19 * textPI);
                   seen++;
                 }
@@ -378,7 +386,8 @@
           k.fillText(part.text, LO + outline, baselineY + outline);
           let x = LO;
           for (const entry of formattedChars) {
-            const color = entry.rgb || part.colour;
+            const prefixColour = part.drPrefixColour && ci < part.drPrefixLength ? part.drPrefixColour : null;
+            const color = entry.rgb || prefixColour || part.colour;
             k.fillStyle = 'rgba(' + color.join(',') + ',' + part.alpha + ')';
             k.fillText(entry.char, x, baselineY);
             x += k.measureText(entry.char).width;

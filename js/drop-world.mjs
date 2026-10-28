@@ -1,7 +1,7 @@
 /* Pickup-box animation helpers. World positions use the preview's 32-unit coordinates. */
 export const PICKUP_ATLAS_RECT = Object.freeze({ x: 160, y: 0, width: 20, height: 20 }); // X8, Y0
 export const PICKUP_SIZE = 12;
-export const PICKUP_HOVER_HEIGHT = -9;
+export const PICKUP_HOVER_HEIGHT = -8.25;
 export const PICKUP_SPAWN_DURATION = 400;
 export const PICKUP_COLLECTION_DURATION = 360;
 export const PICKUP_FLOAT_AMPLITUDE = 0.8;
@@ -44,7 +44,7 @@ export function pickupPose(pickup, now, playerFrame) {
   };
 }
 
-export function pickupShouldCollect(pickup, now, playerFrame, reach = 18) {
+export function pickupShouldCollect(pickup, now, playerFrame, reach = 10) {
   if (pickup.collectAt != null || now - pickup.spawnedAt < PICKUP_SPAWN_DURATION) return false;
   if (!playerFrame || !playerFrame.ground) return false;
   const playerY = Number(playerFrame.y ?? 0);
