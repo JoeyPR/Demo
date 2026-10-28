@@ -43,8 +43,8 @@ test("world pickup is small, level-correct, and uses the player shadow system",(
   assert.match(app,/pickup\.shadowCanvas/);
   assert.match(app,/drawPickups\(c, frame, ground, s, cameraPivotX, playerRect\.height\)/);
   assert.match(world,/x: 160, y: 0, width: 20, height: 20/);
-  assert.match(world,/PICKUP_SIZE = 5\.5/);
-  assert.match(world,/PICKUP_HOVER_HEIGHT = -17\.5/);
+  assert.match(world,/PICKUP_SIZE = 6\.5/);
+  assert.match(world,/PICKUP_HOVER_HEIGHT = -23\.5/);
   assert.match(world,/pickupPose\(pickup, state\.clock, frame\)/);
   assert.match(world,/pickupShouldCollect\(pickup, state\.clock, frame\)/);
 });
