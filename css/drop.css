@@ -20,7 +20,7 @@
   gap: var(--drop-row-gap, 12px);
   width: max-content;
   min-width: min(88%, var(--drop-min-width, 565px));
-  max-width: min(88%, var(--drop-max-width, 565px));
+  max-width: min(96%, var(--drop-max-width, 96%));
   max-height: 75%;
   overflow: auto;
   box-sizing: border-box;

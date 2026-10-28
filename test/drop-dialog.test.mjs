@@ -12,7 +12,8 @@ test("DROP opens a confirmation dialog for the focused item",()=>{
 });
 test("dialog follows text content and keeps a reference-sized starting footprint",()=>{
   assert.match(drop,/dialog\.style\.setProperty\("--drop-min-width"/);
-  assert.match(drop,/dialog\.style\.setProperty\("--drop-max-width"/);
+  assert.match(drop,/dialog\.style\.setProperty\("--drop-max-width", rect\.width \* 0\.96/);
+  assert.match(css,/max-width: min\(96%, var\(--drop-max-width, 96%\)\)/);
   assert.match(drop,/syncAmountWidth/);
   assert.match(drop,/amountInput\.style\.width/);
   assert.match(css,/width: max-content/);

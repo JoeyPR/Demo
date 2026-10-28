@@ -60,7 +60,7 @@
     // unusually long names and quantities, up to the preview's content bounds.
     dialog.style.setProperty("--drop-scale", String(scale));
     dialog.style.setProperty("--drop-min-width", Math.min(rect.width * 0.88, 565 * scale) + "px");
-    dialog.style.setProperty("--drop-max-width", rect.width * 0.88 + "px");
+    dialog.style.setProperty("--drop-max-width", rect.width * 0.96 + "px");
     dialog.style.setProperty("--drop-pad-x", 34 * scale + "px");
     dialog.style.setProperty("--drop-pad-top", 28 * scale + "px");
     dialog.style.setProperty("--drop-pad-bottom", 18 * scale + "px");
