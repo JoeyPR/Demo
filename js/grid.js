@@ -145,15 +145,25 @@
 
   function markEquipped() {
     const eq = P.equippedIds || new Set();
-    for (const b of win.querySelectorAll('.box')) b.classList.toggle('sel', eq.has(+b.dataset.id));
-    for (const b of P.$('#quick').querySelectorAll('.box')) if (b.dataset.id) b.classList.toggle('sel', eq.has(+b.dataset.id));
+    for (const b of win.querySelectorAll('.box')) {
+      const id = +b.dataset.id;
+      const equipped = eq.has(id);
+      b.classList.toggle('sel', equipped);
+      // Artifact art is a special equipped state, not the default item box.
+      b.classList.toggle('art', equipped && !!P.ancestralIds?.has(id));
+    }
+    for (const b of P.$('#quick').querySelectorAll('.box')) if (b.dataset.id) {
+      const id = +b.dataset.id;
+      const equipped = eq.has(id);
+      b.classList.toggle('sel', equipped);
+      b.classList.toggle('art', equipped && !!P.ancestralIds?.has(id));
+    }
   }
 
   function boxEl(it) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '') +
-      (P.ancestralIds && P.ancestralIds.has(it.id) ? ' art' : '');
+    b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '');
     b.dataset.id = it.id;
     if (it.slot != null) b.dataset.slot = it.slot;
     b.setAttribute('aria-label', it.name + ' (#' + it.id + ')');
@@ -272,7 +282,8 @@
     b._it = it;
     b.classList.toggle('gone', !!it.gone);
     b.classList.toggle('fav', favs.has(it.id));
-    b.classList.toggle('art', !!(P.ancestralIds && P.ancestralIds.has(it.id)));
+    const equippedIds = P.equippedIds || new Set();
+    b.classList.toggle('art', equippedIds.has(it.id) && !!P.ancestralIds?.has(it.id));
     if (it.slot != null) b.dataset.slot = it.slot;
     else delete b.dataset.slot;
     const fv = b.querySelector('.fv');
