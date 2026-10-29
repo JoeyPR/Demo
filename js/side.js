@@ -13,7 +13,8 @@
     q.disabled = !on;
     if (!on) q.value = '';
     P.store.set('searchOn', on);
-    P.inv.refresh();
+    // Sync the grid's cached search state with tab-driven enable/disable.
+    P.emit('searchOn', on);
   };
 
   sw.disabled = true; sw.tabIndex = -1; sw.onclick = null;
