@@ -4,7 +4,7 @@ import {
   PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION, PICKUP_COLLECTION_DURATION,
   PICKUP_FLOAT_AMPLITUDE, PICKUP_FLOAT_PERIOD, pickupPose, pickupShouldCollect
 } from "../js/drop-world.mjs";
-const sample = () => ({ spawnedAt:0, startX:0, targetX:18, startY:PICKUP_HOVER_HEIGHT-2, targetY:PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
+const sample = (worldY = 0) => ({ spawnedAt:0, startX:0, targetX:18, worldX:18, startY:worldY + PICKUP_HOVER_HEIGHT-2, targetY:worldY + PICKUP_HOVER_HEIGHT, worldY:worldY + PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
 
 test("white pickup frame uses atlas cell X8 Y0 and a 20x20 source rect", () => {
   assert.deepEqual(PICKUP_ATLAS_RECT, {x:160,y:0,width:20,height:20});
@@ -21,6 +21,9 @@ test("drop animation grows a tiny item box to full size over 400ms", () => {
   assert.equal(end.scale,1);
   assert.equal(end.phase,"floating");
   assert.ok(first.x<end.x);
+  const afterPlayerMoves = pickupPose(pickup,PICKUP_SPAWN_DURATION + 1000,{x:200,y:500});
+  assert.equal(afterPlayerMoves.x,pickup.worldX, "settled pickup does not follow player X");
+  assert.equal(afterPlayerMoves.y,pickup.worldY, "settled pickup does not follow player Y");
   const afterPlayerMoves = pickupPose(pickup,PICKUP_SPAWN_DURATION + 1000,{x:200,y:0});
   assert.equal(afterPlayerMoves.x,pickup.targetX, "settled pickup keeps its captured world X");
 });
@@ -44,14 +47,14 @@ test("collection pulls the pickup toward the player and shrinks it over time", (
   assert.ok(middle.scale<1 && middle.scale>0);
   assert.equal(end.scale,0);
   assert.equal(end.x,4);
-  assert.equal(end.y,PICKUP_HOVER_HEIGHT);
+  assert.equal(end.y,pickup.worldY);
 });
-test("collection starts only when the player is grounded and close enough", () => {
+test("collection starts only when the grounded player reaches the fixed pickup", () => {
   const pickup=sample();
-  assert.equal(pickupShouldCollect(pickup,399,{x:20,y:0,ground:true}),false);
-  assert.equal(pickupShouldCollect(pickup,400,{x:20,y:-10,ground:false}),false);
-  assert.equal(pickupShouldCollect(pickup,400,{x:0,y:0,ground:true}),false, "stays dropped until the player actually approaches");
-  assert.equal(pickupShouldCollect(pickup,400,{x:9,y:0,ground:true}),true);
-  assert.equal(pickupShouldCollect(pickup,400,{x:20,y:0,ground:true}),true);
-  assert.equal(pickupShouldCollect(pickup,400,{x:-20,y:0,ground:true}),false);
+  assert.equal(pickupShouldCollect(pickup,399,{x:18,y:0,ground:true}),false);
+  assert.equal(pickupShouldCollect(pickup,400,{x:18,y:-10,ground:false}),false);
+  assert.equal(pickupShouldCollect(pickup,400,{x:0,y:0,ground:true}),false, "must not collect from the original drop point when pickup is away");
+  assert.equal(pickupShouldCollect(pickup,400,{x:12,y:0,ground:true}),false);
+  assert.equal(pickupShouldCollect(pickup,400,{x:14,y:0,ground:true}),true);
+  assert.equal(pickupShouldCollect(pickup,400,{x:18,y:0,ground:true}),true);
 });

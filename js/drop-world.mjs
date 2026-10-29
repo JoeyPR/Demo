@@ -12,12 +12,14 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 export function pickupPose(pickup, now, playerFrame) {
   const age = Math.max(0, now - pickup.spawnedAt);
+  const targetX = pickup.worldX ?? pickup.targetX;
+  const targetY = pickup.worldY ?? pickup.targetY ?? 0;
   if (pickup.collectAt != null) {
     const progress = clamp01((now - pickup.collectAt) / PICKUP_COLLECTION_DURATION);
     const eased = progress * progress * (3 - 2 * progress);
     return {
-      x: lerp(pickup.collectStartX ?? pickup.targetX, playerFrame.x, eased),
-      y: lerp(pickup.collectStartY ?? pickup.targetY ?? 0, (playerFrame.y ?? 0) + PICKUP_HOVER_HEIGHT, eased),
+      x: lerp(pickup.collectStartX ?? targetX, playerFrame.x, eased),
+      y: lerp(pickup.collectStartY ?? targetY, (playerFrame.y ?? 0) + PICKUP_HOVER_HEIGHT, eased),
       scale: 1 - eased,
       bob: 0,
       progress,
@@ -29,13 +31,13 @@ export function pickupPose(pickup, now, playerFrame) {
   const progress = clamp01(age / PICKUP_SPAWN_DURATION);
   const grow = Math.max(0.04, progress * progress);
   const arc = Math.sin(progress * Math.PI) * 4.2;
-  const y = lerp(pickup.startY ?? pickup.targetY ?? 0, pickup.targetY ?? 0, progress) - arc;
+  const y = lerp(pickup.startY ?? targetY, targetY, progress) - arc;
   const bobAge = Math.max(0, age - PICKUP_SPAWN_DURATION);
   const bob = age < PICKUP_SPAWN_DURATION
     ? 0
     : Math.sin((bobAge / PICKUP_FLOAT_PERIOD) * 2 * Math.PI) * PICKUP_FLOAT_AMPLITUDE;
   return {
-    x: lerp(pickup.startX ?? pickup.targetX, pickup.targetX, grow),
+    x: lerp(pickup.startX ?? targetX, targetX, grow),
     y,
     scale: grow,
     bob,
@@ -44,11 +46,13 @@ export function pickupPose(pickup, now, playerFrame) {
   };
 }
 
-export function pickupShouldCollect(pickup, now, playerFrame, reach = 10) {
+export function pickupShouldCollect(pickup, now, playerFrame, reach = 5) {
   if (pickup.collectAt != null || now - pickup.spawnedAt < PICKUP_SPAWN_DURATION) return false;
   if (!playerFrame || !playerFrame.ground) return false;
   const playerY = Number(playerFrame.y ?? 0);
-  const targetY = Number(pickup.targetY ?? 0);
-  return Math.abs(playerFrame.x - pickup.targetX) <= reach &&
-    Math.abs(playerY + PICKUP_HOVER_HEIGHT - targetY) <= 14;
+  const targetX = Number(pickup.worldX ?? pickup.targetX);
+  const targetY = Number(pickup.worldY ?? pickup.targetY ?? 0);
+  const droppedGroundY = targetY - PICKUP_HOVER_HEIGHT;
+  return Math.abs(playerFrame.x - targetX) <= reach &&
+    Math.abs(playerY - droppedGroundY) <= 4;
 }

@@ -4,6 +4,9 @@
 (function(){
   'use strict';
   const SHEETS = 'demo/assets/';
+  const SUPER_SUPPORTER_WRENCH = 'super-supporter';
+  const quickWrenchImg = new Image(); quickWrenchImg.src = 'img/wrench-quick.png';
+  const superWrenchImg = new Image(); superWrenchImg.src = 'img/wrench.png';
   let data = null;
   const imgCache = new Map();
 
@@ -31,28 +34,32 @@
     const draw = () => {
       x.clearRect(0, 0, 64, 64);
       let sx = 0, sy = 0, im = null;
-      if (isStyle && entry) { im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32; }
-      else if (entry) { im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32; }
-      else if (isStyle) {
-        /* base wrench: green tint */
-        im = document.createElement('canvas'); im.width = 32; im.height = 32;
-        const g = im.getContext('2d');
-        const src = new Image(); src.src = 'img/wrench.png';
+      if (isStyle && entry && entry[0] === SUPER_SUPPORTER_WRENCH) {
         const paint = () => {
-          g.drawImage(src, 0, 0);
+          const tinted = document.createElement('canvas'); tinted.width = tinted.height = 32;
+          const g = tinted.getContext('2d');
+          g.drawImage(superWrenchImg, 0, 0, 32, 32);
           g.globalCompositeOperation = 'multiply';
           g.fillStyle = 'rgb(128,255,128)';
           g.fillRect(0, 0, 32, 32);
           g.globalCompositeOperation = 'destination-in';
-          g.drawImage(src, 0, 0);
-          x.drawImage(im, 0, 0, 32, 32, 8, 8, 48, 48);
+          g.drawImage(superWrenchImg, 0, 0, 32, 32);
+          x.drawImage(tinted, 0, 0, 32, 32, 8, 8, 48, 48);
         };
-        if (src.complete) paint(); else src.onload = paint;
+        if (ready(superWrenchImg)) paint(); else superWrenchImg.addEventListener('load', paint, { once: true });
+        return c;
+      } else if (isStyle && entry) {
+        im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
+      } else if (entry) {
+        im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
+      } else if (isStyle) {
+        const paint = () => x.drawImage(quickWrenchImg, 0, 0, 32, 32, 8, 8, 48, 48);
+        if (ready(quickWrenchImg)) paint(); else quickWrenchImg.addEventListener('load', paint, { once: true });
         return c;
       }
       if (im && ready(im)) x.drawImage(im, sx, sy, 32, 32, 8, 8, 48, 48);
     };
-    const im = entry ? sheet(entry[2]) : null;
+    const im = entry && entry[0] !== SUPER_SUPPORTER_WRENCH ? sheet(entry[2]) : null;
     /* addEventListener (not onload) so shared sheets never drop a callback */
     if (im && !ready(im)) im.addEventListener('load', draw, { once: true });
     draw();
@@ -111,6 +118,8 @@
     };
     if (which === 'styles') {
       grid.append(mk(0, 'Wrench (base)', null, true));
+      grid.append(mk(SUPER_SUPPORTER_WRENCH, 'Super Supporter Wrench',
+        [SUPER_SUPPORTER_WRENCH, 'Super Supporter', 'img/wrench.png', 0, 0], true));
       for (const s of data.styles) grid.append(mk(s[0], s[1] + ' Wrench Style', s, true));
     } else {
       grid.append(mk(0, 'No decoration', null, false));

@@ -91,19 +91,28 @@
   const ready = im => im && (im.complete && im.naturalWidth > 0);
 
   /* green base wrench canvas (z6 on the site) */
-  const baseWrenchImg = new Image(); baseWrenchImg.src = 'img/wrench.png';
-  let baseWrenchCanvas = null;
+  const SUPER_SUPPORTER_WRENCH = 'super-supporter';
+  const baseWrenchImg = new Image(); baseWrenchImg.src = 'img/wrench-quick.png';
+  const superWrenchImg = new Image(); superWrenchImg.src = 'img/wrench.png';
+  let baseWrenchCanvas = null, superWrenchCanvas = null;
   function baseWrench() {
     if (baseWrenchCanvas || !ready(baseWrenchImg)) return baseWrenchCanvas;
     const c = document.createElement('canvas'); c.width = c.height = 32;
+    c.getContext('2d').drawImage(baseWrenchImg, 0, 0, 32, 32);
+    baseWrenchCanvas = c;
+    return c;
+  }
+  function superSupporterWrench() {
+    if (superWrenchCanvas || !ready(superWrenchImg)) return superWrenchCanvas;
+    const c = document.createElement('canvas'); c.width = c.height = 32;
     const g = c.getContext('2d');
-    g.drawImage(baseWrenchImg, 0, 0);
+    g.drawImage(superWrenchImg, 0, 0, 32, 32);
     g.globalCompositeOperation = 'multiply';
     g.fillStyle = 'rgb(128,255,128)';
     g.fillRect(0, 0, 32, 32);
     g.globalCompositeOperation = 'destination-in';
-    g.drawImage(baseWrenchImg, 0, 0);
-    baseWrenchCanvas = c;
+    g.drawImage(superWrenchImg, 0, 0, 32, 32);
+    superWrenchCanvas = c;
     return c;
   }
 
@@ -285,10 +294,10 @@
       return Pq;
     });
     const yOf = (part, h) => {
-      if (part.guild) return iconCenterY() - 0.875 * PB;
-      if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2;
-      if (part.flag) return iconCenterY() - h / 2 + 1.2 * PI;
-      if (part.badge) return iconCenterY() - h / 2;
+      if (part.guild) return iconCenterY() - 0.875 * PB + 2 * PI;
+      if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2 + 2 * PI;
+      if (part.flag) return iconCenterY() - h / 2 + 3.2 * PI;
+      if (part.badge) return iconCenterY() - h / 2 + 2 * PI;
       return baselineY - PR * 0.8 - (h - PR * 0.8) / 2;
     };
     const firstText = parts.findIndex(x => x.text !== undefined);
@@ -309,8 +318,10 @@
       const formattedChars = hasFormatting ? P.rtfont.characters(part.formatText) : null;
       if (part.wrench) {
         const LD = Ld, Lu = LO + LD / 2, Ln = baselineY - PR * 0.393 - Ld / 2 + LD / 2;
-        const entry = state.wrenchStyle !== BASE_WRENCH ? wrenchEntry('styles', state.wrenchStyle) : null;
-        const wim = entry ? sheet(entry[2]) : baseWrench();
+        const isSuperSupporterWrench = state.wrenchStyle === SUPER_SUPPORTER_WRENCH;
+        const entry = !isSuperSupporterWrench && state.wrenchStyle !== BASE_WRENCH
+          ? wrenchEntry('styles', state.wrenchStyle) : null;
+        const wim = isSuperSupporterWrench ? superSupporterWrench() : entry ? sheet(entry[2]) : baseWrench();
         const sx = entry ? entry[3] * 32 : 0, sy = entry ? entry[4] * 32 : 0;
         k.save();
         k.translate(Lu, Ln);
@@ -460,7 +471,7 @@
     setFlag(v) { state.flag = v; save(); },
     setGuildRole(v) { state.guildRole = v; save(); },
     setGuildFlag(id) { state.guildFlag = +id || 0; save(); },
-    setWrenchStyle(id) { state.wrenchStyle = +id || 0; save(); },
+    setWrenchStyle(id) { state.wrenchStyle = id === SUPER_SUPPORTER_WRENCH ? id : (+id || 0); save(); },
     setWrenchDecoration(id) { state.wrenchDecoration = +id || 0; save(); },
     setWrenchOn(on) { state.wrenchOn = !!on; save(); },
     toggleTitle(key) {

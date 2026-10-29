@@ -569,7 +569,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     const platePoint = projectCameraPoint(
       w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom * 0.92, state.clock, 0.75);
+    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom * 0.92, state.clock, 0.70);
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
@@ -683,6 +683,8 @@ function dropWorldItem(item, amount) {
   }
   const frame = state.lastFrame;
   const facing = Math.sign(frame.facing || motion?.facing || 1) || 1;
+  const dropX = frame.x + facing * 18;
+  const dropY = frame.y + PICKUP_HOVER_HEIGHT;
   const pickup = {
     id: state.nextPickupId++,
     item,
@@ -690,9 +692,11 @@ function dropWorldItem(item, amount) {
     icon: P.thumb(item, 64),
     spawnedAt: state.clock,
     startX: frame.x + facing * 5,
-    targetX: frame.x + facing * 18,
-    startY: frame.y + PICKUP_HOVER_HEIGHT - 2,
-    targetY: PICKUP_HOVER_HEIGHT,
+    targetX: dropX,
+    worldX: dropX,
+    startY: dropY - 2,
+    targetY: dropY,
+    worldY: dropY,
     collectAt: null,
     collectStartX: null,
     collectStartY: null,
@@ -715,8 +719,8 @@ function updatePickupLifecycle(frame) {
     const pickup = state.pickups[i];
     if (pickup.collectAt == null && pickupShouldCollect(pickup, state.clock, frame)) {
       pickup.collectAt = state.clock;
-      pickup.collectStartX = pickup.targetX;
-      pickup.collectStartY = pickup.targetY;
+      pickup.collectStartX = pickup.worldX ?? pickup.targetX;
+      pickup.collectStartY = pickup.worldY ?? pickup.targetY;
       P.emit("pickup-collect-start", { item: pickup.item, pickupId: pickup.id });
       continue;
     }
