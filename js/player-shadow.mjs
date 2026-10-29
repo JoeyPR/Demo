@@ -8,27 +8,21 @@ export const PLAYER_SHADOW_DROP = 12; // exact output-pixel downward shift
 export const PLAYER_SHADOW_OPACITY = 0.5; // 50% opacity
 export const PLAYER_SHADOW_COLOR = Object.freeze([0, 0, 0]);
 
-const excludedPass = /punch|aura|pet|particle|effect|visual|\bfx\b/i;
-const excludedAtlas = /particle|effect|ancestral|artifact|aura|punch/i;
+const excludedPass = /aura|pet|particle|effect|visual|\bfx\b/i;
+const excludedAtlas = /particle|effect|ancestral|artifact|aura/i;
 
 /** Return only opaque-sprite draw calls allowed to cast the player's shadow. */
 export function getPlayerShadowCalls(calls, {
   ancestralId = null,
-  punchingItemId = null,
-  punching = false,
 } = {}) {
   return calls.filter(call => {
     if (!call || !call.atlas || call.line) return false;
     if (call.owner != null && ancestralId != null && call.owner === ancestralId) return false;
-    if (call.owner != null && punchingItemId != null && call.owner === punchingItemId) return false;
     if (call.xmlParticle || call.fxEngine || call.referenceFx || call.particle ||
         call.effect || call.effects || call.visual || call.visuals || call.pet ||
         call.add || call.shadow === false) return false;
     if (excludedPass.test(String(call.pass ?? ""))) return false;
     if (excludedAtlas.test(String(call.atlas))) return false;
-    // Punch poses change the arm and hand silhouettes. They must not cast a
-    // displaced copy; the torso and non-punch clothing continue to do so.
-    if (punching && /arm|hand/i.test(String(call.pass ?? ""))) return false;
     return true;
   }).map(call => ({
     ...call,
