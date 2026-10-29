@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 const read=path=>readFileSync(new URL(path,import.meta.url),"utf8");
-const html=read("../index.html"),css=read("../css/drop.css"),side=read("../js/side.js"),drop=read("../js/drop.js"),app=read("../js/app.js"),world=read("../js/drop-world.mjs");
+const html=read("../index.html"),css=read("../css/drop.css"),side=read("../js/side.js"),drop=read("../js/drop.js"),app=read("../js/app.js"),world=read("../js/drop-world.mjs"),blackboxCss=read("../css/blackbox.css"),blackboxJs=read("../js/blackbox.js");
 
 test("DROP opens a confirmation dialog for the focused item",()=>{
   assert.match(side,/P\.emit\('drop-request', it\)/);
@@ -81,4 +81,17 @@ test("the item is behind the pickup frame and the popup stays in the preview rec
   assert.match(drop,/preview\.getBoundingClientRect\(\)/);
   assert.match(html,/css\/drop\.css/);
   assert.match(css,/position: fixed/);
+});
+
+
+test("Fist/Wrench drop attempts use the reusable blackbox above the inventory",()=>{
+  assert.match(html,/css\/blackbox\.css/);
+  assert.match(html,/id="blackbox" class="blackbox"/);
+  assert.match(html,/js\/blackbox\.js/);
+  assert.match(blackboxCss,/background:\s*rgba\(0,\s*0,\s*0,\s*\.75\)/);
+  assert.match(blackboxCss,/font-family:\s*"Nameplate CG"/);
+  assert.match(blackboxJs,/P\.blackbox\s*=/);
+  assert.match(blackboxJs,/getBoundingClientRect/);
+  assert.match(side,/P\.blackbox\?\.\("You can't drop that\."\)/);
+  assert.match(drop,/item\?\.tool[\s\S]*P\.blackbox\?\.\("You can't drop that\."\)/);
 });
