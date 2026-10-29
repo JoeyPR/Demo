@@ -11,7 +11,7 @@ import {
   playerShadowOffset,
 } from "../js/player-shadow.mjs";
 
-test("shadow caster selection keeps player/clothing and excludes FX, pets, particles, ancestrals, and punching", () => {
+test("shadow caster selection includes punch sprites while excluding FX, pets, particles, and ancestrals", () => {
   const calls = [
     { atlas: "player_body_only.png", pass: "BODY", alpha: 1 },
     { atlas: "hat.png", pass: "RenderHat", owner: 42, alpha: 0.8 },
@@ -30,18 +30,16 @@ test("shadow caster selection keeps player/clothing and excludes FX, pets, parti
 
   const selected = getPlayerShadowCalls(calls, { ancestralId: 99 });
   assert.deepEqual(selected.map(c => c.atlas), [
-    "player_body_only.png", "hat.png", "shirt-sleeve.png", "held-item.png",
+    "player_body_only.png", "hat.png", "player_puncharm.png", "shirt-sleeve.png", "held-item.png",
   ]);
   assert.deepEqual(selected[0].tint, [0, 0, 0]);
   assert.equal(selected[0].add, false);
   assert.equal(selected[1].alpha, 0.8, "existing item alpha is preserved");
 
-  const whilePunching = getPlayerShadowCalls(calls, {
-    ancestralId: 99, punchingItemId: 55, punching: true,
-  });
+  const whilePunching = getPlayerShadowCalls(calls, { ancestralId: 99 });
   assert.deepEqual(whilePunching.map(c => c.atlas), [
-    "player_body_only.png", "hat.png",
-  ]);
+    "player_body_only.png", "hat.png", "player_puncharm.png", "shirt-sleeve.png", "held-item.png",
+  ], "punch arm and punch-associated item remain in the player shadow mask");
 });
 
 test("avatar stays pinned to its feet while land tiles use the full 32-unit scale", () => {
