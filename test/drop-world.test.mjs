@@ -24,8 +24,6 @@ test("drop animation grows a tiny item box to full size over 400ms", () => {
   const afterPlayerMoves = pickupPose(pickup,PICKUP_SPAWN_DURATION + 1000,{x:200,y:500});
   assert.equal(afterPlayerMoves.x,pickup.worldX, "settled pickup does not follow player X");
   assert.equal(afterPlayerMoves.y,pickup.worldY, "settled pickup does not follow player Y");
-  const afterPlayerMoves = pickupPose(pickup,PICKUP_SPAWN_DURATION + 1000,{x:200,y:0});
-  assert.equal(afterPlayerMoves.x,pickup.targetX, "settled pickup keeps its captured world X");
 });
 test("pickup floats continuously after its spawn animation", () => {
   const pickup=sample();

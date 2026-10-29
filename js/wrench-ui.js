@@ -103,7 +103,8 @@
       b.type = 'button';
       b.className = 'wopt wrench-opt' + (id === (isStyle ? st.wrenchStyle : st.wrenchDecoration) ? ' on' : '');
       b.title = label;
-      if (!entry) b.append(document.createTextNode(isStyle ? 'Wrench' : 'None'));
+      if (!entry && isStyle) b.append(preview(null, true));
+      else if (!entry) b.append(document.createTextNode('None'));
       else b.append(preview(entry, isStyle));
       const name = document.createElement('span');
       name.className = 'wrench-opt-name';
