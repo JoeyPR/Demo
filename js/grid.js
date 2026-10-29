@@ -10,6 +10,11 @@
   const filterButton = P.$('#filter-button');
   const filterPanel = P.$('#filter-panel');
   const filterDisabledTabs = new Set(['custom', 'player', 'makeup']);
+  // The UI calls slot 9 "Ancestral" / "Artifacts". Use the category itself,
+  // not only the special ancestral IDs, to determine equipped artifact styling.
+  const artifactSlot = Object.entries(P.dat?.slots || {})
+    .find(([, label]) => label === 'Ancestral' || label === 'Artifacts')?.[0] ?? '9';
+  const isArtifactItem = item => item != null && String(item.slot) === String(artifactSlot);
   let activeFilter = String(P.store.get('filterCategory', 'all'));
   let searchOn = P.store.get('searchOn', true);
   let favs = new Set(P.store.get('favs', []));
@@ -149,14 +154,14 @@
       const id = +b.dataset.id;
       const equipped = eq.has(id);
       b.classList.toggle('sel', equipped);
-      // Artifact art is a special equipped state, not the default item box.
-      b.classList.toggle('art', equipped && !!P.ancestralIds?.has(id));
+      // Every item in the Artifacts slot gets the special art only while equipped.
+      b.classList.toggle('art', equipped && String(b.dataset.slot) === String(artifactSlot));
     }
     for (const b of P.$('#quick').querySelectorAll('.box')) if (b.dataset.id) {
       const id = +b.dataset.id;
       const equipped = eq.has(id);
       b.classList.toggle('sel', equipped);
-      b.classList.toggle('art', equipped && !!P.ancestralIds?.has(id));
+      b.classList.toggle('art', equipped && String(b.dataset.slot) === String(artifactSlot));
     }
   }
 
@@ -283,7 +288,7 @@
     b.classList.toggle('gone', !!it.gone);
     b.classList.toggle('fav', favs.has(it.id));
     const equippedIds = P.equippedIds || new Set();
-    b.classList.toggle('art', equippedIds.has(it.id) && !!P.ancestralIds?.has(it.id));
+    b.classList.toggle('art', equippedIds.has(it.id) && isArtifactItem(it));
     if (it.slot != null) b.dataset.slot = it.slot;
     else delete b.dataset.slot;
     const fv = b.querySelector('.fv');
