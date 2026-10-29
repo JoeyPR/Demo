@@ -48,6 +48,7 @@ test("nameplate size and icon positioning match the original values", () => {
 test("Dr. title keeps the reference red style without adding a glow", () => {
   assert.ok(plate.includes("dr:     { rgba: [255, 39, 29, 255] },"));
   assert.ok(!plate.includes("dr:     { rgba: [255, 39, 29, 255], shadow:"));
+  assert.ok(plate.includes("const drPrefixColour = drTitle && styleKey === 'dr' ?"), "Dr. must not override Immortal/legend styling");
 });
 
 test("player name and guild role text use their requested independent size increases", () => {
@@ -65,26 +66,24 @@ test("wrench Status is single-select and scales styles plus decorations", () => 
   assert.ok(plate.includes("wrenchStatus: 'default'"));
   assert.ok(plate.includes("setWrenchStatus(id)"));
   assert.ok(plate.includes("WRENCH_STATUS_SCALE[state.wrenchStatus]"));
+  assert.ok(plate.includes("default: 0.6, supporter: 0.7, 'super-supporter': 0.8"));
+  assert.ok(wrenchUI.includes("default: 0.6, supporter: 0.7, 'super-supporter': 0.8"));
   assert.ok(wrenchUI.includes("STATUS_OPTIONS = ["));
   assert.ok(wrenchUI.includes("P.plateConfig.setWrenchStatus(id)"));
   assert.ok(wrenchUI.includes("superOption.disabled = st.wrenchStatus !== 'super-supporter'"));
   assert.ok(wrenchUI.includes("preview(entry, isStyle, st.wrenchStatus)"));
 });
 
-test("country flag metadata is complete and the renderer uses the old Planner flag assets", () => {
+test("country flag metadata is complete and flag assets are bundled locally in Demo", () => {
   assert.ok(flags.length >= 250, "all country flag options should be present");
   for (const id of ["puertorico", "unitedstates", "fr", "jp", "role_fisherman"])
     assert.ok(flags.some(flag => flag.value === id), "missing flag option " + id);
-  assert.ok(plate.includes("COUNTRY_FLAGS_DIR = 'https://raw.githubusercontent.com/JoeyPR/Planner/main/assets/ui/flags/'"));
-  assert.ok(plate.includes("flag: 'unitedstates'"));
-  assert.ok(plate.includes("if (state.flag === 'us') state.flag = 'unitedstates';"));
-  assert.ok(plate.includes("if (state.flag === 'pr') state.flag = 'puertorico';"));
-  assert.ok(!plate.includes("im.crossOrigin = 'anonymous'"), "remote flags must not be blocked by a forced CORS image request");
-  assert.ok(plate.includes("https://cdn.jsdelivr.net/gh/JoeyPR/Planner@main/assets/ui/flags/"));
-  assert.ok(plate.includes("im.dataset.flagMirror = '1'"));
+  assert.ok(plate.includes("COUNTRY_FLAGS_DIR = 'img/flags/'"));
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR + state.flag + '.png'"));
+  assert.ok(!plate.includes("raw.githubusercontent.com/JoeyPR/Planner"));
+  assert.ok(!plate.includes("cdn.jsdelivr.net/gh/JoeyPR/Planner"));
+  assert.ok(!plate.includes("im.dataset.flagMirror"));
 });
-
 
 test("guild roles inherit active title styling rather than always becoming a plain tag", () => {
   assert.ok(plate.includes("const hasTextOrStyle = !!styleKey || sel.some(t => t.prefix || t.suffix)"));

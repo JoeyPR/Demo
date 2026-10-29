@@ -5,7 +5,7 @@
   'use strict';
   const SHEETS = 'demo/assets/';
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const STATUS_SCALE = Object.freeze({ default: 1 / 1.5, supporter: 0.8, 'super-supporter': 1 });
+  const STATUS_SCALE = Object.freeze({ default: 0.6, supporter: 0.7, 'super-supporter': 0.8 });
   const STATUS_OPTIONS = [
     ['default', 'Default'],
     ['supporter', 'Supporter'],

@@ -62,8 +62,8 @@
   const CENTERED_DECORATIONS = new Set([15542, 15688, 15940, 15988, 16056, 16156, 16222, 15554, 14890, 15772, 14574, 14590, 15134, 15420, 15012, 15510, 14712, 14822]);
   const BASE_WRENCH = 32;                    /* the plain green wrench (L0) */
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const WRENCH_STATUS_SCALE = Object.freeze({ default: 1 / 1.5, supporter: 0.8, 'super-supporter': 1 });
-  const COUNTRY_FLAGS_DIR = 'https://raw.githubusercontent.com/JoeyPR/Planner/main/assets/ui/flags/';
+  const WRENCH_STATUS_SCALE = Object.freeze({ default: 0.6, supporter: 0.7, 'super-supporter': 0.8 });
+  const COUNTRY_FLAGS_DIR = 'img/flags/';
   const TITLES_DIR = 'img/titles/', FLAGS_DIR = 'img/flags/', SHEETS_DIR = 'demo/assets/';
 
   /* ---------------- state ---------------- */
@@ -129,19 +129,9 @@
     let im = imageCache.get(src);
     if (!im) {
       im = new Image();
-      // Country flags are hosted in the old Planner repo. Load them as ordinary
-      // display-only images, without forcing CORS mode on the canvas.
-      const flagFilename = src.startsWith(COUNTRY_FLAGS_DIR) ? src.slice(COUNTRY_FLAGS_DIR.length) : null;
+      // Country flags and selectable plate icons are bundled locally in Demo.
       im.onload = () => P.emit('plate-update');
-      im.onerror = () => {
-        // Use a CDN mirror if raw.githubusercontent is unreachable from the client.
-        if (flagFilename && !im.dataset.flagMirror) {
-          im.dataset.flagMirror = '1';
-          im.src = 'https://cdn.jsdelivr.net/gh/JoeyPR/Planner@main/assets/ui/flags/' + flagFilename;
-          return;
-        }
-        P.emit('plate-update');
-      };
+      im.onerror = () => P.emit('plate-update');
       im.src = src;
       imageCache.set(src, im);
     }
@@ -244,7 +234,7 @@
       : null;
     const drTitle = has('dr');
     const usedFormatCode = P.rtfont.characters(rawGrowId).find(char => char.code)?.code ?? null;
-    const drPrefixColour = drTitle ? (P.rtfont.colors[usedFormatCode ?? '4'] ?? P.rtfont.colors['4']) : null;
+    const drPrefixColour = drTitle && styleKey === 'dr' ? (P.rtfont.colors[usedFormatCode ?? '4'] ?? P.rtfont.colors['4']) : null;
     parts.push({
       text: P.rtfont.strip(rawName),
       formatText: rawName,
