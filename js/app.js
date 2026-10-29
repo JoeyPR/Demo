@@ -14,7 +14,7 @@ import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROU
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
-import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_DURATION, pickupPose, pickupShouldCollect } from "./drop-world.mjs";
+import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -703,7 +703,10 @@ function dropWorldItem(item, amount) {
     collectStartX: null,
     collectStartY: null,
     artCanvas: null,
-    shadowCanvas: null
+    shadowCanvas: null,
+    frameCanvas: null,
+    frameShadowCanvas: null,
+    iconCanvas: null
   };
   state.pickups.push(pickup);
   item.gone = true;
@@ -727,7 +730,7 @@ function updatePickupLifecycle(frame) {
       continue;
     }
     if (pickup.collectAt != null &&
-        state.clock - pickup.collectAt >= PICKUP_COLLECTION_DURATION) {
+        state.clock - pickup.collectAt >= PICKUP_COLLECTION_TOTAL_DURATION) {
       pickup.item.gone = false;
       state.pickups.splice(i, 1);
       inventoryChanged = true;
@@ -738,90 +741,177 @@ function updatePickupLifecycle(frame) {
   if (inventoryChanged) P.inv.refresh();
 }
 
+function pickupShadowFrom(source) {
+  const shadow = document.createElement("canvas");
+  shadow.width = shadow.height = 64;
+  const shadowCtx = shadow.getContext("2d");
+  shadowCtx.drawImage(source, 0, 0);
+  shadowCtx.globalCompositeOperation = "source-in";
+  shadowCtx.fillStyle = "rgba(" + PLAYER_SHADOW_COLOR.join(",") + ",1)";
+  shadowCtx.fillRect(0, 0, shadow.width, shadow.height);
+  return shadow;
+}
+
 function ensurePickupArt(pickup) {
-  if (pickup.artCanvas && pickup.shadowCanvas) return;
+  if (pickup.artCanvas && pickup.shadowCanvas && pickup.frameCanvas &&
+      pickup.frameShadowCanvas && pickup.iconCanvas) return;
   if (!pickupSprite.complete || pickupSprite.naturalWidth < PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) return;
 
+  // Keep the frame and item on separate transparent layers so the icon can
+  // jump out of the frame during collection while the empty frame shrinks.
+  const frame = document.createElement("canvas");
+  frame.width = frame.height = 64;
+  const frameCtx = frame.getContext("2d");
+  frameCtx.imageSmoothingEnabled = false;
+  frameCtx.drawImage(pickupSprite,
+    PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
+    PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
+    0, 0, frame.width, frame.height);
+
+  const icon = document.createElement("canvas");
+  icon.width = icon.height = 64;
+  const iconCtx = icon.getContext("2d");
+  iconCtx.imageSmoothingEnabled = false;
+  if (pickup.icon) {
+    const iconSize = icon.width * 0.64;
+    iconCtx.drawImage(pickup.icon,
+      (icon.width - iconSize) / 2, (icon.height - iconSize) / 2, iconSize, iconSize);
+  }
+
+  // Normal state: the icon sits behind the pickup frame exactly as before.
   const art = document.createElement("canvas");
   art.width = art.height = 64;
   const artCtx = art.getContext("2d");
   artCtx.imageSmoothingEnabled = false;
+  artCtx.drawImage(icon, 0, 0);
+  artCtx.drawImage(frame, 0, 0);
 
-  // Render the item first, inside the frame's transparent centre.
-  if (pickup.icon) {
-    const iconSize = art.width * 0.64;
-    artCtx.drawImage(pickup.icon,
-      (art.width - iconSize) / 2, (art.height - iconSize) / 2, iconSize, iconSize);
-  }
-  artCtx.drawImage(pickupSprite,
-    PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
-    PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
-    0, 0, art.width, art.height);
-
-  // The exact same alpha-mask approach as the player's silhouette shadow:
-  // preserve the composed pickup's alpha and recolor its pixels to solid black.
-  const shadow = document.createElement("canvas");
-  shadow.width = shadow.height = 64;
-  const shadowCtx = shadow.getContext("2d");
-  shadowCtx.drawImage(art, 0, 0);
-  shadowCtx.globalCompositeOperation = "source-in";
-  shadowCtx.fillStyle = "rgba(" + PLAYER_SHADOW_COLOR.join(",") + ",1)";
-  shadowCtx.fillRect(0, 0, shadow.width, shadow.height);
+  pickup.iconCanvas = icon;
+  pickup.frameCanvas = frame;
+  pickup.frameShadowCanvas = pickupShadowFrom(frame);
   pickup.artCanvas = art;
-  pickup.shadowCanvas = shadow;
+  pickup.shadowCanvas = pickupShadowFrom(art);
+}
+
+function pickupInventoryTarget() {
+  const grid = document.getElementById("grid");
+  const canvasRect = world.getBoundingClientRect();
+  if (!grid || !canvasRect.width || !canvasRect.height) {
+    return { x: world.width * 0.5, y: world.height * 0.78 };
+  }
+  const r = grid.getBoundingClientRect();
+  // Aim at the first visible inventory row, just inside its upper-left edge.
+  // Convert screen coordinates into the preview canvas's fixed logical space.
+  const screenX = r.left + Math.min(r.width * 0.1, 65);
+  const screenY = r.top + Math.min(r.height * 0.14, 48);
+  return {
+    x: (screenX - canvasRect.left) * world.width / canvasRect.width,
+    y: (screenY - canvasRect.top) * world.height / canvasRect.height,
+  };
 }
 
 function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
   if (!state.pickups.length) return;
   c.imageSmoothingEnabled = false;
+  const inventoryTarget = pickupInventoryTarget();
+
   for (const pickup of state.pickups) {
     const pose = pickupPose(pickup, state.clock, frame);
-    // pose.x / pose.y are world coordinates. Convert them to viewport coordinates
-    // once, around the camera pivot, instead of letting a second transform act
-    // on player-relative coordinates. No edge clamp: the canvas clips offscreen
-    // pickups while the world object remains at its dropped point.
-    const size = PICKUP_SIZE * scale * pose.scale * zoom;
-    if (size < 0.5) continue;
+    const baseSize = PICKUP_SIZE * scale * zoom;
+    const size = baseSize * pose.scale;
     const anchorX = cameraPivotX + (pose.x - frame.x) * scale * zoom;
     const bottomY = cameraPivotY +
       (16 * PLAYER_VISUAL_SCALE + pose.y - frame.y - pose.bob) * scale * zoom;
     const left = anchorX - size / 2;
     const top = bottomY - size;
+    const isFlying = pose.phase === "collecting";
+
+    // A collecting pickup can shrink away while its separate icon is still
+    // in flight, so don't skip the entire pickup just because the box is tiny.
+    if (!isFlying && size < 0.5) continue;
     c.save();
     ensurePickupArt(pickup);
 
-    // Keep the existing 12px pickup-shadow offset proportional to camera zoom.
     const shadowDirection = playerShadowOffset(-1);
-    if (pickup.shadowCanvas) {
-      c.save();
-      c.globalAlpha = PLAYER_SHADOW_OPACITY;
-      c.drawImage(pickup.shadowCanvas,
-        left + shadowDirection.x * zoom,
-        top + shadowDirection.y * zoom, size, size);
-      c.restore();
+    if (!isFlying) {
+      // Drop / 500 ms collection pause: retain the original complete pickup.
+      if (pickup.shadowCanvas) {
+        c.save();
+        c.globalAlpha *= PLAYER_SHADOW_OPACITY;
+        c.drawImage(pickup.shadowCanvas,
+          left + shadowDirection.x * zoom,
+          top + shadowDirection.y * zoom, size, size);
+        c.restore();
+      }
+
+      if (pickup.artCanvas) {
+        c.drawImage(pickup.artCanvas, left, top, size, size);
+      } else {
+        if (pickup.icon) {
+          const iconSize = size * 0.64;
+          const inset = (size - iconSize) / 2;
+          c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
+        }
+        if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
+          c.drawImage(pickupSprite,
+            PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
+            PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
+            left, top, size, size);
+        } else {
+          c.strokeStyle = "#fff";
+          c.lineWidth = Math.max(1, size * 0.06);
+          c.strokeRect(left + size * 0.08, top + size * 0.08, size * 0.84, size * 0.84);
+        }
+      }
+    } else {
+      // Draw only the empty pickup frame at its original world position.
+      if (size >= 0.5) {
+        if (pickup.frameShadowCanvas) {
+          c.save();
+          c.globalAlpha *= PLAYER_SHADOW_OPACITY;
+          c.drawImage(pickup.frameShadowCanvas,
+            left + shadowDirection.x * zoom,
+            top + shadowDirection.y * zoom, size, size);
+          c.restore();
+        }
+        if (pickup.frameCanvas) {
+          c.drawImage(pickup.frameCanvas, left, top, size, size);
+        } else if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
+          c.drawImage(pickupSprite,
+            PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
+            PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
+            left, top, size, size);
+        } else {
+          c.strokeStyle = "#fff";
+          c.lineWidth = Math.max(1, size * 0.06);
+          c.strokeRect(left + size * 0.08, top + size * 0.08, size * 0.84, size * 0.84);
+        }
+      }
+
+      // Launch the item icon up and right first, then curve left into the
+      // inventory. It scales gradually and fades near the target.
+      const start = { x: anchorX, y: bottomY - baseSize / 2 };
+      const flight = pickupIconFlightPose(start, inventoryTarget, pose.iconProgress, baseSize);
+      if (flight.alpha > 0.005) {
+        const flightSize = baseSize * flight.scale;
+        c.save();
+        c.globalAlpha *= flight.alpha;
+        if (pickup.iconCanvas) {
+          c.drawImage(pickup.iconCanvas,
+            flight.x - flightSize / 2, flight.y - flightSize / 2,
+            flightSize, flightSize);
+        } else if (pickup.icon) {
+          const iconSize = flightSize * 0.64;
+          c.drawImage(pickup.icon,
+            flight.x - iconSize / 2, flight.y - iconSize / 2,
+            iconSize, iconSize);
+        }
+        c.restore();
+      }
     }
 
-    if (pickup.artCanvas) {
-      c.drawImage(pickup.artCanvas, left, top, size, size);
-    } else {
-      // Loading fallback; the sprite-composed art replaces this on the next frame.
-      if (pickup.icon) {
-        const iconSize = size * 0.64;
-        const inset = (size - iconSize) / 2;
-        c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
-      }
-      if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
-        c.drawImage(pickupSprite,
-          PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
-          PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
-          left, top, size, size);
-      } else {
-        c.strokeStyle = "#fff";
-        c.lineWidth = Math.max(1, size * 0.06);
-        c.strokeRect(left + size * 0.08, top + size * 0.08, size * 0.84, size * 0.84);
-      }
-    }
-    if (pickup.amount > 1 && pose.scale > 0.25) {
+    // Keep dropped stack counts attached to the shrinking box, not the flying icon.
+    if (pickup.amount > 1 && size > 2 && pose.scale > 0.25) {
       const label = String(pickup.amount);
       const fontSize = Math.max(3, Math.min(size * 0.27, scale * 5.5 * zoom));
       c.font = "700 " + fontSize + "px 'Main CG', sans-serif";
