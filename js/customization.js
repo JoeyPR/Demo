@@ -153,17 +153,8 @@
     };
     flagOptions();
     if (!FLAGS.length) {
-      fetch('img/flags/index.json').then(r => r.json()).then(codes => {
-        const named = {};
-        try {
-          const dn = new Intl.DisplayNames(['en'], { type: 'region' });
-          for (const c of codes) {
-            if (c.length === 2) { try { const n = dn.of(c.toUpperCase()); if (n && n !== c.toUpperCase()) named[c] = n; } catch {}
-            }
-          }
-        } catch {}
-        for (const [c, n] of [['catalonia', 'Catalonia'], ['england', 'England'], ['europeanunion', 'European Union'], ['scotland', 'Scotland'], ['wales', 'Wales']]) named[c] = n;
-        FLAGS.push(...codes.map(c => [c, named[c] || c.toUpperCase()]));
+      fetch('img/flags/options.json').then(r => r.json()).then(options => {
+        FLAGS.push(...options.map(item => [item.value, item.label]));
         FLAGS.sort((a, b) => a[1].localeCompare(b[1]));
         flagOptions();
       }).catch(() => {});

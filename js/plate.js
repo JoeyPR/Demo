@@ -17,7 +17,7 @@
     legend: { shadow: { at: 2, code: true } },
     l125:   { rgba: [0, 255, 255, 150], shadow: { at: 2, rgba: [3, 98, 134, 150] }, swell: [1, 0.175] },
     mentor: { rgba: [247, 148, 30, 255], shadow: { at: 2, rgba: [249, 240, 111, 200] } },
-    dr:     { rgba: [255, 39, 29, 255] },
+    dr:     { rgba: [255, 39, 29, 255], shadow: { at: 2, rgba: [0, 0, 0, 128] } },
     party:  { letters: [[255, 11, 223], [255, 217, 11], [133, 255, 169]], shadow: { at: 2, rgba: [0, 0, 0, 50] } },
     g4g:    { shadow: { at: 1.2, same: true }, swell: [0.9, 0.175] }
   };
@@ -61,16 +61,21 @@
   /* decorations that render centered on the wrench (a$ on the site) */
   const CENTERED_DECORATIONS = new Set([15542, 15688, 15940, 15988, 16056, 16156, 16222, 15554, 14890, 15772, 14574, 14590, 15134, 15420, 15012, 15510, 14712, 14822]);
   const BASE_WRENCH = 32;                    /* the plain green wrench (L0) */
+  const SUPER_SUPPORTER_WRENCH = 'super-supporter';
+  const WRENCH_STATUS_SCALE = Object.freeze({ default: 1 / 1.5, supporter: 0.8, 'super-supporter': 1 });
+  const COUNTRY_FLAGS_DIR = 'https://raw.githubusercontent.com/JoeyPR/Planner/main/assets/ui/flags/';
   const TITLES_DIR = 'img/titles/', FLAGS_DIR = 'img/flags/', SHEETS_DIR = 'demo/assets/';
 
   /* ---------------- state ---------------- */
   const DEFAULTS = {
     growId: '', flag: 'us', role: '', titles: [],
-    guildRole: '', guildFlag: 0, wrenchStyle: 0, wrenchDecoration: 0,
+    guildRole: '', guildFlag: 0, wrenchStatus: 'default', wrenchStyle: 0, wrenchDecoration: 0,
     wrenchOn: false          /* the Fist/Wrench quick box: wrench only shows with a GrowID */
   };
   let state = Object.assign({}, DEFAULTS, P.store.get('plate', {}));
   if (!Array.isArray(state.titles)) state.titles = [];
+  if (!Object.hasOwn(WRENCH_STATUS_SCALE, state.wrenchStatus)) state.wrenchStatus = 'default';
+  if (state.wrenchStatus !== 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
   if (typeof state.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);
   const save = () => { P.store.set('plate', state); P.emit('plate-update'); };
 
@@ -91,7 +96,6 @@
   const ready = im => im && (im.complete && im.naturalWidth > 0);
 
   /* green base wrench canvas (z6 on the site) */
-  const SUPER_SUPPORTER_WRENCH = 'super-supporter';
   const baseWrenchImg = new Image(); baseWrenchImg.src = 'img/wrench-quick.png';
   const superWrenchImg = new Image(); superWrenchImg.src = 'img/wrench.png';
   let baseWrenchCanvas = null, superWrenchCanvas = null;
@@ -122,6 +126,7 @@
     let im = imageCache.get(src);
     if (!im) {
       im = new Image();
+      if (src.startsWith(COUNTRY_FLAGS_DIR)) im.crossOrigin = 'anonymous';
       im.src = src;
       im.onload = () => P.emit('plate-update');
       imageCache.set(src, im);
@@ -176,13 +181,13 @@
   /* guild tag width with small-caps scaling ($6 / X7 on the site) */
   const CAPS = 0.88;
   const withCaps = s => [...s].map(ch => [ch, /[A-Z]/.test(ch)]);
-  function tagWidth(ctx, text, size) {
+  function tagWidth(ctx, text, size, restoreSize = size) {
     let w = 0;
     for (const [ch, cap] of withCaps(text)) {
       ctx.font = '700 ' + (cap ? size * CAPS : size) + "px 'Nameplate CG', sans-serif";
       w += ctx.measureText(ch).width;
     }
-    ctx.font = '700 ' + size + "px 'Nameplate CG', sans-serif";
+    ctx.font = '700 ' + restoreSize + "px 'Nameplate CG', sans-serif";
     return w;
   }
 
@@ -200,7 +205,7 @@
     const guildImg = state.guildFlag && !sel.some(t => t.key === 'tt' || t.key === 'cc') ? guildFlag(state.guildFlag) : null;
     if (guildImg) parts.push({ img: guildImg, guild: true });
     else if (badgeImg) parts.push({ img: badgeImg, badge: badgeTitle.key });
-    else if (state.flag) parts.push({ img: FLAGS_DIR + state.flag + '.png', flag: true });
+    else if (state.flag) parts.push({ img: COUNTRY_FLAGS_DIR + state.flag + '.png', flag: true });
     for (const t of sel) if (t.after) parts.push({ img: TITLES_DIR + t.after + '.png', after: true });
     for (const t of both) parts.push({ img: TITLES_DIR + t.both + '.png' });
     const prefix = sel.find(t => t.prefix)?.prefix ?? '';
@@ -211,11 +216,10 @@
     const style = styleKey ? STYLES[styleKey] : null;
     const swell = styleKey === 'g4g' && legendary ? null : style?.swell ?? null;
     const code = CODE_COLORS[has('dr') && has('legend') ? 4 : 2];
-    const hasTextOrStyle = !!styleKey || sel.some(t => t.prefix || t.suffix);
     const guildRole = GUILD_ROLES[state.guildRole];
-    const tagSeparate = guildRole && !hasTextOrStyle;
+    const tagSeparate = !!guildRole;
     const rawGrowId = P.rtfont.sanitizeGrowId(state.growId.trim(), 19);
-    const rawName = prefix + rawGrowId + suffix + (guildRole && !tagSeparate ? ' ' + guildRole.text : '');
+    const rawName = prefix + rawGrowId + suffix;
     const drTitle = has('dr');
     const usedFormatCode = P.rtfont.characters(rawGrowId).find(char => char.code)?.code ?? null;
     const drPrefixColour = drTitle ? (P.rtfont.colors[usedFormatCode ?? '4'] ?? P.rtfont.colors['4']) : null;
@@ -247,7 +251,8 @@
     const parts = built.parts;
     const factor = Number.isFinite(textScale) && textScale > 0 ? textScale : 1;
     const iconPR = built.size * p;             /* icon size basis */
-    const PR = iconPR * factor;                /* text font size only */
+    const PR = iconPR * factor + 2;             /* player name: +2px */
+    const tagPR = iconPR * factor + 3;          /* guild role: +3px */
     const Pq = 1.6 * p;                       /* icon line gap */
     k.save();
     k.setTransform(1, 0, 0, 1, 0, 0);
@@ -280,10 +285,10 @@
     const LE = parts.findIndex(x => x.flag || x.badge || x.guild);
     const LP = parts[LE];
     const LL = !!LP?.guild;                    /* has guild banner */
-    const LC = iconPR * 1.226 * 1.2;          /* wrench icon stays full-size */
+    const LC = iconPR * 1.226 * 1.2 * (WRENCH_STATUS_SCALE[state.wrenchStatus] ?? WRENCH_STATUS_SCALE.default);
     const widths = parts.map(part => {
       if (part.wrench) return LC;
-      if (part.tag) return tagWidth(k, part.text, PR);
+      if (part.tag) return tagWidth(k, part.text, tagPR, PR);
       if (part.text !== undefined) return k.measureText(part.text).width * (1 + (part.grow ?? 0));
       return sizeOf(part)[0];
     });
@@ -317,7 +322,7 @@
       const formattedChars = hasFormatting ? P.rtfont.characters(part.formatText) : null;
       if (part.wrench) {
         const LD = Ld, Lu = LO + LD / 2, Ln = baselineY - PR * 0.393 - Ld / 2 + LD / 2;
-        const isSuperSupporterWrench = state.wrenchStyle === SUPER_SUPPORTER_WRENCH;
+        const isSuperSupporterWrench = state.wrenchStatus === 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH;
         const entry = !isSuperSupporterWrench && state.wrenchStyle !== BASE_WRENCH
           ? wrenchEntry('styles', state.wrenchStyle) : null;
         const wim = isSuperSupporterWrench ? superSupporterWrench() : entry ? sheet(entry[2]) : baseWrench();
@@ -384,7 +389,7 @@
         } else if (part.tag) {
           let x = LO, ci = 0;
           for (const [ch, cap] of withCaps(part.text)) {
-            k.font = '700 ' + (cap ? PR * CAPS : PR) + "px 'Nameplate CG', sans-serif";
+            k.font = '700 ' + (cap ? tagPR * CAPS : tagPR) + "px 'Nameplate CG', sans-serif";
             paint(ch, x, formattedChars?.[ci]?.rgb || part.colour);
             x += k.measureText(ch).width;
             ci++;
@@ -470,7 +475,17 @@
     setFlag(v) { state.flag = v; save(); },
     setGuildRole(v) { state.guildRole = v; save(); },
     setGuildFlag(id) { state.guildFlag = +id || 0; save(); },
-    setWrenchStyle(id) { state.wrenchStyle = id === SUPER_SUPPORTER_WRENCH ? id : (+id || 0); save(); },
+    setWrenchStatus(id) {
+      state.wrenchStatus = Object.hasOwn(WRENCH_STATUS_SCALE, id) ? id : 'default';
+      if (state.wrenchStatus !== 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
+      save();
+    },
+    setWrenchStyle(id) {
+      state.wrenchStyle = id === SUPER_SUPPORTER_WRENCH
+        ? (state.wrenchStatus === 'super-supporter' ? id : 0)
+        : (+id || 0);
+      save();
+    },
     setWrenchDecoration(id) { state.wrenchDecoration = +id || 0; save(); },
     setWrenchOn(on) { state.wrenchOn = !!on; save(); },
     toggleTitle(key) {

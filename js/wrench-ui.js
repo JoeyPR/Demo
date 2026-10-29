@@ -5,6 +5,12 @@
   'use strict';
   const SHEETS = 'demo/assets/';
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
+  const STATUS_SCALE = Object.freeze({ default: 1 / 1.5, supporter: 0.8, 'super-supporter': 1 });
+  const STATUS_OPTIONS = [
+    ['default', 'Default'],
+    ['supporter', 'Supporter'],
+    ['super-supporter', 'Super Supporter']
+  ];
   const quickWrenchImg = new Image(); quickWrenchImg.src = 'img/wrench-quick.png';
   const superWrenchImg = new Image(); superWrenchImg.src = 'img/wrench.png';
   let data = null;
@@ -25,12 +31,14 @@
   const ready = im => im.complete && im.naturalWidth > 0;
 
   /* 64x64 preview: draw the 32x32 cell trimmed and centered, like the site */
-  function preview(entry, isStyle) {
+  function preview(entry, isStyle, status = 'default') {
     const c = document.createElement('canvas');
     c.width = 64; c.height = 64;
     c.className = 'wprev';
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
+    const drawSize = 48 * (STATUS_SCALE[status] ?? STATUS_SCALE.default);
+    const drawAt = (64 - drawSize) / 2;
     const draw = () => {
       x.clearRect(0, 0, 64, 64);
       let sx = 0, sy = 0, im = null;
@@ -44,7 +52,7 @@
           g.fillRect(0, 0, 32, 32);
           g.globalCompositeOperation = 'destination-in';
           g.drawImage(superWrenchImg, 0, 0, 32, 32);
-          x.drawImage(tinted, 0, 0, 32, 32, 8, 8, 48, 48);
+          x.drawImage(tinted, 0, 0, 32, 32, drawAt, drawAt, drawSize, drawSize);
         };
         if (ready(superWrenchImg)) paint(); else superWrenchImg.addEventListener('load', paint, { once: true });
         return c;
@@ -53,11 +61,11 @@
       } else if (entry) {
         im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
       } else if (isStyle) {
-        const paint = () => x.drawImage(quickWrenchImg, 0, 0, 32, 32, 8, 8, 48, 48);
+        const paint = () => x.drawImage(quickWrenchImg, 0, 0, 32, 32, drawAt, drawAt, drawSize, drawSize);
         if (ready(quickWrenchImg)) paint(); else quickWrenchImg.addEventListener('load', paint, { once: true });
         return c;
       }
-      if (im && ready(im)) x.drawImage(im, sx, sy, 32, 32, 8, 8, 48, 48);
+      if (im && ready(im)) x.drawImage(im, sx, sy, 32, 32, drawAt, drawAt, drawSize, drawSize);
     };
     const im = entry && entry[0] !== SUPER_SUPPORTER_WRENCH ? sheet(entry[2]) : null;
     /* addEventListener (not onload) so shared sheets never drop a callback */
@@ -83,6 +91,29 @@
     }
     const st = P.plateConfig.get();
 
+    /* Status is single-select and controls the rendered scale of both wrenches and decorations. */
+    const statusWrap = document.createElement('div');
+    statusWrap.className = 'wrench-status';
+    const statusLabel = document.createElement('div');
+    statusLabel.className = 'wrench-status-label';
+    statusLabel.textContent = 'Status';
+    const statusOptions = document.createElement('div');
+    statusOptions.className = 'wrench-status-options';
+    for (const [id, label] of STATUS_OPTIONS) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'wrench-status-option' + (st.wrenchStatus === id ? ' on' : '');
+      b.textContent = label;
+      b.setAttribute('aria-pressed', String(st.wrenchStatus === id));
+      b.addEventListener('click', () => {
+        P.plateConfig.setWrenchStatus(id);
+        render(container);
+      });
+      statusOptions.append(b);
+    }
+    statusWrap.append(statusLabel, statusOptions);
+    frag.append(statusWrap);
+
     /* Styles | Decorations toggle */
     const bar = document.createElement('div');
     bar.className = 'c-sections';
@@ -103,9 +134,9 @@
       b.type = 'button';
       b.className = 'wopt wrench-opt' + (id === (isStyle ? st.wrenchStyle : st.wrenchDecoration) ? ' on' : '');
       b.title = label;
-      if (!entry && isStyle) b.append(preview(null, true));
+      if (!entry && isStyle) b.append(preview(null, true, st.wrenchStatus));
       else if (!entry) b.append(document.createTextNode('None'));
-      else b.append(preview(entry, isStyle));
+      else b.append(preview(entry, isStyle, st.wrenchStatus));
       const name = document.createElement('span');
       name.className = 'wrench-opt-name';
       name.textContent = entry ? entry[1] : (isStyle ? 'Base' : 'None');
@@ -119,8 +150,12 @@
     };
     if (which === 'styles') {
       grid.append(mk(0, 'Wrench (base)', null, true));
-      grid.append(mk(SUPER_SUPPORTER_WRENCH, 'Super Supporter Wrench',
-        [SUPER_SUPPORTER_WRENCH, 'Super Supporter', 'img/wrench.png', 0, 0], true));
+      const superOption = mk(SUPER_SUPPORTER_WRENCH, 'Super Supporter Wrench',
+        [SUPER_SUPPORTER_WRENCH, 'Super Supporter', 'img/wrench.png', 0, 0], true);
+      superOption.disabled = st.wrenchStatus !== 'super-supporter';
+      superOption.title = st.wrenchStatus === 'super-supporter'
+        ? 'Super Supporter Wrench' : 'Switch Status to Super Supporter to unlock this wrench';
+      grid.append(superOption);
       for (const s of data.styles) grid.append(mk(s[0], s[1] + ' Wrench Style', s, true));
     } else {
       grid.append(mk(0, 'No decoration', null, false));

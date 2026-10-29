@@ -208,6 +208,17 @@
   padding: 5px 10px; cursor: pointer;
 }
 .c-section.on { background: #7fb64a; color: #10200c; border-color: #ffe27e; }
+.wrench-status { margin: 0 0 10px; }
+.wrench-status-label { font-weight: 700; margin-bottom: 6px; }
+.wrench-status-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.wrench-status-option {
+  flex: 1 1 105px; min-width: 0; padding: 7px 8px; cursor: pointer;
+  border: 2px solid #95C9FF; border-radius: 3px;
+  background: #145EAE; color: #CEE1F3; font: inherit;
+  font-size: calc(16*var(--u));
+}
+.wrench-status-option.on { background: #7fb64a; color: #10200c; border-color: #ffe27e; }
+.wrench-status-option:disabled { opacity: .5; cursor: not-allowed; }
 /* wrench section: option grid with canvas previews + names */
 .wrench-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(86px, 1fr)); gap: 8px; }
 .wrench-opt { flex-direction: column; gap: 4px; padding: 4px; min-width: 0; }

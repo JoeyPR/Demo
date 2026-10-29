@@ -391,7 +391,7 @@ function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   }
   landCtx.imageSmoothingEnabled = false;
   const span = WORLD_PX_W;
-  const camX = ((Math.floor(cameraWorldX) % span) + span) % span;
+  const camX = ((Math.floor(cameraWorldX - lw / 2) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
   renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
@@ -560,9 +560,12 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
-  drawPickups(c, frame, ground, s, cameraPivotX, zoom);
   const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
   c.restore();
+  // Pickups use an explicit world-to-screen projection outside the world transform.
+  // This keeps their world anchor fixed as the camera follows the player; offscreen
+  // pickups remain in state and naturally reappear when the camera comes back.
+  drawPickups(c, frame, s, cameraPivotX, cameraPivotY, zoom);
   // The plate renderer resets the canvas transform internally, so project its
   // head-height anchor explicitly and scale its lettering with the camera.
   if (P.plate) {
@@ -769,28 +772,33 @@ function ensurePickupArt(pickup) {
   pickup.shadowCanvas = shadow;
 }
 
-function drawPickups(c, frame, ground, scale, cameraPivotX, zoom) {
+function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
   if (!state.pickups.length) return;
   c.imageSmoothingEnabled = false;
   for (const pickup of state.pickups) {
     const pose = pickupPose(pickup, state.clock, frame);
-    const safeZoom = Math.max(0.01, zoom || 1);
-    const size = PICKUP_SIZE * scale * pose.scale + pose.scale / safeZoom;
+    // pose.x / pose.y are world coordinates. Convert them to viewport coordinates
+    // once, around the camera pivot, instead of letting a second transform act
+    // on player-relative coordinates. No edge clamp: the canvas clips offscreen
+    // pickups while the world object remains at its dropped point.
+    const size = PICKUP_SIZE * scale * pose.scale * zoom;
     if (size < 0.5) continue;
-    const left = cameraPivotX + (pose.x - frame.x) * scale - size / 2;
-    const top = ground + (pose.y - pose.bob) * scale - size;
+    const anchorX = cameraPivotX + (pose.x - frame.x) * scale * zoom;
+    const bottomY = cameraPivotY +
+      (16 * PLAYER_VISUAL_SCALE + pose.y - frame.y - pose.bob) * scale * zoom;
+    const left = anchorX - size / 2;
+    const top = bottomY - size;
     c.save();
     ensurePickupArt(pickup);
 
-    // Use the player's exact shadow distance (12px right/left, 12px down)
-    // under the same camera transform, but force the pickup shadow LEFT always.
+    // Keep the existing 12px pickup-shadow offset proportional to camera zoom.
     const shadowDirection = playerShadowOffset(-1);
     if (pickup.shadowCanvas) {
       c.save();
       c.globalAlpha = PLAYER_SHADOW_OPACITY;
       c.drawImage(pickup.shadowCanvas,
-        left + shadowDirection.x,
-        top + shadowDirection.y, size, size);
+        left + shadowDirection.x * zoom,
+        top + shadowDirection.y * zoom, size, size);
       c.restore();
     }
 
@@ -816,7 +824,7 @@ function drawPickups(c, frame, ground, scale, cameraPivotX, zoom) {
     }
     if (pickup.amount > 1 && pose.scale > 0.25) {
       const label = String(pickup.amount);
-      const fontSize = Math.max(3, Math.min(size * 0.27, scale * 5.5));
+      const fontSize = Math.max(3, Math.min(size * 0.27, scale * 5.5 * zoom));
       c.font = "700 " + fontSize + "px 'Main CG', sans-serif";
       c.textAlign = "right";
       c.textBaseline = "bottom";
