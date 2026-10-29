@@ -76,9 +76,9 @@ export function pickupPose(pickup, now, playerFrame) {
 export function pickupIconFlightPose(start, target, progress, sizeUnit = 1) {
   const t = clamp01(progress);
   const inv = 1 - t;
-  const c1x = start.x + sizeUnit * 1.1;
+  const c1x = start.x + sizeUnit * 1.75;
   const c1y = start.y - sizeUnit * 1.6;
-  const c2x = target.x + sizeUnit * 1.45;
+  const c2x = target.x + sizeUnit * 3.5;
   const c2y = target.y - sizeUnit * 0.85;
   const cubic = (a, b, c, d) =>
     inv * inv * inv * a +
