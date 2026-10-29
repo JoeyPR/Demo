@@ -102,10 +102,14 @@ test("Custom, Makeup, and Player Customization keep a visible but disabled filte
   assert.match(side, /on = !!on && !nonSearchableTabs\.has\(P\.tabs\.cur\)/);
 });
 
-test("ancestral items use regular boxes until equipped, then use box-art and the artifact checkmark", () => {
-  assert.ok(!grid.includes("P.ancestralIds && P.ancestralIds.has(it.id) ? ' art' : ''"));
-  assert.ok(grid.includes("b.classList.toggle('art', equipped && !!P.ancestralIds?.has(id));"));
-  assert.ok(grid.includes("b.classList.toggle('art', equippedIds.has(it.id) && !!P.ancestralIds?.has(it.id));"));
+test("all items in the Artifacts category use artifact boxes only while equipped", () => {
+  assert.ok(grid.includes("const artifactSlot = Object.entries(P.dat?.slots || {})"));
+  assert.ok(grid.includes("label === 'Ancestral' || label === 'Artifacts'"));
+  assert.ok(grid.includes("const isArtifactItem = item => item != null && String(item.slot) === String(artifactSlot);"));
+  assert.ok(grid.includes("b.classList.toggle('art', equipped && String(b.dataset.slot) === String(artifactSlot));"));
+  assert.ok(grid.includes("b.classList.toggle('art', equippedIds.has(it.id) && isArtifactItem(it));"));
+  assert.ok(!grid.includes("equipped && !!P.ancestralIds?.has(id)"));
+  assert.ok(!grid.includes("equippedIds.has(it.id) && !!P.ancestralIds?.has(it.id)"));
   assert.ok(inv.includes(".box.art{background-image:url(../img/box-art.png)}"));
   assert.ok(inv.includes(".box.sel .ck.o{display:block}"));
   assert.ok(inv.includes(".box.sel.art .ck.o{display:none}"));
