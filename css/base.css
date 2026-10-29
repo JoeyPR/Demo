@@ -1,4 +1,12 @@
 /* BASE: tokens, font, stage, panel look. Nothing else lives here. */
+/* Dedicated Century Gothic Big face for player nameplates; the UI keeps Main CG. */
+@font-face{
+  font-family:"Nameplate CG";
+  src:url(../font/century_gothic_big.woff2) format("woff2");
+  font-style:normal;
+  font-weight:400 700;
+  font-display:swap;
+}
 /* The bundled main_cg.ttf is the one font used by the entire planner UI. */
 @font-face{
   font-family:"Main CG";

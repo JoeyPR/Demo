@@ -6,6 +6,7 @@ const plate = read("../js/plate.js");
 const wrenchUI = read("../js/wrench-ui.js");
 const app = read("../js/app.js");
 const data = JSON.parse(read("../data/wrench.json"));
+const css = read("../css/base.css");
 
 test("nameplate base wrench uses the dedicated quick wrench icon", () => {
   assert.match(plate, /baseWrenchImg\.src = 'img\/wrench-quick\.png'/);
@@ -25,4 +26,19 @@ test("pickup uses a world-fixed target while camera coordinates change", () => {
   assert.match(app, /worldY: dropY/);
   assert.match(app, /const left = cameraPivotX \+ \(pose\.x - frame\.x\) \* scale/);
   assert.match(app, /const top = ground \+ \(pose\.y - pose\.bob\) \* scale/);
+});
+
+
+test("nameplate uses the provided Century Gothic Big font without changing the UI font", () => {
+  assert.ok(css.includes('font-family:"Nameplate CG"'));
+  assert.ok(css.includes("century_gothic_big.woff2"));
+  assert.ok(plate.includes("'Nameplate CG'"));
+  assert.ok(!plate.includes("'Main CG'"));
+});
+
+test("nameplate size and icon positioning match the original values", () => {
+  assert.ok(app.includes("P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.80)"));
+  assert.ok(plate.includes("if (part.guild) return iconCenterY() - 0.875 * PB;"));
+  assert.ok(plate.includes("if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2;"));
+  assert.ok(plate.includes("if (part.flag || part.badge) return iconCenterY() - h / 2;"));
 });

@@ -179,10 +179,10 @@
   function tagWidth(ctx, text, size) {
     let w = 0;
     for (const [ch, cap] of withCaps(text)) {
-      ctx.font = '700 ' + (cap ? size * CAPS : size) + "px 'Main CG', sans-serif";
+      ctx.font = '700 ' + (cap ? size * CAPS : size) + "px 'Nameplate CG', sans-serif";
       w += ctx.measureText(ch).width;
     }
-    ctx.font = '700 ' + size + "px 'Main CG', sans-serif";
+    ctx.font = '700 ' + size + "px 'Nameplate CG', sans-serif";
     return w;
   }
 
@@ -251,7 +251,7 @@
     const Pq = 1.6 * p;                       /* icon line gap */
     k.save();
     k.setTransform(1, 0, 0, 1, 0, 0);
-    k.font = "700 " + PR + "px 'Main CG', sans-serif";
+    k.font = "700 " + PR + "px 'Nameplate CG', sans-serif";
     k.textBaseline = 'alphabetic';
     const joined = parts.filter(x => x.text !== undefined).map(x => x.text).join(' ');
     const PN = descenderPenalty(joined) / 21;
@@ -259,7 +259,7 @@
     const Pt = k.measureText(joined);
     const PA = Pt.actualBoundingBoxAscent + Pt.actualBoundingBoxDescent;
     const scaledFont = k.font;
-    k.font = "700 " + iconPR + "px 'Main CG', sans-serif";
+    k.font = "700 " + iconPR + "px 'Nameplate CG', sans-serif";
     const PI = k.measureText('A').actualBoundingBoxAscent / 14;  /* icon pixel unit */
     k.font = scaledFont;
     const textPI = k.measureText('A').actualBoundingBoxAscent / 14; /* text pixel unit */
@@ -294,10 +294,9 @@
       return Pq;
     });
     const yOf = (part, h) => {
-      if (part.guild) return iconCenterY() - 0.875 * PB + 2 * PI;
-      if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2 + 2 * PI;
-      if (part.flag) return iconCenterY() - h / 2 + 3.2 * PI;
-      if (part.badge) return iconCenterY() - h / 2 + 2 * PI;
+      if (part.guild) return iconCenterY() - 0.875 * PB;
+      if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2;
+      if (part.flag || part.badge) return iconCenterY() - h / 2;
       return baselineY - PR * 0.8 - (h - PR * 0.8) / 2;
     };
     const firstText = parts.findIndex(x => x.text !== undefined);
@@ -385,12 +384,12 @@
         } else if (part.tag) {
           let x = LO, ci = 0;
           for (const [ch, cap] of withCaps(part.text)) {
-            k.font = '700 ' + (cap ? PR * CAPS : PR) + "px 'Main CG', sans-serif";
+            k.font = '700 ' + (cap ? PR * CAPS : PR) + "px 'Nameplate CG', sans-serif";
             paint(ch, x, formattedChars?.[ci]?.rgb || part.colour);
             x += k.measureText(ch).width;
             ci++;
           }
-          k.font = '700 ' + PR + "px 'Main CG', sans-serif";
+          k.font = '700 ' + PR + "px 'Nameplate CG', sans-serif";
         } else if (hasFormatting) {
           const outline = Math.max(1, p * factor * 0.5);
           k.fillStyle = 'rgba(0,0,0,.5)';
