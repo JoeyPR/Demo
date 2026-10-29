@@ -6,6 +6,9 @@ export const PICKUP_SPAWN_DURATION = 400;
 export const PICKUP_COLLECTION_DELAY = 500;
 // Time spent flying toward the inventory after the initial half-second pause.
 export const PICKUP_COLLECTION_DURATION = 750;
+// The empty pickup frame clears faster than the icon's flight.
+export const PICKUP_BOX_SHRINK_DURATION = 450;
+export const PICKUP_ICON_ART_SIZE = 64 * 0.64 + 2;
 export const PICKUP_COLLECTION_TOTAL_DURATION = PICKUP_COLLECTION_DELAY + PICKUP_COLLECTION_DURATION;
 export const PICKUP_FLOAT_AMPLITUDE = 0.8;
 export const PICKUP_FLOAT_PERIOD = 1600;
@@ -33,14 +36,16 @@ export function pickupPose(pickup, now, playerFrame) {
       };
     }
 
-    const progress = clamp01((elapsed - PICKUP_COLLECTION_DELAY) / PICKUP_COLLECTION_DURATION);
-    // The pickup box shrinks at the fixed drop point; the item icon follows
-    // its own screen-space curve toward the inventory.
-    const eased = progress * progress * (3 - 2 * progress);
+    const flightElapsed = Math.max(0, elapsed - PICKUP_COLLECTION_DELAY);
+    const progress = clamp01(flightElapsed / PICKUP_COLLECTION_DURATION);
+    const boxProgress = clamp01(flightElapsed / PICKUP_BOX_SHRINK_DURATION);
+    // The empty frame disappears sooner, while the item icon keeps flying
+    // independently for the full duration of its curved trip.
+    const boxEased = boxProgress * boxProgress * (3 - 2 * boxProgress);
     return {
       x: targetX,
       y: targetY,
-      scale: 1 - eased,
+      scale: 1 - boxEased,
       bob: 0,
       progress,
       iconProgress: progress,
@@ -91,7 +96,7 @@ export function pickupIconFlightPose(start, target, progress, sizeUnit = 1) {
   return {
     x: cubic(start.x, c1x, c2x, target.x),
     y: cubic(start.y, c1y, c2y, target.y),
-    scale: 1 + 1.3 * Math.pow(t, 1.6),
+    scale: 1 + 2.2 * Math.pow(t, 1.6),
     alpha: 1 - smoothFade,
     progress: t,
   };
