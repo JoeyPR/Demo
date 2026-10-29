@@ -42,9 +42,17 @@ test("search row reserves room for a matching square filter button on desktop an
 });
 
 test("search enablement is synchronized with the grid before filtering", () => {
-  assert.match(side, /P\\.store\\.set\\('searchOn', on\\);\\s*P\\.emit\\('searchOn', on\\);/);
-  assert.match(grid, /P\\.on\\('searchOn', on => \\{\\s*searchOn = on;[\\s\\S]*?P\\.inv\\.refresh\\(\\);\\s*\\}\\);/);
-});
+  assert.ok(side.includes("P.store.set('searchOn', on);"));
+  assert.ok(side.includes("P.emit('searchOn', on);"));
+  assert.ok(side.indexOf("P.store.set('searchOn', on);") < side.indexOf("P.emit('searchOn', on);"));
+
+  const listenerStart = grid.indexOf("P.on('searchOn', on => {");
+  const listenerEnd = grid.indexOf("\n  });", listenerStart);
+  assert.ok(listenerStart >= 0 && listenerEnd > listenerStart, "grid listens for search-state updates");
+  const listener = grid.slice(listenerStart, listenerEnd);
+  assert.ok(listener.includes("searchOn = on;"));
+  assert.ok(listener.includes("P.inv.refresh();"));
+});;
 
 test("filter categories are derived from catalog item slots and filter the visible grid", () => {
   assert.match(grid, /const bySlot = new Map\(\)/);
