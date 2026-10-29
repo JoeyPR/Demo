@@ -102,7 +102,11 @@
   }
 
   function open(item) {
-    if (!item || item.tool || item.wearable === false || item.gone) {
+    if (item?.tool) {
+      P.blackbox?.("You can't drop that.");
+      return;
+    }
+    if (!item || item.wearable === false || item.gone) {
       P.toast("Select a valid item first.");
       return;
     }
