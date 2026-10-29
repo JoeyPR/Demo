@@ -52,7 +52,7 @@ test("search enablement is synchronized with the grid before filtering", () => {
   const listener = grid.slice(listenerStart, listenerEnd);
   assert.ok(listener.includes("searchOn = on;"));
   assert.ok(listener.includes("P.inv.refresh();"));
-});;
+});
 
 test("filter categories are derived from catalog item slots and filter the visible grid", () => {
   assert.match(grid, /const bySlot = new Map\(\)/);
