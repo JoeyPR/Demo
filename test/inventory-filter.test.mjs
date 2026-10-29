@@ -102,13 +102,15 @@ test("Custom, Makeup, and Player Customization keep a visible but disabled filte
   assert.match(side, /on = !!on && !nonSearchableTabs\.has\(P\.tabs\.cur\)/);
 });
 
-test("equipped artifact boxes show the dedicated chk-art checkmark", () => {
-  assert.match(grid, /const ckArt = document\.createElement\('img'\); ckArt\.className = 'ck p'; ckArt\.src = 'img\/chk-art\.png'/);
-  assert.match(grid, /P\.ancestralIds && P\.ancestralIds\.has\(it\.id\)/);
-  assert.match(inv, /\.box\.sel \.ck\.o\{display:block\}/);
-  assert.match(inv, /\.box\.sel\.art \.ck\.o\{display:none\}/);
-  assert.match(inv, /\.box\.sel\.art \.ck\.p\{display:block\}/);
-});
+test("ancestral items use regular boxes until equipped, then use box-art and the artifact checkmark", () => {
+  assert.doesNotMatch(grid, /P\\.ancestralIds && P\\.ancestralIds\\.has\\(it\\.id\\) \\? ' art' : ''/);
+  assert.match(grid, /b\\.classList\\.toggle\\('art', equipped && !!P\\.ancestralIds\\?\\.has\\(id\\)\\)/);
+  assert.match(grid, /b\\.classList\\.toggle\\('art', equippedIds\\.has\\(it\\.id\\) && !!P\\.ancestralIds\\?\\.has\\(it\\.id\\)\\)/);
+  assert.match(inv, /\\.box\\.art\\{background-image:url\\(\\.\\.\\/img\\/box-art\\.png\\)\\}/);
+  assert.match(inv, /\\.box\\.sel \\.ck\\.o\\{display:block\\}/);
+  assert.match(inv, /\\.box\\.sel\\.art \\.ck\\.o\\{display:none\\}/);
+  assert.match(inv, /\\.box\\.sel\\.art \\.ck\\.p\\{display:block\\}/);
+});;
 
 test("Fist and Wrench icon source assets are easy to locate", () => {
   assert.match(grid, /on \? 'img\/wrench-quick\.png' : 'img\/fist\.png'/);
