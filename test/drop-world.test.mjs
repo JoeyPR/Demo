@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION,
-  PICKUP_COLLECTION_DELAY, PICKUP_COLLECTION_DURATION, PICKUP_COLLECTION_TOTAL_DURATION,
+  PICKUP_COLLECTION_DELAY, PICKUP_COLLECTION_DURATION, PICKUP_BOX_SHRINK_DURATION,
+  PICKUP_ICON_ART_SIZE, PICKUP_COLLECTION_TOTAL_DURATION,
   PICKUP_FLOAT_AMPLITUDE, PICKUP_FLOAT_PERIOD, pickupPose, pickupIconFlightPose, pickupShouldCollect
 } from "../js/drop-world.mjs";
 const sample = (worldY = 0) => ({ spawnedAt:0, startX:0, targetX:18, worldX:18, startY:worldY + PICKUP_HOVER_HEIGHT-2, targetY:worldY + PICKUP_HOVER_HEIGHT, worldY:worldY + PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
@@ -68,6 +69,19 @@ test("collection holds the full pickup for 500ms, then shrinks it at its fixed w
   assert.equal(PICKUP_COLLECTION_TOTAL_DURATION,PICKUP_COLLECTION_DELAY+PICKUP_COLLECTION_DURATION);
 });
 
+test("pickup artwork is two pixels larger and the empty box shrinks faster than the icon flies", () => {
+  assert.equal(PICKUP_ICON_ART_SIZE, 42.96);
+  assert.equal(PICKUP_BOX_SHRINK_DURATION, 450);
+  assert.ok(PICKUP_BOX_SHRINK_DURATION < PICKUP_COLLECTION_DURATION);
+
+  const pickup=sample();
+  Object.assign(pickup,{collectAt:100});
+  const boxGone=pickupPose(pickup,100+PICKUP_COLLECTION_DELAY+PICKUP_BOX_SHRINK_DURATION,{x:0,y:0});
+  assert.equal(boxGone.scale,0);
+  assert.equal(boxGone.phase,"collecting");
+  assert.ok(boxGone.iconProgress<1,"the icon continues traveling after the pickup frame vanishes");
+});
+
 test("the item icon jumps right, swerves left into the inventory, grows, then fades out", () => {
   const start={x:100,y:200};
   const target={x:20,y:500};
@@ -87,8 +101,9 @@ test("the item icon jumps right, swerves left into the inventory, grows, then fa
   assert.ok(late.alpha>0 && late.alpha<1,"the icon fades as it approaches the inventory");
   assert.equal(end.x,target.x);
   assert.equal(end.y,target.y);
-  assert.equal(end.scale,2.3);
+  assert.equal(end.scale,3.2);
   assert.equal(end.alpha,0);
+  assert.equal(end.scale,3.2,"the icon scales to 3.2× its initial flight size");
 });
 
 test("the renderer separates the pickup frame from the flying item icon", () => {
@@ -97,6 +112,8 @@ test("the renderer separates the pickup frame from the flying item icon", () => 
   assert.ok(app.includes('const isFlying = pose.phase === "collecting";'));
   assert.ok(app.includes("pickup.frameShadowCanvas"));
   assert.ok(app.includes("pickupIconFlightPose(start, inventoryTarget, pose.iconProgress, baseSize)"));
+  assert.ok(app.includes("PICKUP_ICON_ART_SIZE"));
+  assert.ok(app.includes("const iconSize = PICKUP_ICON_ART_SIZE;"));
   assert.ok(app.includes("state.clock - pickup.collectAt >= PICKUP_COLLECTION_TOTAL_DURATION"));
 });
 
