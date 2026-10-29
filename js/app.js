@@ -14,7 +14,7 @@ import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROU
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
-import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
+import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -773,7 +773,7 @@ function ensurePickupArt(pickup) {
   const iconCtx = icon.getContext("2d");
   iconCtx.imageSmoothingEnabled = false;
   if (pickup.icon) {
-    const iconSize = icon.width * 0.64;
+    const iconSize = PICKUP_ICON_ART_SIZE;
     iconCtx.drawImage(pickup.icon,
       (icon.width - iconSize) / 2, (icon.height - iconSize) / 2, iconSize, iconSize);
   }
@@ -848,7 +848,7 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
         c.drawImage(pickup.artCanvas, left, top, size, size);
       } else {
         if (pickup.icon) {
-          const iconSize = size * 0.64;
+          const iconSize = size * PICKUP_ICON_ART_SIZE / 64;
           const inset = (size - iconSize) / 2;
           c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
         }
@@ -901,7 +901,7 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
             flight.x - flightSize / 2, flight.y - flightSize / 2,
             flightSize, flightSize);
         } else if (pickup.icon) {
-          const iconSize = flightSize * 0.64;
+          const iconSize = flightSize * PICKUP_ICON_ART_SIZE / 64;
           c.drawImage(pickup.icon,
             flight.x - iconSize / 2, flight.y - iconSize / 2,
             iconSize, iconSize);
