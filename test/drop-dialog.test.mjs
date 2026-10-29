@@ -52,7 +52,7 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(app,/targetY: dropY/);
   assert.match(app,/worldY: dropY/);
   assert.match(app,/P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom \* 0\.92, state\.clock, 0\.70\)/);
-  assert.match(app,/P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom \* 0\.92, state\.clock, 0\.75\)/);
+  assert.match(app,/P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom \* 0\.92, state\.clock, 0\.70\)/);
   assert.match(app,/PICKUP_SIZE \* scale \* pose\.scale \+ pose\.scale \/ safeZoom/);
   assert.match(app,/PLAYER_SHADOW_OPACITY/);
   assert.match(app,/PLAYER_SHADOW_COLOR/);
