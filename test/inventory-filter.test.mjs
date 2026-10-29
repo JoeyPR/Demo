@@ -103,14 +103,14 @@ test("Custom, Makeup, and Player Customization keep a visible but disabled filte
 });
 
 test("ancestral items use regular boxes until equipped, then use box-art and the artifact checkmark", () => {
-  assert.doesNotMatch(grid, /P\\.ancestralIds && P\\.ancestralIds\\.has\\(it\\.id\\) \\? ' art' : ''/);
-  assert.match(grid, /b\\.classList\\.toggle\\('art', equipped && !!P\\.ancestralIds\\?\\.has\\(id\\)\\)/);
-  assert.match(grid, /b\\.classList\\.toggle\\('art', equippedIds\\.has\\(it\\.id\\) && !!P\\.ancestralIds\\?\\.has\\(it\\.id\\)\\)/);
-  assert.match(inv, /\\.box\\.art\\{background-image:url\\(\\.\\.\\/img\\/box-art\\.png\\)\\}/);
-  assert.match(inv, /\\.box\\.sel \\.ck\\.o\\{display:block\\}/);
-  assert.match(inv, /\\.box\\.sel\\.art \\.ck\\.o\\{display:none\\}/);
-  assert.match(inv, /\\.box\\.sel\\.art \\.ck\\.p\\{display:block\\}/);
-});;
+  assert.ok(!grid.includes("P.ancestralIds && P.ancestralIds.has(it.id) ? ' art' : ''"));
+  assert.ok(grid.includes("b.classList.toggle('art', equipped && !!P.ancestralIds?.has(id));"));
+  assert.ok(grid.includes("b.classList.toggle('art', equippedIds.has(it.id) && !!P.ancestralIds?.has(it.id));"));
+  assert.ok(inv.includes(".box.art{background-image:url(../img/box-art.png)}"));
+  assert.ok(inv.includes(".box.sel .ck.o{display:block}"));
+  assert.ok(inv.includes(".box.sel.art .ck.o{display:none}"));
+  assert.ok(inv.includes(".box.sel.art .ck.p{display:block}"));
+});
 
 test("Fist and Wrench icon source assets are easy to locate", () => {
   assert.match(grid, /on \? 'img\/wrench-quick\.png' : 'img\/fist\.png'/);
