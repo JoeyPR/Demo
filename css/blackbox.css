@@ -1,0 +1,32 @@
+/* Reusable short warning / unavailable-action message above the inventory.
+   "Nameplate CG" is the bundled century_gothic_big.woff2 face from base.css. */
+.blackbox {
+  position: fixed;
+  z-index: 70;
+  left: 50%;
+  top: 0;
+  width: max-content;
+  max-width: 88vw;
+  padding: max(8px, calc(10 * var(--u))) max(12px, calc(18 * var(--u)));
+  color: #fff;
+  background: rgba(0, 0, 0, .75);
+  font-family: "Nameplate CG", sans-serif;
+  font-size: clamp(16px, calc(40 * var(--u)), 24px);
+  font-weight: 400;
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: anywhere;
+  border-radius: 3px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, .65);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity .14s ease, transform .14s ease;
+}
+.blackbox.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.blackbox[hidden] {
+  display: none;
+}
