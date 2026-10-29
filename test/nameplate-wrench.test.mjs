@@ -80,7 +80,8 @@ test("country flag metadata is complete and the renderer uses the old Planner fl
   assert.ok(plate.includes("if (state.flag === 'us') state.flag = 'unitedstates';"));
   assert.ok(plate.includes("if (state.flag === 'pr') state.flag = 'puertorico';"));
   assert.ok(!plate.includes("im.crossOrigin = 'anonymous'"), "remote flags must not be blocked by a forced CORS image request");
-  assert.ok(plate.includes("im.onerror = () => P.emit('plate-update')"));
+  assert.ok(plate.includes("https://cdn.jsdelivr.net/gh/JoeyPR/Planner@main/assets/ui/flags/"));
+  assert.ok(plate.includes("im.dataset.flagMirror = '1'"));
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR + state.flag + '.png'"));
 });
 

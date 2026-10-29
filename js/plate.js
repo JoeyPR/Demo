@@ -129,11 +129,19 @@
     let im = imageCache.get(src);
     if (!im) {
       im = new Image();
-      // Country flags are remote images. Do not set crossOrigin: the canvas only
-      // displays these images and is never read back for export; an anonymous CORS
-      // request can otherwise turn a visible flag into a failed image load.
+      // Country flags are hosted in the old Planner repo. Load them as ordinary
+      // display-only images, without forcing CORS mode on the canvas.
+      const flagFilename = src.startsWith(COUNTRY_FLAGS_DIR) ? src.slice(COUNTRY_FLAGS_DIR.length) : null;
       im.onload = () => P.emit('plate-update');
-      im.onerror = () => P.emit('plate-update');
+      im.onerror = () => {
+        // Use a CDN mirror if raw.githubusercontent is unreachable from the client.
+        if (flagFilename && !im.dataset.flagMirror) {
+          im.dataset.flagMirror = '1';
+          im.src = 'https://cdn.jsdelivr.net/gh/JoeyPR/Planner@main/assets/ui/flags/' + flagFilename;
+          return;
+        }
+        P.emit('plate-update');
+      };
       im.src = src;
       imageCache.set(src, im);
     }
