@@ -274,15 +274,11 @@ function renderAvatar() {
   state.avatarBounds = bounds;
   drawCanvas(avatarCtx, calls, atlases, { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
 
-  // Project a separate pure-black alpha mask from the player and wearable
-  // sprites. FX, visuals, particles, pets, the ancestral and punch pieces are
-  // intentionally excluded; each remaining item keeps its own draw matrix.
-  const punching = !!state.lastFrame?.punch;
-  const punchItemId = punching ? state.lastResult?.punchPose?.itemId ?? null : null;
+  // Project a separate pure-black alpha mask from the player, wearable sprites,
+  // and punch arm/hand. FX, particles, pets, and ancestral effects stay excluded;
+  // each included part keeps its own draw matrix so the punch shadow follows it.
   const shadows = getPlayerShadowCalls(calls, {
     ancestralId: state.equipped.get(9)?.id ?? null,
-    punchingItemId: punchItemId,
-    punching,
   });
   avatarShadowCtx.setTransform(1, 0, 0, 1, 0, 0);
   avatarShadowCtx.clearRect(0, 0, width, height);
