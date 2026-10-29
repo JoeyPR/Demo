@@ -3,7 +3,10 @@ export const PICKUP_ATLAS_RECT = Object.freeze({ x: 160, y: 0, width: 20, height
 export const PICKUP_SIZE = 12;
 export const PICKUP_HOVER_HEIGHT = -8.25;
 export const PICKUP_SPAWN_DURATION = 400;
-export const PICKUP_COLLECTION_DURATION = 360;
+export const PICKUP_COLLECTION_DELAY = 500;
+// Time spent flying toward the inventory after the initial half-second pause.
+export const PICKUP_COLLECTION_DURATION = 750;
+export const PICKUP_COLLECTION_TOTAL_DURATION = PICKUP_COLLECTION_DELAY + PICKUP_COLLECTION_DURATION;
 export const PICKUP_FLOAT_AMPLITUDE = 0.8;
 export const PICKUP_FLOAT_PERIOD = 1600;
 
@@ -15,9 +18,24 @@ export function pickupPose(pickup, now, playerFrame) {
   const targetX = pickup.worldX ?? pickup.targetX;
   const targetY = pickup.worldY ?? pickup.targetY ?? 0;
   if (pickup.collectAt != null) {
-    const progress = clamp01((now - pickup.collectAt) / PICKUP_COLLECTION_DURATION);
-    // The collection effect shrinks the box at its fixed drop point. Never
-    // animate its world coordinates toward the moving player/camera.
+    const elapsed = Math.max(0, now - pickup.collectAt);
+    // Growtopia-style pickup pause: keep the full box in place for 500 ms
+    // before the icon launches and the empty box starts shrinking.
+    if (elapsed < PICKUP_COLLECTION_DELAY) {
+      return {
+        x: targetX,
+        y: targetY,
+        scale: 1,
+        bob: 0,
+        progress: 0,
+        iconProgress: 0,
+        phase: "collect-delay",
+      };
+    }
+
+    const progress = clamp01((elapsed - PICKUP_COLLECTION_DELAY) / PICKUP_COLLECTION_DURATION);
+    // The pickup box shrinks at the fixed drop point; the item icon follows
+    // its own screen-space curve toward the inventory.
     const eased = progress * progress * (3 - 2 * progress);
     return {
       x: targetX,
@@ -25,7 +43,8 @@ export function pickupPose(pickup, now, playerFrame) {
       scale: 1 - eased,
       bob: 0,
       progress,
-      phase: "collecting",
+      iconProgress: progress,
+      phase: progress >= 1 ? "collected" : "collecting",
     };
   }
 
@@ -45,6 +64,35 @@ export function pickupPose(pickup, now, playerFrame) {
     bob,
     progress,
     phase: progress < 1 ? "spawning" : "floating",
+  };
+}
+
+/**
+ * Smooth cubic arc for the item icon flying from the pickup to the inventory.
+ * The first control point sends the icon briefly up/right out of the box; the
+ * second brings it back left into the inventory target. sizeUnit scales the
+ * arc naturally with preview scale and camera zoom.
+ */
+export function pickupIconFlightPose(start, target, progress, sizeUnit = 1) {
+  const t = clamp01(progress);
+  const inv = 1 - t;
+  const c1x = start.x + sizeUnit * 1.1;
+  const c1y = start.y - sizeUnit * 1.6;
+  const c2x = target.x + sizeUnit * 1.45;
+  const c2y = target.y - sizeUnit * 0.85;
+  const cubic = (a, b, c, d) =>
+    inv * inv * inv * a +
+    3 * inv * inv * t * b +
+    3 * inv * t * t * c +
+    t * t * t * d;
+  const fade = clamp01((t - 0.58) / 0.42);
+  const smoothFade = fade * fade * (3 - 2 * fade);
+  return {
+    x: cubic(start.x, c1x, c2x, target.x),
+    y: cubic(start.y, c1y, c2y, target.y),
+    scale: 1 + 1.3 * Math.pow(t, 1.6),
+    alpha: 1 - smoothFade,
+    progress: t,
   };
 }
 
