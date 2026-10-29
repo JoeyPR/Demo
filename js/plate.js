@@ -68,12 +68,15 @@
 
   /* ---------------- state ---------------- */
   const DEFAULTS = {
-    growId: '', flag: 'us', role: '', titles: [],
+    growId: '', flag: 'unitedstates', role: '', titles: [],
     guildRole: '', guildFlag: 0, wrenchStatus: 'default', wrenchStyle: 0, wrenchDecoration: 0,
     wrenchOn: false          /* the Fist/Wrench quick box: wrench only shows with a GrowID */
   };
   let state = Object.assign({}, DEFAULTS, P.store.get('plate', {}));
   if (!Array.isArray(state.titles)) state.titles = [];
+  // Older saved previews used ISO-style aliases that aren't filenames in the original flag catalog.
+  if (state.flag === 'us') state.flag = 'unitedstates';
+  if (state.flag === 'pr') state.flag = 'puertorico';
   if (!Object.hasOwn(WRENCH_STATUS_SCALE, state.wrenchStatus)) state.wrenchStatus = 'default';
   if (state.wrenchStatus !== 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
   if (typeof state.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);

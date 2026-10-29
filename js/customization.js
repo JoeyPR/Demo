@@ -148,7 +148,7 @@
         o.value = code;
         flagSelect.append(o);
       }
-      flagSelect.value = P.plateConfig.get().flag || 'us';
+      flagSelect.value = P.plateConfig.get().flag || 'unitedstates';
       flagsLoaded = true;
     };
     flagOptions();

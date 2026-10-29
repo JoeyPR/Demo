@@ -70,9 +70,12 @@ test("wrench Status is single-select and scales styles plus decorations", () => 
 
 test("country flag metadata is complete and the renderer uses the old Planner flag assets", () => {
   assert.ok(flags.length >= 250, "all country flag options should be present");
-  for (const id of ["us", "puertorico", "unitedstates", "pr", "fr", "jp", "role_fisherman"])
+  for (const id of ["puertorico", "unitedstates", "fr", "jp", "role_fisherman"])
     assert.ok(flags.some(flag => flag.value === id), "missing flag option " + id);
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR = 'https://raw.githubusercontent.com/JoeyPR/Planner/main/assets/ui/flags/'"));
+  assert.ok(plate.includes("flag: 'unitedstates'"));
+  assert.ok(plate.includes("if (state.flag === 'us') state.flag = 'unitedstates';"));
+  assert.ok(plate.includes("if (state.flag === 'pr') state.flag = 'puertorico';"));
   assert.ok(plate.includes("im.crossOrigin = 'anonymous'"));
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR + state.flag + '.png'"));
 });
