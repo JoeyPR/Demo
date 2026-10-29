@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION, PICKUP_COLLECTION_DURATION,
-  PICKUP_FLOAT_AMPLITUDE, PICKUP_FLOAT_PERIOD, pickupPose, pickupShouldCollect
+  PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION,
+  PICKUP_COLLECTION_DELAY, PICKUP_COLLECTION_DURATION, PICKUP_COLLECTION_TOTAL_DURATION,
+  PICKUP_FLOAT_AMPLITUDE, PICKUP_FLOAT_PERIOD, pickupPose, pickupIconFlightPose, pickupShouldCollect
 } from "../js/drop-world.mjs";
 const sample = (worldY = 0) => ({ spawnedAt:0, startX:0, targetX:18, worldX:18, startY:worldY + PICKUP_HOVER_HEIGHT-2, targetY:worldY + PICKUP_HOVER_HEIGHT, worldY:worldY + PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
 
@@ -35,21 +36,57 @@ test("pickup floats continuously after its spawn animation", () => {
   assert.ok(c.bob<0);
   assert.equal(PICKUP_FLOAT_AMPLITUDE,0.8);
 });
-test("collection shrinks the pickup at its fixed world position instead of chasing the player", () => {
+test("collection holds the full pickup for 500ms, then shrinks it at its fixed world position", () => {
   const pickup=sample();
   Object.assign(pickup,{collectAt:400,collectStartX:pickup.targetX,collectStartY:0});
-  const beginning=pickupPose(pickup,400,{x:4,y:0});
-  const middle=pickupPose(pickup,400+PICKUP_COLLECTION_DURATION/2,{x:4,y:0});
-  const whilePlayerMoves=pickupPose(pickup,400+PICKUP_COLLECTION_DURATION/2,{x:-500,y:300});
-  const end=pickupPose(pickup,400+PICKUP_COLLECTION_DURATION,{x:4,y:0});
+
+  const pause=pickupPose(pickup,400+PICKUP_COLLECTION_DELAY/2,{x:4,y:0});
+  assert.equal(pause.phase,"collect-delay");
+  assert.equal(pause.scale,1);
+  assert.equal(pause.iconProgress,0);
+
+  const beginning=pickupPose(pickup,400+PICKUP_COLLECTION_DELAY,{x:4,y:0});
+  assert.equal(beginning.phase,"collecting");
   assert.equal(beginning.scale,1);
+  assert.equal(beginning.iconProgress,0);
+
+  const middle=pickupPose(pickup,400+PICKUP_COLLECTION_DELAY+PICKUP_COLLECTION_DURATION/2,{x:4,y:0});
+  const whilePlayerMoves=pickupPose(pickup,400+PICKUP_COLLECTION_DELAY+PICKUP_COLLECTION_DURATION/2,{x:-500,y:300});
   assert.ok(middle.scale<1 && middle.scale>0);
   assert.equal(whilePlayerMoves.x,pickup.worldX);
   assert.equal(whilePlayerMoves.y,pickup.worldY);
+
+  const end=pickupPose(pickup,400+PICKUP_COLLECTION_TOTAL_DURATION,{x:4,y:0});
+  assert.equal(end.phase,"collected");
   assert.equal(end.scale,0);
+  assert.equal(end.iconProgress,1);
   assert.equal(end.x,pickup.worldX);
   assert.equal(end.y,pickup.worldY);
+  assert.equal(PICKUP_COLLECTION_DELAY,500);
+  assert.equal(PICKUP_COLLECTION_TOTAL_DURATION,PICKUP_COLLECTION_DELAY+PICKUP_COLLECTION_DURATION);
 });
+
+test("the item icon jumps right, swerves left into the inventory, grows, then fades out", () => {
+  const start={x:100,y:200};
+  const target={x:20,y:500};
+  const first=pickupIconFlightPose(start,target,0,10);
+  const early=pickupIconFlightPose(start,target,0.2,10);
+  const middle=pickupIconFlightPose(start,target,0.5,10);
+  const end=pickupIconFlightPose(start,target,1,10);
+
+  assert.equal(first.x,start.x);
+  assert.equal(first.y,start.y);
+  assert.equal(first.scale,1);
+  assert.equal(first.alpha,1);
+  assert.ok(early.x>start.x,"the icon initially jumps right out of the pickup box");
+  assert.ok(middle.scale>early.scale && middle.scale>1,"the icon slowly grows during its flight");
+  assert.ok(middle.alpha>0 && middle.alpha<1,"the icon fades as it approaches the inventory");
+  assert.equal(end.x,target.x);
+  assert.equal(end.y,target.y);
+  assert.equal(end.scale,2.3);
+  assert.equal(end.alpha,0);
+});
+
 test("collection starts only when the grounded player reaches the fixed pickup", () => {
   const pickup=sample();
   assert.equal(pickupShouldCollect(pickup,399,{x:18,y:0,ground:true}),false);
