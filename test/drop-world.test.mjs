@@ -72,6 +72,7 @@ test("the item icon jumps right, swerves left into the inventory, grows, then fa
   const first=pickupIconFlightPose(start,target,0,10);
   const early=pickupIconFlightPose(start,target,0.2,10);
   const middle=pickupIconFlightPose(start,target,0.5,10);
+  const late=pickupIconFlightPose(start,target,0.8,10);
   const end=pickupIconFlightPose(start,target,1,10);
 
   assert.equal(first.x,start.x);
@@ -80,7 +81,8 @@ test("the item icon jumps right, swerves left into the inventory, grows, then fa
   assert.equal(first.alpha,1);
   assert.ok(early.x>start.x,"the icon initially jumps right out of the pickup box");
   assert.ok(middle.scale>early.scale && middle.scale>1,"the icon slowly grows during its flight");
-  assert.ok(middle.alpha>0 && middle.alpha<1,"the icon fades as it approaches the inventory");
+  assert.equal(middle.alpha,1,"the icon remains visible during most of the flight");
+  assert.ok(late.alpha>0 && late.alpha<1,"the icon fades as it approaches the inventory");
   assert.equal(end.x,target.x);
   assert.equal(end.y,target.y);
   assert.equal(end.scale,2.3);
