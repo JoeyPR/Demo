@@ -45,17 +45,20 @@ test("nameplate size and icon positioning match the original values", () => {
 });
 
 
-test("Dr. name styling retains an explicit dark drop shadow", () => {
-  assert.ok(plate.includes("dr:     { rgba: [255, 39, 29, 255], shadow: { at: 2, rgba: [0, 0, 0, 128] } },"));
+test("Dr. title keeps the reference red style without adding a glow", () => {
+  assert.ok(plate.includes("dr:     { rgba: [255, 39, 29, 255] },"));
+  assert.ok(!plate.includes("dr:     { rgba: [255, 39, 29, 255], shadow:"));
 });
 
 test("player name and guild role text use their requested independent size increases", () => {
   assert.ok(plate.includes("const PR = iconPR * factor + 2"));
-  assert.ok(plate.includes("const tagPR = iconPR * factor + 3"));
+  assert.ok(plate.includes("const tagPR = iconPR * factor + 5"));
   assert.ok(plate.includes("tagWidth(k, part.text, tagPR, PR)"));
   assert.ok(plate.includes("cap ? tagPR * CAPS : tagPR"));
-  assert.ok(plate.includes("const tagSeparate = !!guildRole;"));
-  assert.ok(plate.includes("const rawName = prefix + rawGrowId + suffix;"));
+  assert.ok(plate.includes("const tagSeparate = guildRole && !hasTextOrStyle;"));
+  assert.ok(plate.includes("const rawName = rawNameBase + roleSuffix;"));
+  assert.ok(plate.includes("guildRoleStartIndex"));
+  assert.ok(plate.includes("const inGuildRole = part.guildRoleStartIndex != null && ci >= part.guildRoleStartIndex"));
 });
 
 test("wrench Status is single-select and scales styles plus decorations", () => {
@@ -76,6 +79,15 @@ test("country flag metadata is complete and the renderer uses the old Planner fl
   assert.ok(plate.includes("flag: 'unitedstates'"));
   assert.ok(plate.includes("if (state.flag === 'us') state.flag = 'unitedstates';"));
   assert.ok(plate.includes("if (state.flag === 'pr') state.flag = 'puertorico';"));
-  assert.ok(plate.includes("im.crossOrigin = 'anonymous'"));
+  assert.ok(!plate.includes("im.crossOrigin = 'anonymous'"), "remote flags must not be blocked by a forced CORS image request");
+  assert.ok(plate.includes("im.onerror = () => P.emit('plate-update')"));
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR + state.flag + '.png'"));
+});
+
+
+test("guild roles inherit active title styling rather than always becoming a plain tag", () => {
+  assert.ok(plate.includes("const hasTextOrStyle = !!styleKey || sel.some(t => t.prefix || t.suffix)"));
+  assert.ok(plate.includes("const tagSeparate = guildRole && !hasTextOrStyle"));
+  assert.ok(plate.includes("const roleSuffix = guildRole && !tagSeparate ? ' ' + guildRole.text : ''"));
+  assert.ok(plate.includes("style: styleKey, colour: [255, 255, 255]"));
 });

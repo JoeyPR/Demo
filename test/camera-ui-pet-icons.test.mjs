@@ -32,6 +32,8 @@ test("nameplate anchor and scale follow the camera and requested offsets", () =>
   assert.match(plate, /const LC = iconPR \* 1\.226 \* 1\.2/);
   assert.match(plate, /textScale = 1/);
   assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild/);
+  assert.match(plate, /const tagPR = iconPR \* factor \+ 5/);
+  assert.match(inventoryCss, /\.box\.tool \.ic\{inset:8%;overflow:hidden\}/);
 });
 
 test("filter panel retains its inner and outer drop shadows", () => {

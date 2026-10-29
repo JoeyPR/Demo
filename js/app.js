@@ -541,10 +541,9 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.translate(-cameraPivotX, -cameraPivotY);
 
   const playerRect = playerVisualRect(b, rootX, rootY, s);
-  const shadowOffset = playerShadowOffset(motion.facing);
-  // Draw the silhouette with the exact same camera transform and dimensions as
-  // the avatar. Its relative size and 12-unit directional drop therefore stay
-  // consistent at every zoom level instead of shrinking/growing against it.
+  const shadowOffset = playerShadowOffset(-1);
+  // The player shadow is always projected to the left, independent of facing.
+  // It shares the avatar's zoom transform and dimensions so it stays attached.
   // Render order: shadow behind land; player and clothing in front of land.
   c.imageSmoothingEnabled = false;
   c.save();

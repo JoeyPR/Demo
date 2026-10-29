@@ -16,10 +16,12 @@ export function pickupPose(pickup, now, playerFrame) {
   const targetY = pickup.worldY ?? pickup.targetY ?? 0;
   if (pickup.collectAt != null) {
     const progress = clamp01((now - pickup.collectAt) / PICKUP_COLLECTION_DURATION);
+    // The collection effect shrinks the box at its fixed drop point. Never
+    // animate its world coordinates toward the moving player/camera.
     const eased = progress * progress * (3 - 2 * progress);
     return {
-      x: lerp(pickup.collectStartX ?? targetX, playerFrame.x, eased),
-      y: lerp(pickup.collectStartY ?? targetY, (playerFrame.y ?? 0) + PICKUP_HOVER_HEIGHT, eased),
+      x: targetX,
+      y: targetY,
       scale: 1 - eased,
       bob: 0,
       progress,

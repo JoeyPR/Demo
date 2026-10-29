@@ -53,10 +53,11 @@ test("avatar stays pinned to its feet while land tiles use the full 32-unit scal
   assert.equal(rect.y + rect.height, 200 + 32 * 4);
 });
 
-test("shadow is black at 50% and shifts exactly 12px down toward facing", () => {
+test("shadow is black at 50% and always shifts left 12px and down 12px", () => {
   assert.deepEqual(PLAYER_SHADOW_COLOR, [0, 0, 0]);
-  assert.deepEqual(playerShadowOffset(1), { x: 12, y: 12 });
+  assert.deepEqual(playerShadowOffset(1), { x: -12, y: 12 });
   assert.deepEqual(playerShadowOffset(-1), { x: -12, y: 12 });
+  assert.deepEqual(playerShadowOffset(0), { x: -12, y: 12 });
   assert.equal(PLAYER_SHADOW_OFFSET, 12);
   assert.equal(PLAYER_SHADOW_DROP, 12);
   assert.equal(PLAYER_SHADOW_OPACITY, 0.5);
@@ -69,6 +70,7 @@ test("preview keeps the shadow proportional to the player during camera zoom", a
   assert.match(app, /getPlayerShadowCalls\(calls/);
   assert.match(app, /drawImage\(avatarShadow/);
   assert.match(app, /playerVisualRect\(b, rootX, rootY, s\)/);
+  assert.match(app, /const shadowOffset = playerShadowOffset\(-1\)/);
   assert.doesNotMatch(app, /c\.ellipse\(w \/ 2, ground/);
   assert.match(app, /globalAlpha = PLAYER_SHADOW_OPACITY/);
   assert.match(app, /c\.drawImage\(avatarShadow,\s*playerRect\.x \+ shadowOffset\.x, playerRect\.y \+ shadowOffset\.y,\s*playerRect\.width, playerRect\.height\)/,

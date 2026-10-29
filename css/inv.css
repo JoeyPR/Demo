@@ -105,8 +105,8 @@
 #quick .box.art{background-image:url(../img/box-blue.png)}
 #quick .box.sel.art .ck.p{display:block}
 
-/* Fist/Wrench use the same icon area and scale as ordinary inventory artwork. */
-.box.tool .ic{inset:10.2%;overflow:hidden}
+/* Slightly enlarge the top-drawer Fist/Wrench art without touching box borders. */
+.box.tool .ic{inset:8%;overflow:hidden}
 .box.tool .ic img{width:100%;height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;flex:none}
 
 /* 3. tabs — the PNGs already contain their own outlines, corners and shadows.

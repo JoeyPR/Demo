@@ -17,7 +17,7 @@
     legend: { shadow: { at: 2, code: true } },
     l125:   { rgba: [0, 255, 255, 150], shadow: { at: 2, rgba: [3, 98, 134, 150] }, swell: [1, 0.175] },
     mentor: { rgba: [247, 148, 30, 255], shadow: { at: 2, rgba: [249, 240, 111, 200] } },
-    dr:     { rgba: [255, 39, 29, 255], shadow: { at: 2, rgba: [0, 0, 0, 128] } },
+    dr:     { rgba: [255, 39, 29, 255] },
     party:  { letters: [[255, 11, 223], [255, 217, 11], [133, 255, 169]], shadow: { at: 2, rgba: [0, 0, 0, 50] } },
     g4g:    { shadow: { at: 1.2, same: true }, swell: [0.9, 0.175] }
   };
@@ -129,9 +129,12 @@
     let im = imageCache.get(src);
     if (!im) {
       im = new Image();
-      if (src.startsWith(COUNTRY_FLAGS_DIR)) im.crossOrigin = 'anonymous';
-      im.src = src;
+      // Country flags are remote images. Do not set crossOrigin: the canvas only
+      // displays these images and is never read back for export; an anonymous CORS
+      // request can otherwise turn a visible flag into a failed image load.
       im.onload = () => P.emit('plate-update');
+      im.onerror = () => P.emit('plate-update');
+      im.src = src;
       imageCache.set(src, im);
     }
     return ready(im) ? im : null;
@@ -220,15 +223,24 @@
     const swell = styleKey === 'g4g' && legendary ? null : style?.swell ?? null;
     const code = CODE_COLORS[has('dr') && has('legend') ? 4 : 2];
     const guildRole = GUILD_ROLES[state.guildRole];
-    const tagSeparate = !!guildRole;
+    // Match SetPlannerGT: plain names get a separate guild tag, while active
+    // title styling/prefix/suffix keeps the role in the styled name string.
+    const hasTextOrStyle = !!styleKey || sel.some(t => t.prefix || t.suffix);
+    const tagSeparate = guildRole && !hasTextOrStyle;
     const rawGrowId = P.rtfont.sanitizeGrowId(state.growId.trim(), 19);
-    const rawName = prefix + rawGrowId + suffix;
+    const roleSuffix = guildRole && !tagSeparate ? ' ' + guildRole.text : '';
+    const rawNameBase = prefix + rawGrowId + suffix;
+    const rawName = rawNameBase + roleSuffix;
+    const guildRoleStartIndex = roleSuffix
+      ? [...P.rtfont.strip(rawNameBase + ' ')].length
+      : null;
     const drTitle = has('dr');
     const usedFormatCode = P.rtfont.characters(rawGrowId).find(char => char.code)?.code ?? null;
     const drPrefixColour = drTitle ? (P.rtfont.colors[usedFormatCode ?? '4'] ?? P.rtfont.colors['4']) : null;
     parts.push({
       text: P.rtfont.strip(rawName),
       formatText: rawName,
+      guildRoleStartIndex,
       drPrefixLength: drTitle ? [...prefix].length : 0,
       drPrefixColour,
       style: styleKey, colour: [255, 255, 255], alpha: 1,
@@ -255,7 +267,7 @@
     const factor = Number.isFinite(textScale) && textScale > 0 ? textScale : 1;
     const iconPR = built.size * p;             /* icon size basis */
     const PR = iconPR * factor + 2;             /* player name: +2px */
-    const tagPR = iconPR * factor + 3;          /* guild role: +3px */
+    const tagPR = iconPR * factor + 5;          /* guild role: larger than the player name */
     const Pq = 1.6 * p;                       /* icon line gap */
     k.save();
     k.setTransform(1, 0, 0, 1, 0, 0);
@@ -292,7 +304,15 @@
     const widths = parts.map(part => {
       if (part.wrench) return LC;
       if (part.tag) return tagWidth(k, part.text, tagPR, PR);
-      if (part.text !== undefined) return k.measureText(part.text).width * (1 + (part.grow ?? 0));
+      if (part.text !== undefined) {
+        if (part.guildRoleStartIndex == null) return k.measureText(part.text).width * (1 + (part.grow ?? 0));
+        const start = part.guildRoleStartIndex;
+        const before = k.measureText(part.text.slice(0, start)).width;
+        k.font = "700 " + tagPR + "px 'Nameplate CG', sans-serif";
+        const role = k.measureText(part.text.slice(start)).width;
+        k.font = "700 " + PR + "px 'Nameplate CG', sans-serif";
+        return (before + role) * (1 + (part.grow ?? 0));
+      }
       return sizeOf(part)[0];
     });
     const gaps = parts.map((part, i) => {
@@ -368,12 +388,14 @@
             const ax = LO + offset * textPI, ay = baselineY - 19 * textPI + offset * textPI;
             k.save();
             if (part.scale !== 1) { k.translate(ax, ay); k.scale(part.scale, part.scale); k.translate(-ax, -ay); }
-            if (!perLetter && !hasFormatting) {
+            if (!perLetter && !hasFormatting && part.guildRoleStartIndex == null) {
               k.fillStyle = rgba(colorFn(0, 0));
               k.fillText(part.text, ax, ay + 19 * textPI);
             } else {
               let x = ax, seen = 0;
               chars.forEach((ch, ci) => {
+                const inGuildRole = part.guildRoleStartIndex != null && ci >= part.guildRoleStartIndex;
+                k.font = "700 " + (inGuildRole ? tagPR : PR) + "px 'Nameplate CG', sans-serif";
                 if (ch !== ' ') {
                   const explicit = applyFormatting ? formattedChars[ci]?.rgb : null;
                   const prefixColour = part.drPrefixColour && ci < part.drPrefixLength ? part.drPrefixColour : null;
@@ -383,6 +405,7 @@
                 }
                 x += k.measureText(ch).width;
               });
+              k.font = scaledFont;
             }
             k.restore();
           };
@@ -410,6 +433,15 @@
             k.fillText(entry.char, x, baselineY);
             x += k.measureText(entry.char).width;
           }
+        } else if (part.guildRoleStartIndex != null) {
+          let x = LO;
+          [...part.text].forEach((ch, ci) => {
+            const inGuildRole = ci >= part.guildRoleStartIndex;
+            k.font = "700 " + (inGuildRole ? tagPR : PR) + "px 'Nameplate CG', sans-serif";
+            paint(ch, x, part.colour);
+            x += k.measureText(ch).width;
+          });
+          k.font = "700 " + PR + "px 'Nameplate CG', sans-serif";
         } else {
           paint(part.text, LO, part.colour);
         }

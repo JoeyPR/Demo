@@ -35,16 +35,19 @@ test("pickup floats continuously after its spawn animation", () => {
   assert.ok(c.bob<0);
   assert.equal(PICKUP_FLOAT_AMPLITUDE,0.8);
 });
-test("collection pulls the pickup toward the player and shrinks it over time", () => {
+test("collection shrinks the pickup at its fixed world position instead of chasing the player", () => {
   const pickup=sample();
   Object.assign(pickup,{collectAt:400,collectStartX:pickup.targetX,collectStartY:0});
   const beginning=pickupPose(pickup,400,{x:4,y:0});
   const middle=pickupPose(pickup,400+PICKUP_COLLECTION_DURATION/2,{x:4,y:0});
+  const whilePlayerMoves=pickupPose(pickup,400+PICKUP_COLLECTION_DURATION/2,{x:-500,y:300});
   const end=pickupPose(pickup,400+PICKUP_COLLECTION_DURATION,{x:4,y:0});
   assert.equal(beginning.scale,1);
   assert.ok(middle.scale<1 && middle.scale>0);
+  assert.equal(whilePlayerMoves.x,pickup.worldX);
+  assert.equal(whilePlayerMoves.y,pickup.worldY);
   assert.equal(end.scale,0);
-  assert.equal(end.x,4);
+  assert.equal(end.x,pickup.worldX);
   assert.equal(end.y,pickup.worldY);
 });
 test("collection starts only when the grounded player reaches the fixed pickup", () => {

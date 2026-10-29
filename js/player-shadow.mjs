@@ -3,7 +3,7 @@
  * offset. Effects are deliberately filtered before this projection.
  */
 export const PLAYER_VISUAL_SCALE = 0.78; // character is slightly shorter than a full 32-unit land tile
-export const PLAYER_SHADOW_OFFSET = 12; // exact output-pixel shift, mirrored by facing
+export const PLAYER_SHADOW_OFFSET = 12; // fixed leftward output-pixel shift
 export const PLAYER_SHADOW_DROP = 12; // exact output-pixel downward shift
 export const PLAYER_SHADOW_OPACITY = 0.5; // 50% opacity
 export const PLAYER_SHADOW_COLOR = Object.freeze([0, 0, 0]);
@@ -48,11 +48,7 @@ export function playerVisualRect(bounds, rootX, rootY, unitScale) {
   };
 }
 
-/** Directional projection: facing right => bottom-right, left => bottom-left. */
-export function playerShadowOffset(facing) {
-  // Drawn on an identity canvas transform, these remain fixed screen pixels.
-  return {
-    x: (facing < 0 ? -1 : 1) * PLAYER_SHADOW_OFFSET,
-    y: PLAYER_SHADOW_DROP,
-  };
+/** Fixed left-directional projection. Facing never changes the shadow offset. */
+export function playerShadowOffset(_facing) {
+  return { x: -PLAYER_SHADOW_OFFSET, y: PLAYER_SHADOW_DROP };
 }
