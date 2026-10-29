@@ -275,6 +275,11 @@
     "filename": "cr.png"
   },
   {
+    "value": "ci",
+    "label": "Côte d’Ivoire",
+    "filename": "ci.png"
+  },
+  {
     "value": "hr",
     "label": "Croatia",
     "filename": "hr.png"

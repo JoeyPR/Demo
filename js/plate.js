@@ -62,7 +62,7 @@
   const CENTERED_DECORATIONS = new Set([15542, 15688, 15940, 15988, 16056, 16156, 16222, 15554, 14890, 15772, 14574, 14590, 15134, 15420, 15012, 15510, 14712, 14822]);
   const BASE_WRENCH = 32;                    /* the plain green wrench (L0) */
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const WRENCH_STATUS_SCALE = Object.freeze({ default: 0.6, supporter: 0.7, 'super-supporter': 0.8 });
+  const WRENCH_STATUS_SCALE = Object.freeze({ default: 0.48, supporter: 0.56, 'super-supporter': 0.64 });
   const COUNTRY_FLAGS_DIR = 'img/flags/';
   const TITLES_DIR = 'img/titles/', FLAGS_DIR = 'img/flags/', SHEETS_DIR = 'demo/assets/';
 
@@ -129,9 +129,18 @@
     let im = imageCache.get(src);
     if (!im) {
       im = new Image();
-      // Country flags and selectable plate icons are bundled locally in Demo.
+      // Country flags are local Demo assets. If hosted under a nested route,
+      // retry the same local file at this site's root; never use another site.
       im.onload = () => P.emit('plate-update');
-      im.onerror = () => P.emit('plate-update');
+      im.onerror = () => {
+        if (src.startsWith(COUNTRY_FLAGS_DIR) && !im.dataset.demoFlagRootRetry) {
+          im.dataset.demoFlagRootRetry = '1';
+          const localPath = src.split('/').filter(Boolean).join('/');
+          const rootSrc = new URL('/' + localPath, window.location.origin).href;
+          if (rootSrc !== im.src) { im.src = rootSrc; return; }
+        }
+        P.emit('plate-update');
+      };
       im.src = src;
       imageCache.set(src, im);
     }
@@ -395,9 +404,13 @@
                 const inGuildRole = part.guildRoleStartIndex != null && ci >= part.guildRoleStartIndex;
                 k.font = "700 " + (inGuildRole ? tagPR : PR) + "px 'Nameplate CG', sans-serif";
                 if (ch !== ' ') {
-                  const explicit = applyFormatting ? formattedChars[ci]?.rgb : null;
-                  const prefixColour = part.drPrefixColour && ci < part.drPrefixLength ? part.drPrefixColour : null;
-                  k.fillStyle = rgba(explicit ? [...explicit, 255] : prefixColour ? [...prefixColour, 255] : colorFn(ci, seen));
+                  const isDrPrefix = ci < (part.drPrefixLength ?? 0);
+                  // A Dr. prefix is special only when Dr. is the active style;
+                  // higher-priority titles (especially Immortal) control its color.
+                  const explicit = applyFormatting && !isDrPrefix ? formattedChars[ci]?.rgb : null;
+                  const prefixColour = part.drPrefixColour && isDrPrefix ? part.drPrefixColour : null;
+                  const inherited = isDrPrefix && !perLetter ? colorFn(0, 0) : colorFn(ci, seen);
+                  k.fillStyle = rgba(prefixColour ? [...prefixColour, 255] : explicit ? [...explicit, 255] : inherited);
                   k.fillText(ch, x, ay + 19 * textPI);
                   seen++;
                 }

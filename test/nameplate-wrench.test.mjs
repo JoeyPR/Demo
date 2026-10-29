@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const plate = read("../js/plate.js");
 const wrenchUI = read("../js/wrench-ui.js");
@@ -48,7 +48,9 @@ test("nameplate size and icon positioning match the original values", () => {
 test("Dr. title keeps the reference red style without adding a glow", () => {
   assert.ok(plate.includes("dr:     { rgba: [255, 39, 29, 255] },"));
   assert.ok(!plate.includes("dr:     { rgba: [255, 39, 29, 255], shadow:"));
-  assert.ok(plate.includes("const drPrefixColour = drTitle && styleKey === 'dr' ?"), "Dr. must not override Immortal/legend styling");
+  assert.ok(plate.includes("const drPrefixColour = drTitle && styleKey === 'dr' ?"), "Dr. prefix color only applies when Dr. is the active style");
+  assert.ok(plate.includes("const isDrPrefix = ci < (part.drPrefixLength ?? 0);"));
+  assert.ok(plate.includes("const inherited = isDrPrefix && !perLetter ? colorFn(0, 0) : colorFn(ci, seen);"), "higher-priority title styling must control Dr. prefix color");
 });
 
 test("player name and guild role text use their requested independent size increases", () => {
@@ -66,8 +68,8 @@ test("wrench Status is single-select and scales styles plus decorations", () => 
   assert.ok(plate.includes("wrenchStatus: 'default'"));
   assert.ok(plate.includes("setWrenchStatus(id)"));
   assert.ok(plate.includes("WRENCH_STATUS_SCALE[state.wrenchStatus]"));
-  assert.ok(plate.includes("default: 0.6, supporter: 0.7, 'super-supporter': 0.8"));
-  assert.ok(wrenchUI.includes("default: 0.6, supporter: 0.7, 'super-supporter': 0.8"));
+  assert.ok(plate.includes("default: 0.48, supporter: 0.56, 'super-supporter': 0.64"));
+  assert.ok(wrenchUI.includes("default: 0.48, supporter: 0.56, 'super-supporter': 0.64"));
   assert.ok(wrenchUI.includes("STATUS_OPTIONS = ["));
   assert.ok(wrenchUI.includes("P.plateConfig.setWrenchStatus(id)"));
   assert.ok(wrenchUI.includes("superOption.disabled = st.wrenchStatus !== 'super-supporter'"));
@@ -80,9 +82,13 @@ test("country flag metadata is complete and flag assets are bundled locally in D
     assert.ok(flags.some(flag => flag.value === id), "missing flag option " + id);
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR = 'img/flags/'"));
   assert.ok(plate.includes("COUNTRY_FLAGS_DIR + state.flag + '.png'"));
+  assert.ok(plate.includes("src.split('/').filter(Boolean).join('/')"));
   assert.ok(!plate.includes("raw.githubusercontent.com/JoeyPR/Planner"));
   assert.ok(!plate.includes("cdn.jsdelivr.net/gh/JoeyPR/Planner"));
   assert.ok(!plate.includes("im.dataset.flagMirror"));
+  assert.ok(flags.some(flag => flag.value === "ci"), "Côte d’Ivoire should be selectable");
+  for (const flag of flags)
+    assert.ok(existsSync(new URL("../img/flags/" + flag.filename, import.meta.url)), "missing bundled flag asset " + flag.filename);
 });
 
 test("guild roles inherit active title styling rather than always becoming a plain tag", () => {
