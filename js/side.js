@@ -35,8 +35,12 @@
     /* WRENCH routes to the wrench section — no item focus needed */
     if (b.dataset.a === 'wrench') { A.wrench(); return; }
     const it = P.inv.focus || P.inv.sel;
-    /* the Fist/Wrench tool focus is protected — it is not an item */
-    if (!it || it.tool) return P.toast('Select an item first');
+    /* Fist/Wrench are core tools, not drop-able inventory items. */
+    if (!it) return P.toast('Select an item first');
+    if (it.tool) {
+      if (b.dataset.a === 'drop') return P.blackbox?.("You can't drop that.");
+      return;
+    }
     if (b.dataset.a === 'drop') {
       P.emit('drop-request', it);
       return;
