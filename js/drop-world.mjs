@@ -8,7 +8,7 @@ export const PICKUP_COLLECTION_DELAY = 500;
 export const PICKUP_COLLECTION_DURATION = 750;
 // The empty pickup frame clears faster than the icon's flight.
 export const PICKUP_BOX_SHRINK_DURATION = 450;
-export const PICKUP_ICON_ART_SIZE = 64 * 0.64 + 2;
+export const PICKUP_ICON_ART_SIZE = 64 * 0.64 + 6;
 export const PICKUP_COLLECTION_TOTAL_DURATION = PICKUP_COLLECTION_DELAY + PICKUP_COLLECTION_DURATION;
 export const PICKUP_FLOAT_AMPLITUDE = 0.8;
 export const PICKUP_FLOAT_PERIOD = 1600;
