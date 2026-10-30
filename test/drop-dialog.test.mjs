@@ -98,3 +98,11 @@ test("Fist/Wrench drop attempts use the reusable blackbox above the inventory",(
   assert.match(side,/P\.blackbox\?\.\("You can't drop that\."\)/);
   assert.match(drop,/item\?\.tool[\s\S]*P\.blackbox\?\.\("You can't drop that\."\)/);
 });
+
+
+test("drop amount uses a regular text entry field rather than a forced numeric input",()=>{
+  assert.match(drop,/amountInput\.type = "text"/);
+  assert.match(drop,/amountInput\.inputMode = "text"/);
+  assert.doesNotMatch(drop,/amountInput\.type = "number"|amountInput\.inputMode = "numeric"/);
+  assert.match(drop,/\^\\d\+\$/);
+});
