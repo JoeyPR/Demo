@@ -82,7 +82,7 @@ test("pickup remains at its recorded world point until the player enters collect
 });
 
 test("the item is behind the pickup frame and the popup stays in the preview rectangle",()=>{
-  assert.match(app,/artCtx\.drawImage\(pickup\.icon/);
+  assert.match(app,/iconCtx\.drawImage\(pickup\.icon/);
   assert.match(app,/frameCtx\.drawImage\(pickupSprite/);
   assert.match(app,/artCtx\.drawImage\(icon, 0, 0\)/);
   assert.match(app,/artCtx\.drawImage\(frame, 0, 0\)/);
