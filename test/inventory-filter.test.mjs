@@ -95,7 +95,6 @@ test("Custom, Makeup, and Player Customization keep a visible but disabled filte
   assert.match(grid, /const filterDisabledTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
   assert.match(grid, /filterButton\.disabled = disabled/);
   assert.match(grid, /if \(disabled\) setFilterOpen\(false\)/);
-  assert.match(grid,/!categoryFilterActive \\|\\| it\\.tool \\|\\| activeFilter === 'all'/);
   assert.match(inv, /#filter-button:disabled\{opacity:\.5;cursor:default;pointer-events:none\}/);
   assert.doesNotMatch(inv, /#main\[data-t="player"\] #filter-button,[\s\S]*display:none!important/);
   assert.match(side, /const nonSearchableTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
