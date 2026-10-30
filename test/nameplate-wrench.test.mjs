@@ -46,6 +46,8 @@ test("nameplate size and icon positioning match the original values", () => {
   assert.ok(plate.includes("width - COUNTRY_FLAG_EDGE_INSET * 2"));
   assert.ok(plate.includes("height - COUNTRY_FLAG_EDGE_INSET * 2"),
     "country flags have a visible two-pixel inset on all four edges without shrinking badges or role icons");
+  assert.ok(plate.includes("(part.flag ? COUNTRY_FLAG_EDGE_INSET : 0)"),
+    "the smaller flag remains centered in its original nameplate space");
 });
 
 
