@@ -89,9 +89,12 @@ test("Fist/Wrench drop attempts use the reusable blackbox above the inventory",(
   assert.match(html,/id="blackbox" class="blackbox"/);
   assert.match(html,/js\/blackbox\.js/);
   assert.match(blackboxCss,/background:\s*rgba\(0,\s*0,\s*0,\s*\.75\)/);
+  assert.doesNotMatch(blackboxCss,/box-shadow\s*:/);
   assert.match(blackboxCss,/font-family:\s*"Nameplate CG"/);
   assert.match(blackboxJs,/P\.blackbox\s*=/);
   assert.match(blackboxJs,/getBoundingClientRect/);
+  assert.match(blackboxJs,/P\.\$\("#inv"\)/);
+  assert.match(blackboxJs,/inventoryRect\.left \+ inventoryRect\.width \/ 2/);
   assert.match(side,/P\.blackbox\?\.\("You can't drop that\."\)/);
   assert.match(drop,/item\?\.tool[\s\S]*P\.blackbox\?\.\("You can't drop that\."\)/);
 });
