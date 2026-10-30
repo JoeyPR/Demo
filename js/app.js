@@ -40,6 +40,7 @@ const state = {
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
+  weatherFailedKey: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
   landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
   pickups: [], nextPickupId: 1
@@ -243,12 +244,10 @@ document.addEventListener("lostpointercapture", punchDrop);
 window.addEventListener("blur", punchCancel);
 
 /* ---------------- rendering ------------------------------------------- */
-const PALETTE = {
-  sky: "#c6dcd1"
-};
 function drawScene(w, h) {
-  /* plain sky fallback — only shown if the weather fails to load */
-  ctx.fillStyle = PALETTE.sky; ctx.fillRect(0, 0, w, h);
+  /* A failed/missing weather must never expose the old demo placeholder sky. */
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, w, h);
 }
 function renderAvatar() {
   /* dynamically load any atlas a draw call references but we have not
@@ -293,6 +292,17 @@ function renderAvatar() {
    moment (STATIC fully rendered weather), then the animation takes over from
    that exact timeline position (ANIMATED fully rendered weather) — no jump. */
 const WEATHER_STATIC_MS = 500;
+function markWeatherFailed(key, error) {
+  if (state.weatherKey !== key) return;
+  const firstFailure = state.weatherFailedKey !== key;
+  state.weatherRenderer = null;
+  state.weatherStill = null;
+  state.weatherFailedKey = key;
+  if (firstFailure) {
+    console.warn("[Weather] " + key + " failed; using black background.", error);
+    P.toast("Weather unavailable: " + key);
+  }
+}
 async function setWeather(key) {
   /* "None" was removed from the weathers: a saved 'none' (or empty) falls
      back to Sunny — there is always a weather. */
@@ -300,10 +310,12 @@ async function setWeather(key) {
   state.weatherKey = key;
   state.weatherRenderer = null;
   state.weatherStill = null;
+  state.weatherFailedKey = null;
   /* PREVIEW WHILE LOADING: the weather dropdown's cached fully-rendered still
      of the new weather is shown immediately, before its sheets are decoded */
   if (P.weatherThumb) P.weatherThumb(key).then(c => {
-    if (c && state.weatherKey === key && !state.weatherRenderer) state.weatherStill = c;
+    if (c && state.weatherKey === key && !state.weatherRenderer && state.weatherFailedKey !== key)
+      state.weatherStill = c;
   }).catch(() => {});
   try {
     const res = await fetch(moduleURL(`../data/variants/base/${key}.json`));
@@ -324,7 +336,7 @@ async function setWeather(key) {
     state.weatherT0 = t0;
     state.weatherAnimAt = performance.now() + WEATHER_STATIC_MS;
   } catch (err) {
-    P.toast("Weather unavailable: " + key);
+    markWeatherFailed(key, err);
   }
 }
 P.on("weather", key => setWeather(key));
@@ -477,6 +489,7 @@ function hillOffsetsNow(w, h, s, cameraWorldX) {
 
 /* ---------------- frame loop ------------------------------------------- */
 let hudTimer = 0;
+let lastFrameError = null;
 function updateHUD() {
   const hud = $("#hud");
   if (!state.lastFrame) return;
@@ -514,16 +527,21 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
 
   c.imageSmoothingEnabled = false;
   // Backdrop remains viewport-filling; otherwise zoom-out would reveal blanks.
-  if (state.weatherRenderer) {
-    const now = performance.now();
-    const t = now < state.weatherAnimAt ? state.weatherT0 : state.weatherT0 + now - state.weatherAnimAt;
-    /* Hill offsets use the camera's live world X; other weather elements keep
-       their own animation timeline. */
-    state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, camera.cameraWorldX));
-    c.drawImage(weatherBG, 0, 0, w, h);
-  } else if (state.weatherStill) {
-    c.drawImage(state.weatherStill, 0, 0, w, h);
-  } else {
+  try {
+    if (state.weatherRenderer) {
+      const now = performance.now();
+      const t = now < state.weatherAnimAt ? state.weatherT0 : state.weatherT0 + now - state.weatherAnimAt;
+      /* Hill offsets use the camera's live world X; other weather elements keep
+         their own animation timeline. */
+      state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, camera.cameraWorldX));
+      c.drawImage(weatherBG, 0, 0, w, h);
+    } else if (state.weatherStill && state.weatherFailedKey !== state.weatherKey) {
+      c.drawImage(state.weatherStill, 0, 0, w, h);
+    } else {
+      drawScene(w, h);
+    }
+  } catch (weatherError) {
+    markWeatherFailed(state.weatherKey, weatherError);
     drawScene(w, h);
   }
 
@@ -571,13 +589,27 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
-  if (state.weatherRenderer) c.drawImage(weatherFG, 0, 0, w, h);
+  if (state.weatherRenderer) {
+    try { c.drawImage(weatherFG, 0, 0, w, h); }
+    catch (weatherError) { markWeatherFailed(state.weatherKey, weatherError); }
+  }
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
+  lastFrameError = null;
   } catch (err) {
-    console.error(err);
-    state.ready = false;
-    $("#hud").textContent = "Render error: " + err.message;
+    /* Keep the simulation alive after a transient drawing error. A single
+       renderer exception must not permanently disable Drop, movement or tabs. */
+    const message = String(err?.message || err || "Unknown render error");
+    if (message !== lastFrameError) {
+      console.error("[Planner] frame render failed; continuing.", err);
+      lastFrameError = message;
+    }
+    c.save();
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.fillStyle = "#000";
+    c.fillRect(0, 0, w, h);
+    c.restore();
+    $("#hud").textContent = "Render warning: " + message;
   }
 });
 
