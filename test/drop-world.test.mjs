@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION,
+  PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION,
   PICKUP_COLLECTION_DELAY, PICKUP_COLLECTION_DURATION, PICKUP_BOX_SHRINK_DURATION,
   PICKUP_ICON_ART_SIZE, PICKUP_DROP_VARY_MAX, PICKUP_PLAYER_HALF_WIDTH, PICKUP_PLAYER_HEIGHT,
   PICKUP_COLLECTION_TOTAL_DURATION, pickupDropVary,
@@ -10,6 +10,12 @@ import {
 } from "../js/drop-world.mjs";
 const sample = (worldY = 0) => ({ spawnedAt:0, startX:0, targetX:18, worldX:18, startY:worldY + PICKUP_HOVER_HEIGHT-2, targetY:worldY + PICKUP_HOVER_HEIGHT, worldY:worldY + PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+
+test("the complete pickup box is two rendered pixels larger", () => {
+  assert.equal(PICKUP_BOX_EXTRA_SIZE, 2);
+  assert.ok(app.includes("const boxBaseSize = baseSize + PICKUP_BOX_EXTRA_SIZE;"));
+  assert.ok(app.includes("const size = boxBaseSize * pose.scale;"));
+});
 
 test("white pickup frame uses atlas cell X8 Y0 and a 20x20 source rect", () => {
   assert.deepEqual(PICKUP_ATLAS_RECT, {x:160,y:0,width:20,height:20});
