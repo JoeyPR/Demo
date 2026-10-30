@@ -95,7 +95,7 @@ test("Custom, Makeup, and Player Customization keep a visible but disabled filte
   assert.match(grid, /const filterDisabledTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
   assert.match(grid, /filterButton\.disabled = disabled/);
   assert.match(grid, /if \(disabled\) setFilterOpen\(false\)/);
-  assert.match(grid, /!categoryFilterActive \|\| activeFilter === 'all'/);
+  assert.match(grid,/!categoryFilterActive \\|\\| it\\.tool \\|\\| activeFilter === 'all'/);
   assert.match(inv, /#filter-button:disabled\{opacity:\.5;cursor:default;pointer-events:none\}/);
   assert.doesNotMatch(inv, /#main\[data-t="player"\] #filter-button,[\s\S]*display:none!important/);
   assert.match(side, /const nonSearchableTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
@@ -143,7 +143,7 @@ test("main_cg.ttf is the shared font across the planner UI", () => {
   assert.equal(existsSync(new URL("../font/plate.ttf", import.meta.url)), false);
   assert.match(base, /src:url\(\.\.\/font\/main_cg\.ttf\)/);
   assert.match(base, /--font-main:"Main CG",sans-serif/);
-  assert.match(plate, /px 'Main CG', sans-serif/);
+  assert.match(plate, /px 'Nameplate CG', sans-serif/);
   assert.doesNotMatch([base, dropdowns, systems, customization, plate].join("\n"),
     /font\/(?:cg|plate)\.ttf|"Century Gothic", system-ui|Century Gothic GT|ui-monospace/);
 });
