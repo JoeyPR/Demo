@@ -19,7 +19,16 @@
       P.tabs.cur = id;
       P.store.set('tab', id);
       P.$('#main').dataset.t = id;
-      P.$$('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === id));
+
+      /* Set visibility before notifying listeners. Grid refreshes need the
+         real visible layout metrics, not a hidden grid's 1-column fallback. */
+      const toolsTab = id === 'player' || id === 'makeup';
+      const grid = P.$('#grid');
+      const tools = P.$('#custom-tools');
+      if (grid) grid.hidden = toolsTab;
+      if (tools) tools.hidden = !toolsTab;
+
+      P.$('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.t === id));
       P.emit('tab', id);
     }
   };
