@@ -467,7 +467,7 @@
         const h = sizeOf(part)[1], y = yOf(part, h);
         if (im) {
           const iconPart = part.flag || part.badge || part.guild;
-          const x = (part.badge === 'g4g' || part.role && LP?.badge === 'g4g' ? LO - 4 * PI : LO) + (iconPart ? 1 : 0);
+          const x = (part.badge === 'g4g' || part.role && LP?.badge === 'g4g' ? LO - 4 * PI : LO) + (iconPart ? 1 : 0) - (part.flag ? COUNTRY_FLAG_EDGE_INSET : 0);
           const now = EPOCH + clock;
           const isPow = q => descenderPenalty(joined) / 2 ** Math.ceil(Math.log2(Math.max(q.naturalWidth ?? q.width, q.naturalHeight ?? q.height, 1)));
           const pulseTitle = part.role && (state.titles.includes('l125') || state.titles.includes('mentor'));
