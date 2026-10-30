@@ -45,7 +45,10 @@ test("OK creates a local pickup and restores the catalog item on collection",()=
 test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(world,/PICKUP_SIZE = 12/);
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);
-  assert.match(world,/reach = 5/);
+  assert.match(world,/PICKUP_PLAYER_HALF_WIDTH = 8/);
+  assert.match(world,/PICKUP_PLAYER_HEIGHT = 32 \\* 0\\.78/);
+  assert.match(world,/playerRight >= boxLeft && playerLeft <= boxRight/);
+  assert.match(world,/playerBottom >= boxTop && playerTop <= boxBottom/);
   assert.match(app,/startX: frame\.x \+ facing \* 5/);
   assert.match(app,/targetX: dropX/);
   assert.match(app,/worldX: dropX/);
@@ -65,7 +68,10 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
 });
 test("pickup remains at its recorded world point until the player enters collection range",()=>{
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);
-  assert.match(world,/reach = 5/);
+  assert.match(world,/PICKUP_PLAYER_HALF_WIDTH = 8/);
+  assert.match(world,/PICKUP_PLAYER_HEIGHT = 32 \\* 0\\.78/);
+  assert.match(world,/playerRight >= boxLeft && playerLeft <= boxRight/);
+  assert.match(world,/playerBottom >= boxTop && playerTop <= boxBottom/);
   assert.match(app,/const frame = state\.lastFrame/);
   assert.match(app,/startX: frame\.x \+ facing \* 5/);
   assert.match(app,/targetX: dropX/);
