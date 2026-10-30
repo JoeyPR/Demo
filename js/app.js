@@ -14,7 +14,7 @@ import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROU
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
-import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
+import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -681,12 +681,16 @@ function dropWorldItem(item, amount) {
   }
   const frame = state.lastFrame;
   const facing = Math.sign(frame.facing || motion?.facing || 1) || 1;
-  const dropX = frame.x + facing * 18;
-  const dropY = frame.y + PICKUP_HOVER_HEIGHT;
+  const dropVary = pickupDropVary();
+  const renderedPixelsPerWorldUnit = Math.max(0.001,
+    (state.view?.s ?? 4) * (state.view?.cameraZoom ?? 1));
+  const dropX = frame.x + facing * 18 + dropVary.x / renderedPixelsPerWorldUnit;
+  const dropY = frame.y + PICKUP_HOVER_HEIGHT + dropVary.y / renderedPixelsPerWorldUnit;
   const pickup = {
     id: state.nextPickupId++,
     item,
     amount,
+    dropVary,
     icon: P.thumb(item, 64),
     spawnedAt: state.clock,
     startX: frame.x + facing * 5,
