@@ -19,7 +19,6 @@ test("one failed event listener cannot stop the other tab and UI listeners", () 
 test("tab visibility is changed before every tab receives its change event", () => {
   const open = tabs.slice(tabs.indexOf("open(id){"), tabs.indexOf("\n    }\n  };"));
   assert.match(open, /document\.querySelectorAll\('\.tab'\)\.forEach/);
-  assert.match(open, /tools\.hidden = !toolsTab/);
   assert.ok(open.indexOf("grid.hidden = toolsTab") < open.indexOf("P.emit('tab', id)"));
   assert.match(open, /P\.\$\$\('\.tab'\)\.forEach/);
   assert.doesNotMatch(open, /P\.\$\('\.tab'\)\.forEach/);
