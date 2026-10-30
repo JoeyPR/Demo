@@ -149,6 +149,9 @@
     find(name) { return all.find(i => i.name === name) || null; },
     itemById(id) { return all.find(i => i.id === id) || null; },
     refresh() {
+      /* Do not measure or virtualize a grid while Player/Makeup owns the
+         drawer. tabs.js makes it visible before the next tab refresh. */
+      if (g.hidden) return;
       const q = (searchOn ? P.$('#q').value : '').trim().toLowerCase();
       syncFlags();
       const categoryFilterActive = !filterDisabledTabs.has(P.tabs.cur);
@@ -329,17 +332,15 @@
   function activate(item) {
     const f = P.inv.focus;
     if (item.tool) {
+      /* Wardrobe tool boxes are direct actions, not wearable items:
+         one click selects Fist (off) or Wrench (on), with no focus state. */
       toolArmed = false;
-      if (f?.tool && f.id === item.id) {
-        P.inv.focus = null;
-        const wrenchOn = item.toolType === 'wrench';
-        const pc = P.plateConfig.get();
-        P.plateConfig.setWrenchOn(wrenchOn);
-        if (wrenchOn && !pc.growId.trim())
-          P.toast('Type your GrowID in Player Customization to pull up the wrench.');
-      } else {
-        P.inv.focus = item;
-      }
+      P.inv.focus = null;
+      const wrenchOn = item.toolType === 'wrench';
+      const pc = P.plateConfig.get();
+      P.plateConfig.setWrenchOn(wrenchOn);
+      if (wrenchOn && !pc.growId.trim())
+        P.toast('Type your GrowID in Player Customization to pull up the wrench.');
       markFocus();
       return;
     }
@@ -429,9 +430,8 @@
   function markFocus() {
     const f = P.inv.focus;
     for (const b of win.querySelectorAll('.box')) {
-      const matches = !!f && (f.tool
-        ? b.dataset.toolType === f.toolType
-        : !b.dataset.toolType && +b.dataset.id === f.id);
+      /* Fist/Wrench are action buttons and never receive box-focus art. */
+      const matches = !b.classList.contains('tool') && !!f && !f.tool && +b.dataset.id === f.id;
       b.classList.toggle('focus', matches);
     }
     for (const b of P.$('#quick .box')) {
