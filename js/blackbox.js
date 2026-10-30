@@ -7,14 +7,16 @@
   let cleanupTimer = 0;
 
   function position() {
-    const inventory = P.$("#main") || P.$("#inv");
-    if (!inventory) return;
+    // #inv spans the full centered inventory stage: its midpoint aligns with
+    // the top drawer and the preview, unlike #main which is intentionally left-heavy.
+    const inventory = P.$("#inv") || P.$("#ui");
+    const drawer = P.$("#main");
+    if (!inventory || !drawer) return;
 
-    const rect = inventory.getBoundingClientRect();
-    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-    const centerX = Math.max(8, Math.min(viewportWidth - 8, rect.left + rect.width / 2));
-    box.style.left = centerX + "px";
-    box.style.top = Math.max(8, rect.top - box.getBoundingClientRect().height - 10) + "px";
+    const inventoryRect = inventory.getBoundingClientRect();
+    const drawerRect = drawer.getBoundingClientRect();
+    box.style.left = (inventoryRect.left + inventoryRect.width / 2) + "px";
+    box.style.top = Math.max(8, drawerRect.top - box.getBoundingClientRect().height - 10) + "px";
   }
 
   function hide() {
