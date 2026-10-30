@@ -42,8 +42,10 @@ test("nameplate size and icon positioning match the original values", () => {
   assert.ok(plate.includes("if (part.guild) return iconCenterY() - 0.875 * PB;"));
   assert.ok(plate.includes("if (part.role) return (LL ? iconCenterY() - 1.025 * PB : iconCenterY()) - h / 2;"));
   assert.ok(plate.includes("if (part.flag || part.badge) return iconCenterY() - h / 2;"));
-  assert.ok(plate.includes("return [Math.max(1, width - 2), Math.max(1, height - 2)];"),
-    "country flags are two pixels smaller without shrinking title badges or role icons");
+  assert.ok(plate.includes("const COUNTRY_FLAG_EDGE_INSET = 2;"));
+  assert.ok(plate.includes("width - COUNTRY_FLAG_EDGE_INSET * 2"));
+  assert.ok(plate.includes("height - COUNTRY_FLAG_EDGE_INSET * 2"),
+    "country flags have a visible two-pixel inset on all four edges without shrinking badges or role icons");
 });
 
 
