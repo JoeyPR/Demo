@@ -162,4 +162,5 @@ test("Fist and Wrench are regular Clothing boxes inserted immediately before Sha
   assert.match(grid,/catalogItems\.splice\(shadesIndex < 0 \? 0 : shadesIndex, 0, \.\.\.CLOTHING_TOOLS\)/);
   assert.match(grid,/b\.className = 'box' \+ \(it\.tool \? ' reg tool' : ''\)/);
   assert.match(grid,/P\.plateConfig\.setWrenchOn\(wrenchOn\)/);
+  assert.match(grid,/!categoryFilterActive \|\| it\.tool \|\| activeFilter === 'all'/);
 });
