@@ -3,7 +3,14 @@
   const P = window.P = {};
   const ev = {};
   P.on   = (n, f) => ((ev[n] = ev[n] || []).push(f), f);
-  P.emit = (n, d) => (ev[n] || []).forEach(f => f(d));
+  P.emit = (n, d) => {
+    /* One broken UI listener must not prevent the other systems from syncing.
+       Snapshot the list so handlers can safely register new listeners. */
+    for (const f of [...(ev[n] || [])]) {
+      try { f(d); }
+      catch (error) { console.error('[Planner] ' + n + ' listener failed', error); }
+    }
+  };
   P.$    = (s, r) => (r || document).querySelector(s);
   P.$$   = (s, r) => [...(r || document).querySelectorAll(s)];
 
