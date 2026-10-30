@@ -61,7 +61,9 @@
   async function renderStill(key) {
     if (stillCache.has(key)) return stillCache.get(key);
     const m = await getMods();
-    const cfg = await (await fetch(`data/variants/base/${key}.json`)).json();
+    const response = await fetch(`data/variants/base/${key}.json`);
+    if (!response.ok) throw new Error("Weather config unavailable (" + response.status + ")");
+    const cfg = await response.json();
     if (CLOUD_FIX_PENDING.has(key)) m.applyCloudFix(cfg);   /* sunny/monochrome/spring */
     const imgs = await m.loadSheets(cfg, new URL('sheets/', location.href).href);
     const bg = document.createElement('canvas'), fg = document.createElement('canvas');
@@ -83,7 +85,7 @@
   const queue = [];          /* [{key, tile}] awaiting render */
   const WORKERS = 4;
   let active = 0;
-  const io = new IntersectionObserver(entries => {
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;
       const tile = e.target;
@@ -91,7 +93,10 @@
       queue.push({ key: tile.dataset.key, tile });
     }
     pump();
-  }, { root: bodyEl, rootMargin: '96px' });
+  }, { root: bodyEl, rootMargin: '96px' }) : {
+    observe(tile) { queue.push({ key: tile.dataset.key, tile }); pump(); },
+    unobserve() {}
+  };
 
   function pump() {
     while (active < WORKERS && queue.length) {
@@ -115,7 +120,10 @@
 
   /* ---------------- panel content ---------------- */
   function build() {
-    fetch('data/index.json').then(r => r.json()).then(list => {
+    fetch('data/index.json').then(r => {
+      if (!r.ok) throw new Error("Weather list unavailable (" + r.status + ")");
+      return r.json();
+    }).then(list => {
       catalog = list;
       renderPanel();
       updateIcon();
@@ -179,6 +187,7 @@
     const key = P.weather.key;
     try {
       const still = await renderStill(key);
+      if (P.weather.key !== key) return;  /* discard a stale icon render */
       const x = iconCv.getContext('2d');
       x.imageSmoothingEnabled = false;
       x.clearRect(0, 0, 34, 34);
