@@ -14,7 +14,7 @@ import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROU
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
-import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
+import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
@@ -818,7 +818,8 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
   for (const pickup of state.pickups) {
     const pose = pickupPose(pickup, state.clock, frame);
     const baseSize = PICKUP_SIZE * scale * zoom;
-    const size = baseSize * pose.scale;
+    const boxBaseSize = baseSize + PICKUP_BOX_EXTRA_SIZE;
+    const size = boxBaseSize * pose.scale;
     const anchorX = cameraPivotX + (pose.x - frame.x) * scale * zoom;
     const bottomY = cameraPivotY +
       (16 * PLAYER_VISUAL_SCALE + pose.y - frame.y - pose.bob) * scale * zoom;
@@ -890,7 +891,7 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
 
       // Launch the item icon up and right first, then curve left into the
       // inventory. It scales gradually and fades near the target.
-      const start = { x: anchorX, y: bottomY - baseSize / 2 };
+      const start = { x: anchorX, y: bottomY - boxBaseSize / 2 };
       const flight = pickupIconFlightPose(start, inventoryTarget, pose.iconProgress, baseSize);
       if (flight.alpha > 0.005) {
         const flightSize = baseSize * flight.scale;
