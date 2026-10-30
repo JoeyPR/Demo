@@ -106,6 +106,11 @@
 #quick .box.sel.art .ck.p{display:block}
 
 /* Slightly enlarge the top-drawer Fist/Wrench art without touching box borders. */
+/* Wardrobe Fist/Wrench are blue action boxes, never wearable/focus boxes. */
+#grid-window .box.tool,
+#grid-window .box.tool.sel,
+#grid-window .box.tool.focus{background-image:url(../img/box-blue.png)}
+#grid-window .box.tool::before{display:none}
 .box.tool .ic{inset:8%;overflow:hidden}
 .box.tool .ic img{width:100%;height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;flex:none}
 
@@ -113,10 +118,10 @@
    The button adds no background/border and never clips the baked drop shadow. */
 #tabs{left:calc(1000*var(--u) - 50vw);top:calc(286.2*var(--u));
   width:calc(50vw - 916*var(--u));height:calc(607.8*var(--u));
-  display:flex;flex-direction:column;gap:0;pointer-events:none}
+  display:flex;flex-direction:column;gap:0;pointer-events:auto;z-index:12}
 .tab{display:block;position:relative;flex:0 0 calc(101.3*var(--u));min-height:0;
   width:100%;height:calc(101.3*var(--u));margin:0 0 calc(-4*var(--u));padding:0;box-sizing:border-box;
-  pointer-events:auto;outline:0;background:none;border:0;border-radius:0;overflow:visible}
+  pointer-events:auto;touch-action:manipulation;z-index:12;outline:0;background:none;border:0;border-radius:0;overflow:visible}
 #tabs .tab:last-child{margin-bottom:0}
 .tab img{position:absolute;top:0;right:0;width:auto;height:100%;max-width:none;object-fit:contain;
   object-position:right bottom;image-rendering:pixelated}
