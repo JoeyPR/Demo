@@ -6,17 +6,19 @@
   let hideTimer = 0;
   let cleanupTimer = 0;
 
-  function position() {
-    // #inv spans the full centered inventory stage: its midpoint aligns with
-    // the top drawer and the preview, unlike #main which is intentionally left-heavy.
+  function positionAtCurrentInventory() {
+    // Snapshot the dragged inventory position once when the warning is shown.
+    // #inv provides the shared horizontal center; #handle provides the current
+    // desktop/mobile drawer position after its drag transform has been applied.
     const inventory = P.$("#inv") || P.$("#ui");
-    const drawer = P.$("#main");
-    if (!inventory || !drawer) return;
+    const handle = P.$("#handle");
+    if (!inventory || !handle) return;
 
     const inventoryRect = inventory.getBoundingClientRect();
-    const drawerRect = drawer.getBoundingClientRect();
+    const handleRect = handle.getBoundingClientRect();
+    const boxRect = box.getBoundingClientRect();
     box.style.left = (inventoryRect.left + inventoryRect.width / 2) + "px";
-    box.style.top = Math.max(8, drawerRect.top - box.getBoundingClientRect().height - 10) + "px";
+    box.style.top = Math.max(4, handleRect.top - boxRect.height - 8) + "px";
   }
 
   function hide() {
@@ -35,11 +37,10 @@
     box.textContent = text;
     box.hidden = false;
     box.classList.remove("on");
-    position();
+    positionAtCurrentInventory();
 
     window.requestAnimationFrame(() => {
       if (box.hidden) return;
-      position();
       box.classList.add("on");
     });
 
@@ -47,10 +48,4 @@
     hideTimer = window.setTimeout(hide, Number.isFinite(ms) ? Math.max(400, ms) : 1800);
   };
 
-  window.addEventListener("resize", () => {
-    if (!box.hidden) position();
-  });
-  P.on("preview", () => {
-    if (!box.hidden) position();
-  });
 })();
