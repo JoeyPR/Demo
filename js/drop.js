@@ -119,7 +119,13 @@
     error.hidden = true;
     error.textContent = "";
     iconBox.replaceChildren();
-    if (typeof P.thumb === "function") iconBox.append(P.thumb(item, 64));
+    if (typeof P.thumb === "function") {
+      try { iconBox.append(P.thumb(item, 64)); }
+      catch (error) {
+        console.warn("[Drop] item thumbnail unavailable; opening dialog anyway.", error);
+        iconBox.textContent = (item.name || "?").slice(0, 1).toUpperCase();
+      }
+    }
     overlay.hidden = false;
     amountInput.focus({ preventScroll: true });
     amountInput.select();
