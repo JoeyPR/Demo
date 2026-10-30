@@ -26,7 +26,7 @@ test("top drawer handle is a child of the drawer and does not apply a second dra
 
 test("Fist and Wrench use the same icon area and scale as inventory item icons", () => {
   assert.match(inv, /\.box \.ic\{position:absolute;inset:10\.2%/);
-  assert.match(inv, /\.box\.tool \.ic\{inset:10\.2%;overflow:hidden\}/);
+  assert.match(inv, /\.box\.tool \.ic\{inset:8%;overflow:hidden\}/);
   assert.match(inv, /\.box\.tool \.ic img\{width:100%;height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;flex:none\}/);
   assert.doesNotMatch(inv, /width:calc\((118\.5|113\.6)% - 2px\)/);
 });
