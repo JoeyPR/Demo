@@ -56,7 +56,10 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(app,/worldY: dropY/);
   assert.match(app,/P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom, state\.clock, 0\.80\)/);
   assert.match(app,/P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom, state\.clock, 0\.80\)/);
-  assert.ok(app.includes("PICKUP_SIZE * scale * pose.scale * zoom"));
+  assert.ok(app.includes("const baseSize = PICKUP_SIZE * scale * zoom;"));
+  assert.ok(app.includes("const boxBaseSize = baseSize + PICKUP_BOX_EXTRA_SIZE;"));
+  assert.ok(app.includes("const size = boxBaseSize * pose.scale;"));
+  assert.ok(app.includes("const flightSize = baseSize * flight.scale;"));
   assert.ok(app.includes("const anchorX = cameraPivotX + (pose.x - frame.x) * scale * zoom"));
   assert.ok(app.includes("const bottomY = cameraPivotY +"));
   assert.match(app,/PLAYER_SHADOW_OPACITY/);
@@ -64,7 +67,6 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(app,/playerShadowOffset\(-1\)/);
   assert.ok(app.includes("left + shadowDirection.x * zoom,"));
   assert.ok(app.includes("top + shadowDirection.y * zoom, size, size"));
-  assert.ok(app.includes("pose.scale * zoom"));
 });
 test("pickup remains at its recorded world point until the player enters collection range",()=>{
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);
