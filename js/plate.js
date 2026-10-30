@@ -294,13 +294,14 @@
     const L1 = 13.125 * PI;
     const iconCenterY = () => baselineY - 19 * PI + PB / 2;
     const pow2 = im => 2 ** Math.ceil(Math.log2(Math.max(im.naturalWidth ?? im.width, im.naturalHeight ?? im.height, 1)));
-    const sizeOf = part => {
+    const COUNTRY_FLAG_EDGE_INSET = 2;
+  const sizeOf = part => {
       const im = resolveImg(part);
       if (part.guild) return [1.5 * PB * (im ? (im.naturalWidth ?? im.width) / (im.naturalHeight ?? im.height) : 1), 1.5 * PB];
       if (part.flag) {
         const width = im ? PB * (im.naturalWidth ?? im.width) / pow2(im) : PB;
         const height = im ? PB * (im.naturalHeight ?? im.height) / pow2(im) : PB;
-        return [Math.max(1, width - 2), Math.max(1, height - 2)];
+        return [Math.max(1, width - COUNTRY_FLAG_EDGE_INSET * 2), Math.max(1, height - COUNTRY_FLAG_EDGE_INSET * 2)];
       }
       if (part.role || part.badge) return im ? [PB * (im.naturalWidth ?? im.width) / pow2(im), PB * (im.naturalHeight ?? im.height) / pow2(im)] : [PB, PB];
       return [im ? (im.naturalWidth ?? im.width) / (im.naturalHeight ?? im.height) * PG : PG, PG];
