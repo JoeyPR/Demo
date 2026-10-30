@@ -48,7 +48,7 @@ test("Clothing Fist/Wrench boxes immediately apply the tool without focus state"
   const focusEnd = grid.indexOf("\n  }", focusStart);
   const focus = grid.slice(focusStart, focusEnd);
   assert.match(focus, /!b\.classList\.contains\('tool'\)/);
-  assert.match(invCss, /#grid-window \.box\.tool\{background-image:url\(\.\.\/img\/box-blue\.png\)\}/);
+  assert.match(invCss, /#grid-window \.box\.tool,\s*#grid-window \.box\.tool\.sel,\s*#grid-window \.box\.tool\.focus\{background-image:url\(\.\.\/img\/box-blue\.png\)\}/);
   assert.match(invCss, /#grid-window \.box\.tool::before\{display:none\}/);
 });
 
