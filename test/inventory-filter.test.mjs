@@ -152,3 +152,14 @@ test("Land and Weather buttons use the requested blue panel and white text", () 
   assert.match(dropdowns, /\.dd-btn \{[\s\S]*?background: #277D9F;[\s\S]*?color: #fff;/);
   assert.match(dropdowns, /\.dd-btn:hover \{ background: #277D9F; color: #fff; \}/);
 });
+
+
+test("Fist and Wrench are regular Clothing boxes inserted immediately before Shades",()=>{
+  assert.match(grid,/const CLOTHING_TOOLS = \[/);
+  assert.match(grid,/name: 'Fist'[\s\S]*toolImage: 'img\/fist\.png'/);
+  assert.match(grid,/name: 'Wrench'[\s\S]*toolImage: 'img\/wrench-quick\.png'/);
+  assert.match(grid,/const shadesIndex = catalogItems\.findIndex/);
+  assert.match(grid,/catalogItems\.splice\(shadesIndex < 0 \? 0 : shadesIndex, 0, \.\.\.CLOTHING_TOOLS\)/);
+  assert.match(grid,/b\.className = 'box' \+ \(it\.tool \? ' reg tool' : ''\)/);
+  assert.match(grid,/P\.plateConfig\.setWrenchOn\(wrenchOn\)/);
+});
