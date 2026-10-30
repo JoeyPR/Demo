@@ -8,13 +8,23 @@ export const PICKUP_COLLECTION_DELAY = 500;
 export const PICKUP_COLLECTION_DURATION = 750;
 // The empty pickup frame clears faster than the icon's flight.
 export const PICKUP_BOX_SHRINK_DURATION = 450;
-export const PICKUP_ICON_ART_SIZE = 64 * 0.64 + 6;
+export const PICKUP_ICON_ART_SIZE = 64 * 0.64 + 7;
+export const PICKUP_DROP_VARY_MAX = 5;
+export const PICKUP_PLAYER_HALF_WIDTH = 8;
+export const PICKUP_PLAYER_HEIGHT = 32 * 0.78;
 export const PICKUP_COLLECTION_TOTAL_DURATION = PICKUP_COLLECTION_DELAY + PICKUP_COLLECTION_DURATION;
 export const PICKUP_FLOAT_AMPLITUDE = 0.8;
 export const PICKUP_FLOAT_PERIOD = 1600;
 
 const clamp01 = value => Math.min(1, Math.max(0, value));
 const lerp = (a, b, t) => a + (b - a) * t;
+
+/** Random radial offset measured in rendered pixels, bounded by 0–5px. */
+export function pickupDropVary(random = Math.random) {
+  const radius = clamp01(Number(random()) || 0) * PICKUP_DROP_VARY_MAX;
+  const angle = clamp01(Number(random()) || 0) * Math.PI * 2;
+  return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, radius };
+}
 
 export function pickupPose(pickup, now, playerFrame) {
   const age = Math.max(0, now - pickup.spawnedAt);
@@ -96,19 +106,34 @@ export function pickupIconFlightPose(start, target, progress, sizeUnit = 1) {
   return {
     x: cubic(start.x, c1x, c2x, target.x),
     y: cubic(start.y, c1y, c2y, target.y),
-    scale: 1 + 2.2 * Math.pow(t, 1.6),
+    scale: 1 + 4 * Math.pow(t, 1.6),
     alpha: 1 - smoothFade,
     progress: t,
   };
 }
 
-export function pickupShouldCollect(pickup, now, playerFrame, reach = 5) {
+export function pickupShouldCollect(pickup, now, playerFrame) {
   if (pickup.collectAt != null || now - pickup.spawnedAt < PICKUP_SPAWN_DURATION) return false;
-  if (!playerFrame || !playerFrame.ground) return false;
-  const playerY = Number(playerFrame.y ?? 0);
-  const targetX = Number(pickup.worldX ?? pickup.targetX);
-  const targetY = Number(pickup.worldY ?? pickup.targetY ?? 0);
-  const droppedGroundY = targetY - PICKUP_HOVER_HEIGHT;
-  return Math.abs(playerFrame.x - targetX) <= reach &&
-    Math.abs(playerY - droppedGroundY) <= 4;
+  if (!playerFrame || !Number.isFinite(Number(playerFrame.x)) ||
+      !Number.isFinite(Number(playerFrame.y))) return false;
+
+  // Treat the visible pickup artwork as a 12-unit collision rectangle and the
+  // player as the rendered 0.78-scale body footprint. Collect on first overlap,
+  // including while airborne, rather than requiring the player center to enter a radius.
+  const pose = pickupPose(pickup, now, playerFrame);
+  const halfBox = PICKUP_SIZE * pose.scale / 2;
+  const boxLeft = pose.x - halfBox;
+  const boxRight = pose.x + halfBox;
+  const boxTop = pose.y - PICKUP_SIZE * pose.scale;
+  const boxBottom = pose.y;
+
+  const playerX = Number(playerFrame.x);
+  const playerY = Number(playerFrame.y);
+  const playerLeft = playerX - PICKUP_PLAYER_HALF_WIDTH;
+  const playerRight = playerX + PICKUP_PLAYER_HALF_WIDTH;
+  const playerTop = playerY - PICKUP_PLAYER_HEIGHT;
+  const playerBottom = playerY;
+
+  return playerRight >= boxLeft && playerLeft <= boxRight &&
+    playerBottom >= boxTop && playerTop <= boxBottom;
 }
