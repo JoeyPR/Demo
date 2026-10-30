@@ -28,7 +28,7 @@
       if (grid) grid.hidden = toolsTab;
       if (tools) tools.hidden = !toolsTab;
 
-      P.$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === id)));
+      document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === id)));
       P.emit('tab', id);
     }
   };
