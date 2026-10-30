@@ -153,7 +153,7 @@
       syncFlags();
       const categoryFilterActive = !filterDisabledTabs.has(P.tabs.cur);
       render = all.filter(it => !it.gone && visible(it) &&
-        (!categoryFilterActive || activeFilter === 'all' || String(it.slot) === activeFilter) &&
+        (!categoryFilterActive || it.tool || activeFilter === 'all' || String(it.slot) === activeFilter) &&
         (!q || it.name.toLowerCase().includes(q) || String(it.id) === q));
       g.scrollTop = 0;
       renderWindow(true);
