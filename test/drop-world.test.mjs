@@ -4,7 +4,8 @@ import { readFileSync } from "node:fs";
 import {
   PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_SPAWN_DURATION,
   PICKUP_COLLECTION_DELAY, PICKUP_COLLECTION_DURATION, PICKUP_BOX_SHRINK_DURATION,
-  PICKUP_ICON_ART_SIZE, PICKUP_COLLECTION_TOTAL_DURATION,
+  PICKUP_ICON_ART_SIZE, PICKUP_DROP_VARY_MAX, PICKUP_PLAYER_HALF_WIDTH, PICKUP_PLAYER_HEIGHT,
+  PICKUP_COLLECTION_TOTAL_DURATION, pickupDropVary,
   PICKUP_FLOAT_AMPLITUDE, PICKUP_FLOAT_PERIOD, pickupPose, pickupIconFlightPose, pickupShouldCollect
 } from "../js/drop-world.mjs";
 const sample = (worldY = 0) => ({ spawnedAt:0, startX:0, targetX:18, worldX:18, startY:worldY + PICKUP_HOVER_HEIGHT-2, targetY:worldY + PICKUP_HOVER_HEIGHT, worldY:worldY + PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
@@ -69,8 +70,8 @@ test("collection holds the full pickup for 500ms, then shrinks it at its fixed w
   assert.equal(PICKUP_COLLECTION_TOTAL_DURATION,PICKUP_COLLECTION_DELAY+PICKUP_COLLECTION_DURATION);
 });
 
-test("pickup artwork is six pixels larger total and the empty box shrinks faster than the icon flies", () => {
-  assert.equal(PICKUP_ICON_ART_SIZE, 46.96);
+test("pickup artwork is seven pixels larger total and the empty box shrinks faster than the icon flies", () => {
+  assert.equal(PICKUP_ICON_ART_SIZE, 47.96);
   assert.equal(PICKUP_BOX_SHRINK_DURATION, 450);
   assert.ok(PICKUP_BOX_SHRINK_DURATION < PICKUP_COLLECTION_DURATION);
 
@@ -101,9 +102,9 @@ test("the item icon jumps right, swerves left into the inventory, grows, then fa
   assert.ok(late.alpha>0 && late.alpha<1,"the icon fades as it approaches the inventory");
   assert.equal(end.x,target.x);
   assert.equal(end.y,target.y);
-  assert.equal(end.scale,3.2);
+  assert.equal(end.scale,5);
   assert.equal(end.alpha,0);
-  assert.equal(end.scale,3.2,"the icon scales to 3.2× its initial flight size");
+  assert.equal(end.scale,5,"the icon scales to 5× its initial flight size");
 });
 
 test("the renderer separates the pickup frame from the flying item icon", () => {
@@ -117,12 +118,31 @@ test("the renderer separates the pickup frame from the flying item icon", () => 
   assert.ok(app.includes("state.clock - pickup.collectAt >= PICKUP_COLLECTION_TOTAL_DURATION"));
 });
 
-test("collection starts only when the grounded player reaches the fixed pickup", () => {
+test("collection starts on first contact with the pickup box, including airborne contact", () => {
   const pickup=sample();
-  assert.equal(pickupShouldCollect(pickup,399,{x:18,y:0,ground:true}),false);
-  assert.equal(pickupShouldCollect(pickup,400,{x:18,y:-10,ground:false}),false);
-  assert.equal(pickupShouldCollect(pickup,400,{x:0,y:0,ground:true}),false, "must not collect from the original drop point when pickup is away");
-  assert.equal(pickupShouldCollect(pickup,400,{x:12,y:0,ground:true}),false);
-  assert.equal(pickupShouldCollect(pickup,400,{x:14,y:0,ground:true}),true);
-  assert.equal(pickupShouldCollect(pickup,400,{x:18,y:0,ground:true}),true);
+  assert.equal(pickupShouldCollect(pickup,399,{x:18,y:0,ground:true}),false,
+    "the pickup is not collidable before its spawn animation finishes");
+  assert.equal(pickupShouldCollect(pickup,400,{x:18,y:-22,ground:false}),false,
+    "the player's body is above the pickup box");
+  assert.equal(pickupShouldCollect(pickup,400,{x:0,y:0,ground:true}),false,
+    "must not collect from the original drop point when pickup is away");
+  assert.equal(pickupShouldCollect(pickup,400,{x:3,y:0,ground:true}),false,
+    "no collection while the player's collision bounds remain outside the box");
+  assert.equal(pickupShouldCollect(pickup,400,{x:4,y:0,ground:true}),true,
+    "pickup begins at the player's edge touching the box pixels");
+  assert.equal(pickupShouldCollect(pickup,400,{x:12,y:0,ground:true}),true);
+  assert.equal(pickupShouldCollect(pickup,400,{x:18,y:-10,ground:false}),true,
+    "ground state does not block a real body/box overlap");
+  assert.equal(PICKUP_PLAYER_HALF_WIDTH,8);
+  assert.equal(PICKUP_PLAYER_HEIGHT,32*0.78);
+});
+
+test("dropVary stays within a five-pixel radial range", () => {
+  const zero=pickupDropVary(()=>0);
+  assert.deepEqual(zero,{x:0,y:0,radius:0});
+  let values=[1,0];
+  const maximum=pickupDropVary(()=>values.shift());
+  assert.ok(Math.abs(maximum.x-5)<1e-9);
+  assert.ok(Math.abs(maximum.y)<1e-9);
+  assert.equal(maximum.radius,PICKUP_DROP_VARY_MAX);
 });
