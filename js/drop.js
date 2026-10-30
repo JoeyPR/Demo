@@ -21,11 +21,11 @@
   row.append(iconBox, title);
   const prompt = make("p", "drop-prompt", "drop-prompt");
   const amountInput = make("input", "drop-amount", "drop-amount");
-  amountInput.type = "number";
-  amountInput.min = "1";
-  amountInput.max = "999999";
-  amountInput.step = "1";
-  amountInput.inputMode = "numeric";
+  amountInput.type = "text";
+  amountInput.inputMode = "text";
+  amountInput.maxLength = 6;
+  amountInput.autocomplete = "off";
+  amountInput.spellcheck = false;
   amountInput.value = "1";
   amountInput.setAttribute("aria-label", "Amount to drop");
   const error = make("p", "drop-error", "drop-error");
@@ -127,7 +127,8 @@
 
   function confirm() {
     if (!currentItem) return;
-    const amount = Number(amountInput.value);
+    const rawAmount = String(amountInput.value || "").trim();
+    const amount = /^\d+$/.test(rawAmount) ? Number(rawAmount) : NaN;
     if (!Number.isSafeInteger(amount) || amount < 1 || amount > 999999) {
       error.textContent = "Enter a whole number from 1 to 999999.";
       error.hidden = false;
