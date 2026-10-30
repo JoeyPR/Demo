@@ -1,0 +1,38 @@
+name: Planner runtime regression
+on:
+  push:
+    branches: [camera-quickslot-nameplate]
+    paths:
+      - 'js/core.js'
+      - 'js/tabs.js'
+      - 'js/grid.js'
+      - 'js/app.js'
+      - 'js/drop.js'
+      - 'js/weather.js'
+      - 'css/inv.css'
+      - 'test/runtime-reliability.test.mjs'
+      - 'test/drop-dialog.test.mjs'
+      - 'test/inventory-filter.test.mjs'
+      - '.github/workflows/planner-runtime-regression.yml'
+  pull_request:
+    paths:
+      - 'js/core.js'
+      - 'js/tabs.js'
+      - 'js/grid.js'
+      - 'js/app.js'
+      - 'js/drop.js'
+      - 'js/weather.js'
+      - 'css/inv.css'
+      - 'test/runtime-reliability.test.mjs'
+      - 'test/drop-dialog.test.mjs'
+      - 'test/inventory-filter.test.mjs'
+      - '.github/workflows/planner-runtime-regression.yml'
+jobs:
+  runtime-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/runtime-reliability.test.mjs test/drop-dialog.test.mjs test/inventory-filter.test.mjs
