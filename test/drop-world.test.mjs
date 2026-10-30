@@ -71,7 +71,7 @@ test("collection holds the full pickup for 500ms, then shrinks it at its fixed w
 });
 
 test("pickup artwork is seven pixels larger total and the empty box shrinks faster than the icon flies", () => {
-  assert.equal(PICKUP_ICON_ART_SIZE, 47.96);
+  assert.equal(PICKUP_ICON_ART_SIZE, 49.96);
   assert.equal(PICKUP_BOX_SHRINK_DURATION, 450);
   assert.ok(PICKUP_BOX_SHRINK_DURATION < PICKUP_COLLECTION_DURATION);
 
