@@ -94,7 +94,10 @@ test("Fist/Wrench drop attempts use the reusable blackbox above the inventory",(
   assert.match(blackboxJs,/P\.blackbox\s*=/);
   assert.match(blackboxJs,/getBoundingClientRect/);
   assert.match(blackboxJs,/P\.\$\("#inv"\)/);
+  assert.match(blackboxJs,/const handle = P\.\$\("#handle"\)/);
+  assert.match(blackboxJs,/handleRect\.top - boxRect\.height - 8/);
   assert.match(blackboxJs,/inventoryRect\.left \+ inventoryRect\.width \/ 2/);
+  assert.doesNotMatch(blackboxJs,/P\.on\("preview"|addEventListener\("resize"/);
   assert.match(side,/P\.blackbox\?\.\("You can't drop that\."\)/);
   assert.match(drop,/item\?\.tool[\s\S]*P\.blackbox\?\.\("You can't drop that\."\)/);
 });
@@ -103,6 +106,8 @@ test("Fist/Wrench drop attempts use the reusable blackbox above the inventory",(
 test("drop amount uses a regular text entry field rather than a forced numeric input",()=>{
   assert.match(drop,/amountInput\.type = "text"/);
   assert.match(drop,/amountInput\.inputMode = "text"/);
+  assert.match(drop,/const rawAmount = String\(amountInput\.value \|\| ""\)\.trim\(\)/);
+  assert.match(drop,/const amount = \/\^\\d\+\$\/\.test\(rawAmount\)/);
   assert.doesNotMatch(drop,/amountInput\.type = "number"|amountInput\.inputMode = "numeric"/);
   assert.match(drop,/\^\\d\+\$/);
 });
