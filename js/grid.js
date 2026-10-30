@@ -36,8 +36,20 @@
     .map((name, i) => ({ id: 200001 + i, name, tab: 'custom', kind: 'cloth',
       qty: 1, fav: false, eq: false, gone: false, wearable: false, slot: null }));
 
+  // Core tools are regular white inventory boxes, inserted directly ahead of
+  // Shades so they are available from the Clothing tab without becoming catalog gear.
+  const CLOTHING_TOOLS = [
+    { id: -100001, name: 'Fist', tab: 'cloth', tool: true, toolType: 'fist',
+      toolImage: 'img/fist.png', qty: 1, fav: false, eq: false, gone: false, wearable: true, slot: null },
+    { id: -100002, name: 'Wrench', tab: 'cloth', tool: true, toolType: 'wrench',
+      toolImage: 'img/wrench-quick.png', qty: 1, fav: false, eq: false, gone: false, wearable: true, slot: null }
+  ];
+
   function build() {
-    all = ((P.catalog && P.catalog.items) || []).map(it => (it.tab = 'cloth', it));
+    const catalogItems = ((P.catalog && P.catalog.items) || []).map(it => (it.tab = 'cloth', it));
+    const shadesIndex = catalogItems.findIndex(it => String(it.name || '').trim().toLowerCase() === 'shades');
+    catalogItems.splice(shadesIndex < 0 ? 0 : shadesIndex, 0, ...CLOTHING_TOOLS);
+    all = catalogItems;
     for (const c of CUSTOMS) if (!all.some(it => it.id === c.id)) all.push(c);
     syncFlags();
   }
@@ -168,10 +180,11 @@
   function boxEl(it) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'box' + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '');
+    b.className = 'box' + (it.tool ? ' reg tool' : '') + (it.gone ? ' gone' : '') + (favs.has(it.id) ? ' fav' : '');
     b.dataset.id = it.id;
+    if (it.tool) b.dataset.toolType = it.toolType;
     if (it.slot != null) b.dataset.slot = it.slot;
-    b.setAttribute('aria-label', it.name + ' (#' + it.id + ')');
+    b.setAttribute('aria-label', it.tool ? it.name + ' tool' : it.name + ' (#' + it.id + ')');
     b._it = it;
     const ic = document.createElement('span'); ic.className = 'ic';
     const n = document.createElement('span'); n.className = 'n';
@@ -192,9 +205,18 @@
     if (!it) return;
     const ic = b.querySelector('.ic');
     if (ic && !ic.firstChild) {
-      const thumbEl = P.thumb ? P.thumb(it, 64) : null;
-      if (thumbEl) ic.append(thumbEl);
-      else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
+      if (it.tool) {
+        const image = document.createElement('img');
+        image.src = it.toolImage;
+        image.alt = it.name;
+        image.draggable = false;
+        image.className = it.toolType === 'wrench' ? 'art-wrench' : 'art-fist';
+        ic.append(image);
+      } else {
+        const thumbEl = P.thumb ? P.thumb(it, 64) : null;
+        if (thumbEl) ic.append(thumbEl);
+        else { const ph = document.createElement('span'); ph.className = 'ph'; ph.textContent = '?'; ic.append(ph); }
+      }
     }
     const n = b.querySelector('.n');
     if (n && !n.textContent) n.textContent = it.name;   /* kept as metadata; the label itself is hidden (names never show) */
@@ -305,8 +327,23 @@
 
   /* ---------------- box-focus activation (the four-click state machine) --- */
   function activate(item) {
-    toolArmed = false;                       /* any real-item activation resets the tool sequence */
     const f = P.inv.focus;
+    if (item.tool) {
+      toolArmed = false;
+      if (f?.tool && f.id === item.id) {
+        P.inv.focus = null;
+        const wrenchOn = item.toolType === 'wrench';
+        const pc = P.plateConfig.get();
+        P.plateConfig.setWrenchOn(wrenchOn);
+        if (wrenchOn && !pc.growId.trim())
+          P.toast('Type your GrowID in Player Customization to pull up the wrench.');
+      } else {
+        P.inv.focus = item;
+      }
+      markFocus();
+      return;
+    }
+    toolArmed = false;                         /* any real-item activation resets the tool sequence */
     if (f && !f.tool && f.id === item.id) {
       P.inv.focus = null;                      /* consume the focus */
       P.emit('equip', { id: item.id });        /* equipped -> unequips, else equips */
@@ -391,8 +428,13 @@
   /* mark the focused box (yellow brackets) in the inventory and quick drawer tool box */
   function markFocus() {
     const f = P.inv.focus;
-    for (const b of win.querySelectorAll('.box')) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
-    for (const b of P.$$('#quick .box')) {
+    for (const b of win.querySelectorAll('.box')) {
+      const matches = !!f && (f.tool
+        ? b.dataset.toolType === f.toolType
+        : !b.dataset.toolType && +b.dataset.id === f.id);
+      b.classList.toggle('focus', matches);
+    }
+    for (const b of P.$('#quick .box')) {
       if (b.classList.contains('tool')) b.classList.toggle('focus', !!f && !!f.tool);
       else if (b.dataset.id) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
     }
