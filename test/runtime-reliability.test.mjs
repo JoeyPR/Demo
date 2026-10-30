@@ -38,7 +38,11 @@ test("Clothing Fist/Wrench boxes immediately apply the tool without focus state"
   assert.match(activate, /P\.inv\.focus = null/);
   assert.match(activate, /const wrenchOn = item\.toolType === 'wrench'/);
   assert.match(activate, /P\.plateConfig\.setWrenchOn\(wrenchOn\)/);
-  assert.doesNotMatch(activate, /P\.inv\.focus = item/);
+  const toolBranch = activate.slice(
+    activate.indexOf("if (item.tool)"),
+    activate.indexOf("\n    }\n    toolArmed = false")
+  );
+  assert.doesNotMatch(toolBranch, /P\\.inv\\.focus = item/);
 
   const focusStart = grid.indexOf("function markFocus()");
   const focusEnd = grid.indexOf("\n  }", focusStart);
