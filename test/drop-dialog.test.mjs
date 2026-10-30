@@ -46,7 +46,7 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(world,/PICKUP_SIZE = 12/);
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);
   assert.match(world,/PICKUP_PLAYER_HALF_WIDTH = 8/);
-  assert.match(world,/PICKUP_PLAYER_HEIGHT = 32 \\* 0\\.78/);
+  assert.match(world,/PICKUP_PLAYER_HEIGHT = 32 \* 0\.78/);
   assert.match(world,/playerRight >= boxLeft && playerLeft <= boxRight/);
   assert.match(world,/playerBottom >= boxTop && playerTop <= boxBottom/);
   assert.match(app,/startX: frame\.x \+ facing \* 5/);
@@ -69,7 +69,7 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
 test("pickup remains at its recorded world point until the player enters collection range",()=>{
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);
   assert.match(world,/PICKUP_PLAYER_HALF_WIDTH = 8/);
-  assert.match(world,/PICKUP_PLAYER_HEIGHT = 32 \\* 0\\.78/);
+  assert.match(world,/PICKUP_PLAYER_HEIGHT = 32 \* 0\.78/);
   assert.match(world,/playerRight >= boxLeft && playerLeft <= boxRight/);
   assert.match(world,/playerBottom >= boxTop && playerTop <= boxBottom/);
   assert.match(app,/const frame = state\.lastFrame/);
@@ -83,7 +83,9 @@ test("pickup remains at its recorded world point until the player enters collect
 
 test("the item is behind the pickup frame and the popup stays in the preview rectangle",()=>{
   assert.match(app,/artCtx\.drawImage\(pickup\.icon/);
-  assert.match(app,/artCtx\.drawImage\(pickupSprite/);
+  assert.match(app,/frameCtx\.drawImage\(pickupSprite/);
+  assert.match(app,/artCtx\.drawImage\(icon, 0, 0\)/);
+  assert.match(app,/artCtx\.drawImage\(frame, 0, 0\)/);
   assert.match(drop,/preview\.getBoundingClientRect\(\)/);
   assert.match(html,/css\/drop\.css/);
   assert.match(css,/position: fixed/);
