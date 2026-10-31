@@ -110,9 +110,8 @@
 #grid-window .box.tool,
 #grid-window .box.tool.sel,
 #grid-window .box.tool.focus{background-image:url(../img/box-blue.png)}
-#grid-window .box.tool::before{display:none}
 .box.tool .ic{inset:8%;overflow:hidden}
-.box.tool .ic img{width:100%;height:100%;max-width:100%;object-fit:contain;image-rendering:pixelated;flex:none}
+.box.tool .ic img{width:calc(100% + 2px);height:calc(100% + 2px);max-width:none;object-fit:contain;image-rendering:pixelated;flex:none}
 
 /* 3. tabs — the PNGs already contain their own outlines, corners and shadows.
    The button adds no background/border and never clips the baked drop shadow. */
