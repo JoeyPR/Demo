@@ -4,11 +4,9 @@
 .item-info-description,.item-info-properties p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;
   font-size:var(--info-font-size,27px);font-weight:700;line-height:1.15}
 .item-info-description{color:#FCE6BA}
-.item-info-property-group{margin-top:calc(var(--drop-scale,1)*9px);color:#BFDAFF}
-.item-info-label{margin:0 0 calc(var(--drop-scale,1)*5px);font-size:var(--info-font-size,27px);line-height:1.15}
+.item-info-property-group{margin-top:calc(var(--drop-scale,1)*9px);color:#ADF4FF}
 .item-info-properties{display:flex;flex-direction:column;gap:calc(var(--drop-scale,1)*5px)}
-.item-info-properties p{color:#BFDAFF}
-.item-info-source{width:max-content;max-width:100%;font-size:max(10px,calc(var(--info-font-size,27px)*.65));color:#cce8f5;text-decoration:underline}
-.item-info-source[hidden],.item-info-property-group[hidden]{display:none}
+.item-info-properties p{color:#ADF4FF}
+.item-info-property-group[hidden]{display:none}
 .item-info-dialog .drop-actions{margin-top:calc(var(--drop-scale,1)*5px)}
 .item-info-dialog :focus-visible{outline:2px solid #fff;outline-offset:3px}

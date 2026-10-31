@@ -134,6 +134,11 @@
   function confirm() {
     if (!currentItem) return;
     const rawAmount = String(amountInput.value || "").trim();
+    if (rawAmount && Number.isFinite(Number(rawAmount)) && Number(rawAmount) < 0) {
+      close();
+      P.playerChat?.submit("Nice try.  You remind me of myself at that age.");
+      return;
+    }
     const amount = /^\d+$/.test(rawAmount) ? Number(rawAmount) : NaN;
     if (!Number.isSafeInteger(amount) || amount < 1 || amount > 999999) {
       error.textContent = "Enter a whole number from 1 to 999999.";

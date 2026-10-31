@@ -188,6 +188,8 @@
       b.type = 'button'; b.title = s.name;b.setAttribute('aria-label',s.name+' skin');
       b.setAttribute('aria-pressed',String(state.skin===i));b.dataset.skin=s.id;
       b.style.setProperty('--skin-color',s.hex);
+      b.style.setProperty('--skin-rgb',s.rgb.slice(0,3).join(','));
+      b.style.setProperty('--skin-alpha',String((s.rgb[3]??255)/255));
       b.addEventListener('click', () => {
         state.skin = i;
         P.store.set('skin', s.id);

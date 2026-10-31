@@ -20,15 +20,12 @@ const title=make('h2','drop-title','item-info-title');
 row.append(icon,title);
 const description=make('p','item-info-description','item-info-description');
 const propertyGroup=make('div','item-info-property-group');
-const propertyTitle=make('h3','item-info-label',null,'Properties');
 const properties=make('div','item-info-properties','item-info-properties');
-propertyGroup.append(propertyTitle,properties);
-const source=make('a','item-info-source','item-info-source','Growtopia Wiki');
-source.target='_blank';source.rel='noopener noreferrer';source.hidden=true;
+propertyGroup.append(properties);
 const actions=make('div','drop-actions');
 const closeButton=make('button','drop-confirm','item-info-close','OK');
 closeButton.type='button';actions.append(closeButton);
-dialog.append(row,description,propertyGroup,source,actions);overlay.append(dialog);document.body.append(overlay);
+dialog.append(row,description,propertyGroup,actions);overlay.append(dialog);document.body.append(overlay);
 
 let snapshot=null,current=null,previousFocus=null;
 let pending=null,requestVersion=0;
@@ -59,10 +56,8 @@ function render(item) {
   const info=resolveItemInfo(snapshot,item);
   formatted(description,info.description||'Description unavailable.','o');
   properties.replaceChildren();
-  for(const line of info.properties){const p=make('p');formatted(p,line,'3');properties.append(p);}
+  for(const line of info.properties){const p=make('p');formatted(p,line,'1');properties.append(p);}
   propertyGroup.hidden=!info.properties.length;
-  source.hidden=!info.source;
-  if(info.source)source.href=info.source;else source.removeAttribute('href');
   dialog.setAttribute('aria-busy','false');
 }
 function close() {
@@ -79,7 +74,7 @@ async function open(item) {
   icon.replaceChildren();
   try{if(P.thumb)icon.append(P.thumb(item,64));}catch{icon.textContent=(item.name||'?').slice(0,1);}
   formatted(description,'Loading item information…','o');
-  propertyGroup.hidden=true;source.hidden=true;dialog.setAttribute('aria-busy','true');
+  propertyGroup.hidden=true;dialog.setAttribute('aria-busy','true');
   overlay.hidden=false;position();dialog.scrollTop=0;
   P.emit('input-reset');P.emit('item-info-open',item);
   closeButton.focus({preventScroll:true});
@@ -94,9 +89,7 @@ document.addEventListener('keydown',event=>{
   event.stopPropagation();
   if(event.key==='Escape'){event.preventDefault();close();return;}
   if(event.key==='Tab'){
-    const stops=[...(source.hidden?[]:[source]),closeButton];
-    const index=stops.indexOf(document.activeElement);
-    event.preventDefault();stops[(index+(event.shiftKey?-1:1)+stops.length)%stops.length].focus();
+    event.preventDefault();closeButton.focus();
   }
 },true);
 window.addEventListener('resize',position);P.on('preview',position);P.on('info-request',open);

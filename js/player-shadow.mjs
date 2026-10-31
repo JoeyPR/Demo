@@ -2,7 +2,7 @@
  * shader contract: source alpha becomes a solid color mask, shifted by an
  * offset. Effects are deliberately filtered before this projection.
  */
-export const PLAYER_VISUAL_SCALE = 0.78; // character is slightly shorter than a full 32-unit land tile
+export const PLAYER_VISUAL_SCALE = 1; // native 32-unit player rig and world tiles share one scale
 export const PLAYER_SHADOW_OFFSET = 12; // fixed leftward output-pixel shift
 export const PLAYER_SHADOW_DROP = 12; // exact output-pixel downward shift
 export const PLAYER_SHADOW_OPACITY = 0.5; // 50% opacity
@@ -27,8 +27,21 @@ export function getPlayerShadowCalls(calls, {
   }).map(call => ({
     ...call,
     tint: [...PLAYER_SHADOW_COLOR],
+    skinPalette: null,
     add: false,
+    blend: "source-over",
   }));
+}
+
+/** Recolor an already composed alpha silhouette without changing its alpha.
+ * This final mask operation also protects shadows from item/Buddy tint modes.
+ */
+export function blackenShadowMask(ctx, width, height) {
+  ctx.save();
+  ctx.globalCompositeOperation = "source-in";
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, width, height);
+  ctx.restore();
 }
 
 /** Avatar destination rect: uniform scale around the rig's feet pivot (16,32). */

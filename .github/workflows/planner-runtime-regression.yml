@@ -3,6 +3,10 @@ on:
   push:
     branches: [camera-quickslot-nameplate]
     paths:
+      - 'js/preview-mode.js'
+      - 'js/player-shadow.mjs'
+      - 'js/pads.js'
+      - 'css/preview-mode.css'
       - 'src/**'
       - 'demo/engine/**'
       - 'js/player-chat.js'
@@ -39,6 +43,10 @@ on:
       - '.github/workflows/planner-runtime-regression.yml'
   pull_request:
     paths:
+      - 'js/preview-mode.js'
+      - 'js/player-shadow.mjs'
+      - 'js/pads.js'
+      - 'css/preview-mode.css'
       - 'src/**'
       - 'demo/engine/**'
       - 'js/player-chat.js'

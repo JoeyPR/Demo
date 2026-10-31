@@ -1,7 +1,7 @@
 /* The main planner: shared avatar/FX composition, terrain motion, weather,
    equipment and the original inventory/Drop contracts. */
 import { PlannerPlayer } from "../demo/engine/player.mjs";
-import { WorldMotion, WORLD_ORIGIN_X, WORLD_ORIGIN_Y, WORLD_TILE_SIZE, WORLD_PLAYER_HALF_WIDTH, WORLD_PLAYER_HEIGHT } from "./world-motion.mjs";
+import { WorldMotion, WORLD_ORIGIN_X, WORLD_ORIGIN_Y, WORLD_TILE_SIZE } from "./world-motion.mjs";
 import { SKINS, resolveStoredSkin } from "./skin-colors.mjs";
 import { normalizeCatalogItem } from "../demo/engine/catalog-adapter.mjs";
 import { drawCanvas } from "../demo/engine/render.mjs";
@@ -13,11 +13,10 @@ import { resolveLook } from "../demo/engine/look.mjs";
 import { createReferenceFxAtlas } from "../demo/engine/reference-fx.mjs";
 import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
-import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, DEFAULT_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, resolveBackgroundSelection, uniformLandWorld, uniformBackgroundWorld } from "./land-system.mjs";
-import { generateWorld, placeBlock, removeBlock, invalidateWorld } from "./land-system.mjs";
+import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
-import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
+import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset, blackenShadowMask } from "./player-shadow.mjs";
 import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
@@ -27,7 +26,7 @@ const avatar = document.createElement("canvas"), avatarCtx = avatar.getContext("
 const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarShadow.getContext("2d");
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
 const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
-const backgroundCanvas = document.createElement("canvas"), backgroundCtx = backgroundCanvas.getContext("2d");
+const worldShadowCanvas = document.createElement("canvas"), worldShadowCtx = worldShadowCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
 const pickupSprite = new Image();
 pickupSprite.src = moduleURL("../img/pickup.png").href;
@@ -41,11 +40,11 @@ const state = {
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   weatherFailedKey: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null, backgroundBlock: DEFAULT_BACKGROUND_ID, backgroundWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
+  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
   pickups: [], nextPickupId: 1,
   hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true,
-  worldMode: P.store.get("worldMode", true), editableWorld:null, worldTool:"play", worldSelection:116,
-  worldGroundId:2, worldBackgroundId:14, pendingWorldEvents:[], dance:null
+  livePreview:false, editableWorld:null,
+  pendingWorldEvents:[], dance:null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -176,8 +175,8 @@ function withPetHost(motion) {
     armAngle: state.lastResult?.pose?.frontAngle ?? 0,
     petBareHead: !state.equipped.get(0),
     petLift: state.lastResult?.lift?.y ?? 0,
-    petWorld: { solidAt: (x,y) => state.worldMode ? worldSolidAt(x-16,y) : true },
-    particleWorld: { solidAt: (x,y) => state.worldMode ? worldSolidAt(x-16,y-32) : y>=32 } };
+    petWorld: { solidAt: (x,y) => state.landBlock!=null ? worldSolidAt(x-16,y) : true },
+    particleWorld: { solidAt: (x,y) => state.landBlock!=null ? worldSolidAt(x-16,y-32) : y>=32 } };
 }
 function worldSolidAt(x,y) { return motion instanceof WorldMotion ? motion.solidAt(x,y) : false; }
 function step(dt) {
@@ -186,9 +185,9 @@ function step(dt) {
     state.jumpUntil = state.clock + 100; state.doubleAt = null;
   }
   const input = {
-    right: !!(P.input.right), left: !!(P.input.left),
-    jump: state.clock < state.jumpUntil || !!P.input.jump,
-    punch: (!state.worldMode||state.worldTool==="play") && (state.clock < state.punchUntil || !!P.input.punch || state.punchHold || state.clock < state.gesturePunchUntil)
+    right: state.livePreview && !!P.input.right, left: state.livePreview && !!P.input.left,
+    jump: state.livePreview && (state.clock < state.jumpUntil || !!P.input.jump),
+    punch: state.livePreview && (state.clock < state.punchUntil || !!P.input.punch || state.punchHold || state.clock < state.gesturePunchUntil)
   };
   /* touch punch aim: the gesture's canvas point steers the punch at the
      character — same contract as the Demo render lab (punchTarget is in
@@ -230,7 +229,7 @@ function step(dt) {
   updatePickupLifecycle(frame);
 }
 P.on("pad", pad => {
-  if(!motion)return;
+  if(!motion||!state.livePreview)return;
   if (pad.k === "jump" && pad.down) { motion.lastJump = false; state.jumpUntil = state.clock + 150; }
   if (pad.k === "punch" && pad.down) state.punchUntil = state.clock + 34;
 });
@@ -277,13 +276,13 @@ function punchOverDrawer(e) {
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   });
 }
-const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #item-info-overlay, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]");
+const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #item-info-overlay, #preview-mode-toggle, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]");
 document.addEventListener("pointerdown", e => {
+  if (!state.livePreview) return;
   if (e.pointerType === "mouse" && e.button !== 0) return;
   if (punchOverUI(e.target) || punchOverDrawer(e)) return;
   if (state.punchPointer !== null) { punchCancel(); return; }   /* second finger: pinch zoom takes over */
   if (!punchInside(e)) return;
-  if (state.worldMode && state.worldTool!=="play") { editWorldAt(e);return; }
   punchAimFromEvent(e);
   state.punchHold = true;
   state.punchPointer = e.pointerId;
@@ -342,6 +341,7 @@ function renderAvatar() {
   avatarShadowCtx.clearRect(0, 0, width, height);
   if (shadows.length) drawCanvas(avatarShadowCtx, shadows, atlases,
     { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
+  blackenShadowMask(avatarShadowCtx, width, height);
   return calls.length;
 }
 
@@ -410,8 +410,7 @@ P.on("preview", pv => {
 });
 
 /* ---------------- land -------------------------------------------------- */
-/* Outfit-only terrain remains a selectable uniform strip. Explore World uses
-   the same verified tile rules with the editable world and collision grid. */
+/* Preview and Live Preview share one terrain surface and one collision grid. */
 function landPage(name) {
   if (landImages.has(name)) return Promise.resolve(landImages.get(name));
   if (landLoads.has(name)) return landLoads.get(name);
@@ -427,158 +426,55 @@ function landPage(name) {
 }
 const DEFAULT_LAND = DEFAULT_LAND_ID;   /* Dirt — the default land the player walks on */
 function setLand(id) {
-  const resolved = resolveLandSelection(id);
-  if (resolved === LAND_NONE) {
-    state.landBlock = null; state.landWorld = null;
-    if(state.editableWorld&&state.worldMode)P.world.setActive(false);
-    return;
-  }
-  const def = BLOCKS[resolved];
-  landPage(def.page || "tiles_page1");
-  const backgroundId = state.backgroundBlock ?? CAVE_BACKGROUND_ID;
-  const backgroundDef = BLOCKS[backgroundId];
-  if (backgroundDef) landPage(backgroundDef.page || "tiles_page1");
-  state.landBlock = resolved;
-  state.landWorld = uniformLandWorld(resolved, 24, backgroundId);
-  applyWorldLook();
+  const resolved=resolveLandSelection(id);
+  state.landBlock=resolved===LAND_NONE?null:resolved;
+  state.editableWorld=uniformLandWorld(state.landBlock??0,24,0);
+  state.landWorld=state.landBlock==null?null:state.editableWorld;
+  if(state.landBlock!=null)landPage(BLOCKS[resolved].page||"tiles_page1");
+  if(motion)resetMotionForScene();
 }
-function setBackground(id) {
-  const resolved = resolveBackgroundSelection(id);
-  state.backgroundBlock = resolved;
-  state.backgroundWorld = resolved == null ? null : uniformBackgroundWorld(resolved);
-  if (resolved != null) {
-    const def = BLOCKS[resolved];
-    landPage(def.page || "tiles_page1");
-  }
-  /* The same selected wall continues behind the foreground land strip. */
-  if (state.landBlock != null)
-    state.landWorld = uniformLandWorld(state.landBlock, 24, resolved ?? CAVE_BACKGROUND_ID);
-  applyWorldLook();
-}
-function applyWorldLook() {
-  if(!state.editableWorld)return;
-  for(let y=0;y<state.editableWorld.fg.length;y++)for(let x=0;x<WORLD_W;x++) {
-    if(state.landBlock!=null&&state.editableWorld.fg[y][x]===state.worldGroundId)state.editableWorld.fg[y][x]=state.landBlock;
-    if(state.editableWorld.bg[y][x]&&state.editableWorld.bg[y][x]===state.worldBackgroundId)
-      state.editableWorld.bg[y][x]=state.backgroundBlock??0;
-  }
-  state.worldGroundId=state.landBlock??state.worldGroundId;state.worldBackgroundId=state.backgroundBlock??0;
-  invalidateWorld(state.editableWorld);
-}
-P.on("land", id => setLand(id));
-P.on("background", id => setBackground(id));
-
+P.on("land",setLand);
 function resetMotionForScene() {
-  const previous=motion;
-  motion=new WorldMotion({world:state.worldMode?state.editableWorld:null,blocks:BLOCKS});
+  motion=new WorldMotion({world:state.landBlock==null?null:state.editableWorld,blocks:BLOCKS});
   motion.clockMs=state.clock;motion.setAbilities(state.abilities??{});
-  // Mode changes start at the shared surface origin; equipment stays equipped.
+  state.jumpUntil=state.punchUntil=0;state.doubleAt=null;state.dance=null;
   state.lastFrame=motion.snapshot();state.ancestralPath.length=0;
-  state.pendingWorldEvents.length=0;
-  if(previous)player?.reset();
+  state.pendingWorldEvents.length=0;player?.reset();
   P.emit("input-reset");punchCancel();
 }
-P.world = {
-  get active(){return state.worldMode;},
-  setActive(active){state.worldMode=!!active;if(state.worldMode&&state.landBlock==null)P.land.set(DEFAULT_LAND);P.store.set("worldMode",state.worldMode);resetMotionForScene();P.emit("world-update");},
-  get tool(){return state.worldTool;},
-  setTool(tool){if(!["play","place","erase"].includes(tool))return;state.worldTool=tool;P.emit("input-reset");punchCancel();P.emit("world-update");},
-  get selectedId(){return state.worldSelection;},
-  select(id){if(BLOCKS[id]?.eligible&&!BLOCKS[id].unsupported){state.worldSelection=Number(id);P.emit("world-update");}},
-  get blocks(){return Object.entries(BLOCKS).filter(([,def])=>def.eligible&&!def.unsupported).map(([id,def])=>({id:Number(id),...def}));},
-  newWorld(){state.editableWorld=generateWorld(Math.floor(Math.random()*0x7fffffff));state.worldGroundId=2;state.worldBackgroundId=14;applyWorldLook();resetMotionForScene();P.emit("world-update");},
-  respawn(){if(!motion)return;const frame=motion.respawn();state.pendingWorldEvents=frame.events.filter(event=>event.type==="respawn");state.ancestralPath.length=0;player?.reset();P.emit("input-reset");P.emit("world-update");},
-  get data(){return state.editableWorld;},
-  // A deterministic projection shared by mouse/touch editing and QA.
-  tileAt(clientX,clientY){return sceneTileAt(clientX,clientY);},
-  edit(tx,ty,erase=false){return editWorldTile(tx,ty,erase);}
+P.previewMode={
+  get live(){return state.livePreview;},
+  setLive(live){
+    const next=!!live;if(next===state.livePreview)return;
+    state.livePreview=next;resetMotionForScene();P.emit("preview-mode",{live:next});
+  },
+  respawn(){resetMotionForScene();},
+  get world(){return state.editableWorld;}
 };
-function sceneTileAt(clientX,clientY) {
-  const view=state.view;if(!view)return null;
-  const rect=world.getBoundingClientRect();
-  const point=unprojectCameraPoint((clientX-rect.left)*world.width/rect.width,
-    (clientY-rect.top)*world.height/rect.height,view.cameraPivotX,view.cameraPivotY,view.cameraZoom);
-  const feetFocus=view.cameraPivotY+16*PLAYER_VISUAL_SCALE*view.s;
-  const x=state.lastFrame.x+(point.x-view.cameraPivotX)/view.s;
-  const y=state.lastFrame.y+(point.y-feetFocus)/view.s;
-  return {tx:((Math.floor((x+WORLD_ORIGIN_X)/WORLD_TILE_SIZE)%WORLD_W)+WORLD_W)%WORLD_W,
-    ty:Math.floor((y+WORLD_ORIGIN_Y)/WORLD_TILE_SIZE)};
-}
-function editWorldTile(tx,ty,erase=false) {
-  if(!state.worldMode||!state.editableWorld||!Number.isInteger(tx)||!Number.isInteger(ty))return false;
-  const def=BLOCKS[state.worldSelection];if(!def)return false;
-  const layer=def.layer==="bg"?"bg":"fg";
-  if(erase||state.worldTool==="erase")return removeBlock(state.editableWorld,tx,ty,layer);
-  const frame=state.lastFrame,cellLeft=tx*WORLD_TILE_SIZE,cellTop=ty*WORLD_TILE_SIZE;
-  const px=((frame.x+WORLD_ORIGIN_X)%(WORLD_W*WORLD_TILE_SIZE)+WORLD_W*WORLD_TILE_SIZE)%(WORLD_W*WORLD_TILE_SIZE);
-  const feet=frame.y+WORLD_ORIGIN_Y;
-  if(layer==="fg"&&def.collision===1&&cellLeft<px+WORLD_PLAYER_HALF_WIDTH&&cellLeft+WORLD_TILE_SIZE>px-WORLD_PLAYER_HALF_WIDTH&&
-      cellTop<feet&&cellTop+WORLD_TILE_SIZE>feet-WORLD_PLAYER_HEIGHT)return false;
-  const placed=placeBlock(state.editableWorld,tx,ty,state.worldSelection,layer);
-  if(placed&&def.twoDir&&frame.facing<0)state.editableWorld.flip[layer+':'+tx+','+ty]=1;
-  return placed;
-}
-function editWorldAt(event) {
-  const tile=sceneTileAt(event.clientX,event.clientY);
-  if(tile)editWorldTile(tile.tx,tile.ty,event.button===2);
-}
-world.addEventListener("contextmenu",event=>{
-  if(state.worldMode&&state.worldTool!=="play"){event.preventDefault();editWorldAt(event);}
-});
-function drawInteractiveWorld(w,h,s,camera,layer) {
-  if(!state.editableWorld)return;
+function drawTerrainLayer(w,h,s,camera,pass="all",shadow=false) {
+  if(!state.editableWorld||state.landBlock==null)return;
   const start=unprojectCameraPoint(0,0,camera.cameraPivotX,camera.cameraPivotY,camera.zoom);
   const end=unprojectCameraPoint(w,h,camera.cameraPivotX,camera.cameraPivotY,camera.zoom);
-  const tileScale=s*(WORLD_TILE_SIZE/32),bw=Math.ceil((end.x-start.x)/tileScale)+2,bh=Math.ceil((end.y-start.y)/tileScale)+2;
-  const canvas=layer==="bg"?backgroundCanvas:landCanvas,c=layer==="bg"?backgroundCtx:landCtx;
+  const tileScale=s*(WORLD_TILE_SIZE/32),pad=16;
+  const bw=Math.ceil((end.x-start.x)/tileScale)+pad*2;
+  const bh=Math.ceil((end.y-start.y)/tileScale)+pad*2;
+  const canvas=shadow?worldShadowCanvas:landCanvas,c=shadow?worldShadowCtx:landCtx;
   if(canvas.width!==bw||canvas.height!==bh){canvas.width=bw;canvas.height=bh;}
   c.clearRect(0,0,bw,bh);c.imageSmoothingEnabled=false;
   const feetFocus=camera.cameraPivotY+16*PLAYER_VISUAL_SCALE*s;
-  const camX=(WORLD_ORIGIN_X+camera.cameraWorldX+(start.x-camera.cameraPivotX)/s)*32/WORLD_TILE_SIZE;
-  const camY=(WORLD_ORIGIN_Y+camera.cameraWorldY+(start.y-feetFocus)/s)*32/WORLD_TILE_SIZE;
-  const atlas=page=>{if(!landImages.has(page))landPage(page);return landImages.get(page)??null;};
-  // Rasterize whole source texels; retain subpixel camera movement in the one
-  // composite blit so neighboring tiles cannot leave transparent seams.
+  const camX=(WORLD_ORIGIN_X+camera.cameraWorldX+(start.x-camera.cameraPivotX)/s)*32/WORLD_TILE_SIZE-pad;
+  const camY=(WORLD_ORIGIN_Y+camera.cameraWorldY+(start.y-feetFocus)/s)*32/WORLD_TILE_SIZE-pad;
   const rasterX=Math.floor(camX),rasterY=Math.floor(camY);
-  const stats=renderWorld(c,state.editableWorld,atlas,rasterX,rasterY,bw,bh,state.clock,{layers:[layer],repeatX:true});
-  if(layer==="bg")state.backgroundStats=stats;else state.landStats=stats;
-  ctx.drawImage(canvas,0,0,bw,bh,start.x+(rasterX-camX)*tileScale,start.y+(rasterY-camY)*tileScale,bw*tileScale,bh*tileScale);
-}
-function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
-  const landS = s * (WORLD_TILE_SIZE / 32);
-  const lw = Math.ceil(w / (landS * zoom));
-  const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
-  if (landCanvas.width !== lw || landCanvas.height !== lh) {
-    landCanvas.width = lw; landCanvas.height = lh;
-  }
-  landCtx.imageSmoothingEnabled = false;
-  const span = WORLD_PX_W;
-  const camX = ((Math.floor(cameraWorldX - lw / 2) % span) + span) % span;
-  landCtx.clearRect(0, 0, lw, lh);
-  const atlasFn = page => landImages.get(page) ?? null;
-  state.landStats=renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock,{repeatX:true});
-  const dx = (w - lw * landS) / 2;
-  ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS);
-}
-
-function drawBackgroundTiles(w, h, s, camera) {
-  if (!state.backgroundWorld) return;
-  const tileScale = s * (WORLD_TILE_SIZE / 32);
-  const bw = Math.ceil(w / tileScale) + 2;
-  const bh = Math.ceil(h / tileScale) + 2;
-  if (backgroundCanvas.width !== bw || backgroundCanvas.height !== bh) {
-    backgroundCanvas.width = bw;
-    backgroundCanvas.height = bh;
-  }
-  backgroundCtx.imageSmoothingEnabled = false;
-  backgroundCtx.clearRect(0, 0, bw, bh);
-  const camX = Math.floor(camera.cameraWorldX - camera.cameraPivotX / tileScale);
-  const camY = Math.floor(camera.cameraWorldY - camera.cameraPivotY / tileScale);
-  const span = WORLD_PX_W;
-  const wrappedX = ((camX % span) + span) % span;
-  const atlasFn = page => landImages.get(page) ?? null;
-  state.backgroundStats=renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX, camY, bw, bh, state.clock,{layers:['bg'],repeatX:true});
-  ctx.drawImage(backgroundCanvas, 0, 0, bw, bh, 0, 0, bw * tileScale, bh * tileScale);
+  const atlas=page=>{if(!landImages.has(page))landPage(page);return landImages.get(page)??null;};
+  const stats=renderWorld(c,state.editableWorld,atlas,rasterX,rasterY,bw,bh,state.clock,
+    {layers:['fg'],repeatX:true,foregroundPass:pass});
+  state.landStats=stats;
+  const offset=shadow?playerShadowOffset(-1):{x:0,y:0};
+  if(shadow)blackenShadowMask(c,bw,bh);
+  ctx.save();if(shadow)ctx.globalAlpha=PLAYER_SHADOW_OPACITY;
+  ctx.drawImage(canvas,0,0,bw,bh,start.x+(rasterX-camX-pad)*tileScale+offset.x,
+    start.y+(rasterY-camY-pad)*tileScale+offset.y,bw*tileScale,bh*tileScale);
+  ctx.restore();
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -668,7 +564,7 @@ function updateHUD() {
   const hud = $("#hud");
   if (!state.lastFrame) return;
   const f = state.lastFrame;
-  const act = f.punch ? "PUNCH" : f.locomotion ? f.locomotion.toUpperCase() : "IDLE";
+  const act = !state.livePreview ? "PREVIEW" : f.punch ? "PUNCH" : f.locomotion ? f.locomotion.toUpperCase() : "IDLE";
   const ab = state.abilities;
   const extra = [ab?.doubleJump ? "double jump" : null, ab?.highJump ? "high jump" : null, ab?.speedy ? "speedy" : null].filter(Boolean).join(" · ");
   hud.textContent = `${act}${extra ? " · " + extra : ""} · ${state.equipped.size} pieces`;
@@ -683,7 +579,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   const frame = state.lastFrame, result = state.lastResult;
   // Logical draw scale never includes zoom. Only the camera transform changes.
   const s = Math.min(4, Math.max(3, w / 480));
-  const zoom = clampCameraZoom(P.camZoom?.v ?? 1);
+  const zoom = clampCameraZoom((P.camZoom?.v ?? 1)*(state.livePreview?1:1.65));
 
   renderAvatar();
   const b = state.avatarBounds;
@@ -728,26 +624,24 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.scale(zoom, zoom);
   c.translate(-cameraPivotX, -cameraPivotY);
 
-  /* Selected Growtopia BG block tiles the viewport behind the player. */
-  if(state.worldMode)drawInteractiveWorld(w,h,s,camera,"bg");
-  else drawBackgroundTiles(w, h, s, camera);
+  // World shadows sit behind their own art. Walk-through foreground (doors,
+  // decorations and platforms) sits behind actor/pickup shadows; solids cover them.
+  drawTerrainLayer(w,h,s,camera,"all",true);
+  drawTerrainLayer(w,h,s,camera,"walkthrough");
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(-1);
-  // The player shadow is always projected to the left, independent of facing.
-  // It shares the avatar's zoom transform and dimensions so it stays attached.
-  // Render order: shadow behind land; player and clothing in front of land.
-  c.imageSmoothingEnabled = false;
-  c.save();
-  c.globalAlpha = PLAYER_SHADOW_OPACITY;
+  c.save();c.globalAlpha = PLAYER_SHADOW_OPACITY;
   c.drawImage(avatarShadow,
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  if(state.worldMode)drawInteractiveWorld(w,h,s,camera,"fg");
-  else if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX);
+  // Pickups use the same explicit screen projection for both composition passes.
+  c.save();c.setTransform(1,0,0,1,0,0);
+  drawPickups(c,frame,s,cameraPivotX,cameraPivotY,zoom,"shadow");
+  c.restore();
+  drawTerrainLayer(w,h,s,camera,"solid");
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
-  // Scale the player and all clothing around rig feet (16,32). Land tiles use
-  // the full 32-unit world scale; the character remains at 0.78 scale.
+  // Player components and terrain both retain their native 32-unit scale.
   c.imageSmoothingEnabled = false;
   c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
   drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
@@ -766,7 +660,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.80);
     const rect=world.getBoundingClientRect();
     P.emit("player-chat-anchor",{x:rect.left+platePoint.x*rect.width/world.width,
-      y:rect.top+(platePoint.y-(P.rtfont.hasVisibleName(P.plateConfig.get().growId)?9:0)*s*zoom)*rect.height/world.height,
+      y:rect.top+platePoint.y*rect.height/world.height,
       scale:s*zoom*rect.width/world.width});
   }
   // Foreground weather is viewport-space, as it was before camera-scope
@@ -1024,7 +918,7 @@ function pickupInventoryTarget() {
   };
 }
 
-function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
+function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="art") {
   if (!state.pickups.length) return;
   c.imageSmoothingEnabled = false;
   const inventoryTarget = pickupInventoryTarget();
@@ -1048,17 +942,15 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
     ensurePickupArt(pickup);
 
     const shadowDirection = playerShadowOffset(-1);
-    if (!isFlying) {
-      // Drop / 500 ms collection pause: retain the original complete pickup.
-      if (pickup.shadowCanvas) {
-        c.save();
-        c.globalAlpha *= PLAYER_SHADOW_OPACITY;
-        c.drawImage(pickup.shadowCanvas,
-          left + shadowDirection.x * zoom,
-          top + shadowDirection.y * zoom, size, size);
-        c.restore();
+    if(pass==="shadow") {
+      const mask=isFlying?pickup.frameShadowCanvas:pickup.shadowCanvas;
+      if(mask&&size>=.5) {
+        c.globalAlpha*=PLAYER_SHADOW_OPACITY;
+        c.drawImage(mask,left+shadowDirection.x*zoom,top+shadowDirection.y*zoom,size,size);
       }
-
+      c.restore();continue;
+    }
+    if (!isFlying) {
       if (pickup.artCanvas) {
         c.drawImage(pickup.artCanvas, left, top, size, size);
       } else {
@@ -1081,14 +973,6 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom) {
     } else {
       // Draw only the empty pickup frame at its original world position.
       if (size >= 0.5) {
-        if (pickup.frameShadowCanvas) {
-          c.save();
-          c.globalAlpha *= PLAYER_SHADOW_OPACITY;
-          c.drawImage(pickup.frameShadowCanvas,
-            left + shadowDirection.x * zoom,
-            top + shadowDirection.y * zoom, size, size);
-          c.restore();
-        }
         if (pickup.frameCanvas) {
           c.drawImage(pickup.frameCanvas, left, top, size, size);
         } else if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
@@ -1154,6 +1038,7 @@ P.on("drop-confirm", payload => {
 
 /* ---------------- boot -------------------------------------------------- */
 window.plannerApp = state;   /* debug/QA hook */
+state.avatarShadow=avatarShadow;state.worldShadow=worldShadowCanvas;
 state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels = land holes) */
 (async function init() {
   try {
@@ -1210,13 +1095,9 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     } catch (error) {
       console.warn("[Background] Block catalog could not be loaded.", error);
     }
-    /* Load the saved wall before the first frame so the scene starts complete. */
-    setBackground(P.store.get("background", String(DEFAULT_BACKGROUND_ID)));
+    // Preview and Live Preview share the selected land and weather. Background
+    // walls and generated exploration terrain are no longer separate modes.
     setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
-    state.editableWorld=generateWorld(1);
-    applyWorldLook();
-    if(state.landBlock==null)state.worldMode=false;
-    resetMotionForScene();
 
     state.ready = true;
     P.equippedIds = new Set();
@@ -1232,6 +1113,6 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
 })();
 
 document.addEventListener("keydown",event=>{
-  if(event.code!=="KeyR"||!state.worldMode||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))return;
-  event.preventDefault();P.world.respawn();
+  if(event.code!=="KeyR"||!state.livePreview||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))return;
+  event.preventDefault();P.previewMode.respawn();
 });

@@ -6,7 +6,7 @@
   const P = window.P;
   if (!P) return;
   const MAX_LENGTH = 120;
-  const WORD_MS = 900, FADE_IN_MS = 160, FADE_OUT_MS = 220;
+  const SPEECH_MS = 5000, FADE_IN_MS = 1000, FADE_OUT_MS = 1000;
   const preview = document.getElementById('pv');
   const make = (tag, id, text) => {
     const node = document.createElement(tag);
@@ -22,7 +22,8 @@
     button.setAttribute('aria-label', label);
     button.title = label;
     const image = make('img');
-    image.src = source; image.alt = ''; image.draggable = false;
+    image.src = source;
+    image.alt = ''; image.draggable = false;
     button.append(image);
     actions.append(button);
     return button;
@@ -62,20 +63,8 @@
   let anchor = null, lastText = '', hideTimer = null, fadeTimer = null, composerTimer = null, opened = false;
   let speechState = null, speechVersion = 0, composerVersion = 0;
   const now = () => window.performance?.now() ?? Date.now();
-  function visibleWords(value) {
-    const text = (P.rtfont?.strip(String(value ?? '')) ?? String(value ?? '')).trim();
-    // Count spoken words rather than color codes or punctuation. Segmenter
-    // also recognizes words in languages that do not separate them by spaces.
-    if (typeof Intl.Segmenter === 'function') {
-      const words = [...new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text)]
-        .filter(segment => segment.isWordLike).length;
-      if (words) return words;
-    }
-    return (text.match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*|\p{Extended_Pictographic}/gu) ?? []).length;
-  }
-  function durationFor(value) { return Math.max(1, visibleWords(value)) * WORD_MS; }
   function stateAt(atMs = now()) {
-    if (!speechState) return { active: false, elapsedMs: 0, durationMs: 0, wordCount: 0, phase: 'hidden', text: '' };
+    if (!speechState) return { active: false, elapsedMs: 0, durationMs: SPEECH_MS, phase: 'hidden', text: '' };
     const elapsedMs = Math.max(0, atMs - speechState.startedAtMs);
     const active = elapsedMs < speechState.durationMs;
     return { ...speechState, active, elapsedMs: Math.min(elapsedMs, speechState.durationMs),
@@ -104,14 +93,18 @@
     if (bubble.hidden || !anchor) return;
     const width = Math.max(80, Math.min(360, area.right - area.left - 20));
     bubble.style.maxWidth = width + 'px';
-    const fontSize = Math.max(16, Math.min(24, (anchor.scale || 1) * 7));
+    // Text follows the same world-to-screen scale as the player. A fixed 16px
+    // minimum made small phone avatars speak in oversized floating panels.
+    const fontSize = Math.max(6, Math.min(48, (anchor.scale || 1) * 7));
     bubble.style.setProperty('--player-chat-font-size', fontSize + 'px');
+    bubble.style.setProperty('--player-chat-pad-y', Math.max(1, fontSize * .12) + 'px');
+    bubble.style.setProperty('--player-chat-pad-x', Math.max(2, fontSize * .2) + 'px');
     let rect = bubble.getBoundingClientRect(), right = area.right;
     const controls = actions.getBoundingClientRect();
     const proposedRight = Math.min(area.right - 8, anchor.x + rect.width / 2);
     // A long message in the short phone preview can reach the top row. Keep
     // its text beside the controls rather than drawing underneath the icons.
-    if (anchor.y - 8 - rect.height < controls.bottom + 8 && proposedRight > controls.left - 8) {
+    if (anchor.y - rect.height / 2 < controls.bottom + 8 && proposedRight > controls.left - 8) {
       const besideControls = controls.left - area.left - 24;
       if (besideControls >= 80) {
         bubble.style.maxWidth = Math.min(width, besideControls) + 'px';
@@ -119,13 +112,18 @@
       }
     }
     const x = Math.min(right - rect.width / 2 - 8, Math.max(area.left + rect.width / 2 + 8, anchor.x));
-    const y = Math.max(area.top + rect.height + 8, Math.min(area.bottom - 8, anchor.y - 8));
+    const y = Math.max(area.top + rect.height / 2 + 4,
+      Math.min(area.bottom - rect.height / 2 - 4, anchor.y));
     bubble.style.left = x + 'px'; bubble.style.top = y + 'px';
   }
   function position() {
     const area = visiblePreview(), gap = 8;
-    actions.style.left = Math.max(area.left + gap, area.right - actions.offsetWidth - gap) + 'px';
-    actions.style.top = area.top + gap + 'px';
+    const rect = preview?.getBoundingClientRect();
+    const bounds = { right:Math.min(innerWidth,rect?.right??innerWidth), top:Math.max(0,rect?.top??0) };
+    // The controls belong to the preview, even when a keyboard changes the
+    // visible viewport. Only the input composer follows the keyboard bounds.
+    actions.style.left = bounds.right - actions.offsetWidth - gap + 'px';
+    actions.style.top = bounds.top + gap + 'px';
     if (opened) {
       composer.style.width = Math.max(120, Math.min(440, area.right - area.left - gap * 2)) + 'px';
       composer.style.left = Math.max(area.left + gap, area.right - composer.offsetWidth - gap) + 'px';
@@ -145,6 +143,7 @@
       composerTimer = null;
     }, FADE_OUT_MS);
     chatButton.setAttribute('aria-expanded', 'false');
+    chatButton.querySelector('img').src='img/chat-button.png';
     textarea.blur();
     if (restoreFocus) chatButton.focus({ preventScroll: true });
     P.emit('player-chat-close');
@@ -156,6 +155,7 @@
     const version = ++composerVersion;
     nextPaint(() => { if (opened && version === composerVersion) composer.classList.add('is-visible'); });
     chatButton.setAttribute('aria-expanded', 'true');
+    chatButton.querySelector('img').src='img/chat-button-typing.png';
     resizeInput(); position();
     P.emit('player-chat-open');
     // Focus stays synchronous with the button's click so iOS/Android can open
@@ -183,8 +183,8 @@
     clear(); lastText = text; speech.textContent = text;
     P.rtfont?.scan(speech);
     bubble.hidden = false;
-    const startedAtMs = now(), durationMs = durationFor(text), wordCount = Math.max(1, visibleWords(text));
-    speechState = { startedAtMs, durationMs, wordCount, text };
+    const startedAtMs = now(), durationMs = SPEECH_MS;
+    speechState = { startedAtMs, durationMs, text };
     const version = speechVersion;
     // A layout read establishes opacity0 before the next paint begins fading.
     bubble.getBoundingClientRect();
@@ -197,7 +197,7 @@
       if (version === speechVersion) bubble.classList.remove('is-visible');
     }, Math.max(0, durationMs - FADE_OUT_MS));
     hideTimer = window.setTimeout(() => { if (version === speechVersion) clear(); }, durationMs);
-    P.emit('player-chat', { text, atMs: startedAtMs, durationMs, wordCount });
+    P.emit('player-chat', { text, atMs: startedAtMs, durationMs });
     return true;
   }
   chatButton.addEventListener('click', () => opened ? close() : open());
@@ -222,7 +222,7 @@
   window.visualViewport?.addEventListener('resize', position);
   window.visualViewport?.addEventListener('scroll', position);
   document.fonts?.ready.then(position);
-  P.playerChat = { open, close, submit, clear, reposition: position, stateAt, durationFor,
+  P.playerChat = { open, close, submit, clear, reposition: position, stateAt, durationMs: SPEECH_MS,
     get speech() { return stateAt(); },
     get isOpen() { return opened; }, get text() { return lastText; }, get draft() { return textarea.value; },
     get maxLength() { return MAX_LENGTH; } };

@@ -18,13 +18,15 @@ with sync_playwright() as p:
         assert page.locator('#item-info-description').inner_text()=="The future's so bright, you need these."
         assert page.locator('#item-info-description [data-rtfont-run]').evaluate('el=>getComputedStyle(el).color')=='rgb(252, 230, 186)'
         assert page.locator('#item-info-properties p').count()==3
-        assert page.locator('#item-info-properties [data-rtfont-run]').first.evaluate('el=>getComputedStyle(el).color')=='rgb(191, 218, 255)'
+        assert page.locator('#item-info-source, .item-info-label').count()==0
+        assert page.locator('#item-info-dialog a').count()==0
+        assert page.locator('#item-info-properties [data-rtfont-run]').first.evaluate('el=>getComputedStyle(el).color')=='rgb(173, 244, 255)'
         assert page.locator('#item-info-close').evaluate('el=>el===document.activeElement')
         before=page.evaluate('plannerApp.lastFrame.x')
         page.keyboard.type('adf');page.wait_for_timeout(100)
         assert abs(page.evaluate('plannerApp.lastFrame.x')-before)<.1
         assert page.evaluate('!P.input.left&&!P.input.right&&!P.input.jump&&!P.input.punch')
-        page.keyboard.press('Tab');assert page.locator('#item-info-source').evaluate('el=>el===document.activeElement')
+        page.keyboard.press('Tab');assert page.locator('#item-info-close').evaluate('el=>el===document.activeElement')
         page.keyboard.press('Shift+Tab');assert page.locator('#item-info-close').evaluate('el=>el===document.activeElement')
         page.screenshot(path=str(out/('mobile.png' if mobile else 'desktop.png')))
         page.keyboard.press('Escape');assert page.locator('#item-info-overlay').is_hidden()

@@ -31,6 +31,7 @@ with sync_playwright() as playwright:
         page.on("response", lambda response: failures.append(f"{response.status} {response.url}") if response.status >= 400 else None)
         page.goto(args.url, wait_until="networkidle")
         page.wait_for_function("window.plannerApp?.ready")
+        page.get_by_role("button",name="Start Live Preview",exact=True).click()
         assert page.evaluate("Object.keys(plannerApp.catalog.fxRenderers).length") == 314
         assert page.evaluate("""async()=>{
           const {createReferenceFxAtlas}=await import('/src/reference-fx.mjs');

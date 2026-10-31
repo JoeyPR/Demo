@@ -65,8 +65,8 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(app,/PLAYER_SHADOW_OPACITY/);
   assert.match(app,/PLAYER_SHADOW_COLOR/);
   assert.match(app,/playerShadowOffset\(-1\)/);
-  assert.ok(app.includes("left + shadowDirection.x * zoom,"));
-  assert.ok(app.includes("top + shadowDirection.y * zoom, size, size"));
+  assert.ok(app.includes("left+shadowDirection.x*zoom"));
+  assert.ok(app.includes("top+shadowDirection.y*zoom,size,size"));
 });
 test("pickup remains at its recorded world point until the player enters collection range",()=>{
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);

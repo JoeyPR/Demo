@@ -25,26 +25,32 @@ with sync_playwright() as p:
         assert abs(chat['x'] - menu['x']) < .1
         assert page.locator('#player-chat-button').evaluate('el=>getComputedStyle(el).backgroundColor') == 'rgba(0, 0, 0, 0)'
         assert page.locator('#preview-menu-button').evaluate('el=>getComputedStyle(el).boxShadow') == 'none'
-        durations = page.evaluate(r'''()=>[
-          P.playerChat.durationFor('one two three'),
-          P.playerChat.durationFor('one   two\nthree'),
-          P.playerChat.durationFor('`4Hello,world!'),
-          P.playerChat.durationFor('...')
-        ]''')
-        assert durations == [2700, 2700, 1800, 900], durations
+        durations = page.evaluate("()=>['one','one two three','...'].map(text=>{P.playerChat.submit(text);return P.playerChat.speech.durationMs;})")
+        assert durations == [5000, 5000, 5000], durations
+        assert page.evaluate('P.playerChat.durationMs') == 5000
+        assert page.evaluate('P.playerChat.durationFor === undefined')
+        assert page.locator('#player-chat-button img').get_attribute('src')=='img/chat-button.png'
+        # Keyboard viewport changes must not move Menu/Chat out of their preview corner.
+        before_controls = page.locator('#preview-actions').bounding_box()
+        page.evaluate("window.originalVisualViewport=window.visualViewport;Object.defineProperty(window,'visualViewport',{configurable:true,value:{offsetLeft:40,offsetTop:80,width:200,height:200}});P.playerChat.reposition()")
+        after_controls = page.locator('#preview-actions').bounding_box()
+        assert before_controls == after_controls, [before_controls, after_controls]
+        page.evaluate("Object.defineProperty(window,'visualViewport',{configurable:true,value:window.originalVisualViewport});P.playerChat.reposition();P.playerChat.clear()")
         page.get_by_role('button', name='Player Chat', exact=True).click()
         assert page.locator('#playerChat').evaluate('el=>el===document.activeElement')
+        assert page.locator('#player-chat-button img').get_attribute('src')=='img/chat-button-typing.png'
         page.locator('#playerChat').fill('Hi')
         page.locator('#playerChat').press('Enter')
         assert not page.evaluate('P.playerChat.isOpen')
+        assert page.locator('#player-chat-button img').get_attribute('src')=='img/chat-button.png'
         page.wait_for_function("getComputedStyle(document.querySelector('#player-chat-bubble')).opacity>.95")
-        assert page.locator('#player-chat-bubble').bounding_box()['height'] <= 35
+        assert page.evaluate('''()=>{const cv=document.querySelector('#pv'),r=cv.getBoundingClientRect(),v=plannerApp.view;return document.querySelector('#player-chat-bubble').getBoundingClientRect().height<=32*v.s*v.cameraZoom*r.width/cv.width*.5;}''')
         phases = page.evaluate('''()=>{
           const t=P.playerChat.speech.startedAtMs;
-          return [0,160,680,899,900].map(ms=>P.playerChat.stateAt(t+ms));
+          return [0,999,1000,3999,4000,4999,5000].map(ms=>P.playerChat.stateAt(t+ms));
         }''')
-        assert [state['phase'] for state in phases] == ['entering', 'visible', 'leaving', 'leaving', 'hidden']
-        assert [state['active'] for state in phases] == [True, True, True, True, False]
+        assert [state['phase'] for state in phases] == ['entering','entering','visible','visible','leaving','leaving','hidden']
+        assert [state['active'] for state in phases] == [True,True,True,True,True,True,False]
         page.wait_for_function("P.playerChat.speech.phase==='leaving'")
         assert not page.locator('#player-chat-bubble').evaluate('el=>el.hidden')
         page.wait_for_function("(()=>{const o=Number(getComputedStyle(document.querySelector('#player-chat-bubble')).opacity);return o>0&&o<.95})()")
@@ -54,11 +60,11 @@ with sync_playwright() as p:
         assert page.evaluate("chatCommands.at(-1).command") == 'dance'
         assert page.locator('#player-chat-bubble').evaluate('el=>el.hidden')
         assert not page.evaluate('P.playerChat.speech.active')
-        # An earlier one-word expiry must not remove replacement speech.
+        # Replacement speech starts a fresh five-second lifetime.
         page.evaluate("P.playerChat.submit('one')")
-        page.wait_for_timeout(400)
+        page.wait_for_timeout(4200)
         page.evaluate("P.playerChat.submit('one two')")
-        page.wait_for_timeout(600)
+        page.wait_for_timeout(1000)
         assert page.evaluate('P.playerChat.speech.active')
         assert page.locator('#player-chat-text').text_content() == 'one two'
         page.get_by_role('button', name='Player Chat', exact=True).click()
@@ -70,14 +76,26 @@ with sync_playwright() as p:
         assert page.evaluate('!P.input.left&&!P.input.right&&!P.input.jump&&!P.input.punch')
         page.locator('#playerChat').press('Escape')
         page.wait_for_function("document.querySelector('#player-chat-composer').hidden")
-        page.evaluate("P.playerChat.submit('Chat now follows words')")
+        page.evaluate("window.confirmedDrops=[];P.on('drop-confirm',event=>confirmedDrops.push(event));P.emit('drop-request',P.catalog.items.find(item=>item.id===34))")
+        page.locator('#drop-amount').fill('-1')
+        page.locator('#drop-confirm').click()
+        assert page.locator('#drop-overlay').is_hidden()
+        assert page.evaluate('confirmedDrops.length') == 0
+        assert page.locator('#player-chat-text').text_content() == 'Nice try.  You remind me of myself at that age.'
+        assert page.evaluate('P.playerChat.speech.durationMs') == 5000
+        page.evaluate("P.emit('drop-request',P.catalog.items.find(item=>item.id===34))")
+        page.locator('#drop-amount').fill('0')
+        page.locator('#drop-confirm').click()
+        assert page.locator('#drop-error').is_visible()
+        page.locator('#drop-cancel').click()
+        page.evaluate("P.playerChat.submit('Chat lasts five seconds')")
         page.wait_for_function("getComputedStyle(document.querySelector('#player-chat-bubble')).opacity>.95")
         page.screenshot(path=str(out / ('mobile.png' if mobile else 'desktop.png')))
         assert not errors, errors
         results.append({'mobile': mobile, 'verticalControls': True, 'shortBubble': True,
-                        'wordTiming': True, 'fadeInOut': True, 'speechLifecycle': True,
+                        'fixedFiveSeconds': True, 'fadeInOut': True, 'speechLifecycle': True,
                         'danceCommand': True, 'replacementTimer': True, 'typingIsolation': True,
-                        'pageErrors': errors})
+                        'negativeDropSpeech': True, 'fixedControls': True, 'pageErrors': errors})
         context.close()
     context = browser.new_context(reduced_motion='reduce')
     page = context.new_page()

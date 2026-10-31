@@ -43,7 +43,7 @@ test("shadow caster selection includes punch sprites while excluding FX, pets, p
 });
 
 test("avatar stays pinned to its feet while land tiles use the full 32-unit scale", () => {
-  assert.equal(PLAYER_VISUAL_SCALE, 0.78);
+  assert.equal(PLAYER_VISUAL_SCALE, 1);
   const rect = playerVisualRect({ x: 0, y: 0, width: 32, height: 32 }, 100, 200, 4);
   assert.equal(rect.width, 32 * 4 * PLAYER_VISUAL_SCALE);
   assert.equal(rect.height, 32 * 4 * PLAYER_VISUAL_SCALE);
@@ -77,12 +77,15 @@ test("preview keeps the shadow proportional to the player during camera zoom", a
   const shadowSection=app.slice(app.lastIndexOf('c.save();',shadowDraw),app.indexOf('c.restore();',shadowDraw));
   assert.doesNotMatch(shadowSection, /shadowScreenCenterX|shadowScreenBottomY|c\.setTransform\(1, 0, 0, 1, 0, 0\)/,
     "shadow is not reset to identity screen space before drawing");
-  assert.match(app, /const landS = s \* \(WORLD_TILE_SIZE \/ 32\);/, "preview and editable world share the tile scale");
+  assert.match(app, /tileScale=s\*\(WORLD_TILE_SIZE\/32\)/, "terrain raster uses the common native tile scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
-  const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX)");
+  const land = app.indexOf('drawTerrainLayer(w,h,s,camera,"solid")');
+  const walkthrough = app.indexOf('drawTerrainLayer(w,h,s,camera,"walkthrough")');
+  const worldShadow=app.indexOf('drawTerrainLayer(w,h,s,camera,"all",true)');
+  assert.ok(worldShadow < walkthrough && walkthrough < shadow);
   const player = app.indexOf("c.drawImage(avatar, playerRect.x");
   assert.ok(shadow < land && land < player,
-    "shadow is behind the land and land is behind the player");
+    "only solid terrain covers player shadows; player art stays above terrain");
   assert.ok(player < app.indexOf("drawAncestralAura(s, rootX, ground, frame, \"front\""),
     "front ancestral effects remain above the player");
 });

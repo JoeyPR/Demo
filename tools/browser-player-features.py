@@ -21,7 +21,7 @@ with sync_playwright() as p:
         page.wait_for_function('plannerApp.lastFrame.ground')
         page.evaluate("P.playerChat.submit('Hello everyone today')")
         page.wait_for_function('plannerApp.lastResult.pose.talking?.active')
-        assert page.evaluate('P.playerChat.speech.durationMs')==2700
+        assert page.evaluate('P.playerChat.speech.durationMs')==5000
         assert page.evaluate('plannerApp.lastResult.pose.face[1]===1')
         page.wait_for_function('plannerApp.lastResult.pose.face[0]===6')
         page.wait_for_function('plannerApp.lastResult.pose.face[0]===5')
@@ -42,6 +42,8 @@ with sync_playwright() as p:
         assert abs(page.evaluate('plannerApp.lastFrame.x')-start['x'])<.01
         page.screenshot(path=str(out/('mobile-dance.png' if mobile else 'desktop-dance.png')))
         # Movement and subsequent speech return control to the ordinary rig.
+        page.get_by_role('button',name='Start Live Preview',exact=True).click()
+        page.evaluate("P.playerChat.submit('/dance')");page.wait_for_function('!!plannerApp.lastResult.pose.dance')
         page.evaluate('document.activeElement?.blur()');page.keyboard.down('d')
         page.wait_for_function('!plannerApp.dance&&!plannerApp.lastResult.pose.dance');page.keyboard.up('d')
         page.wait_for_function('plannerApp.lastFrame.ground&&Math.abs(plannerApp.lastFrame.vx)<.01')

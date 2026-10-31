@@ -1,5 +1,9 @@
 # Player actions, skins and item information
 
+The subsequent [Preview / Live Preview revision](PREVIEW_LIVE_REVISION.md)
+replaces the exploration/background-wall UI, word timing, swatch styling and
+shadow composition described in this historical revision.
+
 Serve the repository root (`python -m http.server 9000`). These changes extend
 the existing main planner and use its inventory, preview and customization UI.
 

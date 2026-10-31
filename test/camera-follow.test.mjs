@@ -38,5 +38,6 @@ test("live app passes current player position into camera and scenery", () => {
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   assert.match(app, /frameX: frame\.x, frameY: frame\.y/);
   assert.match(app, /hillOffsetsNow\(w, h, s, camera\.cameraWorldX\)/);
-  assert.match(app, /drawLandGround\(w, h, ground, s, frame, zoom, camera\.cameraWorldX\)/);
+  assert.match(app, /WORLD_ORIGIN_X\+camera\.cameraWorldX/);
+  assert.match(app, /drawTerrainLayer\(w,h,s,camera,"solid"\)/);
 });

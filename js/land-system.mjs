@@ -454,7 +454,14 @@ export function invalidateWorld(world,tx,ty) {
     cache.cells.delete(layer+':'+x+','+y);
 }
 
-export function buildWorldDrawList(world,camX,camY,viewW,viewH,now=0,{layers=['bg','fg'],repeatX=false}={}) {
+/** Only solid collision cells cover actor/pickup shadows. Doors, platforms and
+ * other pass-through foreground art stay behind them. */
+export function foregroundOccludesShadows(def) {
+  return def?.collision === 1;
+}
+
+export function buildWorldDrawList(world,camX,camY,viewW,viewH,now=0,{layers=['bg','fg'],repeatX=false,foregroundPass='all'}={}) {
+  if(!['all','solid','walkthrough'].includes(foregroundPass))throw Error('Unknown foreground pass');
   if(!world?.fg||!world?.bg||![camX,camY,viewW,viewH,now].every(Number.isFinite)||viewW<=0||viewH<=0)return [];
   const rules=rulesTable();
   let cache=worldCaches.get(world);
@@ -471,6 +478,8 @@ export function buildWorldDrawList(world,camX,camY,viewW,viewH,now=0,{layers=['b
       const tx=((wx%WORLD_W)+WORLD_W)%WORLD_W,id=world[layer][ty]?.[tx]??0;
       if(!id||!rules.present[id])continue;
       const def=BLOCKS[id],key=layer+':'+tx+','+ty;
+      if(layer==='fg'&&foregroundPass!=='all'&&
+        foregroundOccludesShadows(def)!==(foregroundPass==='solid'))continue;
       let cell=cache.cells.get(key);
       if(!cell||cell.id!==id) {cell={id,variant:tileVariant(world,tx,ty,layer)};cache.cells.set(key,cell);}
       let [vx,vy]=cell.variant;

@@ -1,0 +1,171 @@
+{
+  "preview": [
+    {
+      "mobile": false,
+      "passiveInputBlocked": true,
+      "liveActions": true,
+      "mountedActions": true,
+      "nativePlayerTileScale": true,
+      "buddyShadowBlack": true,
+      "worldShadowPixels": true,
+      "removedExploreAndBackgroundUI": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "passiveInputBlocked": true,
+      "liveActions": true,
+      "mountedActions": true,
+      "nativePlayerTileScale": true,
+      "buddyShadowBlack": true,
+      "worldShadowPixels": true,
+      "removedExploreAndBackgroundUI": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "chat": [
+    {
+      "mobile": false,
+      "verticalControls": true,
+      "shortBubble": true,
+      "fixedFiveSeconds": true,
+      "fadeInOut": true,
+      "speechLifecycle": true,
+      "danceCommand": true,
+      "replacementTimer": true,
+      "typingIsolation": true,
+      "negativeDropSpeech": true,
+      "fixedControls": true,
+      "pageErrors": []
+    },
+    {
+      "mobile": true,
+      "verticalControls": true,
+      "shortBubble": true,
+      "fixedFiveSeconds": true,
+      "fadeInOut": true,
+      "speechLifecycle": true,
+      "danceCommand": true,
+      "replacementTimer": true,
+      "typingIsolation": true,
+      "negativeDropSpeech": true,
+      "fixedControls": true,
+      "pageErrors": []
+    }
+  ],
+  "info": [
+    {
+      "mobile": false,
+      "realInfoAction": true,
+      "verifiedProperties": true,
+      "nativeFallback": true,
+      "colorCodes": true,
+      "modalFocusAndMovement": true,
+      "safeText": true,
+      "pageErrors": []
+    },
+    {
+      "mobile": true,
+      "realInfoAction": true,
+      "verifiedProperties": true,
+      "nativeFallback": true,
+      "colorCodes": true,
+      "modalFocusAndMovement": true,
+      "safeText": true,
+      "pageErrors": []
+    }
+  ],
+  "skins": [
+    {
+      "mobile": false,
+      "swatches": 25,
+      "coloredOpaqueBorders": true,
+      "fillOnlyAlpha": true,
+      "sharedPanelGeometryAndShadows": true,
+      "translucentSkins": [
+        "translucent-red",
+        "subscriber-purple",
+        "subscriber-turquoise"
+      ],
+      "selection": true,
+      "pageErrors": []
+    },
+    {
+      "mobile": true,
+      "swatches": 25,
+      "coloredOpaqueBorders": true,
+      "fillOnlyAlpha": true,
+      "sharedPanelGeometryAndShadows": true,
+      "translucentSkins": [
+        "translucent-red",
+        "subscriber-purple",
+        "subscriber-turquoise"
+      ],
+      "selection": true,
+      "pageErrors": []
+    }
+  ],
+  "player": [
+    {
+      "mobile": false,
+      "talkingFaces": true,
+      "speechDurationAndFadeSync": true,
+      "danceComponentsAndTurns": true,
+      "danceCancellation": true,
+      "skinSwatches": 25,
+      "buddyPalette": true,
+      "skinAlphaAndPersistence": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "talkingFaces": true,
+      "speechDurationAndFadeSync": true,
+      "danceComponentsAndTurns": true,
+      "danceCancellation": true,
+      "skinSwatches": 25,
+      "buddyPalette": true,
+      "skinAlphaAndPersistence": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "preservedFlows": [
+    {
+      "mobile": false,
+      "ready": true,
+      "fxScripts": 314,
+      "appearance": true,
+      "punchCues": true,
+      "drop": true,
+      "blackbox": true,
+      "movement": true,
+      "pngExport": true,
+      "touchMovementAndPinch": false,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "ready": true,
+      "fxScripts": 314,
+      "appearance": true,
+      "punchCues": true,
+      "drop": true,
+      "blackbox": true,
+      "movement": true,
+      "pngExport": true,
+      "touchMovementAndPinch": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "nodeTests": {
+    "passed": 290,
+    "failed": 0
+  },
+  "scope": "Desktop and touch-phone integration. Actual player/world shadow pixels checked. Riding is calibrated from video; exact raster parity is unverified."
+}

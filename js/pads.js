@@ -7,6 +7,7 @@
   const held = { left: new Set(), right: new Set(), jump: new Set(), punch: new Set() };   // source ids per pad
 
   function set(k, src, down) {
+    if(down&&!P.previewMode?.live)return;
     const s = held[k]; down ? s.add(src) : s.delete(src);
     const on = s.size ? 1 : 0;
     if (on === input[k]) return;
