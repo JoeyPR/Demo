@@ -57,7 +57,7 @@ function loadSprite(filename) {
         imageCache.delete(name);
         reject(new Error("Demo icon asset failed to load: " + name));
       };
-      image.src = new URL(name, ASSET_ROOT).href;
+      image.src = new URL(name+(name==='tiles_page17.png'?'?v=20261031-new':''), ASSET_ROOT).href;
     }));
   }
   return imageCache.get(name);

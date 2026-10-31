@@ -25,6 +25,7 @@
 
 /* ------------------------------ 1. Constants ----------------------------- */
 
+import {compileWorldRules} from '../src/world-rules.mjs';
 export const TILE = 32;        // every block is 32x32 px
 export const WORLD_W = 100;    // standard Growtopia world: 100 x 60 tiles
 export const WORLD_H = 60;     // (3200 x 1920 px)
@@ -100,6 +101,7 @@ export const BLOCKS = {
  * for completeness but marked unsupported (not renderable). Call once at boot:
  * registerBlocks(GROWTOPIA_ITEMS). */
 export function registerBlocks(rows) {
+  rulesRevision++;
   for (const row of rows) {
     const [id, name, action, page, tx, ty, spread, collisionType, layer, flags = ''] = row;
     const collision = collisionType === 1 ? 1 : collisionType === 2 ? 2 : 0;
@@ -140,6 +142,7 @@ export function registerBlocks(rows) {
    block's own spread type so its atlas variants remain correct. */
 export const BACKGROUND_BLOCK_IDS = new Set();
 export function registerBackgroundBlocks(rows) {
+  rulesRevision++;
   BACKGROUND_BLOCK_IDS.clear();
   for (const row of rows || []) {
     if (!row || row.kind !== "bg") continue;
@@ -437,6 +440,51 @@ export function tileVariant(world, tx, ty, layer = 'fg') {
  * items, right (vx += gridW) for 'h' items. */
 const SPREAD_GRID = { 1: [1, 1], 2: [8, 6], 3: [4, 1], 4: [5, 1], 5: [8, 2],
                       6: [1, 1], 7: [4, 1], 8: [1, 1], 9: [4, 1], 10: [1, 1] };
+let rulesRevision=0, compiledRevision=-1, compiledRules;
+const worldCaches=new WeakMap();
+function rulesTable() {
+  if(compiledRevision!==rulesRevision) {compiledRules=compileWorldRules(BLOCKS);compiledRevision=rulesRevision;}
+  return compiledRules;
+}
+export function invalidateWorld(world,tx,ty) {
+  const cache=worldCaches.get(world);
+  if(!cache)return;
+  if(tx===undefined||ty===undefined)cache.cells.clear();
+  else for(const layer of ['bg','fg'])for(let y=ty-1;y<=ty+1;y++)for(let x=tx-1;x<=tx+1;x++)
+    cache.cells.delete(layer+':'+x+','+y);
+}
+
+export function buildWorldDrawList(world,camX,camY,viewW,viewH,now=0,{layers=['bg','fg'],repeatX=false}={}) {
+  if(!world?.fg||!world?.bg||![camX,camY,viewW,viewH,now].every(Number.isFinite)||viewW<=0||viewH<=0)return [];
+  const rules=rulesTable();
+  let cache=worldCaches.get(world);
+  if(!cache||cache.revision!==rulesRevision) {
+    cache={revision:rulesRevision,cells:new Map()};worldCaches.set(world,cache);
+  }
+  const x0=repeatX?Math.floor(camX/TILE):Math.max(0,Math.floor(camX/TILE));
+  const x1=repeatX?Math.ceil((camX+viewW)/TILE)-1:Math.min(WORLD_W-1,Math.ceil((camX+viewW)/TILE)-1);
+  const y0=Math.max(0,Math.floor(camY/TILE)),y1=Math.min(WORLD_H-1,Math.ceil((camY+viewH)/TILE)-1);
+  const calls=[];
+  for(const layer of layers) {
+    if(layer!=='fg'&&layer!=='bg')throw Error('Unknown world layer');
+    for(let ty=y0;ty<=y1;ty++)for(let wx=x0;wx<=x1;wx++) {
+      const tx=((wx%WORLD_W)+WORLD_W)%WORLD_W,id=world[layer][ty]?.[tx]??0;
+      if(!id||!rules.present[id])continue;
+      const def=BLOCKS[id],key=layer+':'+tx+','+ty;
+      let cell=cache.cells.get(key);
+      if(!cell||cell.id!==id) {cell={id,variant:tileVariant(world,tx,ty,layer)};cache.cells.set(key,cell);}
+      let [vx,vy]=cell.variant;
+      const frame=rules.frameMs[id]?Math.floor(Math.max(0,now)/rules.frameMs[id])%rules.frames[id]:0;
+      const [gw,gh]=SPREAD_GRID[rules.spread[id]]??[1,1];
+      if(def.animDir==='h')vx+=frame*gw;else vy+=frame*gh;
+      calls.push({id,layer,page:rules.pages[rules.page[id]],tint:def.tintRgb,
+        sx:(rules.atlasX[id]+vx)*TILE,sy:(rules.atlasY[id]+vy)*TILE,
+        x:wx*TILE-camX,y:ty*TILE-camY,
+        flipped:!!world.flip?.[key]});
+    }
+  }
+  return calls;
+}
 
 /* Current animation frame of a block at time `now` (ms). Pure: the same
  * (def, now) always yields the same frame, so tests can pin time. */
@@ -453,48 +501,20 @@ export function animFrame(def, now) {
  * BLOCKS[id].page (default tiles_page1). `now` (ms) drives tile animations;
  * it defaults to the clock so the live demo animates on its own. */
 
-export function renderWorld(ctx, world, atlas, camX, camY, viewW, viewH, now = Date.now()) {
-  const pageOf = (def) => typeof atlas === 'function'
-    ? atlas(def.page || 'tiles_page1') : atlas;
-  const x0 = Math.max(0, Math.floor(camX / TILE));
-  const y0 = Math.max(0, Math.floor(camY / TILE));
-  const x1 = Math.min(WORLD_W - 1, Math.ceil((camX + viewW) / TILE));
-  const y1 = Math.min(WORLD_H - 1, Math.ceil((camY + viewH) / TILE));
-
-  for (const layer of ['bg', 'fg']) {
-    for (let ty = y0; ty <= y1; ty++) {
-      for (let tx = x0; tx <= x1; tx++) {
-        const id = world[layer][ty][tx];
-        if (id === 0) continue;
-        const def = BLOCKS[id];
-        if (!def || def.unsupported) continue;
-        const img = tintedAtlas(pageOf(def), def.tintRgb);   // grayscale+tint items draw from a pre-tinted page copy
-        if (!img) continue;
-        const [vx0, vy0] = tileVariant(world, tx, ty, layer);
-        let vx = vx0, vy = vy0;
-        if (def.animFrames > 1) {           // animated tile: advance a whole
-          const fr = animFrame(def, now);   // grid per period, wrap at the end
-          const [gw, gh] = SPREAD_GRID[def.spread] || [1, 1];
-          if (def.animDir === 'h') vx += fr * gw;
-          else vy += fr * gh;
-        }
-        const sx = (def.atlas[0] + vx) * TILE;   // sprite top-left in atlas
-        const sy = (def.atlas[1] + vy) * TILE;
-        const dx = tx * TILE - camX;              // destination on canvas
-        const dy = ty * TILE - camY;
-        if (world.flip && world.flip[layer + ':' + tx + ',' + ty]) {
-          // two-direction item placed facing left: render mirrored
-          ctx.save();
-          ctx.translate(dx + TILE, dy);
-          ctx.scale(-1, 1);
-          ctx.drawImage(img, sx, sy, TILE, TILE, 0, 0, TILE, TILE);
-          ctx.restore();
-        } else {
-          ctx.drawImage(img, sx, sy, TILE, TILE, dx, dy, TILE, TILE);
-        }
-      }
-    }
+export function renderWorld(ctx, world, atlas, camX, camY, viewW, viewH, now = Date.now(), options={}) {
+  const calls=buildWorldDrawList(world,camX,camY,viewW,viewH,now,options);
+  const images=new Map();let drawn=0;
+  for(const call of calls) {
+    const key=call.page+':'+(call.tint??'');
+    if(!images.has(key))images.set(key,tintedAtlas(typeof atlas==='function'?atlas(call.page):atlas,call.tint));
+    const image=images.get(key);if(!image)continue;
+    if(call.flipped) {
+      ctx.save();ctx.translate(call.x+TILE,call.y);ctx.scale(-1,1);
+      ctx.drawImage(image,call.sx,call.sy,TILE,TILE,0,0,TILE,TILE);ctx.restore();
+    } else ctx.drawImage(image,call.sx,call.sy,TILE,TILE,call.x,call.y,TILE,TILE);
+    drawn++;
   }
+  return {visibleTiles:calls.length,drawCalls:drawn,sheets:images.size};
 }
 
 /* ------------------------- Planner land policy ---------------------------- */
@@ -695,6 +715,7 @@ export function canPlace(world, tx, ty, id, layer = 'fg', player = null) {
 export function placeBlock(world, tx, ty, id, layer = 'fg', player = null) {
   if (!canPlace(world, tx, ty, id, layer, player)) return false;
   world[layer][ty][tx] = id;
+  invalidateWorld(world,tx,ty);
   // two-direction items record the PLACER's facing at placement time (the
   // game's "placed in two directions, depending on the direction you're
   // facing" mechanic): the sprite renders mirrored when placed facing left.
@@ -709,6 +730,7 @@ export function removeBlock(world, tx, ty, layer = 'fg') {
   if (tx < 0 || tx >= WORLD_W || ty < 0 || ty >= WORLD_H) return false;
   if (world[layer][ty][tx] === 0) return false;
   world[layer][ty][tx] = 0;
+  invalidateWorld(world,tx,ty);
   if (world.flip) delete world.flip[layer + ':' + tx + ',' + ty];
   return true;
 }

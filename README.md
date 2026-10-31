@@ -1,5 +1,10 @@
 # Growtopia player rendering handoff
 
+**Current integrated planner:** [playable world, blinking and Player Chat](docs/WORLD_CHAT_BLINK.md),
+building on the [October 31 research renovation](docs/RESEARCH_RENOVATION.md).
+Serve the repository root to use the main planner (`python -m http.server 9000`).
+The original rendering lab remains available under `/demo/`.
+
 This package is a researched, editable starting point for Claude to implement player, clothing, and movement rendering in a Growtopia planner. It contains readable ES modules, a source-cited technical guide, a 4,081-item coverage inventory, and a numerical test suite.
 
 **It is not the official Growtopia rendering engine and is not a complete implementation of every item.** The strongest evidence is source-assisted analysis of Set Planner GT's public application and catalog; official-client pixel parity remains unverified ([Set Planner application](https://setplannergt.com/app.d5e8585e60.js), [public catalog](https://setplannergt.com/items.17c8f97f87.dat)).

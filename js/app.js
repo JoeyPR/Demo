@@ -1,16 +1,19 @@
-/* APP: the Demo rendering engine wired into the NewPlanner UI. This module
-   replaces NewPlanner's own player renderer — every sprite, pose, walk
-   cycle, FX and XML renderer comes from the Demo engine unchanged. */
+/* The main planner: shared avatar/FX composition, terrain motion, weather,
+   equipment and the original inventory/Drop contracts. */
 import { PlannerPlayer } from "../demo/engine/player.mjs";
-import { PreviewMotion } from "../demo/engine/motion.mjs";
+import { WorldMotion, WORLD_ORIGIN_X, WORLD_ORIGIN_Y, WORLD_TILE_SIZE, WORLD_PLAYER_HALF_WIDTH, WORLD_PLAYER_HEIGHT } from "./world-motion.mjs";
 import { normalizeCatalogItem } from "../demo/engine/catalog-adapter.mjs";
 import { drawCanvas } from "../demo/engine/render.mjs";
 import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
 import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
+import { rendererScripts } from "../demo/engine/research-data.mjs";
+import { resolveLook } from "../demo/engine/look.mjs";
+import { createReferenceFxAtlas } from "../demo/engine/reference-fx.mjs";
 import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, DEFAULT_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, resolveBackgroundSelection, uniformLandWorld, uniformBackgroundWorld } from "./land-system.mjs";
+import { generateWorld, placeBlock, removeBlock, invalidateWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
@@ -44,7 +47,10 @@ const state = {
   weatherFailedKey: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
   landBlock: null, landWorld: null, backgroundBlock: DEFAULT_BACKGROUND_ID, backgroundWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
-  pickups: [], nextPickupId: 1
+  pickups: [], nextPickupId: 1,
+  hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true,
+  worldMode: P.store.get("worldMode", true), editableWorld:null, worldTool:"play", worldSelection:116,
+  worldGroundId:2, worldBackgroundId:14, pendingWorldEvents:[]
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -57,7 +63,7 @@ function loadAtlas(name) {
     try {
       const image = new Image();
       image.crossOrigin = "anonymous";
-      image.src = moduleURL(`../demo/assets/${name}`).href;
+      image.src = moduleURL(`../demo/assets/${name}${name==="tiles_page17.png"?"?v=20261031-new": ""}`).href;
       await image.decode();
       images.set(name, image);
       const atlas = registerAtlas(image), tint = atlas.tintedCrop;
@@ -97,22 +103,58 @@ function equipToggle(id) {
   // previous item's walking/jump history or its in-flight FX birth positions.
   if (raw.slot === 9) state.ancestralPath.length = 0;
   player.equip([...state.equipped.values()]);
+  const equippedIds=new Set([...state.equipped.values()].map(item=>item.id));
+  for(const key of state.hiddenItems)if(!equippedIds.has(key))state.hiddenItems.delete(key);
+  for(const key of state.transmutes.keys())if(!equippedIds.has(key))state.transmutes.delete(key);
+  player.setAppearance({hiddenItemIds:state.hiddenItems,transmutes:state.transmutes});
   syncAuraPass();
   state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
   motion?.setAbilities(state.abilities);
   P.equippedIds = new Set([...state.equipped.values()].map(i => i.id));
   P.emit("equip-state");
+  P.emit("look-update");
   updateHUD();
 }
 /* Ancestral auras are drawn by the ancestral FX renderer (drawAncestralAura)
    below — the engine's own static RenderAura pass (the artifact's old sprite
    drawn on the character) is hidden so only the animated aura shows. */
 function syncAuraPass() {
-  const item = state.equipped.get(9);
+  const item = displayedItem(9);
   const handled = !!(item && state.ancestralMap?.has(item.id));
   if (handled) state.hiddenPasses.add("RenderAura");
   else state.hiddenPasses.delete("RenderAura");
 }
+function displayedItem(slot) {
+  return resolveLook([...state.equipped.values()],{
+    hiddenItemIds:state.hiddenItems,transmutes:state.transmutes
+  }).displayed.find(item=>item.slot===slot);
+}
+function applyAppearance() {
+  player?.setAppearance({hiddenItemIds:state.hiddenItems,transmutes:state.transmutes});
+  state.ancestralPath.length=0;
+  syncAuraPass();
+  P.emit("look-update");
+}
+// Existing customization controls consume this API; inventory equipment IDs
+// and Drop retain their existing contracts.
+P.look = {
+  get() { return [...state.equipped.values()].map(item=>({id:item.id,name:item.name,slot:item.slot,
+    visible:!state.hiddenItems.has(item.id),displayId:state.transmutes.get(item.id)?.id??item.id})); },
+  setVisible(id,visible) {
+    if(![...state.equipped.values()].some(item=>item.id===id))return;
+    if(visible)state.hiddenItems.delete(id);else state.hiddenItems.add(id);
+    applyAppearance();
+  },
+  transmute(id,targetId) {
+    const equipped=[...state.equipped.values()].find(item=>item.id===id);
+    const target=state.catalog?.items.find(item=>item.id===Number(targetId));
+    if(!equipped||!target||target.slot!==equipped.slot)return false;
+    if(target.id===id)state.transmutes.delete(id);else state.transmutes.set(id,normalize(target));
+    applyAppearance();return true;
+  },
+  get effectsEnabled(){return state.effectsEnabled;},
+  setEffects(enabled){state.effectsEnabled=!!enabled;P.emit("look-update");}
+};
 P.on("equip", payload => equipToggle(typeof payload === "object" && payload !== null ? payload.id : payload));
 P.on("skin", i => {
   state.skin = SKINS[i].rgb;
@@ -124,18 +166,17 @@ P.on("skin", i => {
 });
 
 /* ---------------- simulation ------------------------------------------- */
-/* Pet engine host extras carried on the motion: the rig arm angle and player
-   lift lag one render (the pose resolves after the items advance), the
-   bare-head flag feeds head-riding pets, and the preview floor is flat so the
-   solid query is always standable — the source queries real world tiles for
-   the pet trail's platform edges. */
+/* Pet and particle hosts query the active world using their own rig-to-feet
+   coordinate conversion. The outfit-only mode retains the flat preview. */
 function withPetHost(motion) {
   return { ...motion,
     armAngle: state.lastResult?.pose?.frontAngle ?? 0,
     petBareHead: !state.equipped.get(0),
     petLift: state.lastResult?.lift?.y ?? 0,
-    petWorld: { solidAt: () => true } };
+    petWorld: { solidAt: (x,y) => state.worldMode ? worldSolidAt(x-16,y) : true },
+    particleWorld: { solidAt: (x,y) => state.worldMode ? worldSolidAt(x-16,y-32) : y>=32 } };
 }
+function worldSolidAt(x,y) { return motion instanceof WorldMotion ? motion.solidAt(x,y) : false; }
 function step(dt) {
   state.clock += dt;
   if (state.doubleAt !== null && state.clock >= state.doubleAt) {
@@ -144,7 +185,7 @@ function step(dt) {
   const input = {
     right: !!(P.input.right), left: !!(P.input.left),
     jump: state.clock < state.jumpUntil || !!P.input.jump,
-    punch: state.clock < state.punchUntil || !!P.input.punch || state.punchHold || state.clock < state.gesturePunchUntil
+    punch: (!state.worldMode||state.worldTool==="play") && (state.clock < state.punchUntil || !!P.input.punch || state.punchHold || state.clock < state.gesturePunchUntil)
   };
   /* touch punch aim: the gesture's canvas point steers the punch at the
      character — same contract as the Demo render lab (punchTarget is in
@@ -168,14 +209,17 @@ function step(dt) {
     input.punchTarget = [x, 32 + (aimY - cy) / s - (lift ?? 0)];
   }
   const frame = motion.step(dt, input);
+  frame.events.push(...state.pendingWorldEvents.splice(0));
   if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
   state.lastFrame = frame;
   state.lastResult = player.step(
     withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
-    { skin: state.skin, effects: true });
+    { skin: state.skin, effects: state.effectsEnabled });
+  for(const cue of state.lastResult.audioCues??[])P.emit("punch-cue",cue);
   updatePickupLifecycle(frame);
 }
 P.on("pad", pad => {
+  if(!motion)return;
   if (pad.k === "jump" && pad.down) { motion.lastJump = false; state.jumpUntil = state.clock + 150; }
   if (pad.k === "punch" && pad.down) state.punchUntil = state.clock + 34;
 });
@@ -222,12 +266,13 @@ function punchOverDrawer(e) {
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   });
 }
-const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, [data-dd]");
+const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]");
 document.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
   if (punchOverUI(e.target) || punchOverDrawer(e)) return;
   if (state.punchPointer !== null) { punchCancel(); return; }   /* second finger: pinch zoom takes over */
   if (!punchInside(e)) return;
+  if (state.worldMode && state.worldTool!=="play") { editWorldAt(e);return; }
   punchAimFromEvent(e);
   state.punchHold = true;
   state.punchPointer = e.pointerId;
@@ -243,6 +288,7 @@ document.addEventListener("pointerup", punchDrop);
 document.addEventListener("pointercancel", e => { if (state.punchPointer === e.pointerId) punchCancel(); });
 document.addEventListener("lostpointercapture", punchDrop);
 window.addEventListener("blur", punchCancel);
+P.on("player-chat-open", punchCancel);
 
 /* ---------------- rendering ------------------------------------------- */
 function drawScene(w, h) {
@@ -256,7 +302,7 @@ function renderAvatar() {
   /* the pet leash string is a line primitive with no atlas; it needs none */
   const missing = [...new Set(state.lastResult.calls.filter(c => !c.line && !atlases.has(c.atlas)).map(c => c.atlas))];
   for (const name of missing) loadAtlas(name);
-  const wornAncestral = state.equipped.get(9);
+  const wornAncestral = displayedItem(9);
   const customAncestralId = wornAncestral && state.ancestralMap?.has(wornAncestral.id)
     ? wornAncestral.id : null;
   const calls = state.lastResult.calls.filter(c =>
@@ -278,7 +324,7 @@ function renderAvatar() {
   // and punch arm/hand. FX, particles, pets, and ancestral effects stay excluded;
   // each included part keeps its own draw matrix so the punch shadow follows it.
   const shadows = getPlayerShadowCalls(calls, {
-    ancestralId: state.equipped.get(9)?.id ?? null,
+    ancestralId: displayedItem(9)?.id ?? null,
   });
   avatarShadowCtx.setTransform(1, 0, 0, 1, 0, 0);
   avatarShadowCtx.clearRect(0, 0, width, height);
@@ -352,10 +398,8 @@ P.on("preview", pv => {
 });
 
 /* ---------------- land -------------------------------------------------- */
-/* The land system (land-system.mjs, from the Planner-LANDsystem package):
-   selecting a foreground block re-renders the ground strip the player walks
-   on, using the package's autotiling against a uniform filled world. No
-   background blocks and no placement — the planner ground is visual only. */
+/* Outfit-only terrain remains a selectable uniform strip. Explore World uses
+   the same verified tile rules with the editable world and collision grid. */
 function landPage(name) {
   if (landImages.has(name)) return Promise.resolve(landImages.get(name));
   if (landLoads.has(name)) return landLoads.get(name);
@@ -364,7 +408,7 @@ function landPage(name) {
     img.crossOrigin = "anonymous";
     img.onload = () => { landImages.set(name, img); res(img); };
     img.onerror = () => { landImages.set(name, null); res(null); };
-    img.src = moduleURL(`../sheets/tiles/${name}.png`).href;
+    img.src = moduleURL(`../sheets/tiles/${name}.png?v=20261031-world`).href;
   });
   landLoads.set(name, load);
   return load;
@@ -372,7 +416,11 @@ function landPage(name) {
 const DEFAULT_LAND = DEFAULT_LAND_ID;   /* Dirt — the default land the player walks on */
 function setLand(id) {
   const resolved = resolveLandSelection(id);
-  if (resolved === LAND_NONE) { state.landBlock = null; state.landWorld = null; return; }
+  if (resolved === LAND_NONE) {
+    state.landBlock = null; state.landWorld = null;
+    if(state.editableWorld&&state.worldMode)P.world.setActive(false);
+    return;
+  }
   const def = BLOCKS[resolved];
   landPage(def.page || "tiles_page1");
   const backgroundId = state.backgroundBlock ?? CAVE_BACKGROUND_ID;
@@ -380,6 +428,7 @@ function setLand(id) {
   if (backgroundDef) landPage(backgroundDef.page || "tiles_page1");
   state.landBlock = resolved;
   state.landWorld = uniformLandWorld(resolved, 24, backgroundId);
+  applyWorldLook();
 }
 function setBackground(id) {
   const resolved = resolveBackgroundSelection(id);
@@ -392,9 +441,94 @@ function setBackground(id) {
   /* The same selected wall continues behind the foreground land strip. */
   if (state.landBlock != null)
     state.landWorld = uniformLandWorld(state.landBlock, 24, resolved ?? CAVE_BACKGROUND_ID);
+  applyWorldLook();
+}
+function applyWorldLook() {
+  if(!state.editableWorld)return;
+  for(let y=0;y<state.editableWorld.fg.length;y++)for(let x=0;x<WORLD_W;x++) {
+    if(state.landBlock!=null&&state.editableWorld.fg[y][x]===state.worldGroundId)state.editableWorld.fg[y][x]=state.landBlock;
+    if(state.editableWorld.bg[y][x]&&state.editableWorld.bg[y][x]===state.worldBackgroundId)
+      state.editableWorld.bg[y][x]=state.backgroundBlock??0;
+  }
+  state.worldGroundId=state.landBlock??state.worldGroundId;state.worldBackgroundId=state.backgroundBlock??0;
+  invalidateWorld(state.editableWorld);
 }
 P.on("land", id => setLand(id));
 P.on("background", id => setBackground(id));
+
+function resetMotionForScene() {
+  const previous=motion;
+  motion=new WorldMotion({world:state.worldMode?state.editableWorld:null,blocks:BLOCKS});
+  motion.clockMs=state.clock;motion.setAbilities(state.abilities??{});
+  // Mode changes start at the shared surface origin; equipment stays equipped.
+  state.lastFrame=motion.snapshot();state.ancestralPath.length=0;
+  state.pendingWorldEvents.length=0;
+  if(previous)player?.reset();
+  P.emit("input-reset");punchCancel();
+}
+P.world = {
+  get active(){return state.worldMode;},
+  setActive(active){state.worldMode=!!active;if(state.worldMode&&state.landBlock==null)P.land.set(DEFAULT_LAND);P.store.set("worldMode",state.worldMode);resetMotionForScene();P.emit("world-update");},
+  get tool(){return state.worldTool;},
+  setTool(tool){if(!["play","place","erase"].includes(tool))return;state.worldTool=tool;P.emit("input-reset");punchCancel();P.emit("world-update");},
+  get selectedId(){return state.worldSelection;},
+  select(id){if(BLOCKS[id]?.eligible&&!BLOCKS[id].unsupported){state.worldSelection=Number(id);P.emit("world-update");}},
+  get blocks(){return Object.entries(BLOCKS).filter(([,def])=>def.eligible&&!def.unsupported).map(([id,def])=>({id:Number(id),...def}));},
+  newWorld(){state.editableWorld=generateWorld(Math.floor(Math.random()*0x7fffffff));state.worldGroundId=2;state.worldBackgroundId=14;applyWorldLook();resetMotionForScene();P.emit("world-update");},
+  respawn(){if(!motion)return;const frame=motion.respawn();state.pendingWorldEvents=frame.events.filter(event=>event.type==="respawn");state.ancestralPath.length=0;player?.reset();P.emit("input-reset");P.emit("world-update");},
+  get data(){return state.editableWorld;},
+  // A deterministic projection shared by mouse/touch editing and QA.
+  tileAt(clientX,clientY){return sceneTileAt(clientX,clientY);},
+  edit(tx,ty,erase=false){return editWorldTile(tx,ty,erase);}
+};
+function sceneTileAt(clientX,clientY) {
+  const view=state.view;if(!view)return null;
+  const rect=world.getBoundingClientRect();
+  const point=unprojectCameraPoint((clientX-rect.left)*world.width/rect.width,
+    (clientY-rect.top)*world.height/rect.height,view.cameraPivotX,view.cameraPivotY,view.cameraZoom);
+  const feetFocus=view.cameraPivotY+16*PLAYER_VISUAL_SCALE*view.s;
+  const x=state.lastFrame.x+(point.x-view.cameraPivotX)/view.s;
+  const y=state.lastFrame.y+(point.y-feetFocus)/view.s;
+  return {tx:((Math.floor((x+WORLD_ORIGIN_X)/WORLD_TILE_SIZE)%WORLD_W)+WORLD_W)%WORLD_W,
+    ty:Math.floor((y+WORLD_ORIGIN_Y)/WORLD_TILE_SIZE)};
+}
+function editWorldTile(tx,ty,erase=false) {
+  if(!state.worldMode||!state.editableWorld||!Number.isInteger(tx)||!Number.isInteger(ty))return false;
+  const def=BLOCKS[state.worldSelection];if(!def)return false;
+  const layer=def.layer==="bg"?"bg":"fg";
+  if(erase||state.worldTool==="erase")return removeBlock(state.editableWorld,tx,ty,layer);
+  const frame=state.lastFrame,cellLeft=tx*WORLD_TILE_SIZE,cellTop=ty*WORLD_TILE_SIZE;
+  const px=((frame.x+WORLD_ORIGIN_X)%(WORLD_W*WORLD_TILE_SIZE)+WORLD_W*WORLD_TILE_SIZE)%(WORLD_W*WORLD_TILE_SIZE);
+  const feet=frame.y+WORLD_ORIGIN_Y;
+  if(layer==="fg"&&def.collision===1&&cellLeft<px+WORLD_PLAYER_HALF_WIDTH&&cellLeft+WORLD_TILE_SIZE>px-WORLD_PLAYER_HALF_WIDTH&&
+      cellTop<feet&&cellTop+WORLD_TILE_SIZE>feet-WORLD_PLAYER_HEIGHT)return false;
+  const placed=placeBlock(state.editableWorld,tx,ty,state.worldSelection,layer);
+  if(placed&&def.twoDir&&frame.facing<0)state.editableWorld.flip[layer+':'+tx+','+ty]=1;
+  return placed;
+}
+function editWorldAt(event) {
+  const tile=sceneTileAt(event.clientX,event.clientY);
+  if(tile)editWorldTile(tile.tx,tile.ty,event.button===2);
+}
+world.addEventListener("contextmenu",event=>{
+  if(state.worldMode&&state.worldTool!=="play"){event.preventDefault();editWorldAt(event);}
+});
+function drawInteractiveWorld(w,h,s,camera,layer) {
+  if(!state.editableWorld)return;
+  const start=unprojectCameraPoint(0,0,camera.cameraPivotX,camera.cameraPivotY,camera.zoom);
+  const end=unprojectCameraPoint(w,h,camera.cameraPivotX,camera.cameraPivotY,camera.zoom);
+  const tileScale=s*(WORLD_TILE_SIZE/32),bw=Math.ceil((end.x-start.x)/tileScale)+2,bh=Math.ceil((end.y-start.y)/tileScale)+2;
+  const canvas=layer==="bg"?backgroundCanvas:landCanvas,c=layer==="bg"?backgroundCtx:landCtx;
+  if(canvas.width!==bw||canvas.height!==bh){canvas.width=bw;canvas.height=bh;}
+  c.clearRect(0,0,bw,bh);c.imageSmoothingEnabled=false;
+  const feetFocus=camera.cameraPivotY+16*PLAYER_VISUAL_SCALE*s;
+  const camX=(WORLD_ORIGIN_X+camera.cameraWorldX+(start.x-camera.cameraPivotX)/s)*32/WORLD_TILE_SIZE;
+  const camY=(WORLD_ORIGIN_Y+camera.cameraWorldY+(start.y-feetFocus)/s)*32/WORLD_TILE_SIZE;
+  const atlas=page=>{if(!landImages.has(page))landPage(page);return landImages.get(page)??null;};
+  const stats=renderWorld(c,state.editableWorld,atlas,camX,camY,bw,bh,state.clock,{layers:[layer],repeatX:true});
+  if(layer==="bg")state.backgroundStats=stats;else state.landStats=stats;
+  ctx.drawImage(canvas,0,0,bw,bh,start.x,start.y,bw*tileScale,bh*tileScale);
+}
 function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   // Render land blocks at 20 screen-units per 32-unit source tile: the
   // midpoint between 16 and 24. Grid coordinates stay native at 32 per tile.
@@ -409,8 +543,7 @@ function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   const camX = ((Math.floor(cameraWorldX - lw / 2) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
-  renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
-  if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
+  state.landStats=renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock,{repeatX:true});
   const dx = (w - lw * landS) / 2;
   ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS);
 }
@@ -431,9 +564,7 @@ function drawBackgroundTiles(w, h, s, camera) {
   const span = WORLD_PX_W;
   const wrappedX = ((camX % span) + span) % span;
   const atlasFn = page => landImages.get(page) ?? null;
-  renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX, camY, bw, bh, state.clock);
-  if (wrappedX + bw > span)
-    renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX - span, camY, bw, bh, state.clock);
+  state.backgroundStats=renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX, camY, bw, bh, state.clock,{layers:['bg'],repeatX:true});
   ctx.drawImage(backgroundCanvas, 0, 0, bw, bh, 0, 0, bw * tileScale, bh * tileScale);
 }
 
@@ -453,7 +584,8 @@ async function loadAncestrals() {
 const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
 const ancestralTint = new TintCache();
 function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraPivotY, zoom) {
-  const item = state.equipped.get(9);
+  const item = displayedItem(9);
+  if(!state.effectsEnabled)return;
   if (!item || !state.ancestralMap) return;
   const info = state.ancestralMap.get(item.id);
   if (!info) return;
@@ -584,7 +716,8 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.translate(-cameraPivotX, -cameraPivotY);
 
   /* Selected Growtopia BG block tiles the viewport behind the player. */
-  drawBackgroundTiles(w, h, s, camera);
+  if(state.worldMode)drawInteractiveWorld(w,h,s,camera,"bg");
+  else drawBackgroundTiles(w, h, s, camera);
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(-1);
   // The player shadow is always projected to the left, independent of facing.
@@ -597,7 +730,8 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
     playerRect.width, playerRect.height);
   c.restore();
-  if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX);
+  if(state.worldMode)drawInteractiveWorld(w,h,s,camera,"fg");
+  else if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX);
   drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
   // Scale the player and all clothing around rig feet (16,32). Land tiles use
   // the full 32-unit world scale; the character remains at 0.78 scale.
@@ -617,6 +751,10 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
       w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
     );
     P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.80);
+    const rect=world.getBoundingClientRect();
+    P.emit("player-chat-anchor",{x:rect.left+platePoint.x*rect.width/world.width,
+      y:rect.top+(platePoint.y-(P.rtfont.hasVisibleName(P.plateConfig.get().growId)?9:0)*s*zoom)*rect.height/world.height,
+      scale:s*zoom*rect.width/world.width});
   }
   // Foreground weather is viewport-space, as it was before camera-scope
   // rendering; zooming the world must not move or scale rain/snow overlays.
@@ -1013,9 +1151,10 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     const liftData = await (await fetch(moduleURL("../demo/lift-profiles.json"))).json();
     state.catalog.liftProfiles = Object.fromEntries(liftData.profiles.map(p => [p.id, p]));
     const rendererResponse = await fetch(moduleURL("../demo/renderer-data.json"));
-    if (rendererResponse.ok) state.catalog.renderers = (await rendererResponse.json()).scripts;
-    try { const fx = await fetch(moduleURL("../demo/fx-data.json")); if (fx.ok) state.catalog.fxRenderers = (await fx.json()).scripts; } catch {}
+    if (rendererResponse.ok) state.catalog.renderers = rendererScripts(await rendererResponse.json());
+    try { const fx = await fetch(moduleURL("../demo/fx-data.json")); if (fx.ok) state.catalog.fxRenderers = rendererScripts(await fx.json()); } catch {}
     try { const pd = await fetch(moduleURL("../demo/punch-data.json")); if (pd.ok) state.catalog.punchData = await pd.json(); } catch {}
+    try { const cues=await fetch(moduleURL("../demo/punch-sfx.json"));if(cues.ok)state.catalog.punchSfx=await cues.json(); } catch {}
     state.nativeMetadata = await (await fetch(moduleURL("../demo/native-metadata.json"))).json();
     state.abilityRegistry = await (await fetch(moduleURL("../demo/ability-registry.json"))).json();
 
@@ -1028,18 +1167,12 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     /* procedural reference FX sheet (same as the Demo boot): plain shapes
        the fx renderers reference when an item has no dedicated particles */
     {
-      const c = document.createElement("canvas");
-      c.width = c.height = 32;
-      const g = c.getContext("2d");
-      g.fillStyle = "#fff";
-      g.beginPath(); g.arc(10, 10, 7, 0, Math.PI * 2); g.fill();
-      g.beginPath(); g.moveTo(6, 24); g.lineTo(16, 14); g.lineTo(26, 24); g.closePath(); g.fill();
-      g.beginPath(); g.arc(18, 6, 3, 0, Math.PI * 2); g.fill();
+      const c = createReferenceFxAtlas();
       images.set("reference-fx.png", c);
       atlases.set("reference-fx.png", registerAtlas(c));
     }
 
-    motion = new PreviewMotion();
+    motion = new WorldMotion({blocks:BLOCKS});
     player = new PlannerPlayer(state.catalog);
     state.lastFrame = motion.snapshot();
     state.lastResult = player.step(
@@ -1050,20 +1183,27 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     motion.setAbilities(state.abilities);
     await loadAncestrals();
     try {
-      const [landResponse, backgroundResponse] = await Promise.all([
+      const [landResponse, backgroundResponse, worldResponse] = await Promise.all([
         fetch(moduleURL("../data/land-blocks.json?v=2")),
-        fetch(moduleURL("../data/blocks.json"))
+        fetch(moduleURL("../data/blocks.json")),
+        fetch(moduleURL("../data/world-blocks.json"))
       ]);
       if (!landResponse.ok || !backgroundResponse.ok) throw new Error("Block catalog unavailable");
       const [landRows, backgroundRows] = await Promise.all([landResponse.json(), backgroundResponse.json()]);
       registerBlocks(landRows);
       registerBackgroundBlocks(backgroundRows);
+      if(!worldResponse.ok)throw Error("World block catalog unavailable");
+      registerBlocks(await worldResponse.json());
     } catch (error) {
       console.warn("[Background] Block catalog could not be loaded.", error);
     }
     /* Load the saved wall before the first frame so the scene starts complete. */
     setBackground(P.store.get("background", String(DEFAULT_BACKGROUND_ID)));
     setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
+    state.editableWorld=generateWorld(1);
+    applyWorldLook();
+    if(state.landBlock==null)state.worldMode=false;
+    resetMotionForScene();
 
     state.ready = true;
     P.equippedIds = new Set();
@@ -1077,3 +1217,8 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     $("#hud").textContent = "Unable to start: " + error.message;
   }
 })();
+
+document.addEventListener("keydown",event=>{
+  if(event.code!=="KeyR"||!state.worldMode||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName))return;
+  event.preventDefault();P.world.respawn();
+});

@@ -1,0 +1,12 @@
+{
+  "catalogItems": 4081,
+  "rendererScripts": 314,
+  "fxScripts": 314,
+  "framesPerItem": 18,
+  "invalid": [],
+  "missingAtlases": [],
+  "itemsWithSampledParticles": 231,
+  "peakDrawCalls": 221,
+  "peakParticleCalls": 210,
+  "scope": "Structural playback audit: idle, walking, jumping, punch start/update/stop. No claim of pixel parity or complete conditional FX coverage."
+}

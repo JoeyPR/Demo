@@ -1,0 +1,30 @@
+[
+  {
+    "mobile": false,
+    "ready": true,
+    "fxScripts": 314,
+    "appearance": true,
+    "punchCues": true,
+    "drop": true,
+    "blackbox": true,
+    "movement": true,
+    "pngExport": true,
+    "touchMovementAndPinch": false,
+    "consoleErrors": [],
+    "httpFailures": []
+  },
+  {
+    "mobile": true,
+    "ready": true,
+    "fxScripts": 314,
+    "appearance": true,
+    "punchCues": true,
+    "drop": true,
+    "blackbox": true,
+    "movement": true,
+    "pngExport": true,
+    "touchMovementAndPinch": true,
+    "consoleErrors": [],
+    "httpFailures": []
+  }
+]

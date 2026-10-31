@@ -23,8 +23,10 @@
 
   const map = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
     ArrowUp: 'jump', KeyW: 'jump', Space: 'jump', KeyX: 'punch', KeyF: 'punch' };
-  const typing = () => /INPUT|TEXTAREA/.test((document.activeElement || {}).tagName);
+  const typing = () => /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName) || document.activeElement?.isContentEditable;
   addEventListener('keydown', e => { const k = map[e.code]; if (k && !typing()) { e.preventDefault(); set(k, e.code, true); } });
   addEventListener('keyup',   e => { const k = map[e.code]; if (k) set(k, e.code, false); });
   addEventListener('blur', () => Object.keys(held).forEach(k => { held[k].clear(); set(k, '-', false); }));
+  P.on('input-reset', () => Object.keys(held).forEach(k => { held[k].clear(); set(k, '-', false); }));
+  P.on('player-chat-open', () => P.emit('input-reset'));
 })();

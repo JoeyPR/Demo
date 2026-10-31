@@ -444,7 +444,7 @@
         : !b.classList.contains('tool') && +b.dataset.id === f.id);
       b.classList.toggle('focus', matches);
     }
-    for (const b of P.$('#quick .box')) {
+    for (const b of P.$$('#quick .box')) {
       if (b.classList.contains('tool')) b.classList.toggle('focus', !!f && !!f.tool);
       else if (b.dataset.id) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
     }
