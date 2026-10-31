@@ -153,7 +153,7 @@ export function registerBackgroundBlocks(rows) {
         !Number.isFinite(tx) || !Number.isFinite(ty) ||
         !Number.isInteger(spread) || spread < 1) continue;
 
-    const page = texture.replace(/\\.png$/i, "");
+    const page = texture.replace(/\.png$/i, "");
     BLOCKS[id] = {
       ...(BLOCKS[id] || {}),
       name: name.toLowerCase(),
