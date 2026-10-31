@@ -7,18 +7,26 @@ import { advanceCatalogItem } from "./catalog-adapter.mjs";
 import {ItemEffects,punchEffectOwner} from "./item-fx.mjs";
 import {punchPoseFor,applyPunchPose} from "./punch-data.mjs";
 import {XmlParticleLayer} from "./xml-particles.mjs";
+import {resolveLook} from "./look.mjs";
+import {PunchTimeline} from "./punch-timeline.mjs";
 
 // Integration entry point for Claude: supply catalog, items and MotionFrames.
 export class PlannerPlayer {
-  constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();this.punchData=catalog?.punchData??null;this.xmlfx=new XmlParticleLayer(catalog?.fxRenderers??catalog?.renderers??{});}
-  equip(items) {this.items=items;this.lastEvents.clear();this.effects.reset();this.xmlfx.reset();}
+  constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();this.punchData=catalog?.punchData??null;this.xmlfx=new XmlParticleLayer(catalog?.fxRenderers??catalog?.renderers??{});this.appearance={};this.timeline=new PunchTimeline(catalog?.punchSfx);}
+  equip(items) {this.items=items;this.timeline.reset();this.xmlfx.retain(items);}
+  setAppearance(appearance={}) {resolveLook(this.items,appearance);this.appearance=appearance;}
+  reset() {this.lastEvents.clear();this.effects.reset();this.xmlfx.reset();this.timeline.reset();}
   step(motion,dtMs,visual={}) {
-    motion={...motion,renderContext:{equippedIds:this.items.map(i=>i.id),...visual.renderContext}};
+    if(visual.effects===false&&this.effectsEnabled!==false){this.xmlfx.reset();this.effects.reset();}
+    this.effectsEnabled=visual.effects!==false;
+    const look=resolveLook(this.items,{...this.appearance,...visual});
+    motion={...motion,renderContext:{...motion.renderContext,equippedIds:this.items.map(i=>i.id),
+      transmutedIds:look.transmutedIds,...visual.renderContext}};
     // One MotionFrame owns body, clothes and attachments, never separate clocks.
-    for(const item of this.items)item.skipLegacyParticles=visual.xmlParticles!==false&&!!this.xmlfx.scriptFor(item);
-    for(const item of this.items)if(item.referencePieces)
+    for(const item of this.items)item.skipLegacyParticles=visual.effects!==false&&visual.xmlParticles!==false&&!!this.xmlfx.scriptFor(item);
+    for(const item of new Set([...this.items,...look.displayed]))if(item.referencePieces)
       advanceCatalogItem(item,motion.clockMs,motion);
-    const resolution=resolveItemPose(this.items,motion,visual);
+    const resolution=resolveItemPose(look.displayed,motion,visual);
     let override={...resolution.override},extraPieces=[],dynamicHide=new Map();
     const context={locomotion:motion.locomotion,ground:motion.ground,
       facing:motion.facing,clockMs:motion.clockMs,moveMs:motion.moveMs,
@@ -53,14 +61,17 @@ export class PlannerPlayer {
     }
     const punchPose=motion.punch&&visual.punchData!==false?punchPoseFor(this.items,this.punchData):null;
     if(punchPose&&!shotOwner)applyPunchPose(pose,punchPose);
-    const items=this.items.map(item=>({...item,hide:[...(item.hide??[]),...(dynamicHide.get(item.id)??[])]}));
+    const items=look.displayed.map(item=>({...item,hide:[...(item.hide??[]),...(dynamicHide.get(item.id)??[])]}));
     const lift=resolvePlayerLift(items,motion.clockMs,visual);
-    const gait=this.items.find(i=>i.gait?.active)?.gait;
+    const gait=look.displayed.find(i=>i.gait?.active)?.gait;
     if(gait&&!lift.floating){lift.y+=gait.bodyY;lift.gait=gait;}
-    const xmlfx=visual.xmlParticles===false?[]:this.xmlfx.step(this.items,motion,pose,lift,dtMs);
-    const calls=buildDrawList({motion,pose,items,catalog:this.catalog,visual:{...visual,playerLift:lift},extraPieces:[...extraPieces,...xmlfx]});
+    const xmlfx=visual.xmlParticles===false||visual.effects===false?[]:this.xmlfx.step(this.items,motion,pose,lift,dtMs);
+    const calls=buildDrawList({motion,pose,items,catalog:this.catalog,visual:{...visual,playerLift:lift,contributors:look.contributors},extraPieces:[...extraPieces,...xmlfx]});
     if(punchPose?.hideItem)for(let i=calls.length-1;i>=0;i--)if(calls[i].owner===punchPose.itemId&&!calls[i].world)calls.splice(i,1);
     if(visual.effects!==false)calls.push(...this.effects.step(this.items,motion,calls,lift));
-    return {pose,punchPose,emits,poseResolution:resolution,lift,warnings:this.items.flatMap(i=>i.warnings??[]),calls};
+    const audioCues=this.timeline.step(this.items,motion);
+    // Event IDs are retained only over a bounded replay window.
+    while(this.lastEvents.size>512)this.lastEvents.delete(this.lastEvents.values().next().value);
+    return {pose,punchPose,emits,audioCues,look,poseResolution:resolution,lift,warnings:this.items.flatMap(i=>i.warnings??[]),calls};
   }
 }

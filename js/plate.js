@@ -46,18 +46,30 @@
     { key: 'dgg', name: 'Dungeons Gold', after: 'dungeonGold' },
     { key: 'dgr', name: 'Dungeons Ruby', after: 'dungeonRuby' },
     { key: 'dge', name: 'Dungeons Emerald', after: 'dungeonEmerald' },
-    { key: 'dgsa', name: 'Dungeons Sapphire', after: 'dungeonSapphire' }
+    { key: 'dgsa', name: 'Dungeons Sapphire', after: 'dungeonSapphire' },
+    { key: 'weather', name: 'Weather Master', after: 'weatherMachine' },
+    { key: 'master', name: 'Master', after: 'master_icon' }
   ];
   const titleByKey = Object.fromEntries(TITLES.map(t => [t.key, t]));
   /* conflict groups: at most one title per group (K6 on the site) */
   const CONFLICTS = [
     ['l125', 'party'],
     ['g4g', 'party'],
-    ['thanks', 'old', 'gold', 'silver', 'bronze', 'award', 'winter', 'immortal', 'dgb', 'dgs', 'dgg', 'dgr', 'dge', 'dgsa'],
+    ['thanks', 'old', 'gold', 'silver', 'bronze', 'award', 'winter', 'immortal', 'dgb', 'dgs', 'dgg', 'dgr', 'dge', 'dgsa', 'weather', 'master'],
     ['pblo', 'pblm'],
     ['legend', 'party']
   ];
   const inConflict = (a, b) => a !== b && CONFLICTS.some(g => g.includes(a) && g.includes(b));
+  function normalizeTitles(keys) {
+    const selected=[];
+    for(const value of Array.isArray(keys)?keys:[]) {
+      const key=String(value??'').toLowerCase();
+      if(!titleByKey[key])continue;
+      for(let i=selected.length-1;i>=0;i--)if(selected[i]===key||inConflict(key,selected[i]))selected.splice(i,1);
+      selected.push(key);
+    }
+    return selected;
+  }
   /* decorations that render centered on the wrench (a$ on the site) */
   const CENTERED_DECORATIONS = new Set([15542, 15688, 15940, 15988, 16056, 16156, 16222, 15554, 14890, 15772, 14574, 14590, 15134, 15420, 15012, 15510, 14712, 14822]);
   const BASE_WRENCH = 32;                    /* the plain green wrench (L0) */
@@ -72,19 +84,46 @@
     guildRole: '', guildFlag: 0, wrenchStatus: 'default', wrenchStyle: 0, wrenchDecoration: 0,
     wrenchOn: false          /* the Fist/Wrench quick box: wrench only shows with a GrowID */
   };
-  let state = Object.assign({}, DEFAULTS, P.store.get('plate', {}));
-  if (!Array.isArray(state.titles)) state.titles = [];
+  const safeFile=value=>typeof value==='string'&&/^[a-z0-9_-]{1,32}$/i.test(value)?value:'';
+  function normalizeState(value) {
+    const next=Object.assign({},DEFAULTS,value&&typeof value==='object'?value:{});
+    next.growId=P.rtfont.sanitizeGrowId(String(next.growId??''),19);
+    next.titles=normalizeTitles(next.titles);
+    next.flag=safeFile(next.flag);
+    next.role=['farmer','builder','surgeon','fisher','chef','startopian'].includes(next.role)?next.role:'';
+    next.guildRole=Object.hasOwn(GUILD_ROLES,next.guildRole)?next.guildRole:'';
+    next.guildFlag=Number.isSafeInteger(Number(next.guildFlag))&&Number(next.guildFlag)>0?Number(next.guildFlag):0;
+    next.wrenchStatus=Object.hasOwn(WRENCH_STATUS_SCALE,next.wrenchStatus)?next.wrenchStatus:'default';
+    for(const key of ['wrenchStyle','wrenchDecoration']) {
+      if(key==='wrenchStyle'&&next[key]===SUPER_SUPPORTER_WRENCH&&next.wrenchStatus==='super-supporter')continue;
+      next[key]=Number.isSafeInteger(Number(next[key]))&&Number(next[key])>0?Number(next[key]):0;
+    }
+    next.wrenchOn=!!next.wrenchOn;
+    return next;
+  }
+  const savedState=P.store.get('plate',{});
+  let state = normalizeState(savedState);
   // Older saved previews used ISO-style aliases that aren't filenames in the original flag catalog.
   if (state.flag === 'us') state.flag = 'unitedstates';
   if (state.flag === 'pr') state.flag = 'puertorico';
   if (!Object.hasOwn(WRENCH_STATUS_SCALE, state.wrenchStatus)) state.wrenchStatus = 'default';
   if (state.wrenchStatus !== 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
-  if (typeof state.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);
-  const save = () => { P.store.set('plate', state); P.emit('plate-update'); };
+  if (typeof savedState?.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);
+  const save = () => { state=normalizeState(state);P.store.set('plate', state); P.emit('plate-update'); };
 
   /* ---------------- wrench data + sheets ---------------- */
   let wrenchData = null;                     /* data/wrench.json */
-  fetch('data/wrench.json').then(r => r.json()).then(d => { wrenchData = d; P.emit('plate-update'); }).catch(() => {});
+  fetch('data/wrench.json').then(r => {if(!r.ok)throw Error('Wrench catalog unavailable');return r.json();}).then(d => {
+    const valid=row=>Array.isArray(row)&&Number.isInteger(row[0])&&typeof row[1]==='string'&&
+      typeof row[2]==='string'&&/^[a-z0-9_-]+\.png$/i.test(row[2])&&row.slice(3,5).every(Number.isInteger);
+    wrenchData={styles:(d.styles??[]).filter(valid),decorations:(d.decorations??[]).filter(valid)};
+    P.emit('plate-update');
+  }).catch(() => {});
+  let frames={};
+  fetch('data/title-frames.json').then(r=>{if(!r.ok)throw Error('Title frames unavailable');return r.json();})
+    .then(data=>{frames=Object.fromEntries(Object.entries(data).filter(([key,rect])=>
+      /^(titles|flags)\/[a-z0-9_-]+$/i.test(key)&&Array.isArray(rect)&&rect.length===4&&
+      rect.every(Number.isFinite)&&rect[0]>0&&rect[1]>0));P.emit('plate-update');}).catch(()=>{});
   const sheetCache = new Map();
   function sheet(name) {
     let im = sheetCache.get(name);
@@ -182,7 +221,8 @@
       const src = P.thumb(item, 64);
       if (src) g.drawImage(src, 0, 0, 64, 64, 0, 0, 32, 32);
     }
-    guildFlagCache.set(itemId, canvas);
+    // A missing catalog/thumb can become available after boot; don't cache null.
+    if(canvas)guildFlagCache.set(itemId, canvas);
     return canvas;
   }
 
@@ -279,6 +319,7 @@
     k.save();
     k.setTransform(1, 0, 0, 1, 0, 0);
     k.font = "700 " + PR + "px 'Nameplate CG', sans-serif";
+    k.fontKerning='none';
     k.textBaseline = 'alphabetic';
     const joined = parts.filter(x => x.text !== undefined).map(x => x.text).join(' ');
     const PN = descenderPenalty(joined) / 21;
@@ -443,7 +484,7 @@
           k.fillStyle = 'rgba(0,0,0,.5)';
           k.fillText(part.text, LO + outline, baselineY + outline);
           let x = LO;
-          for (const entry of formattedChars) {
+          for (const [ci,entry] of formattedChars.entries()) {
             const prefixColour = part.drPrefixColour && ci < part.drPrefixLength ? part.drPrefixColour : null;
             const color = entry.rgb || prefixColour || part.colour;
             k.fillStyle = 'rgba(' + color.join(',') + ',' + part.alpha + ')';
@@ -517,11 +558,14 @@
     },
     measure(ctx, cx, baselineY, scale, textScale = 1) { return draw(ctx, scale, cx, baselineY, true, textScale); },
     titles: TITLES, conflicts: CONFLICTS, guildRoles: GUILD_ROLES, baseWrenchId: BASE_WRENCH,
-    get wrenchData() { return wrenchData; }
+    get wrenchData() { return wrenchData; },
+    get frames(){return frames;},
+    // A layout snapshot is useful to exporters and headless verification.
+    inspect(){return buildParts();}
   };
   P.plateConfig = {
-    get: () => state,
-    set(patch) { state = Object.assign({}, DEFAULTS, state, patch); save(); },
+    get: () => ({...state,titles:[...state.titles]}),
+    set(patch) { state = normalizeState({...state,...patch}); save(); },
     setGrowId(v) { state.growId = P.rtfont.sanitizeGrowId(String(v ?? ''), 19); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
     setRole(v) { state.role = v; save(); },
     setFlag(v) { state.flag = v; save(); },
@@ -541,6 +585,7 @@
     setWrenchDecoration(id) { state.wrenchDecoration = +id || 0; save(); },
     setWrenchOn(on) { state.wrenchOn = !!on; save(); },
     toggleTitle(key) {
+      key=String(key??'').toLowerCase();if(!titleByKey[key])return;
       const i = state.titles.indexOf(key);
       if (i >= 0) state.titles.splice(i, 1);
       else {
@@ -550,6 +595,6 @@
       }
       save();
     },
-    reset() { state = Object.assign({}, DEFAULTS); save(); }
+    reset() { state = normalizeState(DEFAULTS); save(); }
   };
 })();

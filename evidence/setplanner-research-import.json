@@ -1,0 +1,144 @@
+{
+  "baseRepository": "JoeyPR/Demo",
+  "baseBranch": "camera-quickslot-nameplate",
+  "baseCommit": "de2711c629f97b01e49f5cc522a8af34f136d953",
+  "archives": [
+    {
+      "name": "1-Setplannergt_Research_Pack.zip",
+      "bytes": 226667,
+      "sha256": "fa1c232a2ff1a73ad9d4e6ada2b276d00f3f8543b01648cb60160d2d2190290b"
+    },
+    {
+      "name": "2-Setplannergt.zip",
+      "bytes": 1590053,
+      "sha256": "34f8195ff0c63fc25cbb6efde85b354eba339dd97b379352e504734713397246"
+    },
+    {
+      "name": "Setplannergt2.zip",
+      "bytes": 117813555,
+      "sha256": "059689c9b23ab662ed0dbfa11d39d574e22ad6798fd09911c9b27875b1c2f52e"
+    }
+  ],
+  "imported": {
+    "titleAndFlagFrames": 278,
+    "punchStyles": 249,
+    "itemPunchOverrides": 223,
+    "scriptSoundMappings": 56,
+    "wrenchStyles": 32,
+    "wrenchDecorations": 32,
+    "newTitleArt": [
+      "master_icon.png"
+    ]
+  },
+  "existingCatalogItems": 4081,
+  "researchDirectoryWearables": 4101,
+  "capturedWearableMetadataMissingFromLocalCatalog": [
+    {
+      "id": 16434,
+      "name": "Blades of Athena",
+      "slot": "Hand"
+    },
+    {
+      "id": 16436,
+      "name": "Helmet of Horrors",
+      "slot": "Face"
+    },
+    {
+      "id": 16442,
+      "name": "Pop Zombie Shoes",
+      "slot": "Feet"
+    },
+    {
+      "id": 16444,
+      "name": "Torn Ribbon Wings",
+      "slot": "Back"
+    },
+    {
+      "id": 16448,
+      "name": "Pop Zombie Face",
+      "slot": "Face"
+    },
+    {
+      "id": 16450,
+      "name": "Pop Zombie Hair",
+      "slot": "Hair"
+    },
+    {
+      "id": 16452,
+      "name": "Pop Zombie Jacket",
+      "slot": "Shirt"
+    },
+    {
+      "id": 16454,
+      "name": "Pop Zombie Pants",
+      "slot": "Pants"
+    },
+    {
+      "id": 16456,
+      "name": "Obsessive Partner Shorts",
+      "slot": "Pants"
+    },
+    {
+      "id": 16458,
+      "name": "Obsessive Partner Top",
+      "slot": "Shirt"
+    },
+    {
+      "id": 16460,
+      "name": "Pet Cyclops",
+      "slot": "Hand"
+    },
+    {
+      "id": 16462,
+      "name": "Raggedy Dress",
+      "slot": "Shirt"
+    },
+    {
+      "id": 16464,
+      "name": "Raggedy Hair",
+      "slot": "Hair"
+    },
+    {
+      "id": 16466,
+      "name": "Sad Jester Arms",
+      "slot": "Hand"
+    },
+    {
+      "id": 16468,
+      "name": "Sad Jester Cap",
+      "slot": "Hat"
+    },
+    {
+      "id": 16470,
+      "name": "Sad Jester Face",
+      "slot": "Face"
+    },
+    {
+      "id": 16472,
+      "name": "Sad Jester Hair",
+      "slot": "Hair"
+    },
+    {
+      "id": 16474,
+      "name": "Sad Jester Shoes",
+      "slot": "Feet"
+    },
+    {
+      "id": 16476,
+      "name": "Sad Jester Shorts",
+      "slot": "Pants"
+    },
+    {
+      "id": 16478,
+      "name": "Sad Jester Suit",
+      "slot": "Shirt"
+    }
+  ],
+  "unavailable": [
+    "AES-GCM key mapping for the latest items/mods/transmute datasets",
+    "Nonempty per-item renderer and FX payloads in the second capture",
+    "Playable audio files for the recovered punch cue names",
+    "Complete world rules and GTW test corpus"
+  ],
+  "implementation": "Independent runtime changes using recovered architecture and readable metadata. Obfuscated application and CFX bundles are not vendored or executed."
+}

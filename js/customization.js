@@ -211,7 +211,7 @@
     const TITLE_CATEGORIES = [
       ['Name', ['legend', 'l125', 'g4g', 'party', 'dr', 'mentor']],
       ['Badges', ['cc', 'tt']],
-      ['Title icons', ['immortal', 'thanks', 'old', 'gold', 'silver', 'bronze', 'award', 'winter', 'pblo', 'pblm', 'dgb', 'dgs', 'dgg', 'dgr', 'dge', 'dgsa']]
+      ['Title icons', ['immortal', 'thanks', 'old', 'gold', 'silver', 'bronze', 'award', 'winter', 'pblo', 'pblm', 'dgb', 'dgs', 'dgg', 'dgr', 'dge', 'dgsa', 'weather', 'master']]
     ];
     for (const [label, keys] of TITLE_CATEGORIES) {
       const b = el('button', 'c-section' + (titleCat === label ? ' on' : ''), label);
@@ -225,6 +225,7 @@
       const sel = plate.titles.includes(t.key);
       const b = el('button', 'c-title' + (sel ? ' on' : ''));
       b.type = 'button';
+      b.setAttribute('aria-pressed', String(sel));
       const im = el('img'); im.src = 'img/titles/' + (t.plateFlag ? t.plateFlag.split('/').pop() : (t.flag || t.after || t.both || 'legend') + '.png'); im.alt = '';
       if (!t.flag && !t.after && !t.both) { im.remove(); b.append(el('span', 'c-title-txt', t.name)); }
       else b.append(im);
@@ -233,6 +234,36 @@
       grid2.append(b);
     }
     panel.append(grid2);
+
+    // Appearance changes the displayed sprites while the equipped item keeps
+    // contributing abilities. Use the existing form controls and panel layout.
+    panel.append(el('h3', 'custom-heading sm', 'Outfit Appearance'));
+    panel.append(el('p', 'custom-note', 'Hide clothing or display another item from the same slot. Equipped bonuses stay active.'));
+    const appearance=el('div','custom-fields');
+    for(const item of P.look?.get()??[]) {
+      const row=el('div','custom-field');
+      const label=el('label','custom-label',item.name);
+      label.htmlFor='look-'+item.id;
+      const visibleLabel=el('label','custom-note');
+      const visible=el('input');visible.type='checkbox';visible.checked=item.visible;
+      visible.setAttribute('aria-label','Show '+item.name);
+      visible.addEventListener('change',()=>P.look.setVisible(item.id,visible.checked));
+      visibleLabel.append(visible,document.createTextNode(' Visible'));
+      const select=el('select','custom-select');select.id='look-'+item.id;
+      for(const target of (P.catalog?.items??[]).filter(target=>target.slot===item.slot)) {
+        const option=el('option','',target.id===item.id?target.name+' (equipped)':target.name);
+        option.value=target.id;select.append(option);
+      }
+      select.value=String(item.displayId);
+      select.addEventListener('change',()=>P.look.transmute(item.id,Number(select.value)));
+      row.append(label,visibleLabel,select);appearance.append(row);
+    }
+    if(!P.look?.get().length)appearance.append(el('p','custom-note','Equip clothing to customize its appearance.'));
+    const effectsLabel=el('label','custom-note');
+    const effects=el('input');effects.type='checkbox';effects.checked=P.look?.effectsEnabled??true;
+    effects.addEventListener('change',()=>P.look?.setEffects(effects.checked));
+    effectsLabel.append(effects,document.createTextNode(' Item particles and effects'));
+    appearance.append(effectsLabel);panel.append(appearance);
 
     /* ---------------- wrench styles + decorations ---------------- */
     /* the former Wrench tab, renovated into the Player Customization tab */
@@ -352,6 +383,7 @@
   let focusWrench = false;
   P.on('focus-wrench', () => { focusWrench = true; });
   P.on('tab', syncTab);
+  P.on('look-update',()=>{if(P.tabs.cur==='player')renderPlayerCustomization();});
 
   applyDyes();
   syncTab(P.tabs.cur);

@@ -8,6 +8,9 @@ import { drawCanvas } from "../demo/engine/render.mjs";
 import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
 import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
+import { rendererScripts } from "../demo/engine/research-data.mjs";
+import { resolveLook } from "../demo/engine/look.mjs";
+import { createReferenceFxAtlas } from "../demo/engine/reference-fx.mjs";
 import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, DEFAULT_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, resolveBackgroundSelection, uniformLandWorld, uniformBackgroundWorld } from "./land-system.mjs";
@@ -44,7 +47,8 @@ const state = {
   weatherFailedKey: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
   landBlock: null, landWorld: null, backgroundBlock: DEFAULT_BACKGROUND_ID, backgroundWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
-  pickups: [], nextPickupId: 1
+  pickups: [], nextPickupId: 1,
+  hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -97,22 +101,58 @@ function equipToggle(id) {
   // previous item's walking/jump history or its in-flight FX birth positions.
   if (raw.slot === 9) state.ancestralPath.length = 0;
   player.equip([...state.equipped.values()]);
+  const equippedIds=new Set([...state.equipped.values()].map(item=>item.id));
+  for(const key of state.hiddenItems)if(!equippedIds.has(key))state.hiddenItems.delete(key);
+  for(const key of state.transmutes.keys())if(!equippedIds.has(key))state.transmutes.delete(key);
+  player.setAppearance({hiddenItemIds:state.hiddenItems,transmutes:state.transmutes});
   syncAuraPass();
   state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
   motion?.setAbilities(state.abilities);
   P.equippedIds = new Set([...state.equipped.values()].map(i => i.id));
   P.emit("equip-state");
+  P.emit("look-update");
   updateHUD();
 }
 /* Ancestral auras are drawn by the ancestral FX renderer (drawAncestralAura)
    below — the engine's own static RenderAura pass (the artifact's old sprite
    drawn on the character) is hidden so only the animated aura shows. */
 function syncAuraPass() {
-  const item = state.equipped.get(9);
+  const item = displayedItem(9);
   const handled = !!(item && state.ancestralMap?.has(item.id));
   if (handled) state.hiddenPasses.add("RenderAura");
   else state.hiddenPasses.delete("RenderAura");
 }
+function displayedItem(slot) {
+  return resolveLook([...state.equipped.values()],{
+    hiddenItemIds:state.hiddenItems,transmutes:state.transmutes
+  }).displayed.find(item=>item.slot===slot);
+}
+function applyAppearance() {
+  player?.setAppearance({hiddenItemIds:state.hiddenItems,transmutes:state.transmutes});
+  state.ancestralPath.length=0;
+  syncAuraPass();
+  P.emit("look-update");
+}
+// Existing customization controls consume this API; inventory equipment IDs
+// and Drop retain their existing contracts.
+P.look = {
+  get() { return [...state.equipped.values()].map(item=>({id:item.id,name:item.name,slot:item.slot,
+    visible:!state.hiddenItems.has(item.id),displayId:state.transmutes.get(item.id)?.id??item.id})); },
+  setVisible(id,visible) {
+    if(![...state.equipped.values()].some(item=>item.id===id))return;
+    if(visible)state.hiddenItems.delete(id);else state.hiddenItems.add(id);
+    applyAppearance();
+  },
+  transmute(id,targetId) {
+    const equipped=[...state.equipped.values()].find(item=>item.id===id);
+    const target=state.catalog?.items.find(item=>item.id===Number(targetId));
+    if(!equipped||!target||target.slot!==equipped.slot)return false;
+    if(target.id===id)state.transmutes.delete(id);else state.transmutes.set(id,normalize(target));
+    applyAppearance();return true;
+  },
+  get effectsEnabled(){return state.effectsEnabled;},
+  setEffects(enabled){state.effectsEnabled=!!enabled;P.emit("look-update");}
+};
 P.on("equip", payload => equipToggle(typeof payload === "object" && payload !== null ? payload.id : payload));
 P.on("skin", i => {
   state.skin = SKINS[i].rgb;
@@ -172,7 +212,8 @@ function step(dt) {
   state.lastFrame = frame;
   state.lastResult = player.step(
     withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
-    { skin: state.skin, effects: true });
+    { skin: state.skin, effects: state.effectsEnabled });
+  for(const cue of state.lastResult.audioCues??[])P.emit("punch-cue",cue);
   updatePickupLifecycle(frame);
 }
 P.on("pad", pad => {
@@ -256,7 +297,7 @@ function renderAvatar() {
   /* the pet leash string is a line primitive with no atlas; it needs none */
   const missing = [...new Set(state.lastResult.calls.filter(c => !c.line && !atlases.has(c.atlas)).map(c => c.atlas))];
   for (const name of missing) loadAtlas(name);
-  const wornAncestral = state.equipped.get(9);
+  const wornAncestral = displayedItem(9);
   const customAncestralId = wornAncestral && state.ancestralMap?.has(wornAncestral.id)
     ? wornAncestral.id : null;
   const calls = state.lastResult.calls.filter(c =>
@@ -278,7 +319,7 @@ function renderAvatar() {
   // and punch arm/hand. FX, particles, pets, and ancestral effects stay excluded;
   // each included part keeps its own draw matrix so the punch shadow follows it.
   const shadows = getPlayerShadowCalls(calls, {
-    ancestralId: state.equipped.get(9)?.id ?? null,
+    ancestralId: displayedItem(9)?.id ?? null,
   });
   avatarShadowCtx.setTransform(1, 0, 0, 1, 0, 0);
   avatarShadowCtx.clearRect(0, 0, width, height);
@@ -409,8 +450,7 @@ function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   const camX = ((Math.floor(cameraWorldX - lw / 2) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
-  renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
-  if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
+  state.landStats=renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock,{repeatX:true});
   const dx = (w - lw * landS) / 2;
   ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS);
 }
@@ -431,9 +471,7 @@ function drawBackgroundTiles(w, h, s, camera) {
   const span = WORLD_PX_W;
   const wrappedX = ((camX % span) + span) % span;
   const atlasFn = page => landImages.get(page) ?? null;
-  renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX, camY, bw, bh, state.clock);
-  if (wrappedX + bw > span)
-    renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX - span, camY, bw, bh, state.clock);
+  state.backgroundStats=renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX, camY, bw, bh, state.clock,{layers:['bg'],repeatX:true});
   ctx.drawImage(backgroundCanvas, 0, 0, bw, bh, 0, 0, bw * tileScale, bh * tileScale);
 }
 
@@ -453,7 +491,8 @@ async function loadAncestrals() {
 const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
 const ancestralTint = new TintCache();
 function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraPivotY, zoom) {
-  const item = state.equipped.get(9);
+  const item = displayedItem(9);
+  if(!state.effectsEnabled)return;
   if (!item || !state.ancestralMap) return;
   const info = state.ancestralMap.get(item.id);
   if (!info) return;
@@ -1013,9 +1052,10 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     const liftData = await (await fetch(moduleURL("../demo/lift-profiles.json"))).json();
     state.catalog.liftProfiles = Object.fromEntries(liftData.profiles.map(p => [p.id, p]));
     const rendererResponse = await fetch(moduleURL("../demo/renderer-data.json"));
-    if (rendererResponse.ok) state.catalog.renderers = (await rendererResponse.json()).scripts;
-    try { const fx = await fetch(moduleURL("../demo/fx-data.json")); if (fx.ok) state.catalog.fxRenderers = (await fx.json()).scripts; } catch {}
+    if (rendererResponse.ok) state.catalog.renderers = rendererScripts(await rendererResponse.json());
+    try { const fx = await fetch(moduleURL("../demo/fx-data.json")); if (fx.ok) state.catalog.fxRenderers = rendererScripts(await fx.json()); } catch {}
     try { const pd = await fetch(moduleURL("../demo/punch-data.json")); if (pd.ok) state.catalog.punchData = await pd.json(); } catch {}
+    try { const cues=await fetch(moduleURL("../demo/punch-sfx.json"));if(cues.ok)state.catalog.punchSfx=await cues.json(); } catch {}
     state.nativeMetadata = await (await fetch(moduleURL("../demo/native-metadata.json"))).json();
     state.abilityRegistry = await (await fetch(moduleURL("../demo/ability-registry.json"))).json();
 
@@ -1028,13 +1068,7 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     /* procedural reference FX sheet (same as the Demo boot): plain shapes
        the fx renderers reference when an item has no dedicated particles */
     {
-      const c = document.createElement("canvas");
-      c.width = c.height = 32;
-      const g = c.getContext("2d");
-      g.fillStyle = "#fff";
-      g.beginPath(); g.arc(10, 10, 7, 0, Math.PI * 2); g.fill();
-      g.beginPath(); g.moveTo(6, 24); g.lineTo(16, 14); g.lineTo(26, 24); g.closePath(); g.fill();
-      g.beginPath(); g.arc(18, 6, 3, 0, Math.PI * 2); g.fill();
+      const c = createReferenceFxAtlas();
       images.set("reference-fx.png", c);
       atlases.set("reference-fx.png", registerAtlas(c));
     }

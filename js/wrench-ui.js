@@ -57,9 +57,9 @@
         if (ready(superWrenchImg)) paint(); else superWrenchImg.addEventListener('load', paint, { once: true });
         return c;
       } else if (isStyle && entry) {
-        im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
+        im = sheet(entry[5] || entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
       } else if (entry) {
-        im = sheet(entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
+        im = sheet(entry[5] || entry[2]); sx = entry[3] * 32; sy = entry[4] * 32;
       } else if (isStyle) {
         const paint = () => x.drawImage(quickWrenchImg, 0, 0, 32, 32, drawAt, drawAt, drawSize, drawSize);
         if (ready(quickWrenchImg)) paint(); else quickWrenchImg.addEventListener('load', paint, { once: true });
@@ -67,7 +67,7 @@
       }
       if (im && ready(im)) x.drawImage(im, sx, sy, 32, 32, drawAt, drawAt, drawSize, drawSize);
     };
-    const im = entry && entry[0] !== SUPER_SUPPORTER_WRENCH ? sheet(entry[2]) : null;
+    const im = entry && entry[0] !== SUPER_SUPPORTER_WRENCH ? sheet(entry[5] || entry[2]) : null;
     /* addEventListener (not onload) so shared sheets never drop a callback */
     if (im && !ready(im)) im.addEventListener('load', draw, { once: true });
     draw();
