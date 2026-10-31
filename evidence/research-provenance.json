@@ -1,0 +1,75 @@
+{
+  "baseCommit": "f09759a375a093a50727f7d7b3a7862094f75fbc",
+  "bundle": "app.f9354b027b.js",
+  "archives": [
+    {
+      "name": "Setplannergt2.zip",
+      "sha256": "059689c9b23ab662ed0dbfa11d39d574e22ad6798fd09911c9b27875b1c2f52e"
+    },
+    {
+      "name": "Setplannergt.zip",
+      "sha256": "34f8195ff0c63fc25cbb6efde85b354eba339dd97b379352e504734713397246"
+    },
+    {
+      "name": "Setplannergt_Research_Pack.zip",
+      "sha256": "fa1c232a2ff1a73ad9d4e6ada2b276d00f3f8543b01648cb60160d2d2190290b"
+    }
+  ],
+  "importedFiles": [
+    {
+      "path": "img/nameplate/font.json",
+      "source": "ui/bubble/font3860.json",
+      "sha256": "3dcf9c3936c01592447f3b319d6dba9927fbc61ae71da7f3f3c7bdc7f5690781",
+      "bytes": 9001
+    },
+    {
+      "path": "img/nameplate/font.png",
+      "source": "ui/bubble/font3860.png",
+      "sha256": "170860df89739473f9ae2f5ef1d7d81893bfba357ad4603cb61e200791bd9f34",
+      "bytes": 31940
+    },
+    {
+      "path": "img/titles/master_icon.png",
+      "source": "ui/titles/master_icon.png",
+      "sha256": "c61b249c516f4cf6210616c9b2a86b2b5c09c10bbf6061ee32db6891458f1d95",
+      "bytes": 461
+    },
+    {
+      "path": "img/flags/lg.png",
+      "source": "ui/flags/lg.png",
+      "sha256": "96249386f3fef5021f97b77dbc44b37506edc939f49bd852eb508c2a51395bb0",
+      "bytes": 396
+    },
+    {
+      "path": "img/wrench.png",
+      "source": "ui/wrench.png",
+      "sha256": "6f08d2d7a3b45866dd22938106c4dbf44cf11b3de2dfbc76c58482d44ec4650e",
+      "bytes": 798
+    },
+    {
+      "path": "data/research/title-frames.json",
+      "source": "ui/titles/frames.json",
+      "sha256": "243bb5f649ded4f45e6641bcf26788ad95346daab02d555ddf6d99e95fa17a16",
+      "bytes": 6664
+    },
+    {
+      "path": "data/research/sfx-punch.json",
+      "source": "ui/sfx/punch.json",
+      "sha256": "5a0c18c7af11ce5255737ab01efc0552a23cf2a648e3b541cd22fe235b659e6f",
+      "bytes": 20234
+    },
+    {
+      "path": "data/research/sfx-items.json",
+      "source": "ui/sfx/items.json",
+      "sha256": "1696c9b0b5c8d077c106d17b1586d6a8f94a276c6e8f92db2482480556eb693d",
+      "bytes": 9581
+    },
+    {
+      "path": "data/research/sfx-index.json",
+      "source": "ui/sfx/index.json",
+      "sha256": "b2d9c6d7413afaaca9b1c48f38aad5d5aff82849827842a51e41b509f1f33e61",
+      "bytes": 3656
+    }
+  ],
+  "sealedData": "Not decrypted; no /api/keys payload provided."
+}

@@ -1,5 +1,7 @@
 # Claude implementation instructions
 
+Latest integration: read `docs/research/RENOVATION.md` first. The active host now uses bitmap nameplates, independent equipment/appearance, bounded XML FX and cached terrain. Keep `src/` and `demo/engine/` shared changes synchronized. The 2026-10-31 revision has numerical and recording-adapter smoke coverage; browser pixel validation remains blocked.
+
 Read PUNCH_RESTORATION.md first. Preserve its Set Planner-derived generic punch curve and 200ms held cadence; do not substitute a new extension/retraction easing curve.
 
 Current revision: read INPUT_ABILITIES_FX_REVISION.md before the older revision notes below. Use the sourced ability registry, default naked/single-jump startup, adaptive draw bounds, held pointer punch, positive animal gait classification and shared reference float fallback. Unknown FX flags remain unresolved, not generically “implemented.”

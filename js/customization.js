@@ -105,7 +105,7 @@
     growInput.placeholder = 'Enter your GrowID';
     growInput.value = P.plateConfig.get().growId;
     growInput.setAttribute('aria-label', 'Player GrowID');
-    growInput.addEventListener('input', () => P.plateConfig.setGrowId(growInput.value));
+    growInput.addEventListener('input', () => { P.plateConfig.setGrowId(growInput.value); growInput.value = P.plateConfig.get().growId; });
     growInput.addEventListener('keydown', e => e.stopPropagation());
     growWrap.append(growLabel, growInput);
     fields.append(growWrap);
@@ -186,7 +186,14 @@
     }
     guildRole.value = P.plateConfig.get().guildRole || '';
     guildRole.addEventListener('change', () => P.plateConfig.setGuildRole(guildRole.value));
-    guildRow.append(flagItem, guildRole);
+    const guildBackground = el('input', 'custom-input');
+    guildBackground.type = 'number'; guildBackground.min = '0';
+    guildBackground.placeholder = 'Guild background item ID';
+    guildBackground.value = P.plateConfig.get().guildBg || '';
+    guildBackground.setAttribute('aria-label', 'Guild background item ID');
+    guildBackground.addEventListener('input', () => P.plateConfig.setGuildBackground(guildBackground.value));
+    guildBackground.addEventListener('keydown', e => e.stopPropagation());
+    guildRow.append(flagItem, guildBackground, guildRole);
     guildWrap.append(guildRow);
     fields.append(guildWrap);
 
@@ -214,7 +221,7 @@
     const plate = P.plateConfig.get();
     const cat = el('div', 'c-sections');
     const TITLE_CATEGORIES = [
-      ['Name', ['legend', 'l125', 'g4g', 'party', 'dr', 'mentor']],
+      ['Name', ['legend', 'l125', 'g4g', 'party', 'dr', 'mentor', 'ss', 'mod', 'dev']],
       ['Badges', ['cc', 'tt']],
       ['Title icons', ['immortal', 'thanks', 'old', 'gold', 'silver', 'bronze', 'award', 'winter', 'pblo', 'pblm', 'dgb', 'dgs', 'dgg', 'dgr', 'dge', 'dgsa']]
     ];
@@ -246,9 +253,42 @@
     panel.append(wrenchSec);
     panel.append(el('p', 'custom-note', 'Pick your wrench style and decoration — shown on the plate next to your name when the Fist/Wrench quick box is set to Wrench.'));
     if (P.wrenchUI) P.wrenchUI.render(panel);
+    renderEquipmentAppearance(panel);
     tools.append(panel);
   }
   let titleCat = 'Name';
+
+  function renderEquipmentAppearance(panel) {
+    panel.querySelector('.equipment-appearance')?.remove();
+    const section = el('section', 'equipment-appearance');
+    section.append(el('h3', 'custom-heading sm', 'Equipment Appearance'));
+    section.append(el('p', 'custom-note', 'Hide clothing or change its appearance. Abilities stay with the equipped item.'));
+    const settings = P.appearance?.get() ?? {};
+    const items = P.catalog?.items.filter(i => P.equippedIds?.has(i.id)) ?? [];
+    if (!items.length) section.append(el('p', 'custom-note', 'Equip an item to customize its appearance.'));
+    for (const item of items) {
+      const row = el('div', 'custom-field');
+      const label = el('label', 'custom-label');
+      const check = el('input'); check.type = 'checkbox';
+      check.checked = !settings.hiddenIds?.includes(item.id);
+      check.addEventListener('change', () => P.appearance?.setHidden(item.id, !check.checked));
+      label.append(check, document.createTextNode(' Show ' + item.name));
+      const select = el('select', 'custom-select');
+      select.setAttribute('aria-label', item.name + ' appearance');
+      const original = el('option', '', 'Original appearance'); original.value = '0'; select.append(original);
+      for (const target of P.catalog.items.filter(i => i.slot === item.slot && i.id !== item.id)) {
+        const option = el('option', '', target.name); option.value = target.id; select.append(option);
+      }
+      select.value = String(settings.transmutes?.[item.id] ?? 0);
+      select.addEventListener('change', () => P.appearance?.setTransmute(item.id, select.value));
+      row.append(label, select); section.append(row);
+    }
+    panel.append(section);
+  }
+  for (const event of ['equip-state', 'appearance-state']) P.on(event, () => {
+    const panel = tools.querySelector('.player-custom-panel');
+    if (panel && P.tabs.cur === 'player') renderEquipmentAppearance(panel);
+  });
 
   /* ---------------- Makeup tab (donor dye cards) ---------------- */
   const dyeCardRefs = new Map();

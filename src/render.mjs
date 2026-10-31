@@ -11,7 +11,7 @@ const blank=()=>({alpha:1,tint:null,add:false});
 function rawCall(record,pass,local=IDENTITY) {
   return {...blank(),atlas:record.a,sx:record.sx,sy:record.sy,sw:record.sw,sh:record.sh,
     matrix:compose(local,spriteMatrix(record)),alpha:record.o??1,pass,tint:record.t??null,
-    sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,pet:!!record.pet,smooth:!!record.sm};
+    sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,blend:record.blend,pet:!!record.pet,smooth:!!record.sm};
 }
 export function resolveWear(items,baseSkin=[255,206,180,255]) {
   // Priority is deterministic but not claimed to be official for conflicting items.
@@ -179,6 +179,7 @@ export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}=
         const m=compose(viewport,call.matrix);
         ctx.setTransform(...m);
         ctx.globalAlpha=call.alpha;
+        ctx.globalCompositeOperation="source-over";
         ctx.strokeStyle=`rgb(${(call.line.rgb??[180,180,180]).join(",")})`;
         ctx.lineWidth=call.line.width??1;
         ctx.lineCap="round";
@@ -196,7 +197,7 @@ export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}=
         throw Error(`Descriptor/atlas density mismatch for ${call.atlas}`);
       const m=compose(viewport,call.matrix,scale(1/ppu));
       ctx.setTransform(...m);ctx.globalAlpha=call.alpha;
-      ctx.globalCompositeOperation=call.add?"lighter":"source-over";
+      ctx.globalCompositeOperation=call.blend==="screen"?"screen":call.add||call.blend==="add"?"lighter":"source-over";
       ctx.imageSmoothingEnabled=!!call.smooth;
       // Tint must multiply RGB and preserve source alpha. Adapter can cache tinted crops.
       if(call.tint) {

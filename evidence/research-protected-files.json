@@ -1,0 +1,82 @@
+[
+  {
+    "path": "index.html",
+    "unchanged": true,
+    "sha256": "a027490126b948952519aff19c803ed840f7f965189c9d8167fba453ff50cc98"
+  },
+  {
+    "path": "js/grid.js",
+    "unchanged": true,
+    "sha256": "9f35649bdde01712a41581d023251b13c380daa630b90f59975963b99a019b97"
+  },
+  {
+    "path": "js/side.js",
+    "unchanged": true,
+    "sha256": "d6a6f8011bda4cd9c347e4749764d5a17bf07ca3eac84eef43709b088ebbe626"
+  },
+  {
+    "path": "js/handle.js",
+    "unchanged": true,
+    "sha256": "136417a0141da0fdbfdbd0f3a40971af0a26ed2e071d3b83cc0f4dba2b54e21e"
+  },
+  {
+    "path": "js/pads.js",
+    "unchanged": true,
+    "sha256": "61caa8e13dc7ff7ff3fa376966a38f5058befe4eb430e5629aa0dfebffdce733"
+  },
+  {
+    "path": "js/tabs.js",
+    "unchanged": true,
+    "sha256": "148f129ba85f11c787330b85d8c1781e668e1dc1278e8e2b4fd9668923f50d0a"
+  },
+  {
+    "path": "js/preview.js",
+    "unchanged": true,
+    "sha256": "f06c5e591c10e4116b176907843eebe73c480e16b3b62f6c66bf6dad0b4356a0"
+  },
+  {
+    "path": "css/inv.css",
+    "unchanged": true,
+    "sha256": "af9713fc1daf9b176eb6f17abb341845b4016014b2e72a41830ecc96876b8ac8"
+  },
+  {
+    "path": "css/wrap.css",
+    "unchanged": true,
+    "sha256": "eb8d69c26fe7bf207b28c28d30e18ccb9cce74f21e9300eceb33cafb4f00371b"
+  },
+  {
+    "path": "css/systems.css",
+    "unchanged": true,
+    "sha256": "260480d427dce5b7123c632055f68c7e12968cb22690358618ae2bbb33785e71"
+  },
+  {
+    "path": "css/dropdowns.css",
+    "unchanged": true,
+    "sha256": "0fcb3ef7152c29073e54d31fd299ebb8fa5b9bf2743d97349ce2495511125521"
+  },
+  {
+    "path": "css/base.css",
+    "unchanged": true,
+    "sha256": "7398caec5f0dd949a7b44822019bb1bda724710d6f5641e127b65672062e433f"
+  },
+  {
+    "path": "css/preview.css",
+    "unchanged": true,
+    "sha256": "8207ab0e4fbf86b5823b2f1b4785744ab89f02981001022c73f851ece2101ab6"
+  },
+  {
+    "path": "css/pads.css",
+    "unchanged": true,
+    "sha256": "1ace2304028fe1dfe2fe2b2b9598f676345956a6846181bc043f957bea98910d"
+  },
+  {
+    "path": "css/mobile.css",
+    "unchanged": true,
+    "sha256": "7cd456520d45297f439cba6ba67afcc76714949e58cdbcdfbcadca2f6ed9babb"
+  },
+  {
+    "path": "css/customization.css",
+    "unchanged": true,
+    "sha256": "db1f222511a44f59f50dc7235e8aa57deee3a7a511d3a46b8b1210de7729e31b"
+  }
+]
