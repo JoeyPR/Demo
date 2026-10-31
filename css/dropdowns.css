@@ -77,6 +77,45 @@
   touch-action: pan-y;
 }
 
+/* Weather Background selector: a third compact control centered between Land and Weather. */
+#dd-background-btn {
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+}
+#dd-background-panel {
+  left: 50%;
+  bottom: 48px;
+  width: min(560px, calc(100vw - 28px));
+  transform: translateX(-50%);
+}
+.dd-bg-head input[data-search] {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 8px;
+  background: #145EAE;
+  color: #fff;
+  border: 1px solid #7BBAD2;
+  border-radius: 5px;
+  font: 600 11px/1.2 var(--font-main);
+  outline: none;
+}
+.dd-bg-head input[data-search]::placeholder { color: #c7ddeb; opacity: .9; }
+.dd-bg-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  gap: 8px;
+}
+.dd-bg-tile .dd-sq { min-height: 48px; }
+.dd-bg-tile.on { border-color: #b3e37e; box-shadow: 0 0 0 1px #7fb64a; }
+.dd-bg-empty {
+  grid-column: 1 / -1;
+  padding: 18px 8px;
+  color: #cfe3c0;
+  text-align: center;
+  font: 600 11px/1.3 var(--font-main);
+}
+
 /* weather: fully rendered 1:1 squares */
 .dd-tiles {
   display: grid;
@@ -119,6 +158,8 @@
   #dd-land-btn { left: 10px; top: calc(var(--pvb, 60vh) + 10px); bottom: auto; }
   #dd-weather-panel { right: 10px; bottom: auto; top: calc(var(--pvb, 60vh) + 40px); max-height: min(38vh, 340px); }
   #dd-land-panel { left: 10px; bottom: auto; top: calc(var(--pvb, 60vh) + 40px); max-height: min(38vh, 340px); }
+  #dd-background-btn { left: 50%; top: calc(var(--pvb, 60vh) + 10px); bottom: auto; transform: translateX(-50%); }
+  #dd-background-panel { left: 50%; bottom: auto; top: calc(var(--pvb, 60vh) + 40px); max-height: min(38vh, 340px); transform: translateX(-50%); }
   .dd-btn { max-width: calc(50vw - 18px); gap: 4px; font-size: 10px; padding: 3px 5px; }
   .dd-btn .dd-thumb { width: 20px; height: 20px; }
   .dd-btn .dd-caret { font-size: 7px; }
