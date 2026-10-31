@@ -2,13 +2,16 @@
 
 This continuation implements visible features in the main planner on top of the
 earlier research renovation. Serve the repository root, not just `/demo/`.
+The subsequent [player actions, skins and Info revision](PLAYER_ACTIONS_SKINS_INFO.md)
+adds dance/talking, word-based speech timing, fades, source-backed skin colors,
+item descriptions/properties, larger tiles and seam-free tile rasterization.
 
 ## Main preview
 
 - **Menu:** the supplied first image occupies the preview's top-right corner.
   It intentionally has no action. The old logo DOM remains, with its visual
   slot replaced by these controls.
-- **Player Chat:** the supplied second image sits beside Menu. Clicking it
+- **Player Chat:** the supplied second image sits below Menu. Clicking it
   synchronously focuses a real textarea so mobile browsers can open their
   keyboard. Enter or Say submits; Shift+Enter inserts a line break; Escape or
   Close dismisses the composer. The archived chatbar supplies the 120-character
@@ -56,7 +59,7 @@ collision, one-way platforms, ceilings, walking off ledges, landing/jump refill,
 horizontal wrapping and respawn. Physics uses the planner's existing coefficients
 and a visual-sized hitbox; this is not a claim of official client physics.
 Tile rendering, hit testing and pointer editing consistently map a native 32px
-cell to 20 logical preview units. Blocks cannot be placed through the avatar.
+cell to 30 logical preview units. Blocks cannot be placed through the avatar.
 Pet and particle hosts receive coordinate-correct terrain queries.
 
 The existing Drop/pickup implementation, blackbox, RTFont parsing, nameplate font

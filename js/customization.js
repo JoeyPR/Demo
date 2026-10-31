@@ -9,13 +9,7 @@
   /* catalog constants (donor's customization-data + site's role/flag lists) */
   const ROLES = ['farmer', 'builder', 'surgeon', 'fisher', 'chef', 'startopian'];
   const FLAGS = [];
-  const SKINS = (typeof window !== 'undefined' && window.PLANNER_SKINS) || [
-    { name: 'Warm peach', rgb: [255, 206, 180] },
-    { name: 'Golden tan', rgb: [208, 149, 105] },
-    { name: 'Deep brown', rgb: [128, 82, 61] },
-    { name: 'Cool blue', rgb: [127, 194, 218] },
-    { name: 'Soft stone', rgb: [186, 194, 175] }
-  ];
+  const SKINS = window.GrowSkinColors.SKINS;
   const DYE_EFFECTS = {
     r: [32, -16, -16], g: [-16, 32, -16], b: [-16, -16, 32],
     k: [-32, -32, -32], clean: [32, 32, 32], lensClean: [-32, -32, -32]
@@ -52,7 +46,7 @@
   const raw = stored && typeof stored === 'object' ? stored : {};
   const state = {
     dyes: {}, uses: {},
-    skin: P.store.get('skin', 0)
+    skin: window.GrowSkinColors.resolveStoredSkin(P.store.get('skin', 0))
   };
   for (const dye of DYES) {
     state.dyes[dye.key] = cloneRGB(raw.dyes && raw.dyes[dye.key], dye.start);
@@ -191,12 +185,13 @@
     const skins = el('div', 'c-skins');
     SKINS.forEach((s, i) => {
       const b = el('button', 'c-skin' + (state.skin === i ? ' on' : ''));
-      b.type = 'button'; b.title = s.name;
-      b.style.background = 'rgb(' + s.rgb.join(',') + ')';
+      b.type = 'button'; b.title = s.name;b.setAttribute('aria-label',s.name+' skin');
+      b.setAttribute('aria-pressed',String(state.skin===i));b.dataset.skin=s.id;
+      b.style.setProperty('--skin-color',s.hex);
       b.addEventListener('click', () => {
         state.skin = i;
-        P.store.set('skin', i);
-        P.emit('skin', i);
+        P.store.set('skin', s.id);
+        P.emit('skin', s.id);
         renderPlayerCustomization();
       });
       skins.append(b);

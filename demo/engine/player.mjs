@@ -10,17 +10,23 @@ import {XmlParticleLayer} from "./xml-particles.mjs";
 import {resolveLook} from "./look.mjs";
 import {PunchTimeline} from "./punch-timeline.mjs";
 import {sampleBlink} from "./blink.mjs";
+import {DanceSampler,sampleTalkingFace} from "./dance.mjs";
 
 // Integration entry point for Claude: supply catalog, items and MotionFrames.
 export class PlannerPlayer {
-  constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();this.punchData=catalog?.punchData??null;this.xmlfx=new XmlParticleLayer(catalog?.fxRenderers??catalog?.renderers??{});this.appearance={};this.timeline=new PunchTimeline(catalog?.punchSfx);}
+  constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();this.punchData=catalog?.punchData??null;this.xmlfx=new XmlParticleLayer(catalog?.fxRenderers??catalog?.renderers??{});this.appearance={};this.timeline=new PunchTimeline(catalog?.punchSfx);this.danceSampler=new DanceSampler();}
   equip(items) {this.items=items;this.timeline.reset();this.xmlfx.retain(items);}
   setAppearance(appearance={}) {resolveLook(this.items,appearance);this.appearance=appearance;}
-  reset() {this.lastEvents.clear();this.effects.reset();this.xmlfx.reset();this.timeline.reset();}
+  reset() {this.lastEvents.clear();this.effects.reset();this.xmlfx.reset();this.timeline.reset();this.danceSampler.reset();}
   step(motion,dtMs,visual={}) {
     if(visual.effects===false&&this.effectsEnabled!==false){this.xmlfx.reset();this.effects.reset();}
     this.effectsEnabled=visual.effects!==false;
     const look=resolveLook(this.items,{...this.appearance,...visual});
+    const dancing=visual.dance&&motion.ground&&!motion.punch&&motion.locomotion==='idle'&&
+      !(Math.abs(motion.vx??0)>0.01)&&!(Math.abs(motion.vy??0)>0.01);
+    const dance=dancing?this.danceSampler.sample(visual.dance.elapsedMs,visual.dance.startFacing):null;
+    if(!dance)this.danceSampler.reset();
+    if(dance)motion={...motion,facing:dance.facing};
     motion={...motion,renderContext:{...motion.renderContext,equippedIds:this.items.map(i=>i.id),
       transmutedIds:look.transmutedIds,...visual.renderContext}};
     // One MotionFrame owns body, clothes and attachments, never separate clocks.
@@ -51,7 +57,13 @@ export class PlannerPlayer {
         emits.push(...out.emit.map(id=>({itemId:item.id,emitterId:id})));
       }
     }
+    if(dance)override={...override,backAngle:dance.backAngle,frontAngle:dance.frontAngle,
+      backFoot:dance.backFoot,frontFoot:dance.frontFoot,face:dance.face};
     const pose=this.rig.update(motion,dtMs,override);
+    if(dance)pose.dance=dance;
+    const talking=!!visual.talking?.active&&!dance&&!motion.punch&&motion.ground;
+    if(talking)pose.face=sampleTalkingFace(visual.talking.elapsedMs);
+    pose.talking={active:talking,elapsedMs:visual.talking?.elapsedMs??0};
     const shotOwner=motion.punch&&punchEffectOwner(this.items);
     if(shotOwner){
       pose.punch=null;pose.backAngle=shotOwner.staticArmPose?.backAngle??0;
@@ -66,6 +78,7 @@ export class PlannerPlayer {
       override:visual.blink??motion.blink});
     const items=look.displayed.map(item=>({...item,hide:[...(item.hide??[]),...(dynamicHide.get(item.id)??[])]}));
     const lift=resolvePlayerLift(items,motion.clockMs,visual);
+    if(dance)lift.y+=dance.bodyY;
     const gait=look.displayed.find(i=>i.gait?.active)?.gait;
     if(gait&&!lift.floating){lift.y+=gait.bodyY;lift.gait=gait;}
     const xmlfx=visual.xmlParticles===false||visual.effects===false?[]:this.xmlfx.step(this.items,motion,pose,lift,dtMs);

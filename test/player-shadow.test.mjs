@@ -77,7 +77,7 @@ test("preview keeps the shadow proportional to the player during camera zoom", a
   const shadowSection=app.slice(app.lastIndexOf('c.save();',shadowDraw),app.indexOf('c.restore();',shadowDraw));
   assert.doesNotMatch(shadowSection, /shadowScreenCenterX|shadowScreenBottomY|c\.setTransform\(1, 0, 0, 1, 0, 0\)/,
     "shadow is not reset to identity screen space before drawing");
-  assert.match(app, /const landS = s \* \(20 \/ 32\);/, "land blocks render at the 20-unit midpoint scale");
+  assert.match(app, /const landS = s \* \(WORLD_TILE_SIZE \/ 32\);/, "preview and editable world share the tile scale");
   const shadow = app.indexOf("c.drawImage(avatarShadow");
   const land = app.indexOf("if (state.landWorld) drawLandGround(w, h, ground, s, frame, zoom, camera.cameraWorldX)");
   const player = app.indexOf("c.drawImage(avatar, playerRect.x");

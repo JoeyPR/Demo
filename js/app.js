@@ -2,6 +2,7 @@
    equipment and the original inventory/Drop contracts. */
 import { PlannerPlayer } from "../demo/engine/player.mjs";
 import { WorldMotion, WORLD_ORIGIN_X, WORLD_ORIGIN_Y, WORLD_TILE_SIZE, WORLD_PLAYER_HALF_WIDTH, WORLD_PLAYER_HEIGHT } from "./world-motion.mjs";
+import { SKINS, resolveStoredSkin } from "./skin-colors.mjs";
 import { normalizeCatalogItem } from "../demo/engine/catalog-adapter.mjs";
 import { drawCanvas } from "../demo/engine/render.mjs";
 import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
@@ -31,16 +32,10 @@ const landImages = new Map(), landLoads = new Map();
 const pickupSprite = new Image();
 pickupSprite.src = moduleURL("../img/pickup.png").href;
 
-const SKINS = [
-  { name: "Warm peach", rgb: [255, 206, 180, 255] },
-  { name: "Golden tan", rgb: [208, 149, 105, 255] },
-  { name: "Deep brown", rgb: [128, 82, 61, 255] },
-  { name: "Cool blue", rgb: [127, 194, 218, 255] },
-  { name: "Soft stone", rgb: [186, 194, 175, 255] }
-];
+const initialSkin = SKINS[resolveStoredSkin(P.store.get("skin", 0))];
 
 const state = {
-  catalog: null, equipped: new Map(), skin: SKINS[P.store.get("skin", 0)].rgb,
+  catalog: null, equipped: new Map(), skin: initialSkin.rgb, skinPalette: initialSkin.palette,
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
@@ -50,7 +45,7 @@ const state = {
   pickups: [], nextPickupId: 1,
   hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true,
   worldMode: P.store.get("worldMode", true), editableWorld:null, worldTool:"play", worldSelection:116,
-  worldGroundId:2, worldBackgroundId:14, pendingWorldEvents:[]
+  worldGroundId:2, worldBackgroundId:14, pendingWorldEvents:[], dance:null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -156,14 +151,22 @@ P.look = {
   setEffects(enabled){state.effectsEnabled=!!enabled;P.emit("look-update");}
 };
 P.on("equip", payload => equipToggle(typeof payload === "object" && payload !== null ? payload.id : payload));
-P.on("skin", i => {
-  state.skin = SKINS[i].rgb;
+P.on("skin", id => {
+  const skin = SKINS[resolveStoredSkin(id)];
+  state.skin = skin.rgb;
+  state.skinPalette = skin.palette;
   // Refresh currently mounted inventory canvases that use skin-relative tint.
   // The grid is virtualized, so this touches only the visible boxes.
   document.querySelectorAll(".box .ic canvas").forEach(canvas => {
     if (canvas.__demoItem) renderDemoInventoryIcon(canvas, canvas.__demoItem, state.skin);
   });
 });
+P.on("player-command", event => {
+  if (event.command === "dance" && state.lastFrame?.ground) {
+    state.dance = { startedAtMs: event.atMs, startFacing: state.lastFrame.facing };
+  }
+});
+P.on("player-chat", () => { state.dance = null; });
 
 /* ---------------- simulation ------------------------------------------- */
 /* Pet and particle hosts query the active world using their own rig-to-feet
@@ -209,12 +212,20 @@ function step(dt) {
     input.punchTarget = [x, 32 + (aimY - cy) / s - (lift ?? 0)];
   }
   const frame = motion.step(dt, input);
+  if (input.left || input.right || input.jump || input.punch || !frame.ground) state.dance = null;
+  const talking = P.playerChat?.stateAt();
+  const dance = state.dance && { elapsedMs: Math.max(0, performance.now()-state.dance.startedAtMs),
+    startFacing: state.dance.startFacing };
   frame.events.push(...state.pendingWorldEvents.splice(0));
   if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
   state.lastFrame = frame;
   state.lastResult = player.step(
     withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
-    { skin: state.skin, effects: state.effectsEnabled });
+    { skin: state.skin, skinPalette: state.skinPalette, effects: state.effectsEnabled, talking, dance });
+  if (dance && state.lastResult.pose.dance) {
+    frame.facing = state.lastResult.pose.dance.facing;
+    motion.facing = frame.facing;
+  }
   for(const cue of state.lastResult.audioCues??[])P.emit("punch-cue",cue);
   updatePickupLifecycle(frame);
 }
@@ -266,7 +277,7 @@ function punchOverDrawer(e) {
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   });
 }
-const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]");
+const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #item-info-overlay, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]");
 document.addEventListener("pointerdown", e => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
   if (punchOverUI(e.target) || punchOverDrawer(e)) return;
@@ -289,6 +300,7 @@ document.addEventListener("pointercancel", e => { if (state.punchPointer === e.p
 document.addEventListener("lostpointercapture", punchDrop);
 window.addEventListener("blur", punchCancel);
 P.on("player-chat-open", punchCancel);
+P.on("item-info-open", () => { P.emit("input-reset"); punchCancel(); });
 
 /* ---------------- rendering ------------------------------------------- */
 function drawScene(w, h) {
@@ -525,14 +537,15 @@ function drawInteractiveWorld(w,h,s,camera,layer) {
   const camX=(WORLD_ORIGIN_X+camera.cameraWorldX+(start.x-camera.cameraPivotX)/s)*32/WORLD_TILE_SIZE;
   const camY=(WORLD_ORIGIN_Y+camera.cameraWorldY+(start.y-feetFocus)/s)*32/WORLD_TILE_SIZE;
   const atlas=page=>{if(!landImages.has(page))landPage(page);return landImages.get(page)??null;};
-  const stats=renderWorld(c,state.editableWorld,atlas,camX,camY,bw,bh,state.clock,{layers:[layer],repeatX:true});
+  // Rasterize whole source texels; retain subpixel camera movement in the one
+  // composite blit so neighboring tiles cannot leave transparent seams.
+  const rasterX=Math.floor(camX),rasterY=Math.floor(camY);
+  const stats=renderWorld(c,state.editableWorld,atlas,rasterX,rasterY,bw,bh,state.clock,{layers:[layer],repeatX:true});
   if(layer==="bg")state.backgroundStats=stats;else state.landStats=stats;
-  ctx.drawImage(canvas,0,0,bw,bh,start.x,start.y,bw*tileScale,bh*tileScale);
+  ctx.drawImage(canvas,0,0,bw,bh,start.x+(rasterX-camX)*tileScale,start.y+(rasterY-camY)*tileScale,bw*tileScale,bh*tileScale);
 }
 function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
-  // Render land blocks at 20 screen-units per 32-unit source tile: the
-  // midpoint between 16 and 24. Grid coordinates stay native at 32 per tile.
-  const landS = s * (20 / 32);
+  const landS = s * (WORLD_TILE_SIZE / 32);
   const lw = Math.ceil(w / (landS * zoom));
   const lh = Math.max(1, Math.ceil(h / (landS * zoom)) + 2);
   if (landCanvas.width !== lw || landCanvas.height !== lh) {
@@ -550,7 +563,7 @@ function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
 
 function drawBackgroundTiles(w, h, s, camera) {
   if (!state.backgroundWorld) return;
-  const tileScale = s * (20 / 32);
+  const tileScale = s * (WORLD_TILE_SIZE / 32);
   const bw = Math.ceil(w / tileScale) + 2;
   const bh = Math.ceil(h / tileScale) + 2;
   if (backgroundCanvas.width !== bw || backgroundCanvas.height !== bh) {
@@ -1177,7 +1190,7 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     state.lastFrame = motion.snapshot();
     state.lastResult = player.step(
       withPetHost({ ...state.lastFrame, worldX: state.lastFrame.x, worldY: state.lastFrame.y, x: 0, y: 0 }), 0,
-      { skin: state.skin, effects: true });
+      { skin: state.skin, skinPalette: state.skinPalette, effects: true });
     state.equipped.clear();
     state.abilities = resolveAbilities([], state.abilityRegistry);
     motion.setAbilities(state.abilities);

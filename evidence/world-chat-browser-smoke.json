@@ -2,6 +2,8 @@
   {
     "mobile": false,
     "blocks": 1766,
+    "tileScale": 1.5,
+    "opaqueTileBoundaries": true,
     "placePointer": true,
     "wallCollision": true,
     "erasePointer": true,
@@ -20,6 +22,8 @@
   {
     "mobile": true,
     "blocks": 1766,
+    "tileScale": 1.5,
+    "opaqueTileBoundaries": true,
     "placePointer": true,
     "wallCollision": true,
     "erasePointer": true,

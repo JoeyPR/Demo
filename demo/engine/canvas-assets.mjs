@@ -15,6 +15,17 @@ export function makeCanvas(width,height) {
   if(typeof document==="undefined") throw Error("A Canvas factory is required in Node");
   const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;return canvas;
 }
+export function tintPixelBuffer(rgba,tint,palette) {
+  for(let p=0;p<rgba.length;p+=4) {
+    if(palette) {
+      const high=Math.max(rgba[p],rgba[p+1],rgba[p+2]),low=Math.min(rgba[p],rgba[p+1],rgba[p+2]);
+      if(!rgba[p+3]||high-low>2)continue;
+      const color=palette[high<=172?0:high<=190?1:high<=209?2:3];
+      for(let c=0;c<3;c++)rgba[p+c]=color[c];
+    } else for(let c=0;c<3;c++)rgba[p+c]=Math.round(rgba[p+c]*tint[c]/255);
+  }
+  return rgba;
+}
 export function registerAtlas(image,{pixelsPerUnit=1,canvasFactory=makeCanvas,maxTintedCrops=512}={}) {
   const cache=new Map(),edgeCache=new Map();
   let sourcePixels=null;
@@ -37,14 +48,13 @@ export function registerAtlas(image,{pixelsPerUnit=1,canvasFactory=makeCanvas,ma
   return {
     image,pixelsPerUnit,sampleCrop,
     tintedCrop(call) {
-      const key=JSON.stringify([call.sx,call.sy,call.sw,call.sh,call.tint]);
+      const key=JSON.stringify([call.sx,call.sy,call.sw,call.sh,call.tint,call.skinPalette]);
       if(cache.has(key)) return cache.get(key);
       const canvas=canvasFactory(call.sw,call.sh),ctx=canvas.getContext("2d",{willReadFrequently:true});
       ctx.drawImage(sampleCrop(call),0,0);
       const pixels=ctx.getImageData(0,0,call.sw,call.sh),rgba=pixels.data;
       // Deliberately preserve every source alpha byte, including transparent RGB.
-      for(let p=0;p<rgba.length;p+=4)
-        for(let c=0;c<3;c++) rgba[p+c]=Math.round(rgba[p+c]*call.tint[c]/255);
+      tintPixelBuffer(rgba,call.tint,call.skinPalette);
       ctx.putImageData(pixels,0,0);
       if(cache.size>=maxTintedCrops) cache.delete(cache.keys().next().value);
       cache.set(key,canvas);return canvas;

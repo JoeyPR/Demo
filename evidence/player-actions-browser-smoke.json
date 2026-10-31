@@ -1,0 +1,81 @@
+{
+  "chat": [
+    {
+      "mobile": false,
+      "verticalControls": true,
+      "shortBubble": true,
+      "wordTiming": true,
+      "fadeInOut": true,
+      "speechLifecycle": true,
+      "danceCommand": true,
+      "replacementTimer": true,
+      "typingIsolation": true,
+      "pageErrors": []
+    },
+    {
+      "mobile": true,
+      "verticalControls": true,
+      "shortBubble": true,
+      "wordTiming": true,
+      "fadeInOut": true,
+      "speechLifecycle": true,
+      "danceCommand": true,
+      "replacementTimer": true,
+      "typingIsolation": true,
+      "pageErrors": []
+    }
+  ],
+  "player": [
+    {
+      "mobile": false,
+      "talkingFaces": true,
+      "speechDurationAndFadeSync": true,
+      "danceComponentsAndTurns": true,
+      "danceCancellation": true,
+      "skinSwatches": 25,
+      "buddyPalette": true,
+      "skinAlphaAndPersistence": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "talkingFaces": true,
+      "speechDurationAndFadeSync": true,
+      "danceComponentsAndTurns": true,
+      "danceCancellation": true,
+      "skinSwatches": 25,
+      "buddyPalette": true,
+      "skinAlphaAndPersistence": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "info": [
+    {
+      "mobile": false,
+      "realInfoAction": true,
+      "verifiedProperties": true,
+      "nativeFallback": true,
+      "colorCodes": true,
+      "modalFocusAndMovement": true,
+      "safeText": true,
+      "pageErrors": []
+    },
+    {
+      "mobile": true,
+      "realInfoAction": true,
+      "verifiedProperties": true,
+      "nativeFallback": true,
+      "colorCodes": true,
+      "modalFocusAndMovement": true,
+      "safeText": true,
+      "pageErrors": []
+    }
+  ],
+  "scope": "Desktop and touch-phone integration checks. Dance uses recovered source motion; official-client pixel parity is unverified.",
+  "nodeTests": {
+    "passed": 285,
+    "failed": 0
+  }
+}

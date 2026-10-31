@@ -6,6 +6,7 @@
   const P = window.P;
   if (!P) return;
   const MAX_LENGTH = 120;
+  const WORD_MS = 900, FADE_IN_MS = 160, FADE_OUT_MS = 220;
   const preview = document.getElementById('pv');
   const make = (tag, id, text) => {
     const node = document.createElement(tag);
@@ -26,8 +27,8 @@
     actions.append(button);
     return button;
   }
-  const chatButton = iconButton('player-chat-button', 'Player Chat', 'img/chat-button.png');
   const menuButton = iconButton('preview-menu-button', 'Menu', 'img/menu-button.png');
+  const chatButton = iconButton('player-chat-button', 'Player Chat', 'img/chat-button.png');
   menuButton.setAttribute('aria-disabled', 'true'); // Reserved; no menu action yet.
   chatButton.setAttribute('aria-controls', 'player-chat-composer');
   chatButton.setAttribute('aria-expanded', 'false');
@@ -58,8 +59,30 @@
   const speech = make('span', 'player-chat-text'); bubble.append(speech);
   document.body.append(actions, composer, bubble);
 
-  let anchor = null, lastText = '', hideTimer = null, opened = false;
+  let anchor = null, lastText = '', hideTimer = null, fadeTimer = null, composerTimer = null, opened = false;
+  let speechState = null, speechVersion = 0, composerVersion = 0;
   const now = () => window.performance?.now() ?? Date.now();
+  function visibleWords(value) {
+    const text = (P.rtfont?.strip(String(value ?? '')) ?? String(value ?? '')).trim();
+    // Count spoken words rather than color codes or punctuation. Segmenter
+    // also recognizes words in languages that do not separate them by spaces.
+    if (typeof Intl.Segmenter === 'function') {
+      const words = [...new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text)]
+        .filter(segment => segment.isWordLike).length;
+      if (words) return words;
+    }
+    return (text.match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*|\p{Extended_Pictographic}/gu) ?? []).length;
+  }
+  function durationFor(value) { return Math.max(1, visibleWords(value)) * WORD_MS; }
+  function stateAt(atMs = now()) {
+    if (!speechState) return { active: false, elapsedMs: 0, durationMs: 0, wordCount: 0, phase: 'hidden', text: '' };
+    const elapsedMs = Math.max(0, atMs - speechState.startedAtMs);
+    const active = elapsedMs < speechState.durationMs;
+    return { ...speechState, active, elapsedMs: Math.min(elapsedMs, speechState.durationMs),
+      phase: !active ? 'hidden' : elapsedMs < FADE_IN_MS ? 'entering'
+        : elapsedMs >= speechState.durationMs - FADE_OUT_MS ? 'leaving' : 'visible' };
+  }
+  const nextPaint = callback => (window.requestAnimationFrame ?? (fn => window.setTimeout(fn, 0)))(callback);
   function visiblePreview() {
     const vv = window.visualViewport;
     const left = vv?.offsetLeft ?? 0, top = vv?.offsetTop ?? 0;
@@ -74,7 +97,7 @@
   }
   function resizeInput() {
     textarea.style.height = 'auto';
-    textarea.style.height = Math.min(160, Math.max(32, textarea.scrollHeight)) + 'px';
+    textarea.style.height = Math.min(140, Math.max(28, textarea.scrollHeight)) + 'px';
     count.textContent = [...textarea.value].length + ' / ' + MAX_LENGTH;
   }
   function positionBubble(area = visiblePreview()) {
@@ -113,14 +136,26 @@
     positionBubble(area);
   }
   function close({ restoreFocus = false } = {}) {
-    opened = false; composer.hidden = true;
+    opened = false; composer.classList.remove('is-visible');
+    composer.inert = true;
+    const version = ++composerVersion;
+    if (composerTimer !== null) window.clearTimeout(composerTimer);
+    composerTimer = window.setTimeout(() => {
+      if (version === composerVersion && !opened) composer.hidden = true;
+      composerTimer = null;
+    }, FADE_OUT_MS);
     chatButton.setAttribute('aria-expanded', 'false');
     textarea.blur();
     if (restoreFocus) chatButton.focus({ preventScroll: true });
     P.emit('player-chat-close');
   }
   function open() {
-    opened = true; composer.hidden = false; chatButton.setAttribute('aria-expanded', 'true');
+    opened = true; composer.hidden = false; composer.inert = false;
+    if (composerTimer !== null) window.clearTimeout(composerTimer);
+    composerTimer = null;
+    const version = ++composerVersion;
+    nextPaint(() => { if (opened && version === composerVersion) composer.classList.add('is-visible'); });
+    chatButton.setAttribute('aria-expanded', 'true');
     resizeInput(); position();
     P.emit('player-chat-open');
     // Focus stays synchronous with the button's click so iOS/Android can open
@@ -130,21 +165,39 @@
   }
   function clear() {
     if (hideTimer !== null) window.clearTimeout(hideTimer);
-    hideTimer = null; bubble.hidden = true; speech.replaceChildren(); lastText = '';
+    if (fadeTimer !== null) window.clearTimeout(fadeTimer);
+    hideTimer = fadeTimer = null; speechVersion++;
+    bubble.classList.remove('is-visible');bubble.hidden = true;
+    speech.replaceChildren(); lastText = ''; speechState = null;
+    P.emit('player-chat-end');
   }
   function submit(value = textarea.value) {
     const text = [...String(value ?? '').replace(/\r\n?/g, '\n')
       .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')].slice(0, MAX_LENGTH).join('').trim();
     if (!(P.rtfont?.strip(text) ?? text).trim()) return false;
+    if (/^\/dance\s*$/i.test(P.rtfont?.strip(text) ?? text)) {
+      clear();textarea.value = '';resizeInput();close();
+      P.emit('player-command', { command: 'dance', atMs: now() });
+      return true;
+    }
     clear(); lastText = text; speech.textContent = text;
     P.rtfont?.scan(speech);
     bubble.hidden = false;
+    const startedAtMs = now(), durationMs = durationFor(text), wordCount = Math.max(1, visibleWords(text));
+    speechState = { startedAtMs, durationMs, wordCount, text };
+    const version = speechVersion;
+    // A layout read establishes opacity0 before the next paint begins fading.
+    bubble.getBoundingClientRect();
+    nextPaint(() => { if (version === speechVersion && !bubble.hidden) bubble.classList.add('is-visible'); });
     if (!anchor) {
       const area = visiblePreview(); anchor = { x: (area.left + area.right) / 2, y: area.top + (area.bottom - area.top) * .45, scale: 1 };
     }
     textarea.value = ''; resizeInput(); close(); position();
-    hideTimer = window.setTimeout(clear, Math.min(12000, 5000 + [...text].length * 45));
-    P.emit('player-chat', { text, atMs: now() });
+    fadeTimer = window.setTimeout(() => {
+      if (version === speechVersion) bubble.classList.remove('is-visible');
+    }, Math.max(0, durationMs - FADE_OUT_MS));
+    hideTimer = window.setTimeout(() => { if (version === speechVersion) clear(); }, durationMs);
+    P.emit('player-chat', { text, atMs: startedAtMs, durationMs, wordCount });
     return true;
   }
   chatButton.addEventListener('click', () => opened ? close() : open());
@@ -169,7 +222,8 @@
   window.visualViewport?.addEventListener('resize', position);
   window.visualViewport?.addEventListener('scroll', position);
   document.fonts?.ready.then(position);
-  P.playerChat = { open, close, submit, clear, reposition: position,
+  P.playerChat = { open, close, submit, clear, reposition: position, stateAt, durationFor,
+    get speech() { return stateAt(); },
     get isOpen() { return opened; }, get text() { return lastText; }, get draft() { return textarea.value; },
     get maxLength() { return MAX_LENGTH; } };
   position();

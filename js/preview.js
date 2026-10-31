@@ -32,7 +32,7 @@
     P.emit('camzoom', Z.v);
   }
 
-  const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, #drop-overlay, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]');
+  const overUI = t => t.closest && t.closest('#ui, #hud, #toast, #logo, #drop-overlay, #item-info-overlay, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]');
   /* Growtopia-style camera zoom: scroll wheel over the world (outside the
      inventory panels and the dropdown buttons) zooms the camera in/out. */
   document.addEventListener('wheel', e => {
@@ -75,7 +75,6 @@
   (function loop(t) {
     const dt = Math.min(.05, (t - t0) / 1000); t0 = t;
     ctx.clearRect(0, 0, pv.w, pv.h);
-    ctx.fillStyle = '#05080c'; ctx.fillRect(0, 0, pv.w, pv.h);
     P.emit('frame', { dt, ctx, w: pv.w, h: pv.h });
     requestAnimationFrame(loop);
   })(t0);

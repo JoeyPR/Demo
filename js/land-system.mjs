@@ -508,10 +508,13 @@ export function renderWorld(ctx, world, atlas, camX, camY, viewW, viewH, now = D
     const key=call.page+':'+(call.tint??'');
     if(!images.has(key))images.set(key,tintedAtlas(typeof atlas==='function'?atlas(call.page):atlas,call.tint));
     const image=images.get(key);if(!image)continue;
+    // Rasterize the native tile grid on integer texels. Fractional per-tile
+    // edges otherwise expose transparent seams when the world buffer is zoomed.
+    const x=Math.round(call.x),y=Math.round(call.y);
     if(call.flipped) {
-      ctx.save();ctx.translate(call.x+TILE,call.y);ctx.scale(-1,1);
+      ctx.save();ctx.translate(x+TILE,y);ctx.scale(-1,1);
       ctx.drawImage(image,call.sx,call.sy,TILE,TILE,0,0,TILE,TILE);ctx.restore();
-    } else ctx.drawImage(image,call.sx,call.sy,TILE,TILE,call.x,call.y,TILE,TILE);
+    } else ctx.drawImage(image,call.sx,call.sy,TILE,TILE,x,y,TILE,TILE);
     drawn++;
   }
   return {visibleTiles:calls.length,drawCalls:drawn,sheets:images.size};

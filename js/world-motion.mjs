@@ -1,8 +1,8 @@
 import {PreviewMotion} from '../demo/engine/motion.mjs';
 
-// World rendering uses 20 logical units for each native 32px texture cell.
+// World rendering uses 30 logical units (1.5× the former 20) for each native 32px texture cell.
 // Motion x is the avatar centre, y its feet, relative to the spawn surface.
-export const WORLD_TILE_SIZE=20;
+export const WORLD_TILE_SIZE=30;
 export const WORLD_ORIGIN_X=50.5*WORLD_TILE_SIZE;
 export const WORLD_ORIGIN_Y=24*WORLD_TILE_SIZE;
 export const WORLD_PLAYER_HALF_WIDTH=8;

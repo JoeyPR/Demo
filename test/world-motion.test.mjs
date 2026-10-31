@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {WorldMotion,WORLD_ORIGIN_X,WORLD_ORIGIN_Y,WORLD_PLAYER_HEIGHT} from '../js/world-motion.mjs';
+import {WorldMotion,WORLD_ORIGIN_X,WORLD_ORIGIN_Y,WORLD_PLAYER_HEIGHT,WORLD_PLAYER_HALF_WIDTH,WORLD_TILE_SIZE} from '../js/world-motion.mjs';
+import {renderWorld,uniformLandWorld} from '../js/land-system.mjs';
 import {PreviewMotion} from '../src/motion.mjs';
 const blocks={1:{collision:1},2:{collision:2},3:{collision:0}};
 function world(){return {fg:Array.from({length:60},(_,y)=>new Array(100).fill(y>=24?1:0)),
@@ -26,10 +27,10 @@ test('tile side collisions stop the box at the wall without tunnelling',()=>{
   const grid=world();grid.fg[22][52]=grid.fg[23][52]=1;
   const m=motion(grid);
   for(let i=0;i<25;i++)m.step(50,{right:true});
-  assert.equal(m.x,22);assert.equal(m.vx,0);
+  assert.equal(m.x,52*WORLD_TILE_SIZE-WORLD_ORIGIN_X-WORLD_PLAYER_HALF_WIDTH);assert.equal(m.vx,0);
   const left=world();left.fg[22][49]=left.fg[23][49]=1;
   const l=motion(left);for(let i=0;i<20;i++)l.step(50,{left:true});
-  assert.equal(l.x,-2);assert.equal(l.vx,0);
+  assert.equal(l.x,50*WORLD_TILE_SIZE-WORLD_ORIGIN_X+WORLD_PLAYER_HALF_WIDTH);assert.equal(l.vx,0);
 });
 test('walking off an edge falls onto a lower real tile surface',()=>{
   const grid=world();for(let y=24;y<=25;y++)for(let x=51;x<=65;x++)grid.fg[y][x]=0;
@@ -37,18 +38,18 @@ test('walking off an edge falls onto a lower real tile surface',()=>{
   for(let i=0;i<50;i++) {
     const frame=m.step(16,{right:i<30});
     leftGround ||= !frame.ground;
-    landed ||= frame.events.some(event=>event.type==='land'&&event.y===40);
+    landed ||= frame.events.some(event=>event.type==='land'&&event.y===2*WORLD_TILE_SIZE);
   }
-  assert.equal(leftGround,true);assert.equal(landed,true);assert.equal(m.y,40);
+  assert.equal(leftGround,true);assert.equal(landed,true);assert.equal(m.y,2*WORLD_TILE_SIZE);
 });
 test('platforms pass an ascending player and catch a descending one',()=>{
-  const grid=world();for(let x=48;x<=52;x++)grid.fg[20][x]=2;
+  const grid=world();for(let x=48;x<=52;x++)grid.fg[21][x]=2;
   const m=motion(grid);let above=false,landed=false;
   for(let i=0;i<120;i++) {
-    const frame=m.step(16,{jump:i<35});above ||= frame.y<-80;
-    landed ||= frame.events.some(event=>event.type==='land'&&event.y===-80);
+    const frame=m.step(16,{jump:i<35});above ||= frame.y<-3*WORLD_TILE_SIZE;
+    landed ||= frame.events.some(event=>event.type==='land'&&event.y===-3*WORLD_TILE_SIZE);
   }
-  assert.equal(above,true);assert.equal(landed,true);assert.equal(m.y,-80);
+  assert.equal(above,true);assert.equal(landed,true);assert.equal(m.y,-3*WORLD_TILE_SIZE);
 });
 test('solid ceilings stop the rising player at the actual lower tile edge',()=>{
   const grid=world();for(let x=48;x<=52;x++)grid.fg[20][x]=1;
@@ -57,7 +58,7 @@ test('solid ceilings stop the rising player at the actual lower tile edge',()=>{
     const f=m.step(16,{jump:true});highest=Math.min(highest,f.y);
     stopped ||= f.vy===0&&!f.ground;
   }
-  assert.ok(Math.abs(highest-((21*20+WORLD_PLAYER_HEIGHT)-WORLD_ORIGIN_Y))<1e-6);
+  assert.ok(Math.abs(highest-((21*WORLD_TILE_SIZE+WORLD_PLAYER_HEIGHT)-WORLD_ORIGIN_Y))<1e-6);
   assert.equal(stopped,true);
 });
 test('world collision retains double jumps, punch repeat, and ability refill after landing',()=>{
@@ -75,12 +76,28 @@ test('foreground wraps horizontally while decorative backgrounds never collide',
   const m=motion(grid);
   assert.equal(m.collisionAt(100,24),0);assert.equal(m.collisionAt(-100,24),0);
   assert.equal(m.collisionAt(50,23),0);
-  assert.equal(m.solidAt(100*20-WORLD_ORIGIN_X+10,1),false);
+  assert.equal(m.solidAt(100*WORLD_TILE_SIZE-WORLD_ORIGIN_X+WORLD_TILE_SIZE/2,1),false);
 });
 test('falling below the world respawns through the event contract',()=>{
   const grid=world();for(const row of grid.fg)row.fill(0);
-  const m=motion(grid);m.y=830;m.ground=false;m.vy=400;
+  const m=motion(grid);m.y=(60-24+6)*WORLD_TILE_SIZE;m.ground=false;m.vy=400;
   const f=m.step(16,{});
   assert.equal(f.x,0);assert.equal(f.y,0);assert.equal(f.vx,0);assert.equal(f.vy,0);
   assert.ok(f.events.some(event=>event.type==='respawn'));
+});
+
+test('fractional camera positions rasterize adjacent tiles without partial texel edges',()=>{
+  const grid=uniformLandWorld(2,24,0);
+  for(const fraction of [.1,.35,.5,.9]) {
+    const calls=[];
+    renderWorld({drawImage(...args){calls.push(args);}},grid,()=>({}),
+      32+fraction,800+fraction,100,100,0,{layers:['fg']});
+    assert.ok(calls.length>=16);
+    for(const call of calls) {
+      assert.ok(Number.isInteger(call[5]));assert.ok(Number.isInteger(call[6]));
+      assert.equal(call[7],32);assert.equal(call[8],32);
+    }
+    const firstRow=calls.filter(call=>call[6]===calls[0][6]);
+    for(let i=1;i<firstRow.length;i++)assert.equal(firstRow[i][5]-firstRow[i-1][5],32);
+  }
 });

@@ -29,23 +29,42 @@ with sync_playwright() as p:
         page.get_by_role('button',name='World controls',exact=True).click()
         page.evaluate('P.world.respawn()')
         page.wait_for_function('plannerApp.lastFrame.x===0&&plannerApp.lastFrame.ground')
+        dimensions=page.evaluate("async()=>{const m=await import('/js/world-motion.mjs');return {tile:m.WORLD_TILE_SIZE,originX:m.WORLD_ORIGIN_X,originY:m.WORLD_ORIGIN_Y,half:m.WORLD_PLAYER_HALF_WIDTH}}")
+        assert dimensions['tile']==30, dimensions
+        # Read actual canvas alpha at fractional camera positions. Uniform opaque
+        # terrain must cover every pixel, including each native tile boundary.
+        assert page.evaluate("""async()=>{
+          const {renderWorld,uniformLandWorld}=await import('/js/land-system.mjs');
+          const atlas=document.createElement('canvas');atlas.width=atlas.height=1024;
+          const a=atlas.getContext('2d');a.fillStyle='#996633';a.fillRect(0,0,1024,1024);
+          const canvas=document.createElement('canvas');canvas.width=canvas.height=100;
+          const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
+          for(const fraction of [.1,.35,.5,.9]) {
+            c.clearRect(0,0,100,100);
+            renderWorld(c,uniformLandWorld(2,24,0),()=>atlas,32+fraction,800+fraction,100,100,0,{layers:['fg']});
+            const pixels=c.getImageData(0,0,100,100).data;
+            for(let i=3;i<pixels.length;i+=4)if(pixels[i]!==255)return false;
+          }
+          return true;
+        }"""), 'fractional tile rasterization exposed a transparent grid'
+        wall_stop=52*dimensions['tile']-dimensions['originX']-dimensions['half']
         # Use the actual screen projection and pointer handler to place a wall.
         def click_tile(tx,ty):
-            xy=page.evaluate('''([tx,ty])=>{
+            xy=page.evaluate('''([tx,ty,d])=>{
               const f=plannerApp.lastFrame,v=plannerApp.view,cv=document.querySelector('#pv'),r=cv.getBoundingClientRect();
-              return {x:r.left+(v.cameraPivotX+((tx+.5)*20-1010-f.x)*v.s*v.cameraZoom)*r.width/cv.width,
-                y:r.top+(v.cameraPivotY+(16*.78+((ty+.5)*20-480-f.y))*v.s*v.cameraZoom)*r.height/cv.height};
-            }''',[tx,ty])
+              return {x:r.left+(v.cameraPivotX+((tx+.5)*d.tile-d.originX-f.x)*v.s*v.cameraZoom)*r.width/cv.width,
+                y:r.top+(v.cameraPivotY+(16*.78+((ty+.5)*d.tile-d.originY-f.y))*v.s*v.cameraZoom)*r.height/cv.height};
+            }''',[tx,ty,dimensions])
             page.mouse.click(xy['x'],xy['y'])
-        click_tile(52,22)
-        assert page.evaluate('P.world.data.fg[22][52]===116')
+        click_tile(52,23)
+        assert page.evaluate('P.world.data.fg[23][52]===116')
         page.evaluate('P.world.setTool("play");document.activeElement?.blur()')
-        page.keyboard.down('d');page.wait_for_function('plannerApp.lastFrame.x>=21.9')
+        page.keyboard.down('d');page.wait_for_function('stop=>plannerApp.lastFrame.x>=stop-.1',arg=wall_stop)
         page.wait_for_timeout(180)
-        assert page.evaluate('Math.abs(plannerApp.lastFrame.x-22)<.01&&plannerApp.lastFrame.vx===0'), page.evaluate('({frame:plannerApp.lastFrame,wall:P.world.data.fg[22][52],mobile:P.preview.mobile})')
+        assert page.evaluate('stop=>Math.abs(plannerApp.lastFrame.x-stop)<.01&&plannerApp.lastFrame.vx===0',wall_stop), page.evaluate('({frame:plannerApp.lastFrame,wall:P.world.data.fg[23][52],mobile:P.preview.mobile})')
         page.keyboard.up('d')
-        page.evaluate('P.world.setTool("erase")');click_tile(52,22)
-        assert page.evaluate('P.world.data.fg[22][52]===0')
+        page.evaluate('P.world.setTool("erase")');click_tile(52,23)
+        assert page.evaluate('P.world.data.fg[23][52]===0')
         page.evaluate('P.world.setTool("play");document.activeElement?.blur()')
         page.keyboard.down('d');page.wait_for_function('plannerApp.lastFrame.x>45');page.keyboard.up('d')
         page.wait_for_timeout(300)
@@ -92,7 +111,7 @@ with sync_playwright() as p:
         page.locator('#world-new').click();assert page.evaluate('plannerApp.lastFrame.x===0')
         assert not errors,errors
         assert not failed,failed
-        results.append({'mobile':mobile,'blocks':1766,'placePointer':True,'wallCollision':True,'erasePointer':True,
+        results.append({'mobile':mobile,'blocks':1766,'tileScale':1.5,'opaqueTileBoundaries':True,'placePointer':True,'wallCollision':True,'erasePointer':True,
           'respawn':True,'modeSwitch':True,'chatFocus':True,'typingIsolation':True,'chatFontAndPanel':True,
           'chatAutosize':True,'safeText':True,'naturalBlink':True,'menuInert':True,'consoleErrors':errors,'httpFailures':failed})
         context.close()

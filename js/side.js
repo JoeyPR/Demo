@@ -24,7 +24,7 @@
   const A = {
     store(it) { it.gone = true; P.inv.sel = null; P.toast('Stored ' + it.name); },   /* disabled below */
     drop(it)  { it.gone = true; P.inv.sel = null; P.toast('Dropped ' + it.name); },
-    info(it)  { P.toast(`${it.name} · #${it.id} · ${it.script ? 'XML renderer' : 'sprite item'}`); },
+    info(it)  { P.emit('info-request', it); },
     fav(it)   { P.emit('fav-toggle', it); },
     wrench()  { P.emit('focus-wrench'); P.emit('open-tab', 'player'); }
   };

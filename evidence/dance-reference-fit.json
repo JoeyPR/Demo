@@ -1,0 +1,102 @@
+{
+  "reference": {
+    "filename": "386271.gif",
+    "sha256": "95d52a2d5a9106d7548145dde88042af6fdc3fe51a4a78bd0155562720abc3a8",
+    "width": 140,
+    "height": 128,
+    "frameCount": 218,
+    "durationMs": 7270,
+    "frameDurationsMs": [
+      30,
+      40
+    ]
+  },
+  "sourceRules": {
+    "source": "supplied Set Planner app.f9354b027b.js emoteSet/emoteStep state13",
+    "armTargetsDegrees": [
+      45,
+      135,
+      225,
+      315
+    ],
+    "armDegreesPerSecond": [
+      560,
+      1000
+    ],
+    "footTargetsLogicalPx": [
+      -2,
+      1
+    ],
+    "footSpeedLogicalPxPerSecond": 10,
+    "turnDurationMs": 1000,
+    "smileAtlasCell": [
+      0,
+      1
+    ]
+  },
+  "measurement": {
+    "scope": "214 dancing capture frames; brown arm silhouette outside the independently aligned static torso/head, excluding eyes, feet, background and shadow. Candidate arms rasterized from actual player_arm.png via the shared component renderer at native 2x scale. Head translation and facing were measured independently from the capture.",
+    "score": "Higher is better: adding an arm pixel scores+1 on a reference skin pixel and-1 on background, counting overlap once. Unchanged body pixels excluded.",
+    "constraints": "Source arm target families, opposing arms, rotation speeds and one-second turn sequence held fixed. Only fixed pose cadence and capture time origin varied.",
+    "candidates": [
+      {
+        "stepMs": 16.666666666666668,
+        "speedMultiplier": 1,
+        "captureOriginMs": 100,
+        "meanArmSilhouetteScore": -47.574766355140184
+      },
+      {
+        "stepMs": 25,
+        "speedMultiplier": 1,
+        "captureOriginMs": 100,
+        "meanArmSilhouetteScore": -25.962616822429908
+      },
+      {
+        "stepMs": 25,
+        "speedMultiplier": 1,
+        "captureOriginMs": 80,
+        "meanArmSilhouetteScore": -7.780373831775701
+      }
+    ],
+    "selectedStepMs": 25,
+    "selectedOriginBehavior": "No added command delay or lead; initial elapsed0 uses neutral arm positions with captured smile."
+  },
+  "limits": [
+    "This is source-assisted pose reconstruction using actual avatar components, not verified pixel-perfect parity with the official client.",
+    "Silhouette fitting cannot uniquely identify arms fully occluded by the head or torso.",
+    "Reference palette, antialiasing, camera scale and shadow differ from the planner; these were excluded from fitting.",
+    "The 25 ms cadence is a fitted renderer choice, not evidence of an official game simulation tick.",
+    "Special instrument-specific dances and their sound cues are not reconstructed by this generic /dance sequence."
+  ],
+  "perFrameExperiment": {
+    "angleCandidatesDegrees": {
+      "first": 0,
+      "last": 359,
+      "step": 1
+    },
+    "frameCount": 218,
+    "method": "Actual player components rasterized at native 2x scale in back arm, body, front arm order; front angle equals 360 minus back angle. Head translation and eye facing measured independently. RGB arm-region fit uses median skin-channel calibration from static head pixels. Dynamic programming limits arm motion to 1050 degrees/second, with a 0.05 score/degree motion cost and a 0.04 score/degree source-pose prior. The first four idle frames stay neutral.",
+    "armRegionCapturePixels": {
+      "x": [
+        42,
+        100
+      ],
+      "y": [
+        69,
+        107
+      ]
+    },
+    "sourcePrior": {
+      "stepMs": 24.75,
+      "captureOriginMs": 80,
+      "speedMultiplier": 1
+    },
+    "meanRgbSquaredErrorPerChannelSourcePrior": 2229.7024320128176,
+    "meanRgbSquaredErrorPerChannelFitted": 2151.6396856567603,
+    "relativeSquaredErrorReduction": 0.03501038759041386,
+    "runtimeAdopted": false,
+    "reason": "The 218-frame recording lasts 7270 ms, shorter than the 12000 ms combined four-second facing and 600 ms foot repeat. Candidate four-second loops have discontinuous arm and body poses: 1130 ms to 5130 ms differs by 58 degrees and 2 logical pixels. The continuous 25 ms source-rules sampler remains active.",
+    "measuredFrames": "dance-reference-poses.json",
+    "alignmentReproductionTool": "../tools/measure-dance-reference.py"
+  }
+}

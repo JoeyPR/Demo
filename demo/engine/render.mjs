@@ -32,7 +32,7 @@ function baseCalls(pose,wear,profile) {
   const body=(tag,atlas,sx,sy,sw,sh,matrix,pass="BODY",tint=wear.skin.slice(0,3),alpha=wear.alpha)=>{
     if(wear.invisible||wear.hide.has(tag)) return;
     if(wear.hideLegs&&["backFoot","frontFoot","backLeg","frontLeg"].includes(tag)) return;
-    out.push({...blank(),tag,atlas,sx,sy,sw,sh,matrix,pass,tint,alpha});
+    out.push({...blank(),tag,atlas,sx,sy,sw,sh,matrix,pass,tint,alpha,skinPalette:tint?wear.skinPalette:null});
   };
   body("body","player_body_only.png",0,0,32,32,IDENTITY);
   body("head","player_head.png",0,0,32,32,IDENTITY);
@@ -144,6 +144,7 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   const contributions=resolveWear(contributors,visual.skin);
   const wear={...resolveWear(visibleItems,visual.skin),skin:contributions.skin,
     alpha:contributions.alpha,invisible:contributions.invisible};
+  wear.skinPalette=contributions.skin===visual.skin?visual.skinPalette??null:null;
   if(visibleItems.some(item=>item.slot===3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
   const blink=visual.blinking===false?sampleBlink(0,{enabled:false}):pose.blink??
     sampleBlink(motion.clockMs,{seed:visual.blinkSeed??1,override:visual.blink??motion.blink});
@@ -169,6 +170,7 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   return calls.filter(call=>visual.effects!==false||!call.xmlParticle).map((call,index)=>({
     ...call,alpha:clamp(call.alpha??1,0,1),
     tint:call.tint==="SKIN"?wear.skin.slice(0,3):call.tint,
+    skinPalette:call.tint==="SKIN"?wear.skinPalette:call.skinPalette,
     matrix:call.world?call.matrix:compose(root,call.unlifted&&!visual.playerLift?.floating?
       translate(0,visual.playerLift?.vehicleY??0):lift,call.matrix),
     _index:index
