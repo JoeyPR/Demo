@@ -9,6 +9,7 @@ import {punchPoseFor,applyPunchPose} from "./punch-data.mjs";
 import {XmlParticleLayer} from "./xml-particles.mjs";
 import {resolveLook} from "./look.mjs";
 import {PunchTimeline} from "./punch-timeline.mjs";
+import {sampleBlink} from "./blink.mjs";
 
 // Integration entry point for Claude: supply catalog, items and MotionFrames.
 export class PlannerPlayer {
@@ -61,6 +62,8 @@ export class PlannerPlayer {
     }
     const punchPose=motion.punch&&visual.punchData!==false?punchPoseFor(this.items,this.punchData):null;
     if(punchPose&&!shotOwner)applyPunchPose(pose,punchPose);
+    pose.blink=sampleBlink(motion.clockMs,{enabled:visual.blinking!==false,seed:visual.blinkSeed??1,
+      override:visual.blink??motion.blink});
     const items=look.displayed.map(item=>({...item,hide:[...(item.hide??[]),...(dynamicHide.get(item.id)??[])]}));
     const lift=resolvePlayerLift(items,motion.clockMs,visual);
     const gait=look.displayed.find(i=>i.gait?.active)?.gait;

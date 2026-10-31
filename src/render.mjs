@@ -4,6 +4,7 @@ import { armMatrix, heldMatrix, punchMatrix, playerRoot } from "./rig.mjs";
 import { sampleFrames } from "./animation.mjs";
 import { spriteMatrix, samplePublicParts } from "./items.mjs";
 import { resolveLook } from "./look.mjs";
+import { sampleBlink, BLINK_LID, blinkFitsFace } from "./blink.mjs";
 
 // Semantic hide tags in our API. Never equate these with native numeric flags.
 const slotPass={0:"RenderHat",1:"RenderShirt",2:"RenderPants",3:"RenderShoes",4:"RenderFaceItem",
@@ -46,6 +47,11 @@ function baseCalls(pose,wear,profile) {
     const [x,y]=pose.face??[0,0];
     body("eyes","player_eyes.png",x*32,y*32,32,32,IDENTITY,"BODY",null,1);
     body("eyelids","player_eyes.png",x*32,(y+4)*32,32,32,IDENTITY,"BODY",wear.skin.slice(0,3),1);
+    if(pose.blink?.closure>0&&blinkFitsFace([x,y])&&!wear.hide.has("eyes")&&!wear.hide.has("eyelids")) {
+      const height=Math.min(BLINK_LID.height,Math.ceil(BLINK_LID.height*pose.blink.closure));
+      body("blinkLids",BLINK_LID.atlas,BLINK_LID.sx,BLINK_LID.sy,BLINK_LID.sw,height,
+        translate(0,BLINK_LID.y),"BODY",wear.skin.slice(0,3),1);
+    }
   }
   for(const side of ["back","front"]) {
     if(side==="back"&&pose.punch) {
@@ -139,7 +145,9 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   const wear={...resolveWear(visibleItems,visual.skin),skin:contributions.skin,
     alpha:contributions.alpha,invisible:contributions.invisible};
   if(visibleItems.some(item=>item.slot===3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
-  let calls=baseCalls(pose,wear,profile);
+  const blink=visual.blinking===false?sampleBlink(0,{enabled:false}):pose.blink??
+    sampleBlink(motion.clockMs,{seed:visual.blinkSeed??1,override:visual.blink??motion.blink});
+  let calls=baseCalls({...pose,blink},wear,profile);
   for(const item of visibleItems) {
     if(wear.noPants&&item.slot===2) continue;
     calls.push(...sampleItem(item,motion,pose,catalog,profile));

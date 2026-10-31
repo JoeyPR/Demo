@@ -1,0 +1,37 @@
+/* Preview Menu and Player Chat use the provided artwork unchanged. */
+#logo{display:none}
+#preview-actions{position:fixed;z-index:10;display:flex;align-items:center;gap:8px;
+  width:max-content;touch-action:manipulation}
+#preview-actions button{width:44px;height:44px;padding:3px;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--radius);touch-action:manipulation}
+#preview-actions button:focus-visible{outline:2px solid var(--line);outline-offset:2px}
+#preview-actions img{width:100%;height:100%;object-fit:contain}
+#preview-menu-button{cursor:default}
+#player-chat-composer,#player-chat-bubble{position:fixed;z-index:14;opacity:1;background:#277d9f;
+  border:var(--bd) solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000}
+#player-chat-composer[hidden],#player-chat-bubble[hidden]{display:none}
+#player-chat-composer{padding:10px;touch-action:pan-y;color:#fff}
+.player-chat-header,.player-chat-footer{display:flex;align-items:center;gap:8px}
+.player-chat-header{justify-content:space-between;margin-bottom:6px}
+#player-chat-label{font:700 16px/1.2 var(--font-main);text-shadow:1px 1px 0 #000}
+#player-chat-close,#player-chat-send{padding:6px 10px;border:1px solid var(--line);border-radius:var(--radius);
+  background:#246b88;box-shadow:1px 1px 0 #000,inset 1px 1px 0 #000;font:700 14px/1.2 var(--font-main)}
+#player-chat-close:focus-visible,#player-chat-send:focus-visible,#playerChat:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#playerChat{display:block;width:100%;min-height:32px;max-height:160px;resize:none;overflow-y:auto;
+  padding:5px 6px;border:0;background:transparent;color:#fff;outline:none;
+  font:400 18px/1.3 'Nameplate CG',sans-serif;text-shadow:1px 1px 0 #000;
+  user-select:text;-webkit-user-select:text;touch-action:pan-y;white-space:pre-wrap;overflow-wrap:anywhere}
+#playerChat::placeholder{color:#d9edf5;opacity:1}
+.player-chat-footer{margin-top:8px;flex-wrap:wrap}
+#player-chat-help{flex:1 1 180px;font:400 11px/1.3 var(--font-main);color:#d9edf5}
+#player-chat-count{font:400 11px/1.3 var(--font-main);color:#d9edf5;font-variant-numeric:tabular-nums}
+#player-chat-bubble{z-index:8;width:max-content;max-width:360px;padding:6px 9px;pointer-events:none;
+  transform:translate(-50%,-100%);font:400 var(--player-chat-font-size,18px)/1.25 'Nameplate CG',sans-serif;
+  white-space:pre-wrap;overflow-wrap:anywhere;user-select:none;text-shadow:1px 1px 0 #000}
+#player-chat-text{display:block;white-space:inherit;overflow-wrap:inherit}
+@media(max-width:900px),(hover:none) and (pointer:coarse){
+  #preview-actions{gap:6px}
+  #preview-actions button{width:40px;height:40px;padding:2px}
+  #player-chat-composer{padding:8px}
+}

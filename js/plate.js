@@ -129,7 +129,7 @@
     let im = sheetCache.get(name);
     if (!im) {
       im = new Image();
-      im.src = SHEETS_DIR + name;
+      im.src = SHEETS_DIR + name + (name==='tiles_page17.png'?'?v=20261031-new':'');
       sheetCache.set(name, im);
     }
     return im;

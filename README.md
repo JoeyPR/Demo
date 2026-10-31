@@ -1,6 +1,7 @@
 # Growtopia player rendering handoff
 
-**Current integrated planner:** [October 31 research renovation](docs/RESEARCH_RENOVATION.md).
+**Current integrated planner:** [playable world, blinking and Player Chat](docs/WORLD_CHAT_BLINK.md),
+building on the [October 31 research renovation](docs/RESEARCH_RENOVATION.md).
 Serve the repository root to use the main planner (`python -m http.server 9000`).
 The original rendering lab remains available under `/demo/`.
 

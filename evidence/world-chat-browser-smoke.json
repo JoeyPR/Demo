@@ -1,0 +1,38 @@
+[
+  {
+    "mobile": false,
+    "blocks": 1766,
+    "placePointer": true,
+    "wallCollision": true,
+    "erasePointer": true,
+    "respawn": true,
+    "modeSwitch": true,
+    "chatFocus": true,
+    "typingIsolation": true,
+    "chatFontAndPanel": true,
+    "chatAutosize": true,
+    "safeText": true,
+    "naturalBlink": true,
+    "menuInert": true,
+    "consoleErrors": [],
+    "httpFailures": []
+  },
+  {
+    "mobile": true,
+    "blocks": 1766,
+    "placePointer": true,
+    "wallCollision": true,
+    "erasePointer": true,
+    "respawn": true,
+    "modeSwitch": true,
+    "chatFocus": true,
+    "typingIsolation": true,
+    "chatFontAndPanel": true,
+    "chatAutosize": true,
+    "safeText": true,
+    "naturalBlink": true,
+    "menuInert": true,
+    "consoleErrors": [],
+    "httpFailures": []
+  }
+]

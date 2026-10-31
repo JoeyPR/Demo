@@ -64,7 +64,7 @@ function loadAtlas(name) {
   if(atlasLoads.has(name))return atlasLoads.get(name);
   const load=(async()=>{
     try {
-      const image=new Image();image.crossOrigin="anonymous";image.src=moduleURL(`./assets/${name}`).href;await image.decode();
+      const image=new Image();image.crossOrigin="anonymous";image.src=moduleURL(`./assets/${name}${name==='tiles_page17.png'?'?v=20261031-new':''}`).href;await image.decode();
       images.set(name,image);
       const atlas=registerAtlas(image),tint=atlas.tintedCrop;
       atlas.tintedCrop=call=>{

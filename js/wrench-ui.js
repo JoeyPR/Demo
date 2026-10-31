@@ -22,7 +22,7 @@
     let im = imgCache.get(name);
     if (!im) {
       im = new Image();
-      im.src = SHEETS + name;
+      im.src = SHEETS + name + (name==='tiles_page17.png'?'?v=20261031-new':'');
       imgCache.set(name, im);
     }
     return im;

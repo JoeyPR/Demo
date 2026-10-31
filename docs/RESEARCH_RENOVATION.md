@@ -1,5 +1,9 @@
 # October 31 research integration
 
+The subsequent [world, blink and Player Chat implementation](WORLD_CHAT_BLINK.md)
+adds terrain collision/editing and the newly supplied textures. Scope statements
+below describe this earlier renovation.
+
 This renovation starts at `de2711c629f97b01e49f5cc522a8af34f136d953` on
 `camera-quickslot-nameplate`. It uses the research pack, the first raw capture,
 and the larger Dropbox capture. The independent runtime remains in this repo;
