@@ -18,7 +18,7 @@
      sync by test). */
   const isLandOption = b =>
     /dirt|bedrock/i.test(String(b[1] || '')) &&
-    !/^data\\s+/i.test(String(b[1] || '').trim());
+    !/^data\s+/i.test(String(b[1] || '').trim());
   const pageImages = new Map(), pageLoads = new Map();
 
   /* ---------------- button + panel scaffolding ---------------- */
