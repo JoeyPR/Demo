@@ -9,6 +9,17 @@ on:
       - 'js/app.js'
       - 'js/drop.js'
       - 'js/weather.js'
+      - 'js/background.js'
+      - 'js/land.js'
+      - 'js/land-system.mjs'
+      - 'js/blackbox.js'
+      - 'js/drop-world.mjs'
+      - 'css/blackbox.css'
+      - 'css/dropdowns.css'
+      - 'index.html'
+      - 'data/blocks.json'
+      - 'data/land-blocks.json'
+      - 'test/background-blocks.test.mjs'
       - 'css/inv.css'
       - 'test/runtime-reliability.test.mjs'
       - 'test/drop-dialog.test.mjs'
@@ -22,6 +33,17 @@ on:
       - 'js/app.js'
       - 'js/drop.js'
       - 'js/weather.js'
+      - 'js/background.js'
+      - 'js/land.js'
+      - 'js/land-system.mjs'
+      - 'js/blackbox.js'
+      - 'js/drop-world.mjs'
+      - 'css/blackbox.css'
+      - 'css/dropdowns.css'
+      - 'index.html'
+      - 'data/blocks.json'
+      - 'data/land-blocks.json'
+      - 'test/background-blocks.test.mjs'
       - 'css/inv.css'
       - 'test/runtime-reliability.test.mjs'
       - 'test/drop-dialog.test.mjs'
@@ -35,4 +57,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test test/runtime-reliability.test.mjs test/drop-dialog.test.mjs test/inventory-filter.test.mjs
+      - run: node --test test/runtime-reliability.test.mjs test/drop-dialog.test.mjs test/inventory-filter.test.mjs test/background-blocks.test.mjs
