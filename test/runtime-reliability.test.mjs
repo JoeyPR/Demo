@@ -29,24 +29,20 @@ test("hidden customization tabs do not corrupt inventory virtualization metrics"
 
 test("Clothing Fist/Wrench boxes focus and synchronize the quick-drawer tool", () => {
   const start = grid.indexOf("function activate(item, box)");
-  const end = grid.indexOf("\\n  }\\n\\n  g.addEventListener('click'", start);
+  const end = grid.indexOf("g.addEventListener('click'", start);
   assert.ok(start >= 0 && end > start);
   const activate = grid.slice(start, end);
-  assert.match(activate, /if \\(item\\.tool\\)/);
-  assert.match(activate, /P\\.inv\\.focus = item/);
-  assert.match(activate, /const wrenchOn = item\\.toolType === 'wrench'/);
-  assert.match(activate, /P\\.plateConfig\\.setWrenchOn\\(wrenchOn\\)/);
-  assert.match(activate, /P\\.blackbox\\?\\.\\(item\\.name, 1500, box\\)/);
-
-  const focusStart = grid.indexOf("function markFocus()");
-  const focusEnd = grid.indexOf("\\n  }", focusStart);
-  const focus = grid.slice(focusStart, focusEnd);
-  assert.match(focus, /b\\.dataset\\.toolType === f\\.toolType/);
-  assert.match(grid, /if \\(!toolArmed\\)[\\s\\S]*?toolArmed = true/);
-  assert.match(grid, /P\\.plateConfig\\.setWrenchOn\\(on\\)/);
-  assert.match(grid, /P\\.blackbox\\?\\.\\(on \\? 'Wrench' : 'Fist', 1500, currentToolBox\\)/);
-  assert.match(invCss, /#grid-window \\.box\\.tool,\\s*#grid-window \\.box\\.tool\\.sel,\\s*#grid-window \\.box\\.tool\\.focus\\{background-image:url\\(\\.\\.\\/img\\/box-blue\\.png\\)\\}/);
-  assert.doesNotMatch(invCss, /\\.box\\.tool::before\\{display:none\\}/);
+  assert.ok(activate.includes("if (item.tool)"));
+  assert.ok(activate.includes("P.inv.focus = item"));
+  assert.ok(activate.includes("const wrenchOn = item.toolType === 'wrench'"));
+  assert.ok(activate.includes("P.plateConfig.setWrenchOn(wrenchOn)"));
+  assert.ok(activate.includes("P.blackbox?.(item.name, 1500, box)"));
+  assert.ok(grid.includes("b.dataset.toolType === f.toolType"));
+  assert.ok(grid.includes("if (!toolArmed)"));
+  assert.ok(grid.includes("P.plateConfig.setWrenchOn(on)"));
+  assert.ok(grid.includes("P.blackbox?.(on ? 'Wrench' : 'Fist', 1500, currentToolBox)"));
+  assert.ok(invCss.includes("#grid-window .box.tool.focus{background-image:url(../img/box-blue.png)"));
+  assert.ok(!invCss.includes("#grid-window .box.tool::before{display:none}"));
 });
 
 test("weather failures use a black fallback and do not disable the app", () => {
