@@ -16,7 +16,9 @@
   /* The only land options are the Dirt and Bedrock families. This is the
      same policy as isDirtOrBedrockName() in js/land-system.mjs (kept in
      sync by test). */
-  const isLandOption = b => /dirt|bedrock/i.test(b[1]);
+  const isLandOption = b =>
+    /dirt|bedrock/i.test(String(b[1] || '')) &&
+    !/^data\\s+/i.test(String(b[1] || '').trim());
   const pageImages = new Map(), pageLoads = new Map();
 
   /* ---------------- button + panel scaffolding ---------------- */
