@@ -134,6 +134,51 @@ export function registerBlocks(rows) {
   return BLOCKS;
 }
 
+/* Background-wall catalog. The Demo data/blocks.json rows are objects whose
+   kind is "bg"; they share the same source atlas geometry as foreground land,
+   but are always non-colliding and rendered through world.bg. Preserve each
+   block's own spread type so its atlas variants remain correct. */
+export const BACKGROUND_BLOCK_IDS = new Set();
+export function registerBackgroundBlocks(rows) {
+  BACKGROUND_BLOCK_IDS.clear();
+  for (const row of rows || []) {
+    if (!row || row.kind !== "bg") continue;
+    const id = Number(row.id);
+    const name = String(row.name || "").trim();
+    const texture = String(row.texture || "").trim();
+    const tx = Number(row.tx), ty = Number(row.ty), spread = Number(row.spread_type);
+    if (!Number.isInteger(id) || id <= 0 || !name ||
+        /null_item|unavailable/i.test(name) ||
+        !texture || /null_item|unavailable/i.test(texture) ||
+        !Number.isFinite(tx) || !Number.isFinite(ty) ||
+        !Number.isInteger(spread) || spread < 1) continue;
+
+    const page = texture.replace(/\\.png$/i, "");
+    BLOCKS[id] = {
+      ...(BLOCKS[id] || {}),
+      name: name.toLowerCase(),
+      spread,
+      atlas: [tx, ty],
+      collision: 0,
+      collisionType: 0,
+      page,
+      layer: "bg",
+      eligible: true,
+      unsupported: false,
+      twoDir: false,
+      blobClamp: null,
+      animMs: 0,
+      animFrames: 0,
+      animDir: null,
+      tintRgb: null,
+      physicsApprox: false,
+      spreadApprox: spread === 8 || spread === 10,
+    };
+    BACKGROUND_BLOCK_IDS.add(id);
+  }
+  return BLOCKS;
+}
+
 /* Tinted-atlas cache: items with `tintRgb` have grayscale art that the client
  * colors by multiplying each pixel's RGB by the tint (alpha preserved). We
  * pre-tint a copy of the whole atlas PAGE once per (image, tint) and draw
@@ -459,8 +504,19 @@ export function renderWorld(ctx, world, atlas, camX, camY, viewW, viewH, now = D
  * blocks and is not drawn when there is no land. */
 
 export const CAVE_BACKGROUND_ID = 14;
+export const DEFAULT_BACKGROUND_ID = CAVE_BACKGROUND_ID;
 export const LAND_NONE = 'none';
 export const DEFAULT_LAND_ID = 2;   /* Dirt — the default land */
+
+/* Resolve only real, renderable background-layer items from data/blocks.json.
+ * A background is decorative: its world layer never participates in collision. */
+export function resolveBackgroundSelection(value) {
+  if (value == null || value === 'none') return null;
+  const id = Number(value);
+  if (!Number.isInteger(id) || !BACKGROUND_BLOCK_IDS.has(id)) return null;
+  const def = BLOCKS[id];
+  return def && !def.unsupported && def.layer === 'bg' ? id : null;
+}
 
 /* A land option is any block whose name is from the Dirt or Bedrock family. */
 export function isDirtOrBedrockName(name) {
@@ -484,11 +540,24 @@ export function resolveLandSelection(value) {
  * the background layer (renderWorld draws bg first, so it sits behind the
  * blocks). The top row picks up the block's top-edge autotile variant;
  * world-edge columns read as connected so scrolling wraps cleanly. */
-export function uniformLandWorld(blockId, topRow = 24) {
+export function uniformLandWorld(blockId, topRow = 24, backgroundId = CAVE_BACKGROUND_ID) {
   const fg = [], bg = [];
   for (let y = 0; y < WORLD_H; y++) {
     fg.push(new Array(WORLD_W).fill(y < topRow ? 0 : blockId));
-    bg.push(new Array(WORLD_W).fill(y < topRow ? 0 : CAVE_BACKGROUND_ID));
+    bg.push(new Array(WORLD_W).fill(y < topRow ? 0 : (backgroundId ?? 0)));
+  }
+  return { seed: 1, fg, bg, flip: {} };
+}
+
+/* A full-viewport wall of one selected background block. Every tile is in the
+   background layer, matching Cave Background's non-colliding wall behavior. */
+export function uniformBackgroundWorld(blockId) {
+  const resolved = resolveBackgroundSelection(blockId);
+  if (resolved == null) return null;
+  const fg = [], bg = [];
+  for (let y = 0; y < WORLD_H; y++) {
+    fg.push(new Array(WORLD_W).fill(0));
+    bg.push(new Array(WORLD_W).fill(resolved));
   }
   return { seed: 1, fg, bg, flip: {} };
 }
