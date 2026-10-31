@@ -10,7 +10,7 @@ import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
 import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
-import { registerBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
+import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, WORLD_W, WORLD_PX_W, CAVE_BACKGROUND_ID, DEFAULT_BACKGROUND_ID, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, resolveBackgroundSelection, uniformLandWorld, uniformBackgroundWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset } from "./player-shadow.mjs";
@@ -23,6 +23,7 @@ const avatar = document.createElement("canvas"), avatarCtx = avatar.getContext("
 const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarShadow.getContext("2d");
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
 const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
+const backgroundCanvas = document.createElement("canvas"), backgroundCtx = backgroundCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
 const pickupSprite = new Image();
 pickupSprite.src = moduleURL("../img/pickup.png").href;
@@ -42,7 +43,7 @@ const state = {
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
   weatherFailedKey: null,
   ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
+  landBlock: null, landWorld: null, backgroundBlock: DEFAULT_BACKGROUND_ID, backgroundWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
   pickups: [], nextPickupId: 1
 };
 let player, motion, lastTimestamp = 0;
@@ -370,24 +371,30 @@ function landPage(name) {
 }
 const DEFAULT_LAND = DEFAULT_LAND_ID;   /* Dirt — the default land the player walks on */
 function setLand(id) {
-  /* Only the Dirt and Bedrock families are land options, plus a genuine
-     None: no land at all (and therefore no Cave Background — it is a backdrop
-     behind land blocks, never drawn on its own). Legacy unsupported picks
-     normalize to None via resolveLandSelection. */
   const resolved = resolveLandSelection(id);
   if (resolved === LAND_NONE) { state.landBlock = null; state.landWorld = null; return; }
   const def = BLOCKS[resolved];
   landPage(def.page || "tiles_page1");
-  /* Cave Background renders BEHIND the blocks: it fills the world's background
-     layer (renderWorld draws bg before fg), so its sheet page must load too. */
-  landPage(BLOCKS[CAVE_BACKGROUND_ID].page || "tiles_page1");
+  const backgroundId = state.backgroundBlock ?? CAVE_BACKGROUND_ID;
+  const backgroundDef = BLOCKS[backgroundId];
+  if (backgroundDef) landPage(backgroundDef.page || "tiles_page1");
   state.landBlock = resolved;
-  /* uniform world: rows 0-23 air, rows 24-59 the selected block with Cave
-     Background behind it — the top row picks up the block's top-edge autotile
-     variant; world-edge columns read as connected so scrolling wraps cleanly */
-  state.landWorld = uniformLandWorld(resolved);
+  state.landWorld = uniformLandWorld(resolved, 24, backgroundId);
+}
+function setBackground(id) {
+  const resolved = resolveBackgroundSelection(id);
+  state.backgroundBlock = resolved;
+  state.backgroundWorld = resolved == null ? null : uniformBackgroundWorld(resolved);
+  if (resolved != null) {
+    const def = BLOCKS[resolved];
+    landPage(def.page || "tiles_page1");
+  }
+  /* The same selected wall continues behind the foreground land strip. */
+  if (state.landBlock != null)
+    state.landWorld = uniformLandWorld(state.landBlock, 24, resolved ?? CAVE_BACKGROUND_ID);
 }
 P.on("land", id => setLand(id));
+P.on("background", id => setBackground(id));
 function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   // Render land blocks at 20 screen-units per 32-unit source tile: the
   // midpoint between 16 and 24. Grid coordinates stay native at 32 per tile.
@@ -406,6 +413,28 @@ function drawLandGround(w, h, ground, s, frame, zoom, cameraWorldX = frame.x) {
   if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
   const dx = (w - lw * landS) / 2;
   ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS);
+}
+
+function drawBackgroundTiles(w, h, s, camera) {
+  if (!state.backgroundWorld) return;
+  const tileScale = s * (20 / 32);
+  const bw = Math.ceil(w / tileScale) + 2;
+  const bh = Math.ceil(h / tileScale) + 2;
+  if (backgroundCanvas.width !== bw || backgroundCanvas.height !== bh) {
+    backgroundCanvas.width = bw;
+    backgroundCanvas.height = bh;
+  }
+  backgroundCtx.imageSmoothingEnabled = false;
+  backgroundCtx.clearRect(0, 0, bw, bh);
+  const camX = Math.floor(camera.cameraWorldX - camera.cameraPivotX / tileScale);
+  const camY = Math.floor(camera.cameraWorldY - camera.cameraPivotY / tileScale);
+  const span = WORLD_PX_W;
+  const wrappedX = ((camX % span) + span) % span;
+  const atlasFn = page => landImages.get(page) ?? null;
+  renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX, camY, bw, bh, state.clock);
+  if (wrappedX + bw > span)
+    renderWorld(backgroundCtx, state.backgroundWorld, atlasFn, wrappedX - span, camY, bw, bh, state.clock);
+  ctx.drawImage(backgroundCanvas, 0, 0, bw, bh, 0, 0, bw * tileScale, bh * tileScale);
 }
 
 /* ---------------- ancestral -------------------------------------------- */
@@ -554,6 +583,8 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
   c.scale(zoom, zoom);
   c.translate(-cameraPivotX, -cameraPivotY);
 
+  /* Selected Growtopia BG block tiles the viewport behind the player. */
+  drawBackgroundTiles(w, h, s, camera);
   const playerRect = playerVisualRect(b, rootX, rootY, s);
   const shadowOffset = playerShadowOffset(-1);
   // The player shadow is always projected to the left, independent of facing.
@@ -1019,11 +1050,19 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     motion.setAbilities(state.abilities);
     await loadAncestrals();
     try {
-      const rows = await (await fetch(moduleURL("../data/land-blocks.json?v=2"))).json();
-      registerBlocks(rows);
-    } catch { /* land tab will report unavailable */ }
-    /* set the land before the first frame so the scene is complete (Dirt by
-       default; a saved 'none' or a legacy unsupported pick renders no land) */
+      const [landResponse, backgroundResponse] = await Promise.all([
+        fetch(moduleURL("../data/land-blocks.json?v=2")),
+        fetch(moduleURL("../data/blocks.json"))
+      ]);
+      if (!landResponse.ok || !backgroundResponse.ok) throw new Error("Block catalog unavailable");
+      const [landRows, backgroundRows] = await Promise.all([landResponse.json(), backgroundResponse.json()]);
+      registerBlocks(landRows);
+      registerBackgroundBlocks(backgroundRows);
+    } catch (error) {
+      console.warn("[Background] Block catalog could not be loaded.", error);
+    }
+    /* Load the saved wall before the first frame so the scene starts complete. */
+    setBackground(P.store.get("background", String(DEFAULT_BACKGROUND_ID)));
     setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
 
     state.ready = true;
