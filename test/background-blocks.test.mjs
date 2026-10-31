@@ -66,7 +66,7 @@ test("the selected wall is also used behind the foreground land strip", () => {
 
 test("Land omits Data-prefixed aliases such as duplicate candy and melon bedrock", () => {
   const choices = landRows.filter(row =>
-    /dirt|bedrock/i.test(row[1]) && !/^data\\s+/i.test(row[1].trim())
+    /dirt|bedrock/i.test(row[1]) && !row[1].trim().startsWith("Data ")
   );
   assert.equal(choices.length, 14);
   assert.ok(choices.every(row => !row[1].trim().startsWith("Data ")));
