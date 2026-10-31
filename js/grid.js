@@ -329,29 +329,31 @@
   }
 
   /* ---------------- box-focus activation (the four-click state machine) --- */
-  function activate(item) {
+  function activate(item, box) {
     const f = P.inv.focus;
     if (item.tool) {
-      /* Wardrobe tool boxes are direct actions, not wearable items:
-         one click selects Fist (off) or Wrench (on), with no focus state. */
+      /* Clothing tools mirror the normal item-box focus state, while also
+         selecting the matching Fist/Wrench art in the top drawer. */
       toolArmed = false;
-      P.inv.focus = null;
+      P.inv.focus = item;
       const wrenchOn = item.toolType === 'wrench';
       const pc = P.plateConfig.get();
       P.plateConfig.setWrenchOn(wrenchOn);
       if (wrenchOn && !pc.growId.trim())
         P.toast('Type your GrowID in Player Customization to pull up the wrench.');
       markFocus();
+      P.blackbox?.(item.name, 1500, box);
       return;
     }
-    toolArmed = false;                         /* any real-item activation resets the tool sequence */
+    toolArmed = false;
     if (f && !f.tool && f.id === item.id) {
-      P.inv.focus = null;                      /* consume the focus */
-      P.emit('equip', { id: item.id });        /* equipped -> unequips, else equips */
+      P.inv.focus = null;
+      P.emit('equip', { id: item.id });
     } else {
       P.inv.focus = item;
     }
     markFocus();
+    P.blackbox?.(item.name, 1500, box);
   }
 
   g.addEventListener('click', e => {
@@ -360,7 +362,7 @@
     const item = P.inv.itemById(+b.dataset.id);
     if (!item) return;
     if (item.wearable === false) { P.toast(item.name + ' is a placeholder — custom clothing is not rendered by this engine.'); return; }
-    activate(item);
+    activate(item, b);
   });
 
   /* ---------------- quick drawer ---------------------------------------- */
@@ -392,14 +394,22 @@
     ic.append(img);
     b.append(ic);
     b.addEventListener('click', () => {
-      P.inv.focus = { tool: true };
-      markFocus();
-      if (!toolArmed) { toolArmed = true; return; }   /* first click: box-focus only */
       const pc = P.plateConfig.get();
+      const activeType = pc.wrenchOn ? 'wrench' : 'fist';
+      P.inv.focus = { tool: true, toolType: activeType };
+      markFocus();
+      if (!toolArmed) {
+        toolArmed = true;
+        P.blackbox?.(activeType === 'wrench' ? 'Wrench' : 'Fist', 1500, b);
+        return;
+      }
       const on = !pc.wrenchOn;
       P.plateConfig.setWrenchOn(on);
       if (on && !pc.growId.trim()) P.toast('Type your GrowID in Player Customization to pull up the wrench.');
-      setToolArt(on);
+      P.inv.focus = { tool: true, toolType: on ? 'wrench' : 'fist' };
+      markFocus();
+      const currentToolBox = P.$('#quick .box.tool') || b;
+      P.blackbox?.(on ? 'Wrench' : 'Fist', 1500, currentToolBox);
     });
     return b;
   }
@@ -418,7 +428,6 @@
       b.setAttribute('aria-label', 'Empty quick slot — equipped items stay in the inventory');
       b.addEventListener('click', () => {
         P.tabs.open('cloth');
-        if (!P.$('#q').disabled) P.$('#q').focus();
         P.toast('Equipped items are listed in the inventory.');
       });
       quick.append(b);
@@ -430,8 +439,9 @@
   function markFocus() {
     const f = P.inv.focus;
     for (const b of win.querySelectorAll('.box')) {
-      /* Fist/Wrench are action buttons and never receive box-focus art. */
-      const matches = !b.classList.contains('tool') && !!f && !f.tool && +b.dataset.id === f.id;
+      const matches = !!f && (f.tool
+        ? b.dataset.toolType === f.toolType
+        : !b.classList.contains('tool') && +b.dataset.id === f.id);
       b.classList.toggle('focus', matches);
     }
     for (const b of P.$('#quick .box')) {
@@ -446,8 +456,9 @@
   P.on('catalog', () => { build(); renderFilterOptions(); P.inv.refresh(); renderQuick(); });
   P.on('tab', () => P.inv.refresh());
   P.on('searchOn', on => {
+    /* Tab changes may enable search, but must never summon the mobile keyboard.
+       The user opens the keyboard only by tapping the search field itself. */
     searchOn = on;
-    if (searchOn) P.$('#q').focus();
     P.inv.refresh();
   });
   P.on('fav-toggle', it => {
