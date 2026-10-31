@@ -1,0 +1,206 @@
+{
+  "count": 20,
+  "items": [
+    {
+      "id": 16434,
+      "name": "Blades of Athena",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        8,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16436,
+      "name": "Helmet of Horrors",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        6,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16442,
+      "name": "Pop Zombie Shoes",
+      "iconAtlas": "player_feet16_icon.png",
+      "iconCell": [
+        18,
+        26
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16444,
+      "name": "Torn Ribbon Wings",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        9,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16448,
+      "name": "Pop Zombie Face",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        10,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16450,
+      "name": "Pop Zombie Hair",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        12,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16452,
+      "name": "Pop Zombie Jacket",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        13,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16454,
+      "name": "Pop Zombie Pants",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        14,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16456,
+      "name": "Obsessive Partner Shorts",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        18,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16458,
+      "name": "Obsessive Partner Top",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        17,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16460,
+      "name": "Pet Cyclops",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        11,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16462,
+      "name": "Raggedy Dress",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        16,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16464,
+      "name": "Raggedy Hair",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        15,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16466,
+      "name": "Sad Jester Arms",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        20,
+        12
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16468,
+      "name": "Sad Jester Cap",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        19,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16470,
+      "name": "Sad Jester Face",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        23,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16472,
+      "name": "Sad Jester Hair",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        20,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16474,
+      "name": "Sad Jester Shoes",
+      "iconAtlas": "player_feet16_icon.png",
+      "iconCell": [
+        10,
+        28
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16476,
+      "name": "Sad Jester Shorts",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        21,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    },
+    {
+      "id": 16478,
+      "name": "Sad Jester Suit",
+      "iconAtlas": "player_cosmetics4_icon.png",
+      "iconCell": [
+        22,
+        13
+      ],
+      "status": "missing-wearable-renderer-and-motion-data"
+    }
+  ],
+  "reason": "The icon index is not a wearable render descriptor; the captured renderers directory contains no definitions."
+}

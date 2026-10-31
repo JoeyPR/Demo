@@ -37,6 +37,7 @@ function align(a, w, h) {
 }
 class Script {
   constructor(name, data, atlases, seed = 1) {
+    this.maxParticles = 2048; this.maxSystemParticles = 512;
     this.name = name; this.data = data; this.atlases = atlases; this.rand = mulberry(seed);
     this.vars = new Map(); this.t = 0; this.tick = 0; this.states = {}; this.sinceJump = 1e9;
     this.sprites = new Map();
@@ -110,6 +111,7 @@ class Script {
     if (n === 'pet.velocity.length') return h.pet?.speed ?? Math.hypot(...(h.pet?.v ?? [0, 0]));
     if (n === 'pet.facingLeft') return (h.pet?.face ?? 1) < 0;
     if (n === 'distanceToPet') return h.pet?.dist ?? 0;
+    if (n === 'punching') return h.punching;
     if (n === 'onGround') return h.onGround;
     if (n === 'Player.GetFacing') return h.facing;
     if (n === 'punchCount') return h.punches || 0;
@@ -127,9 +129,9 @@ class Script {
     switch (n.tag) {
       case 'Condition': case 'SubCondition': return (a.type || 'and').toLowerCase() === 'or' ? n.c.some(c => this.cond(c)) : n.c.every(c => this.cond(c));
       case 'IsAction': k = this.actionIs(w); break;
-      case 'IsWearing': k = false; break;                       // planner supplies equipped set; none assumed here
+      case 'IsWearing': { const id = Number(w || a.item || a.id); k = (this.host.equippedIds || []).includes(id); break; }                       // planner supplies equipped set; none assumed here
       case 'IsInState': k = this.inStates(a.name) === bool(w); break;
-      case 'IsVariableBool': k = !!this.getVar(a.name) === bool(w); break;
+      case 'IsVariableBool': { const v = this.getVar(a.name); if (v === undefined) { note('unknown-condition:' + a.name); return false; } k = !!v === bool(w); break; }
       case 'IsVariableFloat': { let x = num(this.getVar(a.name)); if (bool(a.abs)) x = Math.abs(x); return this.cmp(x, num(this.value(w)), O); }
       case 'CompareCustomVariable': { const l = num(this.getVar(a.VariableNameToCompare)), r = a.RightHSVariableNameToCompare ? num(this.getVar(a.RightHSVariableNameToCompare)) : num(this.value(w)); return this.cmp(l, r, O); }
       case 'IsFacingLeft': k = (this.host.facing < 0) === bool(w || 'true'); break;
@@ -215,6 +217,7 @@ class Script {
   runStage(name) { for (const n of this.stages[name] || []) this.exec(n); }
   // ---- stepping ------------------------------------------------------------
   step(dt, host) {
+    if (!Number.isFinite(dt) || dt <= 0) return;
     this.host = host; this.tick++; this.t += dt;
     this.sinceJump = host.justJumped ? 0 : this.sinceJump + dt * 1000;
     this.punchStarting = !!host.punchStart;
@@ -293,8 +296,10 @@ class Script {
     for (const p of s.live) {
       p.age += dt;
       if (p.vel1) { const x = Math.min(1, p.age / p.life); p.vel = [lerp(p.vel0[0], p.vel1[0], x), lerp(p.vel0[1], p.vel1[1], x)]; }
+      p.pos[0] += p.vel[0] * dt + .5 * (p.grav?.[0] ?? 0) * dt * dt;
+      p.pos[1] += p.vel[1] * dt + .5 * (p.grav?.[1] ?? 0) * dt * dt;
       if (p.grav) { p.vel[0] += p.grav[0] * dt; p.vel[1] += p.grav[1] * dt; }
-      p.pos[0] += p.vel[0] * dt; p.pos[1] += p.vel[1] * dt; p.angle += p.spin * dt;
+      p.angle += p.spin * dt;
     }
     s.live = s.live.filter(p => p.inf || p.age < p.life);
     const sec = s.attr.secondary && this.byName.get(s.attr.secondary);
@@ -303,8 +308,9 @@ class Script {
       R.age += dt; R.next -= dt;
       const n = parseInt(sec.es.particlesToEmit) || 0, per = parseInt(sec.es.particlesPerEmission) || 1, iv = parseFloat(sec.es.emissionInterval) || 0, lt = parseFloat(sec.es.lifeTime) || 0;
       if (R.next <= 0 && (!n || R.emitted < n) && (!lt || R.age <= lt)) {
-        for (let i = 0; i < per; i++) this.spawn(sec, R.emitted * per + i, p.pos);
-        R.emitted++; R.next = iv <= 0 ? Infinity : iv;
+        const count = Math.min(per, n ? n - R.emitted : per, this.maxSystemParticles);
+        for (let i = 0; i < count; i++) this.spawn(sec, R.emitted + i, p.pos);
+        R.emitted += count; R.next = iv <= 0 ? Infinity : iv;
       }
     }
   }
@@ -317,17 +323,15 @@ class Script {
       s.wasIn = inn; if (!inn) return;
     }
     const E = s.es, e = s.age; s.age += dt;
+    if (E.enable !== undefined && !bool(this.resolve(s, 'em', 'enable', false, {}))) return;
     const delay = parseFloat(E.delayTimer) || 0, life = parseFloat(E.lifeTime) || 0;
     if (!bool(E.infLifeTime) && life > 0 && e > life + delay) {
-      const st = s.attr.updateStage;
-      if (st !== 'AddClothingParticles' && st !== 'Update' && !/^Render/.test(st || '') && s.pulse === undefined && !s.stepped) return;
-      s.age = dt; s.emitted = 0; s.next = 0;
-      if (s.pulse !== undefined && life <= 0.034 && (parseFloat(s.ps.lifeTime ?? 1) || 1) <= 0.05) s.live.length = 0;
+      return; // Finite emitters restart only on an explicit action/state activation.
     }
     if (s.age < delay) return;
     const inf = bool(E.infParticles), chk = bool(E.checkParticleNumToEmit);
     s.next -= dt;
-    if (s.next <= 0) {
+    for (let batches = 0; s.next <= 0 && batches < 64; batches++) {
       const ev = {};
       for (const q of s.em.c) if (q.tag === 'Random' && q.a.name) { const lo = nums(q.a.min), hi = nums(q.a.max); const o = lo.map((x, i) => x + ((hi[i] ?? x) - x) * this.rand()); ev[q.a.name] = o.length === 1 ? o[0] : o; }
       s.emitV = ev;
@@ -336,8 +340,9 @@ class Script {
       if (tot && !inf && s.emitted >= tot) return;
       const iv = ev.emissionInterval !== undefined ? num(ev.emissionInterval) : bool(E.randomizeInterval) ? lerp(parseFloat(E.intervalMin ?? 0.1), parseFloat(E.intervalMax ?? E.intervalMin ?? 0.1), this.rand()) : parseFloat(E.emissionInterval ?? 0);
       if (tot && chk && s.emitted >= tot) { s.next = iv || 0.05; return; }
-      for (let i = 0; i < per; i++) this.spawn(s, s.emitted * per + i);
-      s.emitted++; s.next = iv <= 0 ? Infinity : iv;
+      const count = Math.min(per, tot && !inf ? Math.max(0, tot - s.emitted) : per, this.maxSystemParticles);
+      for (let i = 0; i < count; i++) this.spawn(s, s.emitted + i);
+      s.emitted += count; s.next = iv <= 0 ? Infinity : s.next + Math.max(.001, iv);
     }
   }
   handBase(s) {
@@ -350,6 +355,7 @@ class Script {
     return null;
   }
   spawn(s, idx, at = null) {
+    if (s.live.length >= this.maxSystemParticles || this.systems.reduce((n, sys) => n + sys.live.length, 0) >= this.maxParticles) { note('particle-budget:' + this.name); return; }
     const h = this.host, ps = s.ps, A = s.pa.a, cache = {}, rel = bool(ps.relativeToEmitter);
     let base;
     const hb = !at && this.handBase(s);
@@ -396,7 +402,7 @@ class Script {
     if (bool(A.alternateSpriteFrameWithPunch)) frame = [sp.frame[0] + (((h.punches || 1) + 1) % 2), sp.frame[1]];
     else if (frames.length && bool(A.randomSpriteFrame)) frame = frames[Math.floor(this.rand() * frames.length)];
     else if (frames.length && (bool(A.particleIndexSpriteFrame) || bool(ps.inSpecificOrder))) frame = frames[idx % frames.length];
-    else if (frames.length) an = { frames, len: anim.a.animTime !== undefined ? anim.len : frames.length * TICK, loop: true };
+    else if (frames.length) an = { frames, len: anim.a.animTime !== undefined ? anim.len : frames.length * TICK, loop: anim.loop };
     const grav = bool(ps.useGravity) ? two(val(ps.gravityVector ?? '0,0')) : null;
     const ang0 = num(this.resolve(s, 'pa', 'initialAngle', 0, cache));
     for (const sv of s.pa.c.filter(c => c.tag === 'SetVar')) if (sv.a.name) this.vars.set(sv.a.name, this.ref(s, 'pa', sv.a.source, 0, cache));
@@ -406,7 +412,7 @@ class Script {
       pos: P0, vel: [v0[0] ?? 0, v0[1] ?? 0], vel0: v1 ? [v0[0] ?? 0, v0[1] ?? 0] : null, vel1: v1 ? [v1[0] ?? 0, v1[1] ?? 0] : null,
       grav, age: 0, life, inf: bool(ps.infLifeTime), sprite: spr, frame, anim: an,
       scale0: [sc0[0] ?? 1, sc0[1] ?? sc0[0] ?? 1], scale1: sc1, rgb, angle: ang0, spin: num(this.resolve(s, 'pa', 'initialRotationRate', 0, cache)),
-      world: !rel && !at ? [h.x, h.y, h.facing < 0 ? -1 : 1] : null, roff: rel ? ep : null, orbitStart: num(this.resolve(s, 'pa', 'orbitStart', 0, cache))
+      world: !rel && !at ? [h.x, h.y, h.facing < 0 ? -1 : 1] : null, roff: null, orbitStart: num(this.resolve(s, 'pa', 'orbitStart', 0, cache))
     });
   }
   // ---- drawing -------------------------------------------------------------
@@ -443,20 +449,25 @@ class Script {
         }
       }
       if (bool(ps.relativeToEmitter)) {
-        const e = this.emitterPos(s); let ex = e[0], ey = e[1];
-        if (p.roff) { ex += p.roff[0] ?? 0; ey += p.roff[1] ?? 0; }
-        X += ex; Y += ey; sx *= e[2]; sy *= e[2]; X = fc * X;
+        const e = this.emitterPos(s), anchor = this.handBase(s);
+        X += e[0]; Y += e[1]; sx *= e[2]; sy *= e[2];
+        if (anchor) {
+          const c = Math.cos(anchor[2] ?? 0), sn = Math.sin(anchor[2] ?? 0);
+          [X, Y] = [anchor[0] + c * X - sn * Y, anchor[1] + sn * X + c * Y];
+        }
+        X *= fc;
       } else if (p.world) {
         X = p.world[2] * X + p.world[0] - this.host.x; Y += p.world[1] - this.host.y; screenDirect = true;
-        if (fc !== p.world[2]) ang = 180 - ang;
+        // World-born sprite orientation belongs to its birth facing.
       } else X = fc * X;
       if (bool(ps.isBeamParticle)) {
         const tx = this.host.target[0] - 16, ty = this.host.target[1] - 32;
         ang = Math.atan2(ty - Y, fc * tx - X) * 180 / Math.PI; sx = Math.hypot(fc * tx - X, ty - Y) / sp.w;
       }
-      out.push({ atlas: sp.atlas, sx: fr[0] * sp.w, sy: fr[1] * sp.h, sw: sp.w, sh: sp.h, X, Y, ang: fc < 0 ? -ang : ang,
-        kx: sx * (bool(ps.flipX) ? -1 : 1) * (fc < 0 ? -1 : 1), ky: sy * (bool(ps.flipY) ? -1 : 1), ax, ay,
-        alpha: Math.min(1, al), add, tint: rgb ? rgb.map(v => Math.round(Math.min(1, v) * 255)) : null, screenDirect });
+      if (![X, Y, sx, sy, ang, al, fr?.[0], fr?.[1]].every(Number.isFinite)) { note('non-finite-particle:' + this.name); continue; }
+      out.push({ atlas: sp.atlas, sx: fr[0] * sp.w, sy: fr[1] * sp.h, sw: sp.w, sh: sp.h, X, Y, ang: (p.world ? p.world[2] : fc) < 0 ? -ang : ang,
+        kx: sx * (bool(ps.flipX) ? -1 : 1) * (p.world ? p.world[2] : fc), ky: sy * (bool(ps.flipY) ? -1 : 1), ax, ay,
+        alpha: Math.min(1, al), add, blend: /SCREEN/.test(ps.blendingMode || "") ? "screen" : add ? "add" : "normal", tint: rgb ? rgb.map(v => Math.round(Math.min(1, v) * 255)) : null, screenDirect });
     }
     return out;
   }

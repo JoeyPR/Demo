@@ -1,6 +1,10 @@
 /* APP: the Demo rendering engine wired into the NewPlanner UI. This module
    replaces NewPlanner's own player renderer — every sprite, pose, walk
-   cycle, FX and XML renderer comes from the Demo engine unchanged. */
+   cycle, FX and XML renderer comes from the Demo engine. Research renovation
+   details and fidelity limits: docs/research/RENOVATION.md. */
+import { WorldRenderer } from "./world-renderer.mjs";
+import { createReferenceFxSheet } from "./reference-fx-sheet.mjs";
+import { resolveAppearance } from "../demo/engine/equipment.mjs";
 import { PlannerPlayer } from "../demo/engine/player.mjs";
 import { PreviewMotion } from "../demo/engine/motion.mjs";
 import { normalizeCatalogItem } from "../demo/engine/catalog-adapter.mjs";
@@ -23,6 +27,7 @@ const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarS
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
 const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
+const terrainRenderer = new WorldRenderer();
 
 const SKINS = [
   { name: "Warm peach", rgb: [255, 206, 180, 255] },
@@ -90,19 +95,60 @@ function equipToggle(id) {
   // A different ancestral starts a fresh motion sequence; don't inherit the
   // previous item's walking/jump history or its in-flight FX birth positions.
   if (raw.slot === 9) state.ancestralPath.length = 0;
-  player.equip([...state.equipped.values()]);
-  syncAuraPass();
+  syncEquipmentAppearance();
   state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
   motion?.setAbilities(state.abilities);
   P.equippedIds = new Set([...state.equipped.values()].map(i => i.id));
   P.emit("equip-state");
   updateHUD();
 }
+// Saved appearance is separate from equipped items. Never grant a replacement's
+// abilities or particle recipe to its original owner.
+const appearanceCache = new Map();
+const savedAppearance = P.store.get("appearance", {});
+const appearanceSettings = {
+  hiddenIds: Array.isArray(savedAppearance?.hiddenIds) ? savedAppearance.hiddenIds.filter(Number.isInteger) : [],
+  transmutes: savedAppearance?.transmutes && typeof savedAppearance.transmutes === "object" ? {...savedAppearance.transmutes} : {}
+};
+function syncEquipmentAppearance() {
+  const resolved = resolveAppearance([...state.equipped.values()], appearanceSettings, id => {
+    if (!appearanceCache.has(id)) {
+      const raw = state.catalog.items.find(i => i.id === id);
+      if (raw) appearanceCache.set(id, normalize(raw));
+    }
+    return appearanceCache.get(id);
+  });
+  state.appearance = resolved;
+  player.equip(resolved.equippedItems, resolved.visualItems);
+  syncAuraPass();
+}
+P.appearance = {
+  get: () => structuredClone(appearanceSettings),
+  setHidden(id, hidden) {
+    if (!state.equipped || ![...state.equipped.values()].some(i => i.id === Number(id))) return false;
+    const ids = new Set(appearanceSettings.hiddenIds ?? []);
+    hidden ? ids.add(Number(id)) : ids.delete(Number(id));
+    appearanceSettings.hiddenIds = [...ids];
+    P.store.set("appearance", appearanceSettings); syncEquipmentAppearance(); P.emit("appearance-state"); return true;
+  },
+  setTransmute(id, targetId) {
+    const item = [...state.equipped.values()].find(i => i.id === Number(id));
+    const target = state.catalog?.items.find(i => i.id === Number(targetId));
+    if (!item || Number(targetId) && (!target || target.slot !== item.slot)) return false;
+    appearanceSettings.transmutes ??= {};
+    if (Number(targetId)) appearanceSettings.transmutes[id] = Number(targetId);
+    else delete appearanceSettings.transmutes[id];
+    P.store.set("appearance", appearanceSettings); syncEquipmentAppearance(); P.emit("appearance-state"); return true;
+  }
+};
 /* Ancestral auras are drawn by the ancestral FX renderer (drawAncestralAura)
    below — the engine's own static RenderAura pass (the artifact's old sprite
    drawn on the character) is hidden so only the animated aura shows. */
+function visibleAncestral() {
+  return state.appearance ? state.appearance.visualItems.find(i => i.slot === 9) : state.equipped.get(9);
+}
 function syncAuraPass() {
-  const item = state.equipped.get(9);
+  const item = visibleAncestral();
   const handled = !!(item && state.ancestralMap?.has(item.id));
   if (handled) state.hiddenPasses.add("RenderAura");
   else state.hiddenPasses.delete("RenderAura");
@@ -164,6 +210,7 @@ function step(dt) {
   state.lastResult = player.step(
     withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
     { skin: state.skin, effects: true });
+  for (const cue of state.lastResult.cues ?? []) P.emit("punch-cue", cue);
 }
 P.on("pad", pad => {
   if (pad.k === "jump" && pad.down) { motion.lastJump = false; state.jumpUntil = state.clock + 150; }
@@ -271,14 +318,17 @@ function renderAvatar() {
   /* the pet leash string is a line primitive with no atlas; it needs none */
   const missing = [...new Set(state.lastResult.calls.filter(c => !c.line && !atlases.has(c.atlas)).map(c => c.atlas))];
   for (const name of missing) loadAtlas(name);
-  const wornAncestral = state.equipped.get(9);
+  const wornAncestral = visibleAncestral();
   const customAncestralId = wornAncestral && state.ancestralMap?.has(wornAncestral.id)
     ? wornAncestral.id : null;
+  const sourceAncestral = state.equipped.get(9);
+  const dedicatedSourceId = sourceAncestral && state.ancestralMap?.has(sourceAncestral.id) ? sourceAncestral.id : null;
   const calls = state.lastResult.calls.filter(c =>
     !state.hiddenPasses.has(c.pass) &&
     // The dedicated ancestral renderer owns the worn artifact's appearance.
     // Suppress its legacy sprite draws even when they use RenderInFront.
     !(customAncestralId !== null && c.owner === customAncestralId) &&
+    !(dedicatedSourceId !== null && c.owner === dedicatedSourceId) &&
     (c.line || atlases.has(c.atlas)));
   const bounds = drawBounds(calls), scale = state.resolution / 32;
   const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
@@ -295,7 +345,7 @@ function renderAvatar() {
   const punching = !!state.lastFrame?.punch;
   const punchItemId = punching ? state.lastResult?.punchPose?.itemId ?? null : null;
   const shadows = getPlayerShadowCalls(calls, {
-    ancestralId: state.equipped.get(9)?.id ?? null,
+    ancestralId: visibleAncestral()?.id ?? null,
     punchingItemId: punchItemId,
     punching,
   });
@@ -409,8 +459,8 @@ function drawLandGround(w, h, ground, s, frame, cameraWorldX = frame.x) {
   const camX = ((Math.floor(cameraWorldX) % span) + span) % span;
   landCtx.clearRect(0, 0, lw, lh);
   const atlasFn = page => landImages.get(page) ?? null;
-  renderWorld(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
-  if (camX + lw > span) renderWorld(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
+  terrainRenderer.draw(landCtx, state.landWorld, atlasFn, camX, 24 * 32, lw, lh, state.clock);
+  if (camX + lw > span) terrainRenderer.draw(landCtx, state.landWorld, atlasFn, camX - span, 24 * 32, lw, lh, state.clock);
   const dx = (w - lw * landS) / 2;
   // Called during the zoomed world pass, but terrain must remain unzoomed.
   ctx.save();
@@ -435,7 +485,7 @@ async function loadAncestrals() {
 const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
 const ancestralTint = new TintCache();
 function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraPivotY, zoom) {
-  const item = state.equipped.get(9);
+  const item = visibleAncestral();
   if (!item || !state.ancestralMap) return;
   const info = state.ancestralMap.get(item.id);
   if (!info) return;
@@ -675,6 +725,7 @@ P.thumb = function (raw, size = 64) {
 
 /* ---------------- boot -------------------------------------------------- */
 window.plannerApp = state;   /* debug/QA hook */
+state.terrainRenderer = terrainRenderer;
 state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels = land holes) */
 (async function init() {
   try {
@@ -688,6 +739,13 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     if (rendererResponse.ok) state.catalog.renderers = (await rendererResponse.json()).scripts;
     try { const fx = await fetch(moduleURL("../demo/fx-data.json")); if (fx.ok) state.catalog.fxRenderers = (await fx.json()).scripts; } catch {}
     try { const pd = await fetch(moduleURL("../demo/punch-data.json")); if (pd.ok) state.catalog.punchData = await pd.json(); } catch {}
+    try {
+      const [sounds, itemSounds, index] = await Promise.all(["sfx-punch", "sfx-items", "sfx-index"].map(async name => {
+        const response = await fetch(moduleURL(`../data/research/${name}.json`));
+        if (!response.ok) throw Error("Sound metadata unavailable"); return response.json();
+      }));
+      state.catalog.punchSounds = {...sounds, itemSounds, index};
+    } catch {}
     state.nativeMetadata = await (await fetch(moduleURL("../demo/native-metadata.json"))).json();
     state.abilityRegistry = await (await fetch(moduleURL("../demo/ability-registry.json"))).json();
 
@@ -700,13 +758,7 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     /* procedural reference FX sheet (same as the Demo boot): plain shapes
        the fx renderers reference when an item has no dedicated particles */
     {
-      const c = document.createElement("canvas");
-      c.width = c.height = 32;
-      const g = c.getContext("2d");
-      g.fillStyle = "#fff";
-      g.beginPath(); g.arc(10, 10, 7, 0, Math.PI * 2); g.fill();
-      g.beginPath(); g.moveTo(6, 24); g.lineTo(16, 14); g.lineTo(26, 24); g.closePath(); g.fill();
-      g.beginPath(); g.arc(18, 6, 3, 0, Math.PI * 2); g.fill();
+      const c = createReferenceFxSheet();
       images.set("reference-fx.png", c);
       atlases.set("reference-fx.png", registerAtlas(c));
     }

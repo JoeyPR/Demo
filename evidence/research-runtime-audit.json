@@ -1,0 +1,10 @@
+{
+  "items": 4081,
+  "cases": 32648,
+  "calls": 399839,
+  "xmlParticleCalls": 9348,
+  "cues": 243,
+  "invalid": [],
+  "missingAtlases": [],
+  "limitations": "Structural and numeric verification; no official-client or browser pixel parity."
+}

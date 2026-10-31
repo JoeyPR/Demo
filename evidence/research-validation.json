@@ -1,0 +1,88 @@
+{
+  "baseCommit": "f09759a375a093a50727f7d7b3a7862094f75fbc",
+  "root": {
+    "before": {
+      "tests": 163,
+      "passed": 153,
+      "failed": 10,
+      "failureNames": [
+        "camera zoom follows player and weather, while land tiles stay fixed-size",
+        "camera zoom limits and defaults",
+        "clamps zoom into [min, max]",
+        "computeCameraLayout \u2014 the singular camera",
+        "hill weathers \u2014 scroll with the player beyond the rendered region",
+        "keeps js/preview.js in sync with the camera defaults",
+        "land tiles remain fixed-size at the requested 32 world units",
+        "live app passes current player position into camera and scenery",
+        "preserves real jump displacement and scales it with zoom around the pivot",
+        "preview keeps the shadow proportional to the player during camera zoom",
+        "search row reserves room for a matching square filter button on desktop and mobile",
+        "wraps hill draw positions seamlessly and covers the scene at every offset",
+        "zooming does not move anything: fixed pose, identical positions at every zoom"
+      ]
+    },
+    "after": {
+      "tests": 178,
+      "passed": 168,
+      "failed": 10,
+      "failureNames": [
+        "camera zoom follows player and weather, while land tiles stay fixed-size",
+        "camera zoom limits and defaults",
+        "clamps zoom into [min, max]",
+        "computeCameraLayout \u2014 the singular camera",
+        "hill weathers \u2014 scroll with the player beyond the rendered region",
+        "keeps js/preview.js in sync with the camera defaults",
+        "land tiles remain fixed-size at the requested 32 world units",
+        "live app passes current player position into camera and scenery",
+        "preserves real jump displacement and scales it with zoom around the pivot",
+        "preview keeps the shadow proportional to the player during camera zoom",
+        "search row reserves room for a matching square filter button on desktop and mobile",
+        "wraps hill draw positions seamlessly and covers the scene at every offset",
+        "zooming does not move anything: fixed pose, identical positions at every zoom"
+      ]
+    },
+    "newFailures": []
+  },
+  "legacyDemo": {
+    "before": {
+      "tests": 72,
+      "passed": 65,
+      "failed": 7,
+      "failureNames": [
+        "Riding Cloud floats at idle, blinks on an ambient clock, and is not horse-gait driven",
+        "all eligible default-state profiles agree with changed-input source fixtures",
+        "floating vehicle and seated pixels share the oscillatory delta",
+        "manual generic float replaces the item float instead of stacking a second lift",
+        "native XML emitter hooks are reachable outside the five-aura replacement list",
+        "split horse-sit mounts move rider and opposing halves, stop idle, and skip air",
+        "texture edge clamping and pet wrapping match isolated source pixels"
+      ]
+    },
+    "after": {
+      "tests": 72,
+      "passed": 65,
+      "failed": 7,
+      "failureNames": [
+        "Riding Cloud floats at idle, blinks on an ambient clock, and is not horse-gait driven",
+        "all eligible default-state profiles agree with changed-input source fixtures",
+        "floating vehicle and seated pixels share the oscillatory delta",
+        "manual generic float replaces the item float instead of stacking a second lift",
+        "native XML emitter hooks are reachable outside the five-aura replacement list",
+        "split horse-sit mounts move rider and opposing halves, stop idle, and skip air",
+        "texture edge clamping and pet wrapping match isolated source pixels"
+      ]
+    },
+    "newFailures": []
+  },
+  "newTests": {
+    "tests": 15,
+    "passed": 15,
+    "browserPixels": false,
+    "hostSmoke": "Actual js/app.js and js/plate.js loaded with filesystem-backed fetch/images and recording canvas/DOM adapters."
+  },
+  "browser": {
+    "verified": false,
+    "reason": "Cloud browser cannot reach workspace HTTP; local-file navigation is blocked by browser policy. Local Playwright Chromium is unavailable; download returned invalid archives."
+  },
+  "protectedFiles": "research-protected-files.json"
+}

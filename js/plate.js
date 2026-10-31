@@ -1,3 +1,5 @@
+/* Active bitmap compositor: nameplate-renderer.mjs. The legacy drawing code
+   below remains an initialization fallback; see docs/research/RENOVATION.md. */
 /* PLATE: the Website repo's player plate system — GrowID + titles + role icon +
    country flag + guild banner & role tag + wrench. Faithful port of the site's
    buildParts (R$) and draw (_0) with its data: 24 titles, conflict groups,
@@ -24,12 +26,13 @@
   const CODE_COLORS = { 2: [73, 252, 0], 4: [255, 39, 29] };  /* legend shadow code */
   const TITLES = [
     { key: 'immortal', name: 'Immortal', after: 'immortal', legendary: true },
-    { key: 'legend', name: 'Legendary', flag: 'legend', plateFlag: 'img/titles/legend.png', suffix: ' of Legend', size: 1.15, legendary: true },
+    { key: 'legend', name: 'Legendary', flag: 'legend', plateFlag: 'img/flags/lg.png', suffix: ' of Legend', size: 1.15, legendary: true },
     { key: 'dr', name: 'Dr.', prefix: 'Dr.' },
+    { key: 'ss', name: 'Super Supporter' },
     { key: 'l125', name: 'Level 125' },
     { key: 'g4g', name: 'Grow4Good', flag: 'g4g' },
     { key: 'party', name: 'Party Animal' },
-    { key: 'mentor', name: 'Mentor', flag: 'mentor', plateFlag: 'img/titles/mentor.png' },
+    { key: 'mentor', name: 'Mentor', flag: 'mentor', plateFlag: 'img/titles/master_icon.png' },
     { key: 'cc', name: 'Content Creator', flag: 'ccBadge' },
     { key: 'tt', name: 'TikTok Creator', flag: 'ttBadge' },
     { key: 'thanks', name: 'Thanksgiving', both: 'feather' },
@@ -46,7 +49,9 @@
     { key: 'dgg', name: 'Dungeons Gold', after: 'dungeonGold' },
     { key: 'dgr', name: 'Dungeons Ruby', after: 'dungeonRuby' },
     { key: 'dge', name: 'Dungeons Emerald', after: 'dungeonEmerald' },
-    { key: 'dgsa', name: 'Dungeons Sapphire', after: 'dungeonSapphire' }
+    { key: 'dgsa', name: 'Dungeons Sapphire', after: 'dungeonSapphire' },
+    { key: 'mod', name: 'Moderator', staff: '#' },
+    { key: 'dev', name: 'Developer', staff: '6' }
   ];
   const titleByKey = Object.fromEntries(TITLES.map(t => [t.key, t]));
   /* conflict groups: at most one title per group (K6 on the site) */
@@ -55,7 +60,8 @@
     ['g4g', 'party'],
     ['thanks', 'old', 'gold', 'silver', 'bronze', 'award', 'winter', 'immortal', 'dgb', 'dgs', 'dgg', 'dgr', 'dge', 'dgsa'],
     ['pblo', 'pblm'],
-    ['legend', 'party']
+    ['legend', 'party'],
+    ['mod', 'dev']
   ];
   const inConflict = (a, b) => a !== b && CONFLICTS.some(g => g.includes(a) && g.includes(b));
   /* decorations that render centered on the wrench (a$ on the site) */
@@ -66,11 +72,12 @@
   /* ---------------- state ---------------- */
   const DEFAULTS = {
     growId: '', flag: 'us', role: '', titles: [],
-    guildRole: '', guildFlag: 0, wrenchStyle: 0, wrenchDecoration: 0,
+    guildRole: '', guildFlag: 0, guildBg: 0, wrenchStyle: 0, wrenchDecoration: 0,
     wrenchOn: false          /* the Fist/Wrench quick box: wrench only shows with a GrowID */
   };
   let state = Object.assign({}, DEFAULTS, P.store.get('plate', {}));
-  if (!Array.isArray(state.titles)) state.titles = [];
+  state.titles = Array.isArray(state.titles) ? [...new Set(state.titles)].filter(k => titleByKey[k]) : [];
+  state.growId = String(state.growId ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 18);
   if (typeof state.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);
   const save = () => { P.store.set('plate', state); P.emit('plate-update'); };
 
@@ -145,17 +152,14 @@
   const guildFlagCache = new Map();
   function guildFlag(itemId) {
     if (!itemId) return null;
+    // Inventory thumbs fill asynchronously; cache the live canvas, not a blank copy.
     if (guildFlagCache.has(itemId)) return guildFlagCache.get(itemId);
     let canvas = null;
     const item = P.catalog && P.catalog.items.find(i => i.id === itemId);
     if (item && P.thumb) {
-      canvas = document.createElement('canvas');
-      canvas.width = canvas.height = 32;
-      const g = canvas.getContext('2d');
-      const src = P.thumb(item, 64);
-      if (src) g.drawImage(src, 0, 0, 64, 64, 0, 0, 32, 32);
+      canvas = P.thumb(item, 64);
     }
-    guildFlagCache.set(itemId, canvas);
+    if (canvas) guildFlagCache.set(itemId, canvas);
     return canvas;
   }
 
@@ -408,28 +412,68 @@
     return total;
   }
 
+  /* Bitmap rendering uses the new archive's actual glyph metrics. The old
+     compositor stays available while local font assets initialize. */
+  let bitmap = null, buildModel = null;
+  function drawBitmapWrench(ctx, part, config) {
+    const [x, y, w, h] = part.box;
+    const entry = wrenchEntry('styles', config.wrenchStyle);
+    const source = entry ? sheet(entry[2]) : baseWrenchImg;
+    if (!ready(source)) return;
+    ctx.save();
+    ctx.globalAlpha = part.alpha;
+    ctx.translate(x + w / 2, y + h / 2);
+    ctx.rotate(part.angle * Math.PI / 180);
+    const base = part.green && !entry ? baseWrench() : source;
+    ctx.drawImage(base, entry ? entry[3] * 32 : 0, entry ? entry[4] * 32 : 0,
+      32, 32, -w / 2, -h / 2, w, h);
+    ctx.restore();
+    const deco = wrenchEntry('decorations', config.wrenchDecoration);
+    const image = deco && sheet(deco[2]);
+    if (!ready(image)) return;
+    ctx.save(); ctx.globalAlpha = part.alpha;
+    ctx.translate(x + w / 2, y + h / 2);
+    if (part.green && CENTERED_DECORATIONS.has(deco[0])) ctx.rotate(part.angle * Math.PI / 180);
+    ctx.drawImage(image, deco[3] * 32, deco[4] * 32, 32, 32, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+  const bitmapReady = Promise.all([
+    import('./nameplate-renderer.mjs'),
+    fetch('img/nameplate/font.json').then(r => { if (!r.ok) throw Error('nameplate font'); return r.json(); }),
+    fetch('data/research/title-frames.json').then(r => { if (!r.ok) throw Error('title frames'); return r.json(); }),
+    (async () => { const image = new Image(); image.src = 'img/nameplate/font.png'; await image.decode(); return image; })()
+  ]).then(([api, font, frames, image]) => {
+    buildModel = () => api.buildNameplate(state, TITLES, GUILD_ROLES);
+    bitmap = new api.BitmapNameplate(font, image, frames, { imageOf: img, guildFlag, drawWrench: drawBitmapWrench });
+    P.emit('plate-update'); return true;
+  }).catch(error => { console.error('Bitmap nameplate initialization:', error); return false; });
+
   /* ---------------- public API ---------------- */
   P.plate = {
     draw(ctx, cx, baselineY, scale, t) {
       clock = t ?? clock;
-      return draw(ctx, scale, cx, baselineY, false);
+      return bitmap ? bitmap.draw(ctx, buildModel(), cx, baselineY, scale, clock, state) : draw(ctx, scale, cx, baselineY, false);
     },
-    measure(ctx, cx, baselineY, scale) { return draw(ctx, scale, cx, baselineY, true); },
+    measure(ctx, cx, baselineY, scale) { return bitmap ? bitmap.draw(ctx, buildModel(), cx, baselineY, scale, clock, state, true) : draw(ctx, scale, cx, baselineY, true); },
+    ready: bitmapReady,
+    get renderer() { return bitmap ? 'bitmap' : 'legacy'; },
     titles: TITLES, conflicts: CONFLICTS, guildRoles: GUILD_ROLES, baseWrenchId: BASE_WRENCH,
     get wrenchData() { return wrenchData; }
   };
   P.plateConfig = {
     get: () => state,
     set(patch) { state = Object.assign({}, DEFAULTS, state, patch); save(); },
-    setGrowId(v) { state.growId = String(v ?? '').slice(0, 18); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
+    setGrowId(v) { state.growId = String(v ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 18); P.store.set('plate', state); },  /* silent: no UI rebuild while typing */
     setRole(v) { state.role = v; save(); },
     setFlag(v) { state.flag = v; save(); },
     setGuildRole(v) { state.guildRole = v; save(); },
+    setGuildBackground(id) { state.guildBg = Math.max(0, Math.trunc(+id) || 0); save(); },
     setGuildFlag(id) { state.guildFlag = +id || 0; save(); },
     setWrenchStyle(id) { state.wrenchStyle = +id || 0; save(); },
     setWrenchDecoration(id) { state.wrenchDecoration = +id || 0; save(); },
     setWrenchOn(on) { state.wrenchOn = !!on; save(); },
     toggleTitle(key) {
+      if (!titleByKey[key]) return;
       const i = state.titles.indexOf(key);
       if (i >= 0) state.titles.splice(i, 1);
       else {
@@ -439,6 +483,6 @@
       }
       save();
     },
-    reset() { state = Object.assign({}, DEFAULTS); save(); }
+    reset() { state = Object.assign({}, DEFAULTS, { titles: [] }); save(); }
   };
 })();
