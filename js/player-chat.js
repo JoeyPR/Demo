@@ -34,34 +34,40 @@
   chatButton.setAttribute('aria-controls', 'player-chat-composer');
   chatButton.setAttribute('aria-expanded', 'false');
 
+  const topBar = make('section', 'topBar');
+  topBar.setAttribute('aria-label', 'Chat top bar');
   const composer = make('form', 'player-chat-composer');
-  composer.className = 'panel'; composer.hidden = true;
+  composer.className = 'panel'; composer.hidden = true; composer.inert = true;
   composer.setAttribute('aria-label', 'Player Chat');
-  const header = make('div'); header.className = 'player-chat-header';
-  const label = make('label', 'player-chat-label', 'Player Chat');
-  label.htmlFor = 'playerChat';
-  const cancel = make('button', 'player-chat-close', 'Close');
-  cancel.type = 'button'; cancel.setAttribute('aria-label', 'Close Player Chat');
-  header.append(label, cancel);
   const textarea = make('textarea', 'playerChat');
   textarea.name = 'playerChat'; textarea.maxLength = MAX_LENGTH; textarea.rows = 1;
-  textarea.placeholder = 'Say something…'; textarea.autocomplete = 'off'; textarea.spellcheck = false;
-  textarea.setAttribute('enterkeyhint', 'send'); textarea.setAttribute('aria-describedby', 'player-chat-help');
-  const footer = make('div'); footer.className = 'player-chat-footer';
-  const help = make('span', 'player-chat-help', 'Enter to speak · Shift+Enter for a new line');
-  const count = make('span', 'player-chat-count', '0 / ' + MAX_LENGTH);
-  count.setAttribute('aria-hidden', 'true');
-  const say = make('button', 'player-chat-send', 'Say'); say.type = 'submit';
-  footer.append(help, count, say); composer.append(header, textarea, footer);
+  textarea.placeholder = 'Enter message here'; textarea.autocomplete = 'off'; textarea.spellcheck = false;
+  textarea.setAttribute('aria-label', 'Player Chat');
+  textarea.setAttribute('enterkeyhint', 'send');
+  textarea.setAttribute('aria-description', 'Enter to speak. Shift+Enter for a new line.');
+  composer.append(textarea);
+  // Use the inventory's actual desktop/mobile artwork and frame variants.
+  const inventoryHandle = document.getElementById('handle');
+  const handle = inventoryHandle.cloneNode(true);
+  handle.id = 'topBar-handle'; handle.classList.remove('drag', 'up', 'dn');
+  handle.setAttribute('aria-label', 'Drag chat top bar down or up');
+  handle.setAttribute('aria-controls', 'player-chat-composer');
+  handle.setAttribute('aria-orientation', 'vertical');
+  handle.setAttribute('aria-valuemin', '0');
+  topBar.append(composer, handle);
 
   const bubble = make('div', 'player-chat-bubble'); bubble.className = 'panel'; bubble.hidden = true;
   bubble.setAttribute('role', 'status'); bubble.setAttribute('aria-live', 'polite');
   bubble.setAttribute('aria-atomic', 'true');
   const speech = make('span', 'player-chat-text'); bubble.append(speech);
-  document.body.append(actions, composer, bubble);
+  document.body.append(actions, topBar, bubble);
 
-  let anchor = null, lastText = '', hideTimer = null, fadeTimer = null, composerTimer = null, opened = false;
-  let speechState = null, speechVersion = 0, composerVersion = 0;
+  let anchor = null, lastText = '', hideTimer = null, fadeTimer = null, opened = false;
+  let speechState = null, speechVersion = 0;
+  let reveal = 0, maxReveal = 0, drag = null;
+  let lastReveal = Number(P.store.get('topBarHeight', 0)) || 0;
+  const MIN_REVEAL = 40;
+  const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
   const now = () => window.performance?.now() ?? Date.now();
   function stateAt(atMs = now()) {
     if (!speechState) return { active: false, elapsedMs: 0, durationMs: SPEECH_MS, phase: 'hidden', text: '' };
@@ -85,9 +91,8 @@
     return area;
   }
   function resizeInput() {
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(140, Math.max(28, textarea.scrollHeight)) + 'px';
-    count.textContent = [...textarea.value].length + ' / ' + MAX_LENGTH;
+    // The handle controls the available input height; long text scrolls inside it.
+    textarea.style.height = '100%';
   }
   function positionBubble(area = visiblePreview()) {
     if (bubble.hidden || !anchor) return;
@@ -97,8 +102,8 @@
     // minimum made small phone avatars speak in oversized floating panels.
     const fontSize = Math.max(6, Math.min(48, (anchor.scale || 1) * 7));
     bubble.style.setProperty('--player-chat-font-size', fontSize + 'px');
-    bubble.style.setProperty('--player-chat-pad-y', Math.max(1, fontSize * .12) + 'px');
-    bubble.style.setProperty('--player-chat-pad-x', Math.max(2, fontSize * .2) + 'px');
+    bubble.style.setProperty('--player-chat-pad-y', Math.max(2, fontSize * .22) + 'px');
+    bubble.style.setProperty('--player-chat-pad-x', Math.max(4, fontSize * .36) + 'px');
     let rect = bubble.getBoundingClientRect(), right = area.right;
     const controls = actions.getBoundingClientRect();
     const proposedRight = Math.min(area.right - 8, anchor.x + rect.width / 2);
@@ -116,53 +121,115 @@
       Math.min(area.bottom - rect.height / 2 - 4, anchor.y));
     bubble.style.left = x + 'px'; bubble.style.top = y + 'px';
   }
+  function layoutPreview() {
+    const rect = preview.getBoundingClientRect();
+    return { left: Math.max(0, rect.left), right: Math.min(innerWidth, rect.right),
+      top: Math.max(0, rect.top), bottom: Math.min(innerHeight, rect.bottom) };
+  }
+  function syncInputState() {
+    opened = reveal >= MIN_REVEAL;
+    composer.hidden = reveal <= 0;
+    composer.inert = !opened;
+    chatButton.setAttribute('aria-expanded', String(opened));
+    chatButton.querySelector('img').src = opened ? 'img/chat-button-typing.png' : 'img/chat-button.png';
+    handle.setAttribute('aria-valuenow', String(Math.round(reveal)));
+    handle.setAttribute('aria-valuemax', String(Math.round(maxReveal)));
+    handle.setAttribute('aria-valuetext', opened ? 'Chat open' : 'Chat closed');
+    topBar.style.setProperty('--topbar-height', reveal + 'px');
+    topBar.classList.toggle('is-open', opened);
+  }
+  function setReveal(value) {
+    reveal = clamp(value, 0, maxReveal);
+    syncInputState();
+  }
   function position() {
-    const area = visiblePreview(), gap = 8;
-    const rect = preview?.getBoundingClientRect();
-    const bounds = { right:Math.min(innerWidth,rect?.right??innerWidth), top:Math.max(0,rect?.top??0) };
-    // The controls belong to the preview, even when a keyboard changes the
-    // visible viewport. Only the input composer follows the keyboard bounds.
-    actions.style.left = bounds.right - actions.offsetWidth - gap + 'px';
-    actions.style.top = bounds.top + gap + 'px';
-    if (opened) {
-      composer.style.width = Math.max(120, Math.min(440, area.right - area.left - gap * 2)) + 'px';
-      composer.style.left = Math.max(area.left + gap, area.right - composer.offsetWidth - gap) + 'px';
-      const preferredTop = area.top + actions.offsetHeight + gap * 2;
-      composer.style.top = Math.max(area.top + gap,
-        Math.min(preferredTop, area.bottom - composer.offsetHeight - gap)) + 'px';
+    const area = layoutPreview(), gap = 8;
+    // Icons and topBar belong to the preview, not the keyboard's visual viewport.
+    actions.style.left = area.right - actions.offsetWidth - gap + 'px';
+    actions.style.top = area.top + gap + 'px';
+    const source = inventoryHandle.getBoundingClientRect();
+    const handleHeight = Math.max(1, source.height);
+    const width = Math.max(120, area.right - area.left - gap * 2);
+    topBar.style.left = area.left + gap + 'px';
+    topBar.style.top = area.top + 2 + 'px';
+    topBar.style.width = width + 'px';
+    handle.style.width = source.width + 'px';
+    const center = source.left + source.width / 2;
+    handle.style.left = clamp(center - (area.left + gap) - source.width / 2, 0,
+      Math.max(0, width - source.width)) + 'px';
+    maxReveal = Math.max(0, area.bottom - area.top - handleHeight - gap - 2);
+    const mode = document.getElementById('preview-mode-toggle')?.getBoundingClientRect();
+    topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - area.left + 4 : 8) + 'px');
+    topBar.style.setProperty('--topbar-right-reserve', actions.offsetWidth + 8 + 'px');
+    setReveal(reveal);
+    positionBubble();
+  }
+  function rememberHeight() {
+    if (reveal >= MIN_REVEAL) {
+      lastReveal = reveal;
+      P.store.set('topBarHeight', Math.round(reveal));
     }
-    positionBubble(area);
   }
   function close({ restoreFocus = false } = {}) {
-    opened = false; composer.classList.remove('is-visible');
-    composer.inert = true;
-    const version = ++composerVersion;
-    if (composerTimer !== null) window.clearTimeout(composerTimer);
-    composerTimer = window.setTimeout(() => {
-      if (version === composerVersion && !opened) composer.hidden = true;
-      composerTimer = null;
-    }, FADE_OUT_MS);
-    chatButton.setAttribute('aria-expanded', 'false');
-    chatButton.querySelector('img').src='img/chat-button.png';
-    textarea.blur();
+    rememberHeight();setReveal(0);textarea.blur();
     if (restoreFocus) chatButton.focus({ preventScroll: true });
     P.emit('player-chat-close');
   }
-  function open() {
-    opened = true; composer.hidden = false; composer.inert = false;
-    if (composerTimer !== null) window.clearTimeout(composerTimer);
-    composerTimer = null;
-    const version = ++composerVersion;
-    nextPaint(() => { if (opened && version === composerVersion) composer.classList.add('is-visible'); });
-    chatButton.setAttribute('aria-expanded', 'true');
-    chatButton.querySelector('img').src='img/chat-button-typing.png';
-    resizeInput(); position();
-    P.emit('player-chat-open');
-    // Focus stays synchronous with the button's click so iOS/Android can open
-    // the native keyboard. No timer, promise or animation delays this call.
+  function focusInput() {
+    // Keep native keyboard focus synchronous with the button/handle gesture.
     textarea.focus({ preventScroll: true });
     textarea.setSelectionRange(textarea.value.length, textarea.value.length);
   }
+  function open() {
+    position();
+    const defaultHeight = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)').matches ? 44 : 58;
+    setReveal(Math.max(MIN_REVEAL, lastReveal || defaultHeight));
+    resizeInput();P.emit('player-chat-open');focusInput();
+  }
+  handle.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    event.preventDefault();
+    handle.setPointerCapture(event.pointerId);
+    drag = { id:event.pointerId, y:event.clientY, start:reveal, last:event.clientY, moved:false };
+    handle.classList.add('drag');
+    P.emit('input-reset');
+  });
+  handle.addEventListener('pointermove', event => {
+    if (!drag || event.pointerId !== drag.id) return;
+    event.preventDefault();
+    const delta = event.clientY - drag.y;
+    drag.moved ||= Math.abs(delta) > 4;
+    // The duplicated images are vertically flipped, including their arrows.
+    handle.classList.toggle('up', event.clientY > drag.last);
+    handle.classList.toggle('dn', event.clientY < drag.last);
+    drag.last = event.clientY;
+    setReveal(drag.start + delta);
+  });
+  function finishDrag(event) {
+    if (!drag || event.pointerId !== drag.id) return;
+    const moved = drag.moved;drag = null;
+    handle.classList.remove('drag', 'up', 'dn');
+    if (!moved && event.type === 'pointerup') { opened ? close() : open();return; }
+    if (reveal < MIN_REVEAL / 2) close();
+    else {
+      setReveal(Math.max(MIN_REVEAL, reveal));rememberHeight();
+      P.emit('player-chat-open');
+      if (event.type === 'pointerup') focusInput();
+    }
+  }
+  for (const event of ['pointerup','pointercancel','lostpointercapture']) handle.addEventListener(event, finishDrag);
+  handle.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {event.preventDefault();event.stopPropagation();close();return;}
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();event.stopPropagation();opened ? close() : open();return;
+    }
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();event.stopPropagation();
+      const next = reveal + (event.key === 'ArrowDown' ? 30 : -30);
+      if (next < MIN_REVEAL / 2) close();
+      else {setReveal(Math.max(MIN_REVEAL,next));rememberHeight();P.emit('player-chat-open');}
+    }
+  });
   function clear() {
     if (hideTimer !== null) window.clearTimeout(hideTimer);
     if (fadeTimer !== null) window.clearTimeout(fadeTimer);
@@ -201,7 +268,6 @@
     return true;
   }
   chatButton.addEventListener('click', () => opened ? close() : open());
-  cancel.addEventListener('click', () => close({ restoreFocus: true }));
   composer.addEventListener('submit', event => { event.preventDefault(); submit(); });
   textarea.addEventListener('input', () => { resizeInput(); position(); });
   textarea.addEventListener('keydown', event => {
@@ -211,13 +277,16 @@
     else if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); submit(); }
   });
   // Chat controls must not become punches, wheel zooms or pinch gestures.
-  for (const node of [actions, composer]) for (const event of ['pointerdown', 'pointermove', 'pointerup', 'wheel'])
+  for (const node of [actions, topBar]) for (const event of ['pointerdown', 'pointermove', 'pointerup', 'wheel'])
     node.addEventListener(event, e => e.stopPropagation());
   P.on('player-chat-anchor', point => {
     if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) { anchor = { ...point }; positionBubble(); }
   });
   P.on('preview', position);
   P.on('camzoom', position);
+  P.on('preview-mode', position);
+  P.on('drawer', position);
+  P.on('boot', position);
   window.addEventListener('resize', position);
   window.visualViewport?.addEventListener('resize', position);
   window.visualViewport?.addEventListener('scroll', position);
@@ -225,6 +294,7 @@
   P.playerChat = { open, close, submit, clear, reposition: position, stateAt, durationMs: SPEECH_MS,
     get speech() { return stateAt(); },
     get isOpen() { return opened; }, get text() { return lastText; }, get draft() { return textarea.value; },
-    get maxLength() { return MAX_LENGTH; } };
+    get maxLength() { return MAX_LENGTH; }, get height() { return reveal; }, get maxHeight() { return maxReveal; } };
   position();
+  nextPaint(position);
 })();

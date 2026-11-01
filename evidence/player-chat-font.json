@@ -1,0 +1,13 @@
+{
+  "font": "font/cg.ttf",
+  "sha256": "56afa498001d2c5049b9d52c163354ece33d5360c9d65b087ada352858996d8e",
+  "bytes": 39580,
+  "sourceRepository": "JoeyPR/Demo",
+  "sourceCommit": "0ce4d28c8e20a549d81878b90cea57419f3eb46d",
+  "sourcePath": "font/cg.ttf",
+  "history": "Restored the exact file removed by commit 3d147a7b67749fbd5ef65aaa121c0ef6784e23c5.",
+  "fontFamilyMetadata": "RTFont Century Gothic Big x2",
+  "styleMetadata": "Regular",
+  "cssFamily": "PlayerChat CG",
+  "scope": "Only Player Chat input and speech; shared UI and nameplate fonts retained."
+}

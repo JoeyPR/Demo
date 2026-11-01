@@ -3,6 +3,8 @@ on:
   push:
     branches: [camera-quickslot-nameplate]
     paths:
+      - 'font/**'
+      - 'css/base.css'
       - 'js/preview-mode.js'
       - 'js/player-shadow.mjs'
       - 'js/pads.js'
@@ -43,6 +45,8 @@ on:
       - '.github/workflows/planner-runtime-regression.yml'
   pull_request:
     paths:
+      - 'font/**'
+      - 'css/base.css'
       - 'js/preview-mode.js'
       - 'js/player-shadow.mjs'
       - 'js/pads.js'

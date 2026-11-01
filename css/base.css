@@ -7,7 +7,15 @@
   font-weight:400 700;
   font-display:swap;
 }
-/* The bundled main_cg.ttf is the one font used by the entire planner UI. */
+/* The shared interface retains main_cg.ttf; chat has its requested source face. */
+/* Restore the site's original cg.ttf specifically for player speech/input. */
+@font-face{
+  font-family:"PlayerChat CG";
+  src:url(../font/cg.ttf) format("truetype");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
 @font-face{
   font-family:"Main CG";
   src:url(../font/main_cg.ttf) format("truetype");

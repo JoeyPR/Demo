@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {RIDING_REFERENCE_PIXELS_PER_UNIT,RIDING_REFERENCE_PERIOD_MS,sampleMountedGait} from '../src/mounted-gait.mjs';
+import {RIDING_REFERENCE_PIXELS_PER_UNIT,RIDING_REFERENCE_PERIOD_MS,RIDING_ARM_PERIOD_MS,
+  RIDING_ARM_KEYS,sampleMountedGait,sampleMountedArms} from '../src/mounted-gait.mjs';
 import {normalizeCatalogItem} from '../src/catalog-adapter.mjs';
 import {PlannerPlayer} from '../src/player.mjs';
 const catalog=JSON.parse(readFileSync(new URL('../demo/catalog.json',import.meta.url)));
@@ -32,6 +33,31 @@ test('riding arms and held attachments still respond to jumping and punching',()
   const punch=player.step(frame(32,{punch:{ageMs:70,target:[64,16]}}),16);
   assert.deepEqual(punch.pose.face,[4,0]);assert.ok(punch.pose.punch);
   assert.notEqual(punch.pose.backAngle,rest.pose.backAngle);
+});
+test('grounded riding arms follow the fitted twenty-frame sway rather than the faster body bob',()=>{
+  const player=new PlannerPlayer(catalog,[normalizeCatalogItem(raw,catalog)]);
+  const angles=[];
+  for(let n=0;n<20;n++){
+    const result=player.step(frame(n*RIDING_ARM_PERIOD_MS/20),16);
+    angles.push(result.pose.frontAngle);
+    assert.equal(result.pose.backAngle,result.pose.frontAngle);
+  }
+  assert.deepEqual(angles,[-34,-38,-38,-42,-44,-46,-48,-48,-52,-54,
+    -55,-54,-50,-50,-50,-46,-44,-41,-40,-38]);
+  assert.notEqual(RIDING_ARM_PERIOD_MS,RIDING_REFERENCE_PERIOD_MS);
+  const loop=player.step(frame(RIDING_ARM_PERIOD_MS),16);
+  assert.equal(loop.pose.frontAngle,angles[0]);
+  const rest=player.step(frame(700,{locomotion:'idle',vx:0}),16);
+  assert.equal(rest.pose.frontAngle,-35);
+});
+test('riding sway preserves equipment rest-angle differences and cannot mask air or punch',()=>{
+  const item={vehicle:true,raw:{},staticArmPose:{frontAngle:-20,backAngle:-10}};
+  const sample=sampleMountedArms(item,frame(330));
+  assert.equal(sample.frontAngle,-40);assert.equal(sample.backAngle,-30);
+  assert.equal(sampleMountedArms(item,frame(330,{punch:{ageMs:20}})),null);
+  assert.equal(sampleMountedArms(item,frame(330,{ground:false,locomotion:'jump'})),null);
+  assert.equal(sampleMountedArms(item,frame(330,{locomotion:'idle',vx:0})),null);
+  assert.equal(RIDING_ARM_KEYS.length,20);
 });
 test('browser and tested riding animation are identical',()=>{
   assert.equal(readFileSync(new URL('../src/mounted-gait.mjs',import.meta.url),'utf8'),

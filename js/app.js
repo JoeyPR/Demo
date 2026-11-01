@@ -276,7 +276,7 @@ function punchOverDrawer(e) {
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   });
 }
-const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #item-info-overlay, #preview-mode-toggle, #preview-actions, #player-chat-composer, #player-chat-bubble, [data-dd]");
+const punchOverUI = t => t.closest && t.closest("#ui, #hud, #toast, #logo, #drop-overlay, #item-info-overlay, #preview-mode-toggle, #preview-actions, #topBar, #player-chat-composer, #player-chat-bubble, [data-dd]");
 document.addEventListener("pointerdown", e => {
   if (!state.livePreview) return;
   if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -299,6 +299,7 @@ document.addEventListener("pointercancel", e => { if (state.punchPointer === e.p
 document.addEventListener("lostpointercapture", punchDrop);
 window.addEventListener("blur", punchCancel);
 P.on("player-chat-open", punchCancel);
+P.on("input-reset", punchCancel);
 P.on("item-info-open", () => { P.emit("input-reset"); punchCancel(); });
 
 /* ---------------- rendering ------------------------------------------- */

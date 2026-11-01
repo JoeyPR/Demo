@@ -113,10 +113,16 @@ with sync_playwright() as playwright:
             cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
             page.wait_for_function("!P.input.right")
             initial_zoom = page.evaluate("P.camZoom.v")
+            # Start in visible scene space, below the new topBar handle and
+            # outside the corner controls. Gestures on UI must not zoom.
+            scene = page.locator('#pv').bounding_box()
+            pinch_y = scene['y'] + scene['height'] * .4
+            pinch_left = scene['x'] + scene['width'] * .25
+            pinch_right = scene['x'] + scene['width'] * .75
             cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [
-                {"id": 1, "x": 80, "y": 70}, {"id": 2, "x": 190, "y": 70}]})
+                {"id": 1, "x": pinch_left, "y": pinch_y}, {"id": 2, "x": pinch_right, "y": pinch_y}]})
             cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [
-                {"id": 1, "x": 50, "y": 70}, {"id": 2, "x": 220, "y": 70}]})
+                {"id": 1, "x": pinch_left-30, "y": pinch_y}, {"id": 2, "x": pinch_right+30, "y": pinch_y}]})
             page.wait_for_function("zoom=>P.camZoom.v>zoom", arg=initial_zoom)
             cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
 

@@ -26,11 +26,17 @@ export const RIDING_REFERENCE_PERIOD_MS=1000/3;
 export const RIDING_REFERENCE_PIXELS_PER_UNIT=2.75;
 export const RIDING_REFERENCE_BODY_Y=Object.freeze([26,27,27,28,29,29,28,27,27,26]
   .map(y=>(y-32)/RIDING_REFERENCE_PIXELS_PER_UNIT));
+// The visible riding arm has its own slower cycle. These twenty angles were
+// fitted from the actual arm sprite across the video's grounded travel frames;
+// the body bob is not the arm animation clock.
+export const RIDING_ARM_PERIOD_MS=660;
+export const RIDING_ARM_KEYS=Object.freeze([-34,-38,-38,-42,-44,-46,-48,-48,-52,-54,
+  -55,-54,-50,-50,-50,-46,-44,-41,-40,-38]);
 export function mountedGaitProfile(item) {
   if(item.raw?.mountedGait===false)return null;
   if(item.raw?.mountedGait)return item.raw.mountedGait;
   if(!item.vehicle||isFloatingItem(item))return null;
-  const records=item.raw.gameIcon??[];
+  const records=item.raw?.gameIcon??[];
   const animal=ANIMAL_NAME.test(item.name??item.raw?.name??'')||ANIMAL_ALIASES.has(item.id);
   // All seated riders share the body animation; only split animal sprites
   // receive the small opposing component offsets from the captured horse.
@@ -51,6 +57,20 @@ export function sampleMountedGait(item,motion) {
   // translating the whole horse by the rider bob made it slide vertically.
   const slide=profile.split?Math.sin(2*Math.PI*phase)/3:0;
   return {active:true,bodyY,slide,phase,profile};
+}
+export function sampleMountedArms(item,motion) {
+  const profile=mountedGaitProfile(item),state=locomotionState(motion);
+  if(!profile||state.airborne||!state.moving||motion.punch)return null;
+  const elapsed=item.motionPlayback?motion.clockMs-item.motionPlayback.startedMs:motion.moveMs??0;
+  const periodMs=profile.armPeriodMs??RIDING_ARM_PERIOD_MS,keys=profile.armKeys??RIDING_ARM_KEYS;
+  const phase=(Math.max(0,elapsed)%periodMs)/periodMs;
+  const index=Math.floor(phase*keys.length+1e-8)%keys.length;
+  const delta=keys[index]+35;
+  const rest=item.staticArmPose??item.pose??{};
+  // Preserve equipment-specific rest angles. The rear arm is occluded in most
+  // reference frames, so it follows the same measured sway around its own rest.
+  return {backAngle:(rest.backAngle??-35)+delta,frontAngle:(rest.frontAngle??-35)+delta,
+    index,periodMs,evidence:'set-1.mp4-visible-arm-fit'};
 }
 export function applyMountedGait(item,motion) {
   const gait=sampleMountedGait(item,motion);item.gait=gait;

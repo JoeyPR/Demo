@@ -4,5 +4,8 @@
   color:#fff;font:700 12px/1.1 var(--font-main);text-shadow:1px 1px #000;touch-action:manipulation}
 #preview-mode-toggle:focus-visible{outline:2px solid #fff;outline-offset:2px}
 #preview-mode-toggle[aria-pressed=true]{background:#3c825c}
+#preview-mode-toggle[aria-pressed=false]{width:88px;height:44px;padding:0;border:0;background:transparent;box-shadow:none}
+#preview-mode-toggle img{display:block;width:100%;height:100%;object-fit:contain}
+#preview-mode-toggle [hidden]{display:none}
 body:not(.live-preview) #pads{visibility:hidden;pointer-events:none}
 body:not(.live-preview) #pads .pad{pointer-events:none}

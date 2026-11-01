@@ -1,5 +1,9 @@
 # Preview and Live Preview
 
+The subsequent [topBar and attachment revision](TOPBAR_HAND_ATTACHMENTS.md)
+replaces the chat composer and riding arm pose, restores the requested chat font,
+and adds the supplied Run/favorite artwork.
+
 The main planner now starts in **Preview**: a close-up of the animated outfit,
 selected land and weather. Movement pads are hidden and keyboard/canvas inputs
 cannot move, jump or punch. The top-left **Live Preview** button enables the

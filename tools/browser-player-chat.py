@@ -39,6 +39,47 @@ with sync_playwright() as p:
         page.get_by_role('button', name='Player Chat', exact=True).click()
         assert page.locator('#playerChat').evaluate('el=>el===document.activeElement')
         assert page.locator('#player-chat-button img').get_attribute('src')=='img/chat-button-typing.png'
+        assert page.locator('#playerChat').get_attribute('placeholder') == 'Enter message here'
+        assert page.locator('#topBar #player-chat-composer').count() == 1
+        assert page.locator('.player-chat-header,.player-chat-footer').count() == 0
+        assert 'PlayerChat CG' in page.locator('#playerChat').evaluate('el=>getComputedStyle(el).fontFamily')
+        assert page.evaluate("""document.fonts.load("16px 'PlayerChat CG'").then(fonts=>fonts.length>0)""")
+        assert page.locator('#topBar-handle').evaluate('el=>getComputedStyle(el).transform') == 'matrix(1, 0, 0, -1, 0, 0)'
+        alignment = page.evaluate("""()=>{
+          const original=document.querySelector('#handle').getBoundingClientRect();
+          const clone=document.querySelector('#topBar-handle').getBoundingClientRect();
+          return [Math.abs(original.x+original.width/2-clone.x-clone.width/2), Math.abs(original.width-clone.width)];
+        }""")
+        assert max(alignment) < .1, alignment
+        # Pull the actual flipped handle down and back up; its panel stays inside preview.
+        handle=page.locator('#topBar-handle').bounding_box()
+        before_height=page.evaluate('P.playerChat.height')
+        x=handle['x']+handle['width']/2; y=handle['y']+handle['height']/2
+        if mobile:
+            cdp=context.new_cdp_session(page)
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':x,'y':y}]})
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'id':1,'x':x,'y':y+30}]})
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+        else:
+            page.mouse.move(x,y);page.mouse.down();page.mouse.move(x,y+30,steps=6);page.mouse.up()
+        assert page.evaluate('P.playerChat.height') > before_height+25
+        dragged=page.evaluate('P.playerChat.height')
+        page.locator('#playerChat').press('Escape')
+        assert not page.evaluate('P.playerChat.isOpen')
+        page.get_by_role('button',name='Player Chat',exact=True).click()
+        assert abs(page.evaluate('P.playerChat.height')-dragged)<.1
+        handle=page.locator('#topBar-handle').bounding_box()
+        x=handle['x']+handle['width']/2; y=handle['y']+handle['height']/2
+        if mobile:
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'id':1,'x':x,'y':y}]})
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'id':1,'x':x,'y':max(2,y-250)}]})
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+        else:
+            page.mouse.move(x,y);page.mouse.down();page.mouse.move(x,y-250,steps=10);page.mouse.up()
+        assert page.evaluate('P.playerChat.height') == 0
+        assert page.locator('#player-chat-composer').is_hidden()
+        assert page.locator('#player-chat-button img').get_attribute('src')=='img/chat-button.png'
+        page.get_by_role('button',name='Player Chat',exact=True).click()
         page.locator('#playerChat').fill('Hi')
         page.locator('#playerChat').press('Enter')
         assert not page.evaluate('P.playerChat.isOpen')
@@ -95,7 +136,7 @@ with sync_playwright() as p:
         results.append({'mobile': mobile, 'verticalControls': True, 'shortBubble': True,
                         'fixedFiveSeconds': True, 'fadeInOut': True, 'speechLifecycle': True,
                         'danceCommand': True, 'replacementTimer': True, 'typingIsolation': True,
-                        'negativeDropSpeech': True, 'fixedControls': True, 'pageErrors': errors})
+                        'negativeDropSpeech': True, 'fixedControls': True, 'topBarDrag': True, 'flippedHandleAlignment': True, 'cgFont': True, 'pageErrors': errors})
         context.close()
     context = browser.new_context(reduced_motion='reduce')
     page = context.new_page()

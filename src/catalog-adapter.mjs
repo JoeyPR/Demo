@@ -3,6 +3,7 @@ import {sequencePolicy,sequenceTime,sampleSequenceIndex,isFloatingItem} from "./
 import {bindXmlRenderer,advanceXmlRenderer} from "./xml-renderer.mjs";
 import {applyMountedGait} from "./mounted-gait.mjs";
 import {advancePet} from "./pet-system.mjs";
+import {handAttachment,handReferenceAngle} from "./hand-attachments.mjs";
 
 // Public reference adapter. gameIcon supplies an authored still, not native clips.
 export function normalizeCatalogItem(raw,catalog) {
@@ -70,12 +71,14 @@ export function normalizeCatalogItem(raw,catalog) {
       // Captured mount and seat geometry stays in the unlifted vehicle root.
       attachment="mount";
       pass=record.u>=10.25?"RenderSeat":"RenderShoes";
-    } else if(raw.slot===5&&!record.pet&&!record.ride&&
-      !raw.unturned?.includes(record.a+":"+Math.floor(record.sy/32)))attachment="frontHand";
+    } else if(raw.slot===5)attachment=handAttachment(record,item);
     else if(raw.slot===3)attachment=record.sy%64>=32?"backFoot":"frontFoot";
     if(!sleeve&&attachment!=="pet"&&record.u===0)pass=raw.slot===7?"RenderBackHair":"RenderBehind";
     if(!sleeve&&attachment!=="pet"&&record.u===12)pass="RenderInFront";
-    const referenceAngle=raw.slot===5?(raw.pose?.arm2??0):0;
+    if(record.attachment)attachment=record.attachment;
+    if(attachment==='backHand'&&record.u!==0)pass='RenderBackHandItem';
+    if(record.pass)pass=record.pass;
+    const referenceAngle=raw.slot===5?handReferenceAngle(record,item,attachment):0;
     return {...record,pass,attachment,referenceAngle};
   });
   // Only bind a public part sequence when its complete source cell contains the

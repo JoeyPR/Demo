@@ -1,6 +1,7 @@
-import { compose, translate, scale, rotate, around, IDENTITY, clamp } from "./math.mjs";
+import { compose, translate, scale, IDENTITY, clamp } from "./math.mjs";
 import { PLANNER_PROFILE } from "./planner-profile.mjs";
-import { armMatrix, heldMatrix, punchMatrix, playerRoot } from "./rig.mjs";
+import { limbMatrix, heldPoseMatrix, punchMatrix, playerRoot } from "./rig.mjs";
+import {handAttachment,handReferenceAngle} from "./hand-attachments.mjs";
 import { sampleFrames } from "./animation.mjs";
 import { spriteMatrix, samplePublicParts } from "./items.mjs";
 import { resolveLook } from "./look.mjs";
@@ -58,9 +59,7 @@ function baseCalls(pose,wear,profile) {
       body("backArm","player_puncharm.png",180,0,20,48,punchMatrix(pose.punch,profile),"RenderBackArm");
     } else {
       const at=profile.arm[side];
-      const matrix=compose(
-        around([at[0]+profile.arm.w/2,at[1]+1],rotate(pose[`${side}Angle`])),
-        translate(...at));
+      const matrix=compose(limbMatrix(side,pose[`${side}Angle`],profile),translate(...at));
       body(`${side}Arm`,profile.arm.atlas,0,0,profile.arm.w,profile.arm.h,matrix,
         side==="back"?"RenderBackArm":"RenderFrontArm");
     }
@@ -75,10 +74,10 @@ function fallbackPiecePass(record,item) {
   return slotPass[item.slot]??"RenderInFront";
 }
 function attachmentMatrix(name,pose,profile,referenceAngle=0) {
-  if(name==="backArm") return armMatrix("back",pose.backAngle,profile);
-  if(name==="frontArm") return armMatrix("front",pose.frontAngle,profile);
-  if(name==="backHand") return heldMatrix("back",pose.backAngle,referenceAngle,profile);
-  if(name==="frontHand") return heldMatrix("front",pose.frontAngle,referenceAngle,profile);
+  if(name==="backArm") return limbMatrix("back",pose.backAngle,profile);
+  if(name==="frontArm") return limbMatrix("front",pose.frontAngle,profile);
+  if(name==="backHand") return heldPoseMatrix("back",pose,referenceAngle,profile);
+  if(name==="frontHand") return heldPoseMatrix("front",pose,referenceAngle,profile);
   if(name==="backFoot") return translate(0,pose.backFoot);
   if(name==="frontFoot") return translate(0,pose.frontFoot);
   return IDENTITY;
@@ -115,8 +114,9 @@ function sampleItem(item,motion,pose,catalog,profile) {
         tint:record.skin?"SKIN":record.t??tint?.slice(0,3)??null,owner:item.id});
       continue;
     }
-    const attachment=record.attachment??(side?`${side}Arm`:item.slot===5?"frontHand":"body");
-    let local=attachmentMatrix(attachment,pose,profile,record.referenceAngle??0);
+    const attachment=record.attachment??(side?`${side}Arm`:handAttachment(record,item));
+    const referenceAngle=item.slot===5?handReferenceAngle(record,item,attachment):record.referenceAngle??0;
+    let local=attachmentMatrix(attachment,pose,profile,referenceAngle);
     if(record.noFacing&&motion.facing<0)local=compose(local,translate(32,0),scale(-1,1));
     const call=rawCall(record,record.pass??fallbackPiecePass(record,item),local);
     call.renderOrder ??= item.renderOrder;

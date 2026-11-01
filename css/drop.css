@@ -135,8 +135,10 @@
   background: #FFCC00;
   color: #fff;
 }
-.drop-confirm {
-  width: var(--drop-ok-width, 104px);
+.drop-actions .drop-confirm {
+  width: max-content;
+  padding-inline: max(8px, calc(var(--drop-scale, 1) * 12px));
+  text-align: center;
   background: #7BBAD2;
   color: #fff;
 }

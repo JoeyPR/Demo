@@ -1,0 +1,200 @@
+{
+  "topBarChat": [
+    {
+      "mobile": false,
+      "verticalControls": true,
+      "shortBubble": true,
+      "fixedFiveSeconds": true,
+      "fadeInOut": true,
+      "speechLifecycle": true,
+      "danceCommand": true,
+      "replacementTimer": true,
+      "typingIsolation": true,
+      "negativeDropSpeech": true,
+      "fixedControls": true,
+      "topBarDrag": true,
+      "flippedHandleAlignment": true,
+      "cgFont": true,
+      "pageErrors": []
+    },
+    {
+      "mobile": true,
+      "verticalControls": true,
+      "shortBubble": true,
+      "fixedFiveSeconds": true,
+      "fadeInOut": true,
+      "speechLifecycle": true,
+      "danceCommand": true,
+      "replacementTimer": true,
+      "typingIsolation": true,
+      "negativeDropSpeech": true,
+      "fixedControls": true,
+      "topBarDrag": true,
+      "flippedHandleAlignment": true,
+      "cgFont": true,
+      "pageErrors": []
+    }
+  ],
+  "inventoryAndButtons": [
+    {
+      "mobile": false,
+      "equippedVisible": 10,
+      "ignoresPreviousSearchAndCategory": true,
+      "equippedMembershipRefresh": true,
+      "droppedCopyDoesNotHideWornItem": true,
+      "favoriteArtwork": true,
+      "runArtworkAndReturn": true,
+      "okInsets": [
+        {
+          "left": 20.765625,
+          "right": 20.765625
+        },
+        {
+          "left": 20.765625,
+          "right": 20.765625
+        }
+      ],
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "equippedVisible": 10,
+      "ignoresPreviousSearchAndCategory": true,
+      "equippedMembershipRefresh": true,
+      "droppedCopyDoesNotHideWornItem": true,
+      "favoriteArtwork": true,
+      "runArtworkAndReturn": true,
+      "okInsets": [
+        {
+          "left": 8,
+          "right": 8
+        },
+        {
+          "left": 8,
+          "right": 8
+        }
+      ],
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "previewModes": [
+    {
+      "mobile": false,
+      "passiveInputBlocked": true,
+      "liveActions": true,
+      "mountedActions": true,
+      "nativePlayerTileScale": true,
+      "buddyShadowBlack": true,
+      "worldShadowPixels": true,
+      "removedExploreAndBackgroundUI": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "passiveInputBlocked": true,
+      "liveActions": true,
+      "mountedActions": true,
+      "nativePlayerTileScale": true,
+      "buddyShadowBlack": true,
+      "worldShadowPixels": true,
+      "removedExploreAndBackgroundUI": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "playerFeatures": [
+    {
+      "mobile": false,
+      "talkingFaces": true,
+      "speechDurationAndFadeSync": true,
+      "danceComponentsAndTurns": true,
+      "danceCancellation": true,
+      "skinSwatches": 25,
+      "buddyPalette": true,
+      "skinAlphaAndPersistence": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "talkingFaces": true,
+      "speechDurationAndFadeSync": true,
+      "danceComponentsAndTurns": true,
+      "danceCancellation": true,
+      "skinSwatches": 25,
+      "buddyPalette": true,
+      "skinAlphaAndPersistence": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "preservedFlows": [
+    {
+      "mobile": false,
+      "ready": true,
+      "fxScripts": 314,
+      "appearance": true,
+      "punchCues": true,
+      "drop": true,
+      "blackbox": true,
+      "movement": true,
+      "pngExport": true,
+      "touchMovementAndPinch": false,
+      "consoleErrors": [],
+      "httpFailures": []
+    },
+    {
+      "mobile": true,
+      "ready": true,
+      "fxScripts": 314,
+      "appearance": true,
+      "punchCues": true,
+      "drop": true,
+      "blackbox": true,
+      "movement": true,
+      "pngExport": true,
+      "touchMovementAndPinch": true,
+      "consoleErrors": [],
+      "httpFailures": []
+    }
+  ],
+  "nodeTests": {
+    "passed": 298,
+    "failed": 0
+  },
+  "layoutSpotCheck": {
+    "RunDoesNotOverlapInputAcrossModeSwitch": true,
+    "desktopFieldLeft": 104,
+    "desktopRunRight": 96,
+    "mobileFieldLeft": 103.765625,
+    "mobileRunRight": 98.78125
+  },
+  "scope": "Desktop and touch-phone integration. Hand grip coincidence is tested numerically through arm motion, facing, lift and punch. Riding visible-arm fitting has about 2 degrees RMS error; hidden rear-arm motion and exact compressed-video pixel parity remain unverified.",
+  "catalogAudit": {
+    "catalogItems": 4081,
+    "rendererScripts": 314,
+    "fxScripts": 314,
+    "framesPerItem": 18,
+    "invalid": [],
+    "missingAtlases": [],
+    "itemsWithSampledParticles": 231,
+    "peakDrawCalls": 221,
+    "peakParticleCalls": 210,
+    "scope": "Structural playback audit: idle, walking, jumping, punch start/update/stop. No claim of pixel parity or complete conditional FX coverage."
+  },
+  "suppliedArtwork": {
+    "img/live-preview-run.png": {
+      "source": "3-436614.png",
+      "sha256": "4b0c7f32d898c8d47b962b71a687fef21e60b89d546120c05159f90508a8f4e7",
+      "copiedUnchanged": true
+    },
+    "img/favorite-badge.png": {
+      "source": "4-327294.png",
+      "sha256": "9e8e81bb1518f63acbd2467412f0d052e9e8f6de040e0b3f894189da3e4cf23a",
+      "copiedUnchanged": true
+    }
+  }
+}

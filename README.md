@@ -1,6 +1,7 @@
 # Growtopia player rendering handoff
 
-**Current integrated planner:** [Preview and Live Preview](docs/PREVIEW_LIVE_REVISION.md),
+**Current integrated planner:** [topBar, hand attachments and inventory details](docs/TOPBAR_HAND_ATTACHMENTS.md),
+following [Preview and Live Preview](docs/PREVIEW_LIVE_REVISION.md),
 following [dance, speech, skins and item information](docs/PLAYER_ACTIONS_SKINS_INFO.md),
 extending the [playable world, blinking and Player Chat](docs/WORLD_CHAT_BLINK.md),
 building on the [October 31 research renovation](docs/RESEARCH_RENOVATION.md).

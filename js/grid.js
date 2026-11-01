@@ -9,7 +9,7 @@
   const g = P.$('#grid');
   const filterButton = P.$('#filter-button');
   const filterPanel = P.$('#filter-panel');
-  const filterDisabledTabs = new Set(['custom', 'player', 'makeup']);
+  const filterDisabledTabs = new Set(['equip', 'custom', 'player', 'makeup']);
   // The UI calls slot 9 "Ancestral" / "Artifacts". Use the category itself,
   // not only the special ancestral IDs, to determine equipped artifact styling.
   const artifactSlot = Object.entries(P.dat?.slots || {})
@@ -155,7 +155,10 @@
       const q = (searchOn ? P.$('#q').value : '').trim().toLowerCase();
       syncFlags();
       const categoryFilterActive = !filterDisabledTabs.has(P.tabs.cur);
-      render = all.filter(it => !it.gone && visible(it) &&
+      // Equipped is a complete view of worn gear. Clothing search/category
+      // filters and a dropped inventory copy cannot conceal an equipped item.
+      render = all.filter(it => P.tabs.cur === 'equip' ? it.eq :
+        !it.gone && visible(it) &&
         (!categoryFilterActive || it.tool || activeFilter === 'all' || String(it.slot) === activeFilter) &&
         (!q || it.name.toLowerCase().includes(q) || String(it.id) === q));
       g.scrollTop = 0;
@@ -195,7 +198,7 @@
     const ckArt = document.createElement('img'); ckArt.className = 'ck p'; ckArt.src = 'img/chk-art.png'; ckArt.alt = '';
     b.append(ic, n, ck, ckArt);
     if (favs.has(it.id)) {
-      const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/fav-box.png'; fv.alt = '';
+      const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/favorite-badge.png'; fv.alt = '';
       b.append(fv);
     }
     fillBox(b);
@@ -320,7 +323,7 @@
     if (favs.has(it.id)) {
       if (!fv) {
         const star = document.createElement('img');
-        star.className = 'fv'; star.src = 'img/fav-box.png'; star.alt = '';
+        star.className = 'fv'; star.src = 'img/favorite-badge.png'; star.alt = '';
         b.append(star);
       }
     } else if (fv) fv.remove();
@@ -452,6 +455,7 @@
 
   P.on('equip-state', markEquipped);
   P.on('equip-state', renderQuick);
+  P.on('equip-state', () => { if (P.tabs.cur === 'equip') P.inv.refresh(); });
   P.on('plate-update', renderQuick);
   P.on('catalog', () => { build(); renderFilterOptions(); P.inv.refresh(); renderQuick(); });
   P.on('tab', () => P.inv.refresh());
