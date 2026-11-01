@@ -1,0 +1,65 @@
+{
+  "source": "1-missing_tiles.zip",
+  "sourceSha256": "ee3c5485f8e9de6f61e1f0eb0a92a261eb9e71f1c435d9e40e3c3a1c88f0b9c5",
+  "format": "RTPACK/zlib, RTTX RGBA8 pixels, vertically flipped into PNG top-left origin",
+  "textures": [
+    {
+      "source": "tiles_candyblock.rttex",
+      "sourceSha256": "bd757210863b9c2aa90ec66b4a846509de8029868b3118dd36016f2107e0b5af",
+      "dimensions": [
+        512,
+        256
+      ],
+      "rgbaSha256": "a2bbd5273b1f177eb1c76a99f22a582067c30a9125f6908b6978752823f53abd",
+      "pngSha256": "76ac2806651e7540ec56fc9a624bb09d568a747419f7b3d9b61e3e557824bea3",
+      "destinations": [
+        {
+          "path": "sheets/tiles/tiles_candyblock.png",
+          "previousDimensions": [
+            256,
+            512
+          ],
+          "previousRgbaSha256": "58214adb10b021a344597a2064acf93d07f0341d26a6cbb29bcb1393f6314d31",
+          "pixelContentChanged": true
+        }
+      ]
+    },
+    {
+      "source": "tiles_page17.rttex",
+      "sourceSha256": "7e2021fdbe70dfc5d7ec7ec7266f0abee30f3dd2b8629f0ff00b5d12aa5c3158",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "rgbaSha256": "23efe581fbf050dd20294f8c4af2af580da17d5da2e89fe70c240843164120c9",
+      "pngSha256": "37ba95a9b355eb7f4b1fa8bcd966ae988a1f07b1bfbfd9c63420260373756105",
+      "destinations": [
+        {
+          "path": "sheets/tiles/tiles_page17.png",
+          "previousDimensions": [
+            1024,
+            1024
+          ],
+          "previousRgbaSha256": "c2da82beb72aacf4f68e03e9968bba25e2d8a6e1a247a2fa6a20bcc5cdc83111",
+          "pixelContentChanged": true
+        },
+        {
+          "path": "demo/assets/tiles_page17.png",
+          "previousDimensions": [
+            1024,
+            1024
+          ],
+          "previousRgbaSha256": "aac5d2127b27946dc6ed6e935bfebdddd264be5dee6eeeff35697fba5a369261",
+          "pixelContentChanged": true
+        }
+      ]
+    }
+  ],
+  "metadataIncluded": false,
+  "newWearableRendererSupport": false,
+  "notes": [
+    "The supplied archive contains two texture files and no item, renderer or FX definitions.",
+    "Candy atlas dimensions are 512x256 in the native header, matching Planner-LANDsystem metadata. The prior runtime sheet was 256x512.",
+    "Page 17 is synchronized in both the world tile directory and the player/UI atlas directory."
+  ]
+}

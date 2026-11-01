@@ -126,11 +126,11 @@ test('zoom is applied around the pivot only — the draw transform has no transl
 });
 
 
-test('land source window is centered on camera world X before zoom is applied', () => {
+test('terrain raster origin follows the unprojected camera before one composite blit', () => {
   const app = readFileSync(join(here, '../js/app.js'), 'utf8');
-  assert.ok(app.includes("Math.floor(cameraWorldX - lw / 2)"));
-  assert.ok(app.includes("const dx = (w - lw * landS) / 2"));
-  assert.ok(app.includes("ctx.drawImage(landCanvas, 0, 0, lw, lh, dx, ground, lw * landS, lh * landS)"));
+  assert.ok(app.includes('WORLD_ORIGIN_X+camera.cameraWorldX+(start.x-camera.cameraPivotX)/s'));
+  assert.ok(app.includes('rasterX=Math.floor(camX),rasterY=Math.floor(camY)'));
+  assert.ok(app.includes('start.x+(rasterX-camX-pad)*tileScale+offset.x'));
 });
 
 test('pickup rendering projects its world point once outside the world zoom transform', () => {

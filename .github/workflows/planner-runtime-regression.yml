@@ -3,6 +3,24 @@ on:
   push:
     branches: [camera-quickslot-nameplate]
     paths:
+      - 'font/**'
+      - 'css/base.css'
+      - 'js/preview-mode.js'
+      - 'js/player-shadow.mjs'
+      - 'js/pads.js'
+      - 'css/preview-mode.css'
+      - 'src/**'
+      - 'demo/engine/**'
+      - 'js/player-chat.js'
+      - 'js/world-motion.mjs'
+      - 'js/skin-colors*'
+      - 'js/item-info.js'
+      - 'js/customization.js'
+      - 'css/player-chat.css'
+      - 'css/customization.css'
+      - 'css/item-info.css'
+      - 'data/item-info.json'
+      - 'test/**'
       - 'js/core.js'
       - 'js/tabs.js'
       - 'js/grid.js'
@@ -27,6 +45,24 @@ on:
       - '.github/workflows/planner-runtime-regression.yml'
   pull_request:
     paths:
+      - 'font/**'
+      - 'css/base.css'
+      - 'js/preview-mode.js'
+      - 'js/player-shadow.mjs'
+      - 'js/pads.js'
+      - 'css/preview-mode.css'
+      - 'src/**'
+      - 'demo/engine/**'
+      - 'js/player-chat.js'
+      - 'js/world-motion.mjs'
+      - 'js/skin-colors*'
+      - 'js/item-info.js'
+      - 'js/customization.js'
+      - 'css/player-chat.css'
+      - 'css/customization.css'
+      - 'css/item-info.css'
+      - 'data/item-info.json'
+      - 'test/**'
       - 'js/core.js'
       - 'js/tabs.js'
       - 'js/grid.js'
@@ -57,4 +93,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test test/runtime-reliability.test.mjs test/drop-dialog.test.mjs test/inventory-filter.test.mjs test/background-blocks.test.mjs
+      - run: npm test

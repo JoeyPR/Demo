@@ -59,7 +59,7 @@
       const img = new Image();
       img.onload = () => { pageImages.set(name, img); res(img); };
       img.onerror = () => { pageImages.set(name, null); res(null); };
-      img.src = 'sheets/tiles/' + name + '.png';
+      img.src = 'sheets/tiles/' + name + '.png?v=20261031-world';
     });
     pageLoads.set(name, load);
     return load;

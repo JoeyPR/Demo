@@ -15,7 +15,6 @@ import {
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const officialBlocks = JSON.parse(read("../data/blocks.json"));
 const landRows = JSON.parse(read("../data/land-blocks.json"));
-const backgroundJs = read("../js/background.js");
 const landJs = read("../js/land.js");
 const gridJs = read("../js/grid.js");
 const appJs = read("../js/app.js");
@@ -38,9 +37,6 @@ test("background catalog registers only unique available background-layer blocks
   assert.equal(new Set(rows.map(row => row.name.toLowerCase())).size, rows.length);
   assert.ok(rows.every(row => BLOCKS[row.id].layer === "bg"));
   assert.ok(rows.every(row => BLOCKS[row.id].collision === 0));
-  assert.ok(backgroundJs.includes("row.kind === 'bg'"));
-  assert.ok(backgroundJs.includes("!/null_item|unavailable/i.test(row.name)"));
-  assert.ok(backgroundJs.includes("!/null_item|unavailable/i.test(row.texture)"));
 });
 
 test("Cave Background remains the default non-colliding 47-blob wall", () => {
@@ -118,12 +114,11 @@ test("pickup artwork gains exactly one additional source pixel", () => {
   assert.ok(dropWorld.includes("PICKUP_ICON_ART_SIZE = 64 * 0.64 + 10"));
 });
 
-test("Weather Background selector loads the available BG catalog and uses real tile properties", () => {
-  assert.ok(backgroundJs.includes("row.kind === 'bg'"));
-  assert.ok(backgroundJs.includes("row.spread_type"));
-  assert.ok(backgroundJs.includes("P.emit('background', block.id)"));
-  assert.ok(appJs.includes("registerBackgroundBlocks(backgroundRows)"));
-  assert.ok(appJs.includes("uniformBackgroundWorld(resolved)"));
-  assert.ok(appJs.includes("drawBackgroundTiles(w, h, s, camera)"));
-  assert.ok(indexHtml.includes('src="js/background.js"'));
+test("Preview removes wall-picker and Explore controls while keeping weather and land", () => {
+  assert.ok(!indexHtml.includes('src="js/background.js"'));
+  assert.ok(!indexHtml.includes('src="js/world-ui.js"'));
+  assert.ok(indexHtml.includes('src="js/preview-mode.js"'));
+  assert.ok(indexHtml.includes('src="js/weather.js"'));
+  assert.ok(indexHtml.includes('src="js/land.js"'));
+  assert.ok(appJs.includes('uniformLandWorld(state.landBlock??0,24,0)'));
 });

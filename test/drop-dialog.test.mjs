@@ -27,12 +27,12 @@ test("dialog follows text content and keeps a reference-sized starting footprint
   assert.match(css,/box-shadow: var\(--sh\) var\(--sh\) 0 0 #000, inset var\(--sh\) var\(--sh\) 0 0 #000/);
   assert.match(css,/drop-title[\s\S]*text-shadow: none/);
 });
-test("dialog buttons keep reference dimensions and amount input grows with more digits",()=>{
+test("dialog OK fits its label with balanced padding and amount input grows with more digits",()=>{
   assert.match(drop,/226 \* scale/);
   assert.match(drop,/104 \* scale/);
   assert.match(drop,/40 \* scale/);
   assert.match(css,/width: var\(--drop-cancel-width, 226px\)/);
-  assert.match(css,/width: var\(--drop-ok-width, 104px\)/);
+  assert.match(css,/\.drop-actions \.drop-confirm\s*\{[^}]*width: max-content;[^}]*padding-inline: max\(8px, calc\(var\(--drop-scale, 1\) \* 12px\)\);[^}]*text-align: center;/);
   assert.match(drop,/const needed = \(digits \* 33 \+ 30\) \* uiScale/);
 });
 test("OK creates a local pickup and restores the catalog item on collection",()=>{
@@ -65,8 +65,8 @@ test("pickup is larger, lower, closer, and uses the player shadow system",()=>{
   assert.match(app,/PLAYER_SHADOW_OPACITY/);
   assert.match(app,/PLAYER_SHADOW_COLOR/);
   assert.match(app,/playerShadowOffset\(-1\)/);
-  assert.ok(app.includes("left + shadowDirection.x * zoom,"));
-  assert.ok(app.includes("top + shadowDirection.y * zoom, size, size"));
+  assert.ok(app.includes("left+shadowDirection.x*zoom"));
+  assert.ok(app.includes("top+shadowDirection.y*zoom,size,size"));
 });
 test("pickup remains at its recorded world point until the player enters collection range",()=>{
   assert.match(world,/PICKUP_HOVER_HEIGHT = -8\.25/);

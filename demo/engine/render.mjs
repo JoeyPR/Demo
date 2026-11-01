@@ -1,8 +1,11 @@
-import { compose, translate, scale, rotate, around, IDENTITY, clamp } from "./math.mjs";
+import { compose, translate, scale, IDENTITY, clamp } from "./math.mjs";
 import { PLANNER_PROFILE } from "./planner-profile.mjs";
-import { armMatrix, heldMatrix, punchMatrix, playerRoot } from "./rig.mjs";
+import { limbMatrix, heldPoseMatrix, punchMatrix, playerRoot } from "./rig.mjs";
+import {handAttachment,handReferenceAngle} from "./hand-attachments.mjs";
 import { sampleFrames } from "./animation.mjs";
 import { spriteMatrix, samplePublicParts } from "./items.mjs";
+import { resolveLook } from "./look.mjs";
+import { sampleBlink, BLINK_LID, blinkFitsFace } from "./blink.mjs";
 
 // Semantic hide tags in our API. Never equate these with native numeric flags.
 const slotPass={0:"RenderHat",1:"RenderShirt",2:"RenderPants",3:"RenderShoes",4:"RenderFaceItem",
@@ -11,7 +14,8 @@ const blank=()=>({alpha:1,tint:null,add:false});
 function rawCall(record,pass,local=IDENTITY) {
   return {...blank(),atlas:record.a,sx:record.sx,sy:record.sy,sw:record.sw,sh:record.sh,
     matrix:compose(local,spriteMatrix(record)),alpha:record.o??1,pass,tint:record.t??null,
-    sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,pet:!!record.pet,smooth:!!record.sm};
+    sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,blend:record.blend,
+    renderOrder:record.renderOrder,pet:!!record.pet,smooth:!!record.sm};
 }
 export function resolveWear(items,baseSkin=[255,206,180,255]) {
   // Priority is deterministic but not claimed to be official for conflicting items.
@@ -29,7 +33,7 @@ function baseCalls(pose,wear,profile) {
   const body=(tag,atlas,sx,sy,sw,sh,matrix,pass="BODY",tint=wear.skin.slice(0,3),alpha=wear.alpha)=>{
     if(wear.invisible||wear.hide.has(tag)) return;
     if(wear.hideLegs&&["backFoot","frontFoot","backLeg","frontLeg"].includes(tag)) return;
-    out.push({...blank(),tag,atlas,sx,sy,sw,sh,matrix,pass,tint,alpha});
+    out.push({...blank(),tag,atlas,sx,sy,sw,sh,matrix,pass,tint,alpha,skinPalette:tint?wear.skinPalette:null});
   };
   body("body","player_body_only.png",0,0,32,32,IDENTITY);
   body("head","player_head.png",0,0,32,32,IDENTITY);
@@ -44,15 +48,18 @@ function baseCalls(pose,wear,profile) {
     const [x,y]=pose.face??[0,0];
     body("eyes","player_eyes.png",x*32,y*32,32,32,IDENTITY,"BODY",null,1);
     body("eyelids","player_eyes.png",x*32,(y+4)*32,32,32,IDENTITY,"BODY",wear.skin.slice(0,3),1);
+    if(pose.blink?.closure>0&&blinkFitsFace([x,y])&&!wear.hide.has("eyes")&&!wear.hide.has("eyelids")) {
+      const height=Math.min(BLINK_LID.height,Math.ceil(BLINK_LID.height*pose.blink.closure));
+      body("blinkLids",BLINK_LID.atlas,BLINK_LID.sx,BLINK_LID.sy,BLINK_LID.sw,height,
+        translate(0,BLINK_LID.y),"BODY",wear.skin.slice(0,3),1);
+    }
   }
   for(const side of ["back","front"]) {
     if(side==="back"&&pose.punch) {
       body("backArm","player_puncharm.png",180,0,20,48,punchMatrix(pose.punch,profile),"RenderBackArm");
     } else {
       const at=profile.arm[side];
-      const matrix=compose(
-        around([at[0]+profile.arm.w/2,at[1]+1],rotate(pose[`${side}Angle`])),
-        translate(...at));
+      const matrix=compose(limbMatrix(side,pose[`${side}Angle`],profile),translate(...at));
       body(`${side}Arm`,profile.arm.atlas,0,0,profile.arm.w,profile.arm.h,matrix,
         side==="back"?"RenderBackArm":"RenderFrontArm");
     }
@@ -67,10 +74,10 @@ function fallbackPiecePass(record,item) {
   return slotPass[item.slot]??"RenderInFront";
 }
 function attachmentMatrix(name,pose,profile,referenceAngle=0) {
-  if(name==="backArm") return armMatrix("back",pose.backAngle,profile);
-  if(name==="frontArm") return armMatrix("front",pose.frontAngle,profile);
-  if(name==="backHand") return heldMatrix("back",pose.backAngle,referenceAngle,profile);
-  if(name==="frontHand") return heldMatrix("front",pose.frontAngle,referenceAngle,profile);
+  if(name==="backArm") return limbMatrix("back",pose.backAngle,profile);
+  if(name==="frontArm") return limbMatrix("front",pose.frontAngle,profile);
+  if(name==="backHand") return heldPoseMatrix("back",pose,referenceAngle,profile);
+  if(name==="frontHand") return heldPoseMatrix("front",pose,referenceAngle,profile);
   if(name==="backFoot") return translate(0,pose.backFoot);
   if(name==="frontFoot") return translate(0,pose.frontFoot);
   return IDENTITY;
@@ -107,10 +114,12 @@ function sampleItem(item,motion,pose,catalog,profile) {
         tint:record.skin?"SKIN":record.t??tint?.slice(0,3)??null,owner:item.id});
       continue;
     }
-    const attachment=record.attachment??(side?`${side}Arm`:item.slot===5?"frontHand":"body");
-    let local=attachmentMatrix(attachment,pose,profile,record.referenceAngle??0);
+    const attachment=record.attachment??(side?`${side}Arm`:handAttachment(record,item));
+    const referenceAngle=item.slot===5?handReferenceAngle(record,item,attachment):record.referenceAngle??0;
+    let local=attachmentMatrix(attachment,pose,profile,referenceAngle);
     if(record.noFacing&&motion.facing<0)local=compose(local,translate(32,0),scale(-1,1));
     const call=rawCall(record,record.pass??fallbackPiecePass(record,item),local);
+    call.renderOrder ??= item.renderOrder;
     if(record.skin) call.tint="SKIN";
     call.owner=item.id;
     call.xmlParticle=!!record.xmlParticle;call.fxEngine=!!record.fxEngine;
@@ -130,11 +139,16 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   }
   // Basic slot hiding only; planner-specific raptor/mermaid/wornWith/wrapped
   // substitutions require an authored equipment resolver and are not guessed.
-  const hiddenSlots=new Set(items.flatMap(item=>(item.hideSlots??[]).filter(slot=>slot!==item.slot)));
-  const visibleItems=items.filter(item=>!hiddenSlots.has(item.slot));
-  const wear=resolveWear(visibleItems,visual.skin);
-  if(slots.has(3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
-  let calls=baseCalls(pose,wear,profile);
+  const visibleItems=resolveLook(items).displayed;
+  const contributors=visual.contributors??items;
+  const contributions=resolveWear(contributors,visual.skin);
+  const wear={...resolveWear(visibleItems,visual.skin),skin:contributions.skin,
+    alpha:contributions.alpha,invisible:contributions.invisible};
+  wear.skinPalette=contributions.skin===visual.skin?visual.skinPalette??null:null;
+  if(visibleItems.some(item=>item.slot===3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
+  const blink=visual.blinking===false?sampleBlink(0,{enabled:false}):pose.blink??
+    sampleBlink(motion.clockMs,{seed:visual.blinkSeed??1,override:visual.blink??motion.blink});
+  let calls=baseCalls({...pose,blink},wear,profile);
   for(const item of visibleItems) {
     if(wear.noPants&&item.slot===2) continue;
     calls.push(...sampleItem(item,motion,pose,catalog,profile));
@@ -156,14 +170,17 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   return calls.filter(call=>visual.effects!==false||!call.xmlParticle).map((call,index)=>({
     ...call,alpha:clamp(call.alpha??1,0,1),
     tint:call.tint==="SKIN"?wear.skin.slice(0,3):call.tint,
+    skinPalette:call.tint==="SKIN"?wear.skinPalette:call.skinPalette,
     matrix:call.world?call.matrix:compose(root,call.unlifted&&!visual.playerLift?.floating?
       translate(0,visual.playerLift?.vehicleY??0):lift,call.matrix),
     _index:index
-  })).sort((a,b)=>{
-    const ai=order.indexOf(a.pass),bi=order.indexOf(b.pass);
-    if(ai<0||bi<0) throw Error("Unknown render pass");
-    return ai-bi||a._index-b._index;
-  });
+  })).sort((a,b)=>compareDrawCalls(a,b,order));
+}
+
+export function compareDrawCalls(a,b,order=PLANNER_PROFILE.passOrder) {
+  const ai=order.indexOf(a.pass),bi=order.indexOf(b.pass);
+  if(ai<0||bi<0) throw Error("Unknown render pass");
+  return ai-bi||(a.renderOrder??0)-(b.renderOrder??0)||(a._index??0)-(b._index??0);
 }
 
 // Atlas registry stores source pixels per logical pixel independently per atlas.
@@ -175,6 +192,8 @@ export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}=
   try {
     ctx.imageSmoothingEnabled=false;
     for(const call of calls) {
+      ctx.globalAlpha=call.alpha??1;
+      ctx.globalCompositeOperation=call.add||call.blend==="add"?"lighter":call.blend==="screen"?"screen":"source-over";
       if(call.line) {
         const m=compose(viewport,call.matrix);
         ctx.setTransform(...m);
@@ -196,7 +215,6 @@ export function drawCanvas(ctx,calls,atlases,{tilePixels=32,camera=[0,0],dpr=1}=
         throw Error(`Descriptor/atlas density mismatch for ${call.atlas}`);
       const m=compose(viewport,call.matrix,scale(1/ppu));
       ctx.setTransform(...m);ctx.globalAlpha=call.alpha;
-      ctx.globalCompositeOperation=call.add?"lighter":"source-over";
       ctx.imageSmoothingEnabled=!!call.smooth;
       // Tint must multiply RGB and preserve source alpha. Adapter can cache tinted crops.
       if(call.tint) {

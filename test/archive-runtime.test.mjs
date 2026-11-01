@@ -29,19 +29,17 @@ test("curve interpolation clamps and linearly interpolates components",()=>{
   const c={c:[{tag:"KeyFrame",v:"0,1,2"},{tag:"KeyFrame",v:"1,3,4"}]};
   assert.deepEqual(curveSample(c,.5),[2,3]);assert.deepEqual(curveSample(c,9),[3,4]);
 });
-test("horse gait excludes complete 64px sprites and applies only during travel",()=>{
+test("rider travel follows the video cycle while complete mount sprites stay unsplit",()=>{
   const raw={id:1,name:"Stick Horse",slot:3,gameIcon:[
     {a:"player_sit.png",sx:64,sy:32,sw:32,sh:32,x:16,y:32,u:10.5,seat:1,skin:1},
     {a:"horse.png",sx:0,sy:0,sw:32,sh:32,x:16,y:32,u:10},
     {a:"horse.png",sx:0,sy:32,sw:32,sh:32,x:16,y:32,u:10}]};
   const i=normalizeCatalogItem(raw,{});assert.ok(mountedGaitProfile(i));
   advanceCatalogItem(i,0,frame(0,"walk"));advanceCatalogItem(i,115,frame(115,"walk"));
-  // Rider bob tuning: the moving-hop period is the original 460 ms reference
-  // (see mounted-gait.mjs), so the 115 ms sample hits the peak again.
-  assert.equal(i.gait.bodyY,-1.5*Math.abs(Math.sin(2*Math.PI*115/460)));assert.ok(i.pieces[1].y!==i.pieces[2].y);
+  assert.equal(i.gait.bodyY,-4/2.75);assert.ok(i.pieces[1].y!==i.pieces[2].y);
   advanceCatalogItem(i,100,frame(100));assert.equal(i.gait.active,false);
   const full=normalizeCatalogItem({...raw,gameIcon:[...raw.gameIcon,{a:"whole.png",sw:64,sh:64,x:16,y:32,u:10}]},{});
-  assert.equal(mountedGaitProfile(full),null);
+  assert.equal(mountedGaitProfile(full).split,false);
 });
 test("public pet frame duration is total and it is not arm-attached",()=>{
   const raw={id:1,slot:5,cell:[1,1,0],parts:[{pet:true,atlas:"pet.png"}],

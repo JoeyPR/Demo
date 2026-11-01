@@ -1,6 +1,8 @@
 import {PlannerPlayer} from "./engine/player.mjs";
 import {PreviewMotion} from "./engine/motion.mjs";
 import {importPlannerItem} from "./engine/items.mjs";
+import {rendererScripts} from "./engine/research-data.mjs";
+import {createReferenceFxAtlas} from "./engine/reference-fx.mjs";
 import {drawCanvas} from "./engine/render.mjs";
 import {registerAtlas} from "./engine/canvas-assets.mjs";
 import {point} from "./engine/math.mjs";
@@ -62,7 +64,7 @@ function loadAtlas(name) {
   if(atlasLoads.has(name))return atlasLoads.get(name);
   const load=(async()=>{
     try {
-      const image=new Image();image.crossOrigin="anonymous";image.src=moduleURL(`./assets/${name}`).href;await image.decode();
+      const image=new Image();image.crossOrigin="anonymous";image.src=moduleURL(`./assets/${name}${name==='tiles_page17.png'?'?v=20261031-new':''}`).href;await image.decode();
       images.set(name,image);
       const atlas=registerAtlas(image),tint=atlas.tintedCrop;
       atlas.tintedCrop=call=>{
@@ -530,20 +532,14 @@ async function init() {
     state.catalog.liftProfiles=Object.fromEntries(liftData.profiles.map(p=>[p.id,p]));
     const rendererResponse=await fetch(moduleURL("./renderer-data.json"));
     if(!rendererResponse.ok)throw Error("Renderer XML data failed to load");
-    state.catalog.renderers=(await rendererResponse.json()).scripts;
-    try{const fx=await fetch(moduleURL("./fx-data.json"));if(fx.ok){const d=await fx.json();state.catalog.fxRenderers=d.scripts??d;}}catch{}
+    state.catalog.renderers=rendererScripts(await rendererResponse.json());
+    try{const fx=await fetch(moduleURL("./fx-data.json"));if(fx.ok)state.catalog.fxRenderers=rendererScripts(await fx.json());}catch{}
     try{const pd=await fetch(moduleURL("./punch-data.json"));if(pd.ok)state.catalog.punchData=await pd.json();}catch{}
+    try{const cues=await fetch(moduleURL("./punch-sfx.json"));if(cues.ok)state.catalog.punchSfx=await cues.json();}catch{}
     state.nativeMetadata=await (await fetch(moduleURL("./native-metadata.json"))).json();
     state.abilityRegistry=await (await fetch(moduleURL("./ability-registry.json"))).json();
     // Original procedural reference art; native sprite art is not fabricated.
-    const sheet=document.createElement("canvas");sheet.width=192;sheet.height=32;
-    const g=sheet.getContext("2d");g.fillStyle="white";g.strokeStyle="white";g.lineWidth=2;
-    g.fillRect(14,3,4,26);g.fillRect(3,14,26,4);
-    g.beginPath();g.arc(48,16,10,0,Math.PI*2);g.stroke();g.fillRect(43,9,3,3);
-    g.beginPath();g.moveTo(80,26);g.bezierCurveTo(53,9,76,0,80,11);
-    g.bezierCurveTo(84,0,107,9,80,26);g.fill();
-    g.fillRect(102,13,20,6);g.fillRect(128,13,32,6);
-    g.fillRect(169,9,14,14);g.fillRect(173,5,6,22);
+    const sheet=createReferenceFxAtlas();
     atlases.set("reference-fx.png",registerAtlas(sheet));
     const names=["player_body_only.png","player_head.png","player_extraleg.png","player_feet.png","player_eyes.png",
       "player_arm.png","player_puncharm.png","player_sleeve.png","player_hair.png","player_hairhair.png",

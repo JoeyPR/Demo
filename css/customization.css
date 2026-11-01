@@ -234,3 +234,12 @@
 .c-title-txt { font-size: calc(17*var(--u)); font-weight: 700; text-align: center; overflow-wrap: anywhere; }
 .c-title-name { font-size: calc(15*var(--u)); line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
 .c-title.on { background: #7fb64a; color: #10200c; border-color: #ffe27e; }
+/* Skin colors use the same border, corners and shadows as the Demo panels.
+   Only the fill uses skin alpha; the colored border and black shadows stay opaque. */
+.c-skins{display:grid;grid-template-columns:repeat(auto-fit,minmax(60px,1fr));gap:10px;width:100%}
+.c-skins .c-skin{width:100%;height:44px;min-height:44px;border-radius:var(--radius);
+  border:var(--bd) solid var(--skin-color);
+  background:rgba(var(--skin-rgb),var(--skin-alpha,1));
+  box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000}
+.c-skins .c-skin.on{outline:2px solid var(--line);outline-offset:2px}
+.c-skins .c-skin:focus-visible{outline:3px solid #fff;outline-offset:3px}

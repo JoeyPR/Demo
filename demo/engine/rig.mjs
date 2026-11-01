@@ -1,4 +1,4 @@
-import { around, compose, translate, rotate, scale, approach, approachAngle } from "./math.mjs";
+import { around, compose, translate, rotate, scale, point, approach, approachAngle } from "./math.mjs";
 import { sampleTrack } from "./animation.mjs";
 import { PLANNER_PROFILE } from "./planner-profile.mjs";
 
@@ -65,10 +65,27 @@ export class PlayerRig {
 export function armMatrix(side,angle,profile=PLANNER_PROFILE) {
   return around(side==="back" ? profile.origins.back : profile.origins.front,rotate(angle));
 }
+// The rendered arm rotates one pixel below its source origin. Props, sleeves
+// and the arm rectangle must use this same physical shoulder pivot.
+export function armPivot(side,profile=PLANNER_PROFILE) {
+  const at=profile.arm[side];
+  return [at[0]+profile.arm.w/2,at[1]+1];
+}
+export function limbMatrix(side,angle,profile=PLANNER_PROFILE) {
+  return around(armPivot(side,profile),rotate(angle));
+}
 export function heldMatrix(side,angle,referenceAngle=0,profile=PLANNER_PROFILE) {
-  const pivot=[...(side==="back"?profile.origins.back:profile.origins.front)];
-  pivot[1]+=1;
-  return around(pivot,rotate(angle-referenceAngle));
+  return limbMatrix(side,angle-referenceAngle,profile);
+}
+export function heldPoseMatrix(side,pose,referenceAngle=0,profile=PLANNER_PROFILE) {
+  if(side!=='back'||!pose.punch)return heldMatrix(side,pose[`${side}Angle`],referenceAngle,profile);
+  // Keep rigid equipment at the fist while the punch arm stretches. Applying
+  // the punch's scale to a sword/glove would stretch the equipment itself.
+  const pivot=armPivot(side,profile),restGrip=[pivot[0],profile.arm[side][1]+profile.arm.h-2];
+  const capturedGrip=point(limbMatrix(side,referenceAngle,profile),restGrip);
+  const fist=point(punchMatrix(pose.punch,profile),[10,40]);
+  return compose(translate(...fist),rotate(pose.punch.angle-referenceAngle),
+    translate(-capturedGrip[0],-capturedGrip[1]));
 }
 export function punchMatrix(punch,profile=PLANNER_PROFILE) {
   const [x,y]=profile.arm.back;

@@ -21,6 +21,7 @@ import {
   hillDrawXs,
   hillTravelExcess,
   hillSceneOffset,
+  hillTrackPeriods,
 } from '../weather-engine/weather-renderer.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -38,11 +39,11 @@ describe('land policy — Dirt/Bedrock families plus a genuine None', () => {
 
   it('keeps the js/land.js picker filter in sync with the module policy', () => {
     const src = readFileSync(join(root, 'js/land.js'), 'utf8');
-    const m = src.match(/const isLandOption = b => (\/.+\/i)/);
-    assert.ok(m, 'isLandOption regex not found in js/land.js');
-    const re = new RegExp(m[1].replace(/^\//, '').replace(/\/i$/, ''), 'i');
-    const fromUI = landRows.filter(r => re.test(r[1]));
-    const fromModule = landRows.filter(r => isDirtOrBedrockName(r[1]));
+    const m = src.match(/const isLandOption = b =>\s*([\s\S]*?);/);
+    assert.ok(m, 'isLandOption predicate not found in js/land.js');
+    const predicate = new Function('b','return '+m[1]);
+    const fromUI = landRows.filter(predicate);
+    const fromModule = landRows.filter(r => isDirtOrBedrockName(r[1])&&!/^data\s+/i.test(r[1].trim()));
     assert.deepEqual(fromUI.map(r => r[0]), fromModule.map(r => r[0]));
   });
 
@@ -144,6 +145,7 @@ describe('hill weathers — scroll with the player beyond the rendered region', 
     for (const { cfg } of configs.filter(({ cfg }) => hillSheetIndices(cfg).size > 0)) {
       const hills = hillSheetIndices(cfg);
       const periods = hillPeriods(cfg);
+      const trackPeriods=hillTrackPeriods(cfg,periods);
       // group ALL sibling tracks per sheet — the band is their union, so the
       // geometry must be checked with the real track positions, not a sample x
       const bySheet = new Map();
@@ -181,7 +183,14 @@ describe('hill weathers — scroll with the player beyond the rendered region', 
             assert.ok(drawXs[1] >= 0 && drawXs[1] < period, 'wrapped base inside one period');
             assert.ok(drawXs[0] < 0, 'earlier copy covers the left edge');
           }
-          // combined sibling intervals: the drawn band must be gap-free —
+          // Wobble sprites are sparse accents on top of a full hill band;
+          // their transparent gaps are intentional. Their per-track repeat
+          // period follows the corresponding parent hill, verified separately.
+          if (/desert_wobbly/i.test(cfg.sheets[s])) {
+            for(const track of tracks)assert.ok((trackPeriods.get(track)??period)>0);
+            continue;
+          }
+          // combined sibling intervals: the full hill band must be gap-free —
           // no internal hole between consecutive drawn copies at any offset
           const drawn = kfs.flatMap(kf =>
             hillDrawXs(kf[1], offset, period).map(base => [base, base + kf[3]]))

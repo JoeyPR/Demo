@@ -34,7 +34,7 @@
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
-      img.src = 'sheets/tiles/' + texture;
+      img.src = 'sheets/tiles/' + texture + '?v=20261031-world';
     });
     sheetCache.set(texture, promise);
     return promise;

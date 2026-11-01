@@ -1,0 +1,10 @@
+{
+  "archive": "Planner-LANDsystem.zip",
+  "archiveSha256": "10bf73cdf4d8252419b01096dca44c002eeba6dcdaceb496cb41d7c723676963",
+  "source": "items.gen.js: ROWS",
+  "runtime": "data/world-blocks.json",
+  "renderableRows": 1766,
+  "foreground": 1471,
+  "background": 295,
+  "limits": "Collision1solid,2one-way platform; other collision types retain the supplied approximation. Atlas animations are experimental preview sequences."
+}

@@ -12,11 +12,14 @@
 <link rel="stylesheet" href="css/pads.css">
 <link rel="stylesheet" href="css/inv.css">
 <link rel="stylesheet" href="css/drop.css">
+<link rel="stylesheet" href="css/item-info.css">
 <link rel="stylesheet" href="css/dropdowns.css">
 <link rel="stylesheet" href="css/systems.css">
 <link rel="stylesheet" href="css/customization.css">
 <link rel="stylesheet" href="css/mobile.css">
 <link rel="stylesheet" href="css/blackbox.css">
+<link rel="stylesheet" href="css/player-chat.css">
+<link rel="stylesheet" href="css/preview-mode.css">
 </head>
 <body>
 <div id="wrap"></div>
@@ -80,6 +83,7 @@
 <div id="blackbox" class="blackbox" role="status" aria-live="polite" hidden></div>
 <!-- load order matters: core -> slots stub -> systems -> app boot -->
 <script src="js/core.js"></script>
+<script src="js/skin-colors.js"></script>
 <script>
 /* slot names for the tab categories before the catalog loads */
 P.dat = { slots: {"0":"Hat","1":"Shirt","2":"Pants","3":"Feet","4":"Face","5":"Hand","6":"Back","7":"Hair","8":"Chest","9":"Ancestral"} };
@@ -87,14 +91,16 @@ P.dat = { slots: {"0":"Hat","1":"Shirt","2":"Pants","3":"Feet","4":"Face","5":"H
 <script src="js/pads.js"></script>
 <script src="js/tabs.js"></script>
 <script src="js/rtfont.js"></script>
+<script src="js/player-chat.js"></script>
 <script src="js/plate.js"></script>
 <script src="js/grid.js"></script>
 <script src="js/blackbox.js"></script>
 <script src="js/side.js"></script>
 <script src="js/drop.js"></script>
+<script type="module" src="js/item-info.js"></script>
 <script src="js/weather.js"></script>
 <script src="js/land.js"></script>
-<script src="js/background.js"></script>
+<script src="js/preview-mode.js"></script>
 <script src="js/customization.js"></script>
 <script src="js/wrench-ui.js"></script>
 <script src="js/handle.js"></script>

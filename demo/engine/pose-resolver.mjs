@@ -1,6 +1,7 @@
 // Static poses must not override jump, fall or punch.
 // Mounted airborne movement uses the player's own rig animation.
 import {isFloatingItem,locomotionState} from "./motion-policy.mjs";
+import {sampleMountedArms} from "./mounted-gait.mjs";
 export function resolveItemPose(items,motion,visual={}) {
   const mergeDefined=(target,source)=>Object.assign(target,
     Object.fromEntries(Object.entries(source??{}).filter(([,v])=>v!==undefined)));
@@ -23,14 +24,18 @@ export function resolveItemPose(items,motion,visual={}) {
     // Hold the captured ride pose only while grounded. In the air, preserve
     // the player's jump/fall arm and foot motion; the ride item keeps its own
     // sequence and draw calls in the item renderer.
-    if(!motion.punch&&!locomotion.airborne)
+    if(!motion.punch&&!locomotion.airborne) {
       mergeDefined(override,mounted.staticArmPose??mounted.pose);
+      const arms=sampleMountedArms(mounted,motion);
+      if(arms)mergeDefined(override,{backAngle:arms.backAngle,frontAngle:arms.frontAngle});
+    }
     override.disableWalk=true;
     if(!locomotion.airborne) {
       override.backFoot=0;
       override.frontFoot=0;
     }
-    evidence=mountedAirborne?"player-airborne-pose-while-mounted":"public-static-mount-fallback";
+    evidence=mountedAirborne?"player-airborne-pose-while-mounted":
+      locomotion.moving&&!motion.punch?"video-measured-mounted-arm-travel":"public-static-mount-fallback";
     owner=mounted.id;
   }
   const ordered=[...items].sort((a,b)=>(b.slot===3)-(a.slot===3));

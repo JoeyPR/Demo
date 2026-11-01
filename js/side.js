@@ -3,7 +3,7 @@
    Customization tab; EXPORT saves a player PNG. */
 (function(){
   const side = P.$('#side'), sw = P.$('#sw'), main = P.$('#main'), q = P.$('#q');
-  const nonSearchableTabs = new Set(['custom', 'player', 'makeup']);
+  const nonSearchableTabs = new Set(['equip', 'custom', 'player', 'makeup']);
 
   const setSw = on => {
     on = !!on && !nonSearchableTabs.has(P.tabs.cur);
@@ -24,7 +24,7 @@
   const A = {
     store(it) { it.gone = true; P.inv.sel = null; P.toast('Stored ' + it.name); },   /* disabled below */
     drop(it)  { it.gone = true; P.inv.sel = null; P.toast('Dropped ' + it.name); },
-    info(it)  { P.toast(`${it.name} · #${it.id} · ${it.script ? 'XML renderer' : 'sprite item'}`); },
+    info(it)  { P.emit('info-request', it); },
     fav(it)   { P.emit('fav-toggle', it); },
     wrench()  { P.emit('focus-wrench'); P.emit('open-tab', 'player'); }
   };

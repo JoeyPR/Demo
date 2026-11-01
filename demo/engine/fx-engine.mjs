@@ -2,11 +2,13 @@
 // Ported from the planner FX Lab. Pure ES module: no DOM. Emits plain records / draw calls.
 // Coverage: ParticleSystem Emitter/Particle semantics, state machines, punch/walk/jump/tile events.
 // NOT covered: item sprites, AvatarTransform arm/face effects, pets (see README_FX.md).
+import { integrateParticle } from "./particle-state.mjs";
+import { condition as renderCondition } from "./xml-renderer.mjs";
   const TICK = 0.033;
-const nums = s => String(s ?? '').split(/[,\s]+/).filter(x => x !== '').map(Number).filter(x => !isNaN(x));
+const nums = s => String(s ?? '').split(/[,\s]+/).filter(x => x !== '').map(Number).filter(Number.isFinite);
 const bool = s => String(s).toLowerCase() === 'true';
 const two = v => Array.isArray(v) ? v : [v ?? 0, v ?? 0];
-const num = v => Array.isArray(v) ? (v[0] ?? 0) : typeof v === 'boolean' ? +v : (typeof v === 'number' ? v : parseFloat(v) || 0);
+const num = v => {const value=Array.isArray(v)?num(v[0]):typeof v==='boolean'?+v:parseFloat(v);return Number.isFinite(value)?value:0;};
 const lerp = (a, b, t) => a + (b - a) * t;
 const unsupported = {};
 const note = k => { unsupported[k] = (unsupported[k] || 0) + 1; };
@@ -72,7 +74,7 @@ class Script {
     return {
       node: n, attr: n.a, em, pa, es: sets(em), ps: sets(pa),
       on: st === 'AddClothingParticles' || st === 'Update' || st === 'ContextUpdate' || /^Render/.test(st || ''),
-      age: 0, emitted: 0, next: 0, acc: 0, clock: 0, live: [], pulse: undefined, stepped: false, wasIn: undefined
+      age: 0, emitted: 0, sequence:0, next: 0, acc: 0, clock: 0, live: [], pulse: undefined, stepped: false, wasIn: undefined
     };
   }
   // ---- state / conditions -------------------------------------------------
@@ -113,6 +115,8 @@ class Script {
     if (n === 'onGround') return h.onGround;
     if (n === 'Player.GetFacing') return h.facing;
     if (n === 'punchCount') return h.punches || 0;
+    if (n === 'punching' || n === 'punchInProgress') return !!h.punching;
+    if (n === 'isFacingLeft') return h.facing < 0;
     if (n === 'isMoving') return Math.abs(h.vx) > 0.1;
     if (n === 'PunchDelay') return h.petVars?.PunchDelay ?? 0;
     return undefined;
@@ -127,18 +131,29 @@ class Script {
     switch (n.tag) {
       case 'Condition': case 'SubCondition': return (a.type || 'and').toLowerCase() === 'or' ? n.c.some(c => this.cond(c)) : n.c.every(c => this.cond(c));
       case 'IsAction': k = this.actionIs(w); break;
-      case 'IsWearing': k = false; break;                       // planner supplies equipped set; none assumed here
+      case 'IsWearing': case 'IsRenderMod': case 'IsRenderObjectFlag': case 'IsItemTransformed': {
+        const result=renderCondition(n,{ground:this.host.onGround,facing:this.host.facing,
+          renderContext:this.host.renderContext??{}}, {});
+        if(result===undefined)return false;k=result;break;
+      }
       case 'IsInState': k = this.inStates(a.name) === bool(w); break;
-      case 'IsVariableBool': k = !!this.getVar(a.name) === bool(w); break;
-      case 'IsVariableFloat': { let x = num(this.getVar(a.name)); if (bool(a.abs)) x = Math.abs(x); return this.cmp(x, num(this.value(w)), O); }
-      case 'CompareCustomVariable': { const l = num(this.getVar(a.VariableNameToCompare)), r = a.RightHSVariableNameToCompare ? num(this.getVar(a.RightHSVariableNameToCompare)) : num(this.value(w)); return this.cmp(l, r, O); }
+      case 'IsVariableBool': {const v=this.getVar(a.name);if(v===undefined)return false;k=!!v===bool(w);break;}
+      case 'IsVariableFloat': { const v=this.getVar(a.name);if(v===undefined)return false;let x = num(v); if (bool(a.abs)) x = Math.abs(x); return this.cmp(x, num(this.value(w)), O); }
+      case 'CompareCustomVariable': {
+        const l=this.getVar(a.VariableNameToCompare),r=a.RightHSVariableNameToCompare?this.getVar(a.RightHSVariableNameToCompare):this.value(w);
+        return l!==undefined&&r!==undefined&&this.cmp(num(l),num(r),O);
+      }
       case 'IsFacingLeft': k = (this.host.facing < 0) === bool(w || 'true'); break;
       case 'IsAnimationFinished': k = this.finished(w); break;
       case 'CheckRandomRangeNumber': { const d = parseInt(a.StartNumber ?? '0') || 0, u = parseInt(a.EndNumber ?? '0') || 0, h = u > d ? d + Math.floor(this.rand() * (u - d)) : d; return this.cmp(h, num(this.value(w)), O); }
-      case 'IsRenderMod': case 'IsRenderObjectFlag': k = false; break;
-      case 'ItemHasTag': case 'IsItemTransformed': k = false === bool(w || 'true') ? true : false; k = false; break;
+      case 'ItemHasTag': k = (this.host.renderContext?.itemTags??[]).includes(w); break;
       case 'IsHoldingJumpKey': k = !!this.host.holdJump === bool(w || 'true'); break;
-      default: k = !bool(w || 'true'); if (!/^Is(Zombified|Sitting|SleepingOnaBed|Dancing|Trnsformed|DarkTile)$/.test(n.tag)) note('cond:' + n.tag); return neg ? !k : k;
+      default: {
+        const known=renderCondition(n,{ground:this.host.onGround,facing:this.host.facing,
+          renderContext:this.host.renderContext??{}},{});
+        if(known===undefined)note('cond:' + n.tag);
+        return known===true;
+      }
     }
     return neg ? !k : k;
   }
@@ -206,26 +221,33 @@ class Script {
   update(h) {
     const s = this.byName.get(h.name); if (!s) return;
     s.on = true; s.stepped = true;
-    if (this.punchStarting) { s.age = 0; s.emitted = 0; s.next = 0; return; }
-    if (h.onState || (h.onAction && !/JUMPSTART|JUMPDOUBLE/i.test(h.onAction))) {
-      if (s.pulse !== undefined && s.pulse < this.tick - 1) { s.age = 0; s.emitted = 0; s.next = 0; }
-      s.pulse = this.tick;
+    if (this.punchStarting || s.pulse !== undefined && s.pulse < this.tick - 1) {
+      s.age = 0; s.emitted = 0; s.next = 0;
     }
+    s.pulse = this.tick;
   }
   runStage(name) { for (const n of this.stages[name] || []) this.exec(n); }
+  eventStage(name) {
+    this.runStage(name);
+    for(const s of this.systems)if(s.attr.updateStage===name) {
+      s.on=true;s.age=0;s.emitted=0;s.next=0;s.pulse=undefined;s.stepped=false;
+    }
+  }
   // ---- stepping ------------------------------------------------------------
   step(dt, host) {
+    if(!Number.isFinite(dt)||dt<=0)return;
+    dt=Math.min(dt,0.25);
     this.host = host; this.tick++; this.t += dt;
     this.sinceJump = host.justJumped ? 0 : this.sinceJump + dt * 1000;
     this.punchStarting = !!host.punchStart;
     this.stepMachines(); this.stepAnims(dt);
     this.runStage('AddClothingParticles'); this.runStage('Update'); this.runStage('ContextUpdate');
     for (const st of [...BEHIND, ...FRONT]) this.runStage(st);   // render stages also drive ParticleSystemUpdate/Off
-    if (host.hitTile) this.runStage('OnDamagedTile'); if (host.destroyTile) this.runStage('OnDestroyedTile');
-    if (host.punchStart) { this.runStage('OnPunchStart'); this.runStage('OnPunchBegin'); }
+    if (host.hitTile) this.eventStage('OnDamagedTile'); if (host.destroyTile) this.eventStage('OnDestroyedTile');
+    if (host.punchStart) { this.eventStage('OnPunchStart'); this.eventStage('OnPunchBegin'); }
     if (host.punching) this.runStage('OnPunchUpdate');
-    if (host.punchStop) this.runStage('OnPunchStop');
-    for (const ev of host.events || []) { this.runStage(ev); for (const sy of this.systems) if (sy.attr.updateStage === ev) { sy.on = true; sy.age = 0; sy.emitted = 0; sy.next = 0; } }
+    if (host.punchStop) this.eventStage('OnPunchStop');
+    for (const ev of host.events || []) this.eventStage(ev);
     this.punchStarting = false;
     for (const s of this.systems) {
       s.acc += dt;
@@ -291,10 +313,9 @@ class Script {
     s.clock += dt;
     this.emit(s, dt);
     for (const p of s.live) {
-      p.age += dt;
-      if (p.vel1) { const x = Math.min(1, p.age / p.life); p.vel = [lerp(p.vel0[0], p.vel1[0], x), lerp(p.vel0[1], p.vel1[1], x)]; }
-      if (p.grav) { p.vel[0] += p.grav[0] * dt; p.vel[1] += p.grav[1] * dt; }
-      p.pos[0] += p.vel[0] * dt; p.pos[1] += p.vel[1] * dt; p.angle += p.spin * dt;
+      integrateParticle(p,dt);
+      if(bool(s.ps.destroyOnCollision)&&typeof this.host.solidAt==="function"&&
+          this.host.solidAt(this.host.x+16+p.pos[0],this.host.y+32+p.pos[1]))p.age=p.life,p.inf=false;
     }
     s.live = s.live.filter(p => p.inf || p.age < p.life);
     const sec = s.attr.secondary && this.byName.get(s.attr.secondary);
@@ -303,13 +324,15 @@ class Script {
       R.age += dt; R.next -= dt;
       const n = parseInt(sec.es.particlesToEmit) || 0, per = parseInt(sec.es.particlesPerEmission) || 1, iv = parseFloat(sec.es.emissionInterval) || 0, lt = parseFloat(sec.es.lifeTime) || 0;
       if (R.next <= 0 && (!n || R.emitted < n) && (!lt || R.age <= lt)) {
-        for (let i = 0; i < per; i++) this.spawn(sec, R.emitted * per + i, p.pos);
-        R.emitted++; R.next = iv <= 0 ? Infinity : iv;
+        const count=Math.min(Math.max(0,per),n?n-R.emitted:per,256);
+        for (let i = 0; i < count; i++)if(this.spawn(sec,R.emitted,p.pos,p.world))R.emitted++;
+        R.next = iv <= 0 ? Infinity : iv;
       }
     }
   }
   emit(s, dt) {
     if (!s.on) return;
+    if(s.es.enable!==undefined&&!bool(s.es.enable))return;
     if (s.pulse !== undefined && s.pulse < this.tick - 1) return;
     if (s.attr.updateState) {
       const inn = this.inStates(s.attr.updateState);
@@ -327,17 +350,19 @@ class Script {
     if (s.age < delay) return;
     const inf = bool(E.infParticles), chk = bool(E.checkParticleNumToEmit);
     s.next -= dt;
-    if (s.next <= 0) {
+    let bursts=0;
+    while (s.next <= 0 && bursts++<32) {
       const ev = {};
       for (const q of s.em.c) if (q.tag === 'Random' && q.a.name) { const lo = nums(q.a.min), hi = nums(q.a.max); const o = lo.map((x, i) => x + ((hi[i] ?? x) - x) * this.rand()); ev[q.a.name] = o.length === 1 ? o[0] : o; }
       s.emitV = ev;
-      const g = (k, d) => ev[k] !== undefined ? Math.floor(num(ev[k])) : (parseInt(E[k] ?? d) || 0);
+      const g = (k, d) => Math.max(0,ev[k] !== undefined ? Math.floor(num(ev[k])) : (parseInt(E[k] ?? d) || 0));
       const tot = g('particlesToEmit', '0'), per = g('particlesPerEmission', '1') || 1;
       if (tot && !inf && s.emitted >= tot) return;
       const iv = ev.emissionInterval !== undefined ? num(ev.emissionInterval) : bool(E.randomizeInterval) ? lerp(parseFloat(E.intervalMin ?? 0.1), parseFloat(E.intervalMax ?? E.intervalMin ?? 0.1), this.rand()) : parseFloat(E.emissionInterval ?? 0);
       if (tot && chk && s.emitted >= tot) { s.next = iv || 0.05; return; }
-      for (let i = 0; i < per; i++) this.spawn(s, s.emitted * per + i);
-      s.emitted++; s.next = iv <= 0 ? Infinity : iv;
+      const count=Math.min(per,tot&&(!inf||chk)?tot-s.emitted:per,256);
+      for (let i = 0; i < count; i++)if(this.spawn(s,s.sequence))s.sequence++,s.emitted++;
+      s.next = iv <= 0 ? Infinity : s.next+Math.max(.001,iv);
     }
   }
   handBase(s) {
@@ -349,7 +374,10 @@ class Script {
     }
     return null;
   }
-  spawn(s, idx, at = null) {
+  spawn(s, idx, at = null, birthWorld = null) {
+    const configured=parseInt(s.es.maxParticleInstanceAtOnce??s.ps.maxParticleInstanceAtOnce);
+    const limit=Number.isFinite(configured)?Math.max(0,Math.min(2048,configured)):512;
+    if(s.live.length>=limit||this.systems.reduce((n,system)=>n+system.live.length,0)>=4096)return;
     const h = this.host, ps = s.ps, A = s.pa.a, cache = {}, rel = bool(ps.relativeToEmitter);
     let base;
     const hb = !at && this.handBase(s);
@@ -364,7 +392,7 @@ class Script {
     const wp = this.resolve(s, 'pa', 'worldPos', null, cache);
     let P0 = wp ? [two(wp)[0] - 16 + (ofs[0] ?? 0), two(wp)[1] - 32 + (ofs[1] ?? 0)] : [base[0] + (ofs[0] ?? 0) + (pos[0] ?? 0), base[1] + (ofs[1] ?? 0) + (pos[1] ?? 0)];
     if (!at && !rel) P0 = [P0[0], P0[1]];
-    let life = num(this.resolve(s, 'pa', 'lifeTime', 1, cache)) || 1;
+    let life = Math.max(0.001,num(this.resolve(s, 'pa', 'lifeTime', 1, cache)) || 1);
     let v0 = two(this.resolve(s, 'pa', 'initialVelocity', [0, 0], cache));
     let v1 = bool(ps.interpolateVelocity) ? two(this.resolve(s, 'pa', 'finalVelocity', null, cache) ?? [NaN]) : null;
     const vecTo = nm => {
@@ -396,18 +424,24 @@ class Script {
     if (bool(A.alternateSpriteFrameWithPunch)) frame = [sp.frame[0] + (((h.punches || 1) + 1) % 2), sp.frame[1]];
     else if (frames.length && bool(A.randomSpriteFrame)) frame = frames[Math.floor(this.rand() * frames.length)];
     else if (frames.length && (bool(A.particleIndexSpriteFrame) || bool(ps.inSpecificOrder))) frame = frames[idx % frames.length];
-    else if (frames.length) an = { frames, len: anim.a.animTime !== undefined ? anim.len : frames.length * TICK, loop: true };
+    else if (frames.length) an = { frames, len: anim.len, loop: anim.loop };
     const grav = bool(ps.useGravity) ? two(val(ps.gravityVector ?? '0,0')) : null;
     const ang0 = num(this.resolve(s, 'pa', 'initialAngle', 0, cache));
     for (const sv of s.pa.c.filter(c => c.tag === 'SetVar')) if (sv.a.name) this.vars.set(sv.a.name, this.ref(s, 'pa', sv.a.source, 0, cache));
     const sc0 = two(this.resolve(s, 'pa', 'initialScale', [1, 1], cache)), sc1 = bool(ps.interpolateScale) ? two(val(ps.finalScale ?? '1')) : null;
-    const rgb = ps.initalRGB !== undefined ? two3(val(ps.initalRGB)) : null;
+    const rgb = ps.initialRGB !== undefined || ps.initalRGB !== undefined ? two3(val(ps.initialRGB??ps.initalRGB)) : null;
     s.live.push({
       pos: P0, vel: [v0[0] ?? 0, v0[1] ?? 0], vel0: v1 ? [v0[0] ?? 0, v0[1] ?? 0] : null, vel1: v1 ? [v1[0] ?? 0, v1[1] ?? 0] : null,
       grav, age: 0, life, inf: bool(ps.infLifeTime), sprite: spr, frame, anim: an,
       scale0: [sc0[0] ?? 1, sc0[1] ?? sc0[0] ?? 1], scale1: sc1, rgb, angle: ang0, spin: num(this.resolve(s, 'pa', 'initialRotationRate', 0, cache)),
-      world: !rel && !at ? [h.x, h.y, h.facing < 0 ? -1 : 1] : null, roff: rel ? ep : null, orbitStart: num(this.resolve(s, 'pa', 'orbitStart', 0, cache))
+      alpha0:num(this.resolve(s,'pa','initialAlpha',1,cache)),
+      angle0:ang0,angle1:bool(ps.interpolateAngle)?num(this.resolve(s,'pa','finalAngle',ang0,cache)):undefined,
+      spin0:num(this.resolve(s,'pa','initialRotationRate',0,cache)),
+      spin1:bool(ps.interpolateRotationRate)?num(this.resolve(s,'pa','finalRotationRate',0,cache)):undefined,
+      world: !rel ? birthWorld ?? (!at ? [h.x, h.y, h.facing < 0 ? -1 : 1] : null) : null,
+      orbitStart: num(this.resolve(s, 'pa', 'orbitStart', 0, cache))
     });
+    return true;
   }
   // ---- drawing -------------------------------------------------------------
   stageOf(s) { return s.attr.renderStage || s.renderPass || null; }
@@ -417,7 +451,7 @@ class Script {
     for (const p of s.live) {
       const sp = this.sprites.get(p.sprite); if (!sp || !sp.atlas) continue;
       const t = p.inf ? 0 : Math.min(1, p.age / p.life);
-      let al = num(val(ps.initialAlpha ?? '1'));
+      let al = p.alpha0;
       const cA = s.pa.c.find(c => c.tag === 'Curve' && c.a.name === 'initialAlpha');
       if (cA) al = curve(cA, t)[0] ?? 1; else if (bool(ps.interpolateAlpha)) al += (num(val(ps.finalAlpha ?? '0')) - al) * t;
       if (al <= 0.01) continue;
@@ -430,7 +464,8 @@ class Script {
       let fr = p.frame || sp.frame;
       if (p.anim) { const k = p.anim.len > 0 ? p.age / p.anim.len : 0; fr = p.anim.frames[Math.floor((p.anim.loop ? k % 1 : Math.min(k, 0.999)) * p.anim.frames.length)]; }
       const [ax, ay] = align(ps.renderAlignment, sp.w, sp.h);
-      let ang = bool(ps.rotateWithVelocity) && (p.vel[0] || p.vel[1]) ? Math.atan2(p.vel[1], p.vel[0]) * 180 / Math.PI : p.angle;
+      let ang = bool(ps.rotateWithVelocity) && (p.vel[0] || p.vel[1]) ? Math.atan2(p.vel[1], p.vel[0]) * 180 / Math.PI :
+        p.angle1!==undefined?lerp(p.angle0,p.angle1,t):p.angle;
       let X = p.pos[0], Y = p.pos[1], screenDirect = false;
       if (bool(ps.applyOrbit)) {
         const cO = s.pa.c.find(c => c.tag === 'Curve' && c.a.name === 'orbit');
@@ -444,7 +479,11 @@ class Script {
       }
       if (bool(ps.relativeToEmitter)) {
         const e = this.emitterPos(s); let ex = e[0], ey = e[1];
-        if (p.roff) { ex += p.roff[0] ?? 0; ey += p.roff[1] ?? 0; }
+        const hb=this.handBase(s);
+        if(hb) {
+          const a=hb[2]??0,c=Math.cos(a),sn=Math.sin(a),px=X+ex,py=Y+ey;
+          X=c*px-sn*py;Y=sn*px+c*py;ex=hb[0];ey=hb[1];
+        }
         X += ex; Y += ey; sx *= e[2]; sy *= e[2]; X = fc * X;
       } else if (p.world) {
         X = p.world[2] * X + p.world[0] - this.host.x; Y += p.world[1] - this.host.y; screenDirect = true;
@@ -456,7 +495,8 @@ class Script {
       }
       out.push({ atlas: sp.atlas, sx: fr[0] * sp.w, sy: fr[1] * sp.h, sw: sp.w, sh: sp.h, X, Y, ang: fc < 0 ? -ang : ang,
         kx: sx * (bool(ps.flipX) ? -1 : 1) * (fc < 0 ? -1 : 1), ky: sy * (bool(ps.flipY) ? -1 : 1), ax, ay,
-        alpha: Math.min(1, al), add, tint: rgb ? rgb.map(v => Math.round(Math.min(1, v) * 255)) : null, screenDirect });
+        alpha: Math.max(0,Math.min(1, al)), add, blend:/SCREEN/.test(ps.blendingMode||'')?'screen':undefined,
+        tint: rgb ? rgb.map(v => Math.round(Math.max(0,Math.min(1, v)) * 255)) : null, screenDirect });
     }
     return out;
   }
@@ -480,7 +520,7 @@ class Script {
 }
 
 function two3(v) { const a = Array.isArray(v) ? v : [v, v, v]; return [a[0] ?? 1, a[1] ?? a[0] ?? 1, a[2] ?? a[0] ?? 1]; }
-export const BEHIND = ['RenderBehind', 'RenderBackHair', 'RenderBackHat', 'RenderBackpack', 'RenderBackHandItem', 'RenderBackArm', 'RenderChestBackItem'];
+export const BEHIND = ['RenderBehind', 'RenderBackHair', 'RenderBackHat', 'RenderBackpack', 'RenderAura', 'RenderBackHandItem', 'RenderBackArm', 'RenderChestBackItem'];
 export const FRONT = ['RenderShoes', 'RenderPants', 'RenderShirt', 'RenderChestItem', 'RenderFrontpack', 'RenderFrontArm', 'RenderFaceItem', 'RenderHair', 'RenderHat', 'RenderHandItem', 'RenderPet', 'RenderInFront'];
 export { Script, TICK, unsupported };
 export const coverage = () => ({ ...unsupported });

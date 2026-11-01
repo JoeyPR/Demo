@@ -28,6 +28,7 @@ test("hidden customization tabs do not corrupt inventory virtualization metrics"
 });
 
 test("Clothing Fist/Wrench boxes focus and synchronize the quick-drawer tool", () => {
+  assert.ok(grid.includes("P.$$('#quick .box')"),"quickslot focus iterates the multi-element selector");
   const start = grid.indexOf("function activate(item, box)");
   const end = grid.indexOf("g.addEventListener('click'", start);
   assert.ok(start >= 0 && end > start);

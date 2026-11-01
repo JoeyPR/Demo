@@ -38,11 +38,7 @@ export class PreviewMotion {
       if(this.slowFall&&input.jump&&this.vy>0)
         this.vy=Math.min(this.vy,c.maxFall*c.slowFallFactor);
     }
-    this.x+=this.vx*dt;this.y+=this.vy*dt;
-    if(!this.ground&&this.vy>=0&&this.y>=this.floorY) {
-      this.y=this.floorY;this.vy=0;this.ground=true;this.airAvailable=this.doubleJump;
-      this.events.push({type:"land",id:`land:${this.clockMs}`,at:this.clockMs,x:this.x,y:this.y,facing:this.facing});
-    }
+    this.advancePosition(dt);
     this.cooldown=Math.max(0,this.cooldown-dtMs);
     if(this.cooldown<1e-7)this.cooldown=0; // Do not add a frame for floating-point residue.
     if(this.punch) {
@@ -59,6 +55,15 @@ export class PreviewMotion {
     this.moveMs=state===this.locomotion?this.moveMs+dtMs:0;
     this.locomotion=state;
     return this.snapshot();
+  }
+  // A world adapter can replace spatial collision without duplicating input,
+  // ability, punch, event or animation-clock handling.
+  advancePosition(dt) {
+    this.x+=this.vx*dt;this.y+=this.vy*dt;
+    if(!this.ground&&this.vy>=0&&this.y>=this.floorY) {
+      this.y=this.floorY;this.vy=0;this.ground=true;this.airAvailable=this.doubleJump;
+      this.events.push({type:"land",id:`land:${this.clockMs}`,at:this.clockMs,x:this.x,y:this.y,facing:this.facing});
+    }
   }
   snapshot() {
     return structuredClone(Object.fromEntries(

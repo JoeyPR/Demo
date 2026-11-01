@@ -19,41 +19,69 @@ const ANIMAL_ALIASES=new Set([
   14260 // https://growtopiawiki.com/w/Enbarr,_The_Flowing_Mane
 ]);
 
-// User-observed split horse-sit behavior. Amplitudes/rate are reference tuning,
-// not an assertion that native enum bits or native timing were recovered.
+// Rider head displacement measured from set-1.mp4's travel segment. The
+// capture renders native pixels at approximately 2.75x; its head cycles through
+// y=26..29 versus y=32 at rest. Keep the atlas/leg animation on its own clock.
+export const RIDING_REFERENCE_PERIOD_MS=1000/3;
+export const RIDING_REFERENCE_PIXELS_PER_UNIT=2.75;
+export const RIDING_REFERENCE_BODY_Y=Object.freeze([26,27,27,28,29,29,28,27,27,26]
+  .map(y=>(y-32)/RIDING_REFERENCE_PIXELS_PER_UNIT));
+// The visible riding arm has its own slower cycle. These twenty angles were
+// fitted from the actual arm sprite across the video's grounded travel frames;
+// the body bob is not the arm animation clock.
+export const RIDING_ARM_PERIOD_MS=660;
+export const RIDING_ARM_KEYS=Object.freeze([-34,-38,-38,-42,-44,-46,-48,-48,-52,-54,
+  -55,-54,-50,-50,-50,-46,-44,-41,-40,-38]);
 export function mountedGaitProfile(item) {
   if(item.raw?.mountedGait===false)return null;
   if(item.raw?.mountedGait)return item.raw.mountedGait;
   if(!item.vehicle||isFloatingItem(item))return null;
-  // Positive animal-name classification: a horse-shaped seat is NOT proof
-  // that the vehicle is an animal (brooms, cars, comets share the same seats).
-  if(!ANIMAL_NAME.test(item.name??item.raw?.name??"")&&!ANIMAL_ALIASES.has(item.id))return null;
-  const records=item.raw.gameIcon??[];
-  const horseSeat=records.some(p=>p.a==="player_sit.png"&&p.sy===32&&[64,96].includes(p.sx)||
-    p.a==="player_horsepants.png"&&p.seat);
-  const halves=records.filter(p=>p.a&&!p.skin&&!p.seat&&p.a!=="player_sleeve.png");
-  // Full 64-pixel sprites never receive the opposing-half transformation.
-  if(!horseSeat||halves.some(p=>p.sw>32||p.sh>32)||new Set(halves.map(p=>p.sy)).size<2)return null;
-  return {periodMs:460,hop:1.5,slide:1.25,evidence:"user-observed-split-animal-reference"};
+  const records=item.raw?.gameIcon??[];
+  const animal=ANIMAL_NAME.test(item.name??item.raw?.name??'')||ANIMAL_ALIASES.has(item.id);
+  // All seated riders share the body animation; only split animal sprites
+  // receive the small opposing component offsets from the captured horse.
+  const halves=records.filter(p=>p.a&&!p.skin&&!p.seat&&p.a!=='player_sleeve.png');
+  const split=animal&&halves.every(p=>p.sw<=32&&p.sh<=32)&&new Set(halves.map(p=>p.sy)).size>1;
+  return {periodMs:RIDING_REFERENCE_PERIOD_MS,bodyKeys:RIDING_REFERENCE_BODY_Y,
+    split,evidence:'set-1.mp4-measured-rider-components'};
 }
 export function sampleMountedGait(item,motion) {
   const profile=mountedGaitProfile(item),state=locomotionState(motion);
   if(!profile||state.airborne||!state.moving)return {active:false,bodyY:0,slide:0};
-  const t=item.motionPlayback?motion.clockMs-item.motionPlayback.startedMs:motion.moveMs??0;
-  const phase=2*Math.PI*Math.max(0,t)/profile.periodMs;
-  return {active:true,bodyY:-profile.hop*Math.abs(Math.sin(phase)),
-    slide:profile.slide*Math.sin(phase),phase,profile};
+  const elapsed=item.motionPlayback?motion.clockMs-item.motionPlayback.startedMs:motion.moveMs??0;
+  const t=Math.max(0,elapsed),phase=(t%profile.periodMs)/profile.periodMs;
+  const keys=profile.bodyKeys??RIDING_REFERENCE_BODY_Y;
+  const index=Math.floor(phase*keys.length+1e-8)%keys.length;
+  const bodyY=keys[index];
+  // The horse's native front/hind cells continue their own atlas sequence;
+  // translating the whole horse by the rider bob made it slide vertically.
+  const slide=profile.split?Math.sin(2*Math.PI*phase)/3:0;
+  return {active:true,bodyY,slide,phase,profile};
+}
+export function sampleMountedArms(item,motion) {
+  const profile=mountedGaitProfile(item),state=locomotionState(motion);
+  if(!profile||state.airborne||!state.moving||motion.punch)return null;
+  const elapsed=item.motionPlayback?motion.clockMs-item.motionPlayback.startedMs:motion.moveMs??0;
+  const periodMs=profile.armPeriodMs??RIDING_ARM_PERIOD_MS,keys=profile.armKeys??RIDING_ARM_KEYS;
+  const phase=(Math.max(0,elapsed)%periodMs)/periodMs;
+  const index=Math.floor(phase*keys.length+1e-8)%keys.length;
+  const delta=keys[index]+35;
+  const rest=item.staticArmPose??item.pose??{};
+  // Preserve equipment-specific rest angles. The rear arm is occluded in most
+  // reference frames, so it follows the same measured sway around its own rest.
+  return {backAngle:(rest.backAngle??-35)+delta,frontAngle:(rest.frontAngle??-35)+delta,
+    index,periodMs,evidence:'set-1.mp4-visible-arm-fit'};
 }
 export function applyMountedGait(item,motion) {
   const gait=sampleMountedGait(item,motion);item.gait=gait;
   if(!gait.active)return;
-  const rows=[...new Set(item.referencePieces.filter(p=>p.attachment==="mount"&&!p.seat).map(p=>p.sy))].sort((a,b)=>a-b);
+  const rows=[...new Set(item.referencePieces.filter(p=>p.attachment==='mount'&&!p.seat).map(p=>p.sy))].sort((a,b)=>a-b);
   for(const piece of item.pieces) {
-    if(piece.attachment!=="mount")continue;
+    if(piece.attachment!=='mount')continue;
     if(piece.seat)piece.y+=gait.bodyY;
-    else {
+    else if(gait.profile.split) {
       const row=rows.indexOf(piece.sequence?piece.sequence.frames[0][1]*piece.sequence.stride[1]+piece.sequence.offset[1]:piece.sy);
-      piece.y+=gait.bodyY+(row%2===0?gait.slide:-gait.slide);
+      piece.y+=row%2===0?gait.slide:-gait.slide;
     }
   }
 }

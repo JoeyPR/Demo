@@ -91,13 +91,13 @@ test("filter arrow is larger and the panel keeps both inner and outer shadows", 
   assert.match(panel, /box-shadow:inset var\(--sh\) var\(--sh\) 0 rgba\(0,0,0,\.32\),var\(--sh\) var\(--sh\) 0 #000/);
 });
 
-test("Custom, Makeup, and Player Customization keep a visible but disabled filter control", () => {
-  assert.match(grid, /const filterDisabledTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
+test("Equipped and customization tabs keep a visible but disabled filter control", () => {
+  assert.match(grid, /const filterDisabledTabs = new Set\(\['equip', 'custom', 'player', 'makeup'\]\)/);
   assert.match(grid, /filterButton\.disabled = disabled/);
   assert.match(grid, /if \(disabled\) setFilterOpen\(false\)/);
   assert.match(inv, /#filter-button:disabled\{opacity:\.5;cursor:default;pointer-events:none\}/);
   assert.doesNotMatch(inv, /#main\[data-t="player"\] #filter-button,[\s\S]*display:none!important/);
-  assert.match(side, /const nonSearchableTabs = new Set\(\['custom', 'player', 'makeup'\]\)/);
+  assert.match(side, /const nonSearchableTabs = new Set\(\['equip', 'custom', 'player', 'makeup'\]\)/);
   assert.match(side, /on = !!on && !nonSearchableTabs\.has\(P\.tabs\.cur\)/);
 });
 
@@ -136,15 +136,16 @@ test("selected filter option text has a 1px bottom-right shadow", () => {
   assert.match(inv, /\.filter-option\[aria-pressed=true\]\{[^}]*text-shadow:1px 1px 0 #000/);
 });
 
-test("main_cg.ttf is the shared font across the planner UI", () => {
+test("the shared UI font and nameplate remain separate from the restored player chat font", () => {
   assert.equal(existsSync(new URL("../font/main_cg.ttf", import.meta.url)), true);
-  assert.equal(existsSync(new URL("../font/cg.ttf", import.meta.url)), false);
+  assert.equal(existsSync(new URL("../font/cg.ttf", import.meta.url)), true);
   assert.equal(existsSync(new URL("../font/plate.ttf", import.meta.url)), false);
   assert.match(base, /src:url\(\.\.\/font\/main_cg\.ttf\)/);
   assert.match(base, /--font-main:"Main CG",sans-serif/);
+  assert.match(base, /font-family:"PlayerChat CG";\s*src:url\(\.\.\/font\/cg\.ttf\)/);
   assert.match(plate, /px 'Nameplate CG', sans-serif/);
   assert.doesNotMatch([base, dropdowns, systems, customization, plate].join("\n"),
-    /font\/(?:cg|plate)\.ttf|"Century Gothic", system-ui|Century Gothic GT|ui-monospace/);
+    /font\/plate\.ttf|"Century Gothic", system-ui|Century Gothic GT|ui-monospace/);
 });
 
 test("Land and Weather buttons use the requested blue panel and white text", () => {
