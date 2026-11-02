@@ -345,3 +345,5 @@
   font: 700 calc(21px * var(--wrench-scale, 1))/1 var(--font-main);
   text-align: right;
 }
+
+.wrench-checkbox-box img[hidden] { display: none !important; }
