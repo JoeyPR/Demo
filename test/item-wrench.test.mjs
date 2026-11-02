@@ -93,6 +93,8 @@ test("Wings of Infinity UI is generated from its XML VariableMap, including four
   assert.equal(generated.sections[0].controls[3].type, "heading");
   assert.equal(generated.sections[0].controls[3].label, "`oPrimary Color:");
   assert.equal(generated.sections[0].controls[4].type, "rgb");
+  assert.equal(generated.sections[0].controls[0].help, undefined);
+  assert.equal(generated.sections[0].controls[4].help, undefined);
   const values = createItemWrenchDefaults(generated);
   assert.equal(values.Visible_TL, true);
   assert.equal(values.Trail_TL, true);
@@ -171,4 +173,22 @@ test("the custom checkbox has a transparent 1:1 surface and both blue shadows", 
   assert.match(block, /border-radius:\s*var\(--radius\)/);
   assert.match(block, /background:\s*transparent/);
   assert.match(block, /box-shadow:[\s\S]*#145EAE[\s\S]*inset[\s\S]*#145EAE/);
+});
+
+
+test("the Wrench footer keeps Reset above Cancel and Update", () => {
+  const ui = read("../js/item-wrench-ui.js");
+  assert.match(ui, /footer\.append\(resetButton, actions\)/);
+  assert.match(ui, /actions\.append\(cancelButton, updateButton\)/);
+  assert.match(ui, /make\("button", "wrench-cancel", "Cancel"\)/);
+  assert.match(ui, /make\("button", "wrench-update", "Update"\)/);
+  assert.match(ui, /make\("button", "wrench-reset", "Reset to Default"\)/);
+});
+
+test("the checkbox checkmark falls back cleanly while the image asset is absent", () => {
+  const ui = read("../js/item-wrench-ui.js");
+  const css = read("../css/item-wrench.css");
+  assert.match(ui, /img\/c-chk\.png/);
+  assert.match(ui, /check\.addEventListener\("error"/);
+  assert.match(css, /\.wrench-checkbox-box img\[hidden\]\s*\{\s*display:\s*none !important;/);
 });
