@@ -92,7 +92,7 @@
   font-weight: 700;
   line-height: 1.12;
 }
-/* Text and number inputs reuse the Demo's #145EAE / #95C9FF treatment. */
+/* Text and number inputs keep the Demo fill and use the requested #7BBAD2 border. */
 .item-wrench-input {
   display: block;
   width: 100%;

@@ -83,20 +83,20 @@ function ensureItemAssets(item) {
   return Promise.all([...new Set([...item.pieces.map(p => p.a),
     ...Object.values(item.renderer?.sprites ?? {}).map(s => s.atlas)])].filter(Boolean).map(loadAtlas));
 }
-function attachItemWrenchMetadata(item) {
-  const id = String(item.id);
+function attachItemWrenchMetadata(item, raw = item) {
+  const id = String(raw.id);
   const variableMap = state.itemWrenchVariableMaps?.items?.[id];
   const gameOptionsRecord = state.itemWrenchGameOptions?.items?.[id];
   item.wrenchGameOptions = gameOptionsRecord?.gameOptions ?? null;
   item.wrenchDefinition = state.itemWrenchDefinitions?.items?.[id] ??
-    buildItemWrenchDefinitionFromVariableMap(variableMap, item.id) ??
-    buildItemWrenchDefinitionFromGameOptions(gameOptionsRecord, item.id) ?? null;
+    buildItemWrenchDefinitionFromVariableMap(variableMap, raw.id) ??
+    buildItemWrenchDefinitionFromGameOptions(gameOptionsRecord, raw.id) ?? null;
   return item;
 }
 function normalize(raw) {
   const item = normalizeCatalogItem(raw, state.catalog);
   item.native = state.nativeMetadata?.items?.[raw.id] ?? null;
-  attachItemWrenchMetadata(item);
+  attachItemWrenchMetadata(item, raw);
   item.wrenchSettings = P.itemWrench?.get(raw.id) ??
     P.store.get("itemWrenchSettings", {})?.[String(raw.id)] ?? null;
   ensureItemAssets(item);
