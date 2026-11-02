@@ -48,7 +48,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
   for (const [index, field] of (gameOptions.flags ?? []).entries()) {
     baseControls.push({
       type: "checkbox",
-      key: safeKey(field.name) + "-" + index,
+      key: "flag-" + safeKey(field.name) + "-" + index,
       label: "`o" + String(field.name ?? "Option"),
       default: Number(field.default ?? 1) !== 0,
       binding: {
@@ -68,7 +68,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
     const defaultValue = field.default ?? field.default2 ?? options[0]?.value ?? "";
     baseControls.push({
       type: "select",
-      key: safeKey(field.name) + "-" + index,
+      key: "choice-" + safeKey(field.name) + "-" + index,
       label: "`o" + String(field.name ?? "Choice"),
       options,
       default: defaultValue,
@@ -84,7 +84,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
   for (const [index, field] of (gameOptions.layers ?? []).entries()) {
     baseControls.push({
       type: "select",
-      key: safeKey(field.key ?? field.name) + "-" + index,
+      key: "layer-" + safeKey(field.key ?? field.name) + "-" + index,
       label: "`o" + String(field.name ?? field.key ?? "Layer"),
       options: optionList(field).length ? optionList(field) :
         (field.labels ?? []).map((label, value) => ({ value, label })),
@@ -102,7 +102,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
     const options = (field.labels ?? []).map((label, value) => ({ value, label }));
     baseControls.push({
       type: "select",
-      key: safeKey(field.key ?? field.name) + "-" + index,
+      key: "moving-layer-" + safeKey(field.key ?? field.name) + "-" + index,
       label: "`o" + String(field.name ?? field.key ?? "Moving Layer"),
       options,
       default: field.default ?? 0,
@@ -172,7 +172,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
     for (const [index, field] of colours.entries()) {
       baseControls.push({
         type: "rgb",
-        key: safeKey(field.name) + "-" + index,
+        key: "colour-" + safeKey(field.name) + "-" + index,
         label: "`o" + String(field.name ?? "Color") + " - R,G,B:",
         default: rgbDefault(field.default),
         binding: {
