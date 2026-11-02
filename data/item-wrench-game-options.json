@@ -62,6 +62,132 @@
         ]
       }
     },
+    "10424": {
+      "name": "Rift Cape",
+      "gameOptions": {
+        "flags": [
+          {
+            "bit": 2,
+            "bit2": 3,
+            "name": "Open cape"
+          },
+          {
+            "bit": 0,
+            "bit2": 1,
+            "name": "Collar"
+          },
+          {
+            "bit": 4,
+            "bit2": 5,
+            "name": "Close while moving",
+            "default": 0
+          }
+        ],
+        "colours": [
+          {
+            "slot": 2,
+            "slot2": 3,
+            "name": "Cape",
+            "default": [
+              234,
+              88,
+              226
+            ]
+          },
+          {
+            "slot": 4,
+            "slot2": 5,
+            "name": "Collar",
+            "default": [
+              130,
+              49,
+              126
+            ]
+          }
+        ],
+        "layers": [
+          {
+            "key": "aura",
+            "name": "Aura",
+            "labels": [
+              "None",
+              "Portal Aura",
+              "Starfield Aura",
+              "Electrical Aura"
+            ],
+            "bit": 6,
+            "bit2": 7,
+            "pokes": [
+              [],
+              [
+                [
+                  10158,
+                  "01"
+                ],
+                [
+                  10160,
+                  "00000000"
+                ]
+              ],
+              [
+                [
+                  10158,
+                  "01"
+                ],
+                [
+                  10160,
+                  "01000000"
+                ]
+              ],
+              [
+                [
+                  10158,
+                  "01"
+                ],
+                [
+                  10160,
+                  "02000000"
+                ]
+              ]
+            ]
+          }
+        ],
+        "cycle": {
+          "name": "Time dilation",
+          "off": 10184,
+          "periodOff": 10188,
+          "period": 10,
+          "flip": 500
+        },
+        "movingFx": 1,
+        "fixed": [
+          {
+            "bit": 6,
+            "value": 0
+          },
+          {
+            "bit": 7,
+            "value": 0
+          },
+          {
+            "off": 10160,
+            "i32": -1
+          },
+          {
+            "off": 10164,
+            "i32": -1
+          },
+          {
+            "off": 10184,
+            "value": 0
+          },
+          {
+            "off": 10188,
+            "f32": 10
+          }
+        ]
+      }
+    },
     "10666": {
       "name": "Grow Air Balloon",
       "gameOptions": {
@@ -172,6 +298,166 @@
               "Shadow",
               "Light"
             ]
+          }
+        ]
+      }
+    },
+    "11478": {
+      "name": "Rift Wings",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 10236,
+            "off2": 10240,
+            "size": 4,
+            "name": "Wing style",
+            "values": [
+              0,
+              1,
+              2
+            ],
+            "labels": [
+              "Feathered",
+              "Sharp feathers",
+              "Bat"
+            ],
+            "default2": 1
+          },
+          {
+            "off": 10222,
+            "off2": 10223,
+            "name": "Shape",
+            "values": [
+              0,
+              1,
+              0
+            ],
+            "labels": [
+              "Raised (flapping)",
+              "Spread (open)",
+              "Closed"
+            ],
+            "also": [
+              {
+                "off": 10220,
+                "off2": 10221,
+                "values": [
+                  0,
+                  0,
+                  1
+                ]
+              }
+            ]
+          }
+        ],
+        "colours": [
+          {
+            "off": 10244,
+            "off2": 10248,
+            "name": "Wing",
+            "default": [
+              93,
+              22,
+              200
+            ],
+            "default2": [
+              137,
+              30,
+              43
+            ]
+          },
+          {
+            "off": 10252,
+            "off2": 10256,
+            "name": "Second",
+            "default": [
+              220,
+              72,
+              255
+            ],
+            "default2": [
+              35,
+              35,
+              63
+            ]
+          }
+        ],
+        "movingLayers": [
+          {
+            "key": "trail",
+            "name": "Trail",
+            "labels": [
+              "None",
+              "1st",
+              "2nd",
+              "3rd"
+            ],
+            "default": 1,
+            "default2": 2,
+            "pokes": [
+              [],
+              [
+                [
+                  10226,
+                  "01"
+                ],
+                [
+                  10228,
+                  "00000000"
+                ]
+              ],
+              [
+                [
+                  10226,
+                  "01"
+                ],
+                [
+                  10228,
+                  "01000000"
+                ]
+              ],
+              [
+                [
+                  10226,
+                  "01"
+                ],
+                [
+                  10228,
+                  "02000000"
+                ]
+              ]
+            ]
+          }
+        ],
+        "airJump": {
+          "off": 10224,
+          "off2": 10225,
+          "name": "Double jump effect",
+          "default": 1,
+          "default2": 0
+        },
+        "cycle": {
+          "name": "Time cycle",
+          "off": 10260,
+          "periodOff": 10264,
+          "periodInt": 1,
+          "period": 15,
+          "flip": 501,
+          "restart": "swap",
+          "default": 1
+        },
+        "fixed": [
+          {
+            "off": 10226,
+            "value": 0
+          },
+          {
+            "off": 10227,
+            "value": 0
+          },
+          {
+            "off": 10260,
+            "value": 0
           }
         ]
       }
