@@ -581,7 +581,7 @@
     },
     setWrenchStyle(id) {
       state.wrenchStyle = id === SUPER_SUPPORTER_WRENCH
-        ? (state.wrenchStatus === 'super-supporter' ? id : 0)
+        ? (state.superSupporter ? id : 0)
         : (+id || 0);
       save();
     },
