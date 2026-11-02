@@ -1,0 +1,295 @@
+/* ITEM WRENCH: generated item-specific modal; shares the main Demo dialog tokens. */
+.item-wrench-overlay {
+  position: fixed;
+  z-index: 84;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.item-wrench-overlay[hidden] { display: none !important; }
+
+.item-wrench-dialog {
+  top: 4%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: max-content;
+  min-width: min(86%, var(--wrench-min-width, 565px));
+  max-width: min(96%, var(--wrench-max-width, 96%));
+  max-height: 92%;
+  overflow: hidden;
+  padding: 0;
+  background: var(--fill);
+  border: var(--bd) solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--sh) var(--sh) 0 0 #000,
+              inset var(--sh) var(--sh) 0 0 #000;
+  color: #fff;
+  font-family: var(--font-main);
+  text-align: left;
+}
+
+.item-wrench-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: calc(18px * var(--wrench-scale, 1));
+  min-width: 0;
+  padding: calc(20px * var(--wrench-scale, 1))
+           calc(24px * var(--wrench-scale, 1));
+  border-bottom: var(--bd) solid var(--line);
+}
+.item-wrench-icon {
+  flex: 0 0 calc(64px * var(--wrench-scale, 1));
+  width: calc(64px * var(--wrench-scale, 1));
+  height: calc(64px * var(--wrench-scale, 1));
+}
+.item-wrench-header .drop-title {
+  min-width: 0;
+  color: #fff;
+  font-size: calc(58px * var(--wrench-scale, 1));
+  line-height: 1.05;
+}
+
+.item-wrench-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: calc(22px * var(--wrench-scale, 1));
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding: calc(20px * var(--wrench-scale, 1))
+           calc(24px * var(--wrench-scale, 1));
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) rgba(0,0,0,.2);
+}
+.item-wrench-section {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(14px * var(--wrench-scale, 1));
+  min-width: 0;
+}
+.item-wrench-section + .item-wrench-section {
+  padding-top: calc(18px * var(--wrench-scale, 1));
+  border-top: 1px solid rgba(123,186,210,.7);
+}
+.item-wrench-section-title,
+.item-wrench-subheading {
+  margin: 0;
+  color: #FCE6BA;
+  font-size: calc(42px * var(--wrench-scale, 1));
+  font-weight: 700;
+  line-height: 1.12;
+}
+.item-wrench-subheading {
+  font-size: calc(30px * var(--wrench-scale, 1));
+}
+.item-wrench-note {
+  margin: 0;
+  color: #ADF4FF;
+  font-size: calc(18px * var(--wrench-scale, 1));
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.wrench-control {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: calc(8px * var(--wrench-scale, 1));
+  min-width: 0;
+}
+.wrench-label {
+  display: block;
+  color: #FCE6BA;
+  font-size: calc(29px * var(--wrench-scale, 1));
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+/* Text and number inputs reuse the Demo's #145EAE / #95C9FF treatment. */
+.item-wrench-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: calc(58px * var(--wrench-scale, 1));
+  padding: 0 calc(12px * var(--wrench-scale, 1));
+  border: var(--bd) solid #95C9FF;
+  border-radius: var(--radius);
+  outline: 0;
+  background: rgba(39,125,159,.4);
+  box-shadow: var(--sh) var(--sh) 0 0 #000,
+              inset var(--sh) var(--sh) 0 0 #000;
+  color: #fff;
+  font: 700 calc(29px * var(--wrench-scale, 1))/1 var(--font-main);
+  user-select: text;
+  -webkit-user-select: text;
+}
+.item-wrench-input:focus { border-color: #fff; }
+.item-wrench-input[aria-invalid="true"] {
+  border-color: #FF271D;
+  box-shadow: var(--sh) var(--sh) 0 0 #000,
+              inset var(--sh) var(--sh) 0 0 #000;
+}
+.wrench-rgb-row {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--wrench-scale, 1));
+  min-width: 0;
+}
+.wrench-color-preview {
+  flex: 0 0 calc(52px * var(--wrench-scale, 1));
+  width: calc(52px * var(--wrench-scale, 1));
+  aspect-ratio: 1 / 1;
+  border: var(--bd) solid #95C9FF;
+  border-radius: var(--radius);
+  box-shadow: var(--sh) var(--sh) 0 0 #000;
+}
+.wrench-select { appearance: auto; cursor: pointer; }
+
+/* Checkbox: transparent 1:1 square; no panel or fill.
+   The inner and outer shadows deliberately use #145EAE, not black. */
+.wrench-checkbox-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(16px * var(--wrench-scale, 1));
+  width: fit-content;
+  max-width: 100%;
+  min-height: calc(56px * var(--wrench-scale, 1));
+  color: #FCE6BA;
+  font-size: calc(29px * var(--wrench-scale, 1));
+  font-weight: 700;
+  line-height: 1.12;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.wrench-checkbox-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+.wrench-checkbox-box {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: clamp(24px, calc(56px * var(--wrench-scale, 1)), 56px);
+  aspect-ratio: 1 / 1;
+  overflow: visible;
+  border: var(--bd) solid #95C9FF;
+  border-radius: var(--radius);
+  background: transparent;
+  box-shadow: var(--sh) var(--sh) 0 0 #145EAE,
+              inset var(--sh) var(--sh) 0 0 #145EAE;
+}
+.wrench-checkbox-box img {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.wrench-checkbox-input:checked + .wrench-checkbox-box img { display: block; }
+.wrench-checkbox-input:focus-visible + .wrench-checkbox-box {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+.wrench-checkbox-label { overflow-wrap: anywhere; }
+.wrench-choice-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12px * var(--wrench-scale, 1));
+}
+.wrench-control[hidden] { display: none !important; }
+
+/* Footer: Reset sits above Cancel + Update. */
+.item-wrench-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: calc(12px * var(--wrench-scale, 1));
+  padding: calc(16px * var(--wrench-scale, 1))
+           calc(24px * var(--wrench-scale, 1));
+  border-top: var(--bd) solid var(--line);
+}
+.wrench-reset,
+.wrench-footer-actions button {
+  min-width: 0;
+  min-height: calc(66px * var(--wrench-scale, 1));
+  padding: calc(8px * var(--wrench-scale, 1))
+           calc(16px * var(--wrench-scale, 1));
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--sh) var(--sh) 0 #000;
+  color: #fff;
+  font: 700 calc(30px * var(--wrench-scale, 1))/1.05 var(--font-main);
+  text-align: center;
+  text-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+}
+.wrench-reset {
+  width: 100%;
+  border: var(--bd) solid #95C9FF;
+  background: #145EAE;
+}
+.wrench-footer-actions {
+  display: flex;
+  align-items: stretch;
+  gap: calc(16px * var(--wrench-scale, 1));
+}
+.wrench-footer-actions button { flex: 1 1 0; }
+.wrench-cancel { background: #FFCC00; }
+.wrench-update { background: #7BBAD2; }
+.wrench-footer-actions button:active,
+.wrench-reset:active {
+  transform: translate(var(--sh),var(--sh));
+  box-shadow: none;
+}
+.wrench-footer-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+.item-wrench-dialog :focus-visible {
+  outline-color: #fff;
+}
+@media (max-width: 900px), (hover:none) and (pointer:coarse) {
+  .item-wrench-dialog { top: 3%; max-height: 94%; }
+  .item-wrench-header,
+  .item-wrench-content {
+    padding-left: calc(14px * var(--wrench-scale, 1));
+    padding-right: calc(14px * var(--wrench-scale, 1));
+  }
+  .item-wrench-icon {
+    flex-basis: calc(48px * var(--wrench-scale, 1));
+    width: calc(48px * var(--wrench-scale, 1));
+    height: calc(48px * var(--wrench-scale, 1));
+  }
+  .item-wrench-header .drop-title { font-size: calc(42px * var(--wrench-scale, 1)); }
+  .item-wrench-section-title { font-size: calc(31px * var(--wrench-scale, 1)); }
+  .item-wrench-subheading,
+  .wrench-label { font-size: calc(23px * var(--wrench-scale, 1)); }
+  .wrench-checkbox-row { font-size: calc(22px * var(--wrench-scale, 1)); }
+  .item-wrench-input { font-size: calc(22px * var(--wrench-scale, 1)); }
+  .wrench-reset,
+  .wrench-footer-actions button { font-size: calc(23px * var(--wrench-scale, 1)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .item-wrench-dialog * { scroll-behavior: auto !important; }
+}
