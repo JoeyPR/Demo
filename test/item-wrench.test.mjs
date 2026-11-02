@@ -213,12 +213,9 @@ test("Rift Cape dialog values translate to source-backed native colour, flag, la
   assert.deepEqual(native.c3, [234, 88, 226]);
   assert.deepEqual(native.c4, [130, 49, 126]);
   assert.deepEqual(native.c5, [130, 49, 126]);
-  assert.equal(native.f0, true);
-  assert.equal(native.f1, true);
-  assert.equal(native.f2, true); // Closed Cape is inverse of native Open cape.
-  assert.equal(native.f3, true);
-  assert.equal(native.f4, false); // Open on movement is inverse of Close while moving.
-  assert.equal(native.f5, false);
+  assert.equal(native.f0x, true); // Set Planner indexes flags, not their native bit positions.
+  assert.equal(native.f1x, true);
+  assert.equal(native.f2x, false); // Open on movement is inverse of Close while moving.
   assert.equal(native.l_aura, 0);
   assert.equal(native.l2_aura, 0);
   assert.equal(native.cyc, false);
@@ -277,4 +274,50 @@ test("the application loads Wrench metadata, hydrates per-item saved values and 
   assert.match(app, /item\.wrenchGameOptions\s*=\s*state\.itemWrenchGameOptions/);
   assert.match(app, /P\.on\("item-wrench-preview", applyWrenchPreview\)/);
   assert.match(adapter, /applyItemWrenchAppearance\(item,timeMs\)/);
+});
+
+
+test("the recovered design cycle keeps the first look through the flip delay and honors restart swap", () => {
+  const capeOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["10424"].gameOptions;
+  const wingsOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["11478"].gameOptions;
+  const capeValues = { timeDilationEnabled: true, timeDilationCycleTime: 10 };
+  assert.equal(gameOptionDesign(capeOptions, capeValues, 10000), 0);
+  assert.equal(gameOptionDesign(capeOptions, capeValues, 10500), 1);
+  assert.equal(gameOptionDesign(capeOptions, capeValues, 20500), 0);
+
+  const wingsValues = { timeDilationEnabled: true, timeDilationCycleTime: 15 };
+  assert.equal(gameOptionDesign(wingsOptions, wingsValues, 15000), 0);
+  assert.equal(gameOptionDesign(wingsOptions, wingsValues, 15501), 0);
+  assert.equal(gameOptionDesign(wingsOptions, wingsValues, 16002), 1);
+  assert.equal(gameOptionDesign(wingsOptions, wingsValues, 31503), 0);
+});
+
+test("automatic gameOptions definitions use indexed flag, design color, layer and cycle keys", () => {
+  const metadata = JSON.parse(read("../data/item-wrench-game-options.json"));
+  const capeGenerated = buildItemWrenchDefinitionFromGameOptions(metadata.items["10424"], 10424);
+  const values = createItemWrenchDefaults(capeGenerated);
+  const native = buildNativeWrenchSettings(capeGenerated, values);
+  const flagControls = capeGenerated.sections[0].controls.filter(control => control.type === "checkbox");
+  assert.equal(flagControls.length, 3);
+  assert.equal(flagControls[0].default, true);
+  assert.equal(native.f0x, true);
+  assert.equal(native.f1x, true);
+  assert.equal(native.f2x, false);
+  assert.equal(native.cycP, 10);
+  assert.equal(native.cyc, false);
+
+  const wingsGenerated = buildItemWrenchDefinitionFromGameOptions(metadata.items["11478"], 11478);
+  const colorControls = wingsGenerated.sections.flatMap(section => section.controls).filter(control => control.type === "rgb");
+  assert.equal(colorControls.length, 4);
+  assert.deepEqual(colorControls.map(control => control.binding.settingKeys[0]),
+    ["c10244", "c10252", "c10248", "c10256"]);
+});
+
+test("authored Cape colour controls retain separate first- and second-design slots", () => {
+  const controls = cape.sections.flatMap(section => section.controls);
+  const byKey = key => controls.find(control => control.key === key).binding.settingKeys;
+  assert.deepEqual(byKey("capeColor"), ["c2"]);
+  assert.deepEqual(byKey("capeColorStyle2"), ["c3"]);
+  assert.deepEqual(byKey("collarColor"), ["c4"]);
+  assert.deepEqual(byKey("collarColorStyle2"), ["c5"]);
 });
