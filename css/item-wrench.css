@@ -256,6 +256,7 @@
   width: var(--wrench-reset-width, 120px);
   max-width: 100%;
   background: #145EAE;
+  font-size: calc(44px * var(--wrench-scale, 1));
 }
 .wrench-footer-actions {
   display: flex;
@@ -272,6 +273,7 @@
 }
 .wrench-footer-actions .wrench-update {
   width: var(--wrench-ok-width, 34px);
+  padding-inline: calc(10px * var(--wrench-scale, 1));
   background: #7BBAD2;
   text-align: center;
 }
