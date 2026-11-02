@@ -150,10 +150,12 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
           label: "`o" + String(field.name ?? "Color") + " - R,G,B:",
           default: rgbDefault(field[property]),
           binding: {
-            settingKey: field.slot != null ? "c" + field.slot : "c" + index + "x",
+            settingKey: (field.slot ?? field.off) != null ? "c" + (field.slot ?? field.off) : "c" + index + "x",
             settingKeys: [
-              (styleIndex === 1 ? field.slot2 ?? field.slot : field.slot) != null
-                ? "c" + (styleIndex === 1 ? field.slot2 ?? field.slot : field.slot)
+              (styleIndex === 1 ? field.slot2 ?? field.off2 ?? field.slot ?? field.off
+                : field.slot ?? field.off) != null
+                ? "c" + (styleIndex === 1 ? field.slot2 ?? field.off2 ?? field.slot ?? field.off
+                  : field.slot ?? field.off)
                 : "c" + index + "x"
             ],
             off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2, variant: property
@@ -171,10 +173,9 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
         label: "`o" + String(field.name ?? "Color") + " - R,G,B:",
         default: rgbDefault(field.default),
         binding: {
-          settingKey: field.slot != null ? "c" + field.slot : "c" + index + "x",
+          settingKey: (field.slot ?? field.off) != null ? "c" + (field.slot ?? field.off) : "c" + index + "x",
           settingKeys: [
-            field.slot != null ? "c" + field.slot : "c" + index + "x",
-            field.slot2 != null ? "c" + field.slot2 : "c" + index + "x"
+            (field.slot ?? field.off) != null ? "c" + (field.slot ?? field.off) : "c" + index + "x"
           ],
           off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2
         },
