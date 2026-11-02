@@ -7,6 +7,7 @@ import {
   validateItemWrenchState
 } from "../src/item-wrench-state.mjs";
 import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
+import { buildItemWrenchDefinitionFromGameOptions } from "../src/item-wrench-game-options.mjs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const registry = JSON.parse(read("../data/item-wrench-definitions.json"));
@@ -115,4 +116,24 @@ test("items without a hand-authored override can receive definitions from XML Va
     assert.ok(generated, "missing generated definition for " + id);
     assert.ok(createItemWrenchDefaults(generated));
   }
+});
+
+
+test("native gameOptions automatically generate select controls for items without renderer VariableMaps", () => {
+  const metadata = JSON.parse(read("../data/item-wrench-game-options.json"));
+  const generated = buildItemWrenchDefinitionFromGameOptions(metadata.items["5712"], 5712);
+  assert.equal(generated.name, "Will of the Wild");
+  const select = generated.sections[0].controls[0];
+  assert.equal(select.type, "select");
+  assert.equal(select.label, "`oElement");
+  assert.deepEqual(select.options.map(option => option.label), ["Fire", "Water", "Earth"]);
+  assert.equal(select.default, 0);
+});
+
+test("native colour metadata automatically creates RGB controls", () => {
+  const metadata = JSON.parse(read("../data/item-wrench-game-options.json"));
+  const generated = buildItemWrenchDefinitionFromGameOptions(metadata.items["12958"], 12958);
+  const defaults = createItemWrenchDefaults(generated);
+  assert.deepEqual(defaults["crown-0"], [255, 0, 255]);
+  assert.deepEqual(defaults["glow-1"], [0, 205, 249]);
 });
