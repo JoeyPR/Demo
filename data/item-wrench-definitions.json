@@ -275,8 +275,10 @@
         "recordId": 11478
       },
       "notes": [
-        "The two RGB defaults and Time Cycle period come from the supplied native gameOptions metadata.",
-        "The additional Feathers, Blades, Scales, Always Open/Closed, Stamp Particles and named trail toggles follow the requested dialog design. Their native storage/render bindings still require verification."
+        "The two RGB pairs, choice offsets, Air Jump field and Time Cycle settings are grounded in the supplied native gameOptions record.",
+        "Wing colors are mapped to the Set Planner renderer's native color slots (c10244/c10248 and c10252/c10256).",
+        "The Wing Opening control writes the recovered native choice key; the demo does not yet include its exact open/closed variant geometry.",
+        "Feathers/Blades/Scales, Stamp Particles, and named trail toggles are retained as requested UI controls but are not yet bound to renderer behavior."
       ],
       "sharedControls": [
         {
@@ -289,7 +291,11 @@
           "binding": {
             "offset": 10264,
             "format": "i32",
-            "source": "gameOptions.cycle.periodOff"
+            "source": "gameOptions.cycle.periodOff",
+            "settingKey": "cycP",
+            "settingKeys": [
+              "cycP"
+            ]
           },
           "bindingStatus": "source-backed"
         },
@@ -301,7 +307,11 @@
           "binding": {
             "offset": 10260,
             "source": "gameOptions.cycle.off",
-            "default": 1
+            "default": 1,
+            "settingKey": "cyc",
+            "settingKeys": [
+              "cyc"
+            ]
           },
           "bindingStatus": "source-backed"
         }
@@ -328,7 +338,11 @@
               "binding": {
                 "offset": 10244,
                 "offset2": 10248,
-                "source": "gameOptions.colours"
+                "source": "gameOptions.colours[0]",
+                "settingKey": "c10244",
+                "settingKeys": [
+                  "c10244"
+                ]
               },
               "bindingStatus": "source-backed"
             },
@@ -349,7 +363,11 @@
               "binding": {
                 "offset": 10252,
                 "offset2": 10256,
-                "source": "gameOptions.colours"
+                "source": "gameOptions.colours[1]",
+                "settingKey": "c10252",
+                "settingKeys": [
+                  "c10252"
+                ]
               },
               "bindingStatus": "source-backed"
             },
@@ -397,8 +415,12 @@
               "binding": {
                 "offset": 10244,
                 "offset2": 10248,
-                "source": "gameOptions.colours",
-                "variant": 2
+                "source": "gameOptions.colours[0]",
+                "variant": 2,
+                "settingKey": "c10248",
+                "settingKeys": [
+                  "c10248"
+                ]
               },
               "bindingStatus": "source-backed"
             },
@@ -419,8 +441,12 @@
               "binding": {
                 "offset": 10252,
                 "offset2": 10256,
-                "source": "gameOptions.colours",
-                "variant": 2
+                "source": "gameOptions.colours[1]",
+                "variant": 2,
+                "settingKey": "c10256",
+                "settingKeys": [
+                  "c10256"
+                ]
               },
               "bindingStatus": "source-backed"
             },
@@ -432,23 +458,29 @@
               "default": "",
               "options": [
                 {
-                  "value": "open",
+                  "value": 1,
                   "label": "`oAlways Open Wings"
                 },
                 {
-                  "value": "closed",
+                  "value": 2,
                   "label": "`oAlways Closed Wings"
                 }
               ],
-              "bindingStatus": "source-backed-choice-needs-encoder",
+              "bindingStatus": "source-backed-choice-key-preview-geometry-pending",
               "binding": {
-                "offset": 10222,
-                "offset2": 10223,
-                "source": "gameOptions.choices[1]",
+                "settingKey": "s1",
+                "settingKeys": [
+                  "s1",
+                  "s1b"
+                ],
+                "off": 10222,
+                "off2": 10223,
                 "also": {
-                  "offset": 10220,
-                  "offset2": 10221
-                }
+                  "off": 10220,
+                  "off2": 10221
+                },
+                "emptyValue": 0,
+                "source": "gameOptions.choices[1]"
               }
             },
             {
