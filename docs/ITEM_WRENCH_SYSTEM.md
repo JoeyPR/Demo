@@ -24,7 +24,7 @@ The generator reads each item's labels, descriptions, default values, order, rad
 
 ## Checkbox specification
 
-The checkbox is a transparent 1:1 square with no panel fill. Its border uses `var(--bd)`, `var(--radius)`, and `#95C9FF`. Both the outer and inset shadows use `#145EAE) with the existing `var(--sh)` thickness. When checked, the image at `img/c-chk.png` is displayed. The asset is intentionally not included yet; it will be supplied separately.
+The checkbox is a transparent 1:1 square with no panel fill. Its border uses `var(--bd)`, `var(--radius)`, and `#95C9FF`. Both the outer and inset shadows use `#145EAE` with the existing `var(--sh)` thickness. When checked, the image at `img/c-chk.png` is displayed. The asset is intentionally not included yet; it will be supplied separately.
 
 ## Runtime events
 
