@@ -6,6 +6,7 @@ import {
   normalizeItemWrenchState,
   validateItemWrenchState
 } from "../src/item-wrench-state.mjs";
+import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const registry = JSON.parse(read("../data/item-wrench-definitions.json"));
@@ -77,4 +78,41 @@ test("the page loads the separate item Wrench stylesheet and dialog module", () 
   const html = read("../index.html");
   assert.match(html, /css\/item-wrench\.css/);
   assert.match(html, /js\/item-wrench-ui\.js/);
+});
+
+
+test("Wings of Infinity UI is generated from its XML VariableMap, including four independent wing groups", () => {
+  const maps = JSON.parse(read("../data/item-wrench-variable-maps.json"));
+  const generated = buildItemWrenchDefinitionFromVariableMap(maps.items["15826"], 15826);
+  assert.equal(generated.name, "Wings of Infinity");
+  assert.equal(generated.sections.length, 4);
+  assert.deepEqual(generated.sections.map(section => section.title),
+    ["Top Left Wing", "Bottom Left Wing", "Top Right Wing", "Bottom Right Wing"]);
+  assert.equal(generated.sections[0].controls.length, 5);
+  const values = createItemWrenchDefaults(generated);
+  assert.equal(values.Visible_TL, true);
+  assert.equal(values.Trail_TL, true);
+  assert.equal(values["radioGroup-1"], "Feathered_TL");
+  assert.deepEqual(values.Primary_TL, [0, 120, 220]);
+  assert.deepEqual(values.Secondary_TL, [255, 73, 255]);
+});
+
+test("Anomaly Aura UI labels and Time Dilation fields are taken from VariableMap metadata", () => {
+  const maps = JSON.parse(read("../data/item-wrench-variable-maps.json"));
+  const generated = buildItemWrenchDefinitionFromVariableMap(maps.items["15230"], 15230);
+  const defaults = createItemWrenchDefaults(generated);
+  assert.equal(generated.sharedControls[0].label, "Time Dilation Cycle Time:");
+  assert.equal(defaults.timeCycle, 15);
+  assert.equal(defaults.timeCycle_On, true);
+  assert.equal(defaults.darkAnomaly, false);
+  assert.equal(defaults.lightAnomaly, false);
+});
+
+test("items without a hand-authored override can receive definitions from XML VariableMap data", () => {
+  const maps = JSON.parse(read("../data/item-wrench-variable-maps.json"));
+  for (const id of ["15230", "15826", "16314", "16316"]) {
+    const generated = buildItemWrenchDefinitionFromVariableMap(maps.items[id], Number(id));
+    assert.ok(generated, "missing generated definition for " + id);
+    assert.ok(createItemWrenchDefaults(generated));
+  }
 });
