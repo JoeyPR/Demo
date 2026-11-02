@@ -287,6 +287,7 @@ function makeControl(control) {
       check.src = "img/c-chk.png";
       check.alt = "";
       check.draggable = false;
+      check.addEventListener("error", () => check.setAttribute("hidden", ""));
       box.append(check);
       const text = make("span", "wrench-checkbox-label");
       richText(text, option.label);
