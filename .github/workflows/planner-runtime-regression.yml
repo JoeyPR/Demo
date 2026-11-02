@@ -1,7 +1,7 @@
 name: Planner runtime regression
 on:
   push:
-    branches: [camera-quickslot-nameplate]
+    branches: [camera-quickslot-nameplate, feature/item-wrench-dialog]
     paths:
       - 'font/**'
       - 'css/base.css'
@@ -11,6 +11,10 @@ on:
       - 'css/preview-mode.css'
       - 'src/**'
       - 'demo/engine/**'
+      - 'data/item-wrench-*.json'
+      - 'js/item-wrench-ui.js'
+      - 'css/item-wrench.css'
+      - 'js/side.js'
       - 'js/player-chat.js'
       - 'js/world-motion.mjs'
       - 'js/skin-colors*'
