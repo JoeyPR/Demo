@@ -28,6 +28,8 @@ export function validateItemWrenchValue(control, value) {
         (control.min == null || value >= control.min) &&
         (control.max == null || value <= control.max);
     case "choice-checkboxes":
+      return (control.allowNone && value === "") ||
+        (control.options ?? []).some(option => option.value === value);
     case "select":
       return (control.options ?? []).some(option => option.value === value);
     case "text":
