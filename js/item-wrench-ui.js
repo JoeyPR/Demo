@@ -123,8 +123,15 @@ function updateButtonState(valid) {
 function syncChoiceChecks() {
   for (const [key, refs] of controlNodes) {
     const control = refs.control;
-    if (control.type !== "choice-checkboxes") continue;
-    for (const option of refs.options) option.input.checked = draft[key] === option.value;
+    if (control.type === "choice-checkboxes") {
+      for (const option of refs.options) option.input.checked = draft[key] === option.value;
+    } else if (control.type === "choice-buttons") {
+      for (const option of refs.options) {
+        const selected = draft[key] === option.value;
+        option.button.classList.toggle("selected", selected);
+        option.button.setAttribute("aria-pressed", String(selected));
+      }
+    }
   }
 }
 
@@ -251,6 +258,20 @@ function makeControl(control) {
     select.value = String(draft[control.key] ?? "");
     select.addEventListener("change", () => setValue(control.key, control.options.find(option => String(option.value) === select.value)?.value));
     wrapper.append(select);
+  } else if (control.type === "choice-buttons") {
+    const group = make("div", "wrench-choice-buttons");
+    for (const option of control.options ?? []) {
+      const button = make("button", "wrench-choice-button");
+      button.type = "button";
+      richText(button, option.label);
+      const selected = draft[control.key] === option.value;
+      button.classList.toggle("selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+      button.addEventListener("click", () => setValue(control.key, option.value));
+      group.append(button);
+      refs.options.push({ button, value: option.value });
+    }
+    wrapper.append(group);
   } else if (control.type === "choice-checkboxes") {
     const group = make("div", "wrench-choice-checkboxes");
     for (const option of control.options ?? []) {
@@ -277,6 +298,22 @@ function makeControl(control) {
       refs.options.push({ input, value: option.value });
     }
     wrapper.append(group);
+  } else if (control.type === "slider") {
+    const row = make("div", "wrench-slider-row");
+    const input = make("input", "wrench-slider");
+    input.type = "range";
+    input.min = String(control.min ?? 0);
+    input.max = String(control.max ?? 100);
+    input.step = String(control.step ?? 1);
+    input.value = String(draft[control.key] ?? control.default ?? input.min);
+    input.setAttribute("aria-label", String(control.label).replace(/^\x60[a-z0-9!@#$^&]/, ""));
+    const output = make("output", "wrench-slider-value", input.value);
+    input.addEventListener("input", () => {
+      output.textContent = input.value;
+      setValue(control.key, Number(input.value));
+    });
+    row.append(input, output);
+    wrapper.append(row);
   } else if (control.type === "text") {
     const input = make("input", "item-wrench-input");
     input.type = "text";
