@@ -95,7 +95,7 @@
 .box .fv{position:absolute;right:2%;top:2%;width:30%;height:30%;object-fit:contain;image-rendering:pixelated;display:none;z-index:2}
 .box.fav .fv{display:block}
 .box img{pointer-events:none}
-.box.fav-special{background-image:url(../img/box-fav.png);background-position:center;background-size:100% 100%;cursor:default}
+.box.fav-special{background-image:url(../img/fav-box.png);background-position:center;background-size:100% 100%;cursor:default}
 .box.fav-special::before{display:none}
 
 /* 4. top drawer: every quick box uses the blue box (box-blue.png), including
