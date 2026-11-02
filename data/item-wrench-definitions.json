@@ -17,9 +17,10 @@
           "key": "timeDilationCycleTime",
           "label": "`oTime Dilation Cycle Time:",
           "default": 10,
-          "min": 0,
+          "min": 1,
           "step": "any",
           "binding": {
+            "settingKey": "cycP",
             "offset": 10188,
             "format": "f32",
             "source": "gameOptions.cycle.periodOff"
@@ -32,9 +33,9 @@
           "label": "`oTime Dilation On / Off",
           "default": false,
           "binding": {
+            "settingKey": "cyc",
             "offset": 10184,
-            "source": "gameOptions.cycle.off",
-            "aggregate": "cycle enabled"
+            "source": "gameOptions.cycle.off"
           },
           "bindingStatus": "source-backed-default-off"
         }
@@ -59,6 +60,7 @@
                 226
               ],
               "binding": {
+                "settingKey": "c2",
                 "slot": 2,
                 "slot2": 3,
                 "source": "gameOptions.colours[0]"
@@ -69,8 +71,9 @@
               "type": "checkbox",
               "key": "collarEnabled",
               "label": "`oCape Collar On / Off",
-              "default": false,
+              "default": true,
               "binding": {
+                "settingKey": "f0",
                 "bit": 0,
                 "bit2": 1,
                 "source": "gameOptions.flags[1]"
@@ -92,6 +95,7 @@
                 126
               ],
               "binding": {
+                "settingKey": "c4",
                 "slot": 4,
                 "slot2": 5,
                 "source": "gameOptions.colours[1]"
@@ -102,8 +106,9 @@
               "type": "checkbox",
               "key": "closedCape",
               "label": "`oClosed Cape",
-              "default": true,
+              "default": false,
               "binding": {
+                "settingKey": "f2",
                 "bit": 2,
                 "bit2": 3,
                 "source": "gameOptions.flags[0]",
@@ -117,6 +122,7 @@
               "label": "`oOpen Cape on Movement",
               "default": true,
               "binding": {
+                "settingKey": "f4",
                 "bit": 4,
                 "bit2": 5,
                 "source": "gameOptions.flags[2]",
@@ -130,15 +136,11 @@
               "label": "`oAura On / Off",
               "default": false,
               "binding": {
-                "bits": [
-                  6,
-                  7
-                ],
-                "source": "gameOptions.layers[0]",
                 "deriveFrom": "auraType",
-                "disabledValue": 0
+                "settingKey": "l_aura",
+                "source": "gameOptions.layers[0]"
               },
-              "bindingStatus": "source-backed-aggregate-needs-encoder"
+              "bindingStatus": "source-backed-composite-ui-control"
             },
             {
               "type": "choice-checkboxes",
@@ -161,7 +163,8 @@
                 }
               ],
               "binding": {
-                "source": "gameOptions.layers[0]",
+                "settingKey": "l_aura",
+                "key": "aura",
                 "values": [
                   0,
                   1,
@@ -170,14 +173,66 @@
                 ],
                 "pokes": "gameOptions.layers[0].pokes"
               },
-              "bindingStatus": "source-backed-options-needs-encoder",
+              "bindingStatus": "source-backed-choice-runtime-binding-pending",
               "visibleWhen": {
                 "key": "auraEnabled",
                 "equals": true
               }
             }
           ]
+        },
+        {
+          "key": "capeStyle2",
+          "title": "`oCape Style 2",
+          "controls": [
+            {
+              "type": "heading",
+              "key": "capeColorStyle2Heading",
+              "label": "`oCape Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "capeColorStyle2",
+              "label": "`oCape - R,G,B:",
+              "default": [
+                234,
+                88,
+                226
+              ],
+              "binding": {
+                "settingKey": "c3",
+                "slot": 3,
+                "source": "gameOptions.colours[0].slot2"
+              },
+              "bindingStatus": "source-backed-second-design"
+            },
+            {
+              "type": "heading",
+              "key": "collarColorStyle2Heading",
+              "label": "`oCape Collar Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "collarColorStyle2",
+              "label": "`oCollar - R,G,B:",
+              "default": [
+                130,
+                49,
+                126
+              ],
+              "binding": {
+                "settingKey": "c5",
+                "slot": 5,
+                "source": "gameOptions.colours[1].slot2"
+              },
+              "bindingStatus": "source-backed-second-design"
+            }
+          ]
         }
+      ],
+      "notes": [
+        "Cape and collar colors are resolved from the two native colour slots and the gameIcon tc indices.",
+        "Open/closed and aura selections are source-backed option state. Their original alternate sprite/effect renderings are not present in this demo bundle yet."
       ]
     },
     "11478": {
