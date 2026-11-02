@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "archive": "Growtopia_Items_DAT_Research_Pack.zip",
+    "directory": "growtopia_items_research/source_xml/ItemRenderers/",
+    "join": "native_items.jsonl -> str_version_16 -> item_id",
+    "note": "Only VariableMap Set records carrying UIName are included. Entries preserve the supplied UI labels, descriptions, UIOrder, RadioGroup, input limits and defaults."
+  },
+  "items": {
+    "15230": {
+      "name": "Anomaly Aura",
+      "renderer": "AnomalyAura.xml",
+      "itemUiDescription": "",
+      "entries": [
+        {
+          "name": "timeCycle",
+          "uiName": "Time Dilation Cycle Time:",
+          "minValue": 1,
+          "maxValue": 999,
+          "uiOrder": 0,
+          "radioGroup": -1,
+          "default": "15"
+        },
+        {
+          "name": "timeCycle_On",
+          "uiName": "Time Dilation On / Off",
+          "uiOrder": 1,
+          "radioGroup": 0,
+          "default": "true"
+        },
+        {
+          "name": "darkAnomaly",
+          "uiName": "Dark Anomaly",
+          "uiOrder": 2,
+          "radioGroup": 0,
+          "default": "false"
+        },
+        {
+          "name": "lightAnomaly",
+          "uiName": "Light Anomaly",
+          "uiOrder": 3,
+          "radioGroup": 0,
+          "default": "false"
+        }
+      ]
+    },
+    "15826": {
+      "name": "Wings of Infinity",
+      "renderer": "WingsOfInfinity.xml",
+      "itemUiDescription": "To set the colors for the styles you need to enter RGB(Red, Green, Blue) values. To separate the individual values, you need to use a comma.",
+      "entries": [
+        {
+          "name": "Visible_TL",
+          "uiName": "Wings Visibility On/Off",
+          "uiDescription": "Top Left Wing",
+          "uiOrder": 0,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Trail_TL",
+          "uiName": "Trail On/Off",
+          "uiOrder": 1,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "Feathered_TL",
+          "uiName": "Feathered",
+          "uiDescription": "Wing Theming:",
+          "descriptionType": "textbox",
+          "uiOrder": 2,
+          "radioGroup": 1,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Mechanical_TL",
+          "uiName": "Mechanical",
+          "uiOrder": 3,
+          "radioGroup": 1,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "false"
+        },
+        {
+          "name": "Primary_TL",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Primary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 4,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "0,120,220"
+        },
+        {
+          "name": "Secondary_TL",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Secondary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 5,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "255,73,255"
+        },
+        {
+          "name": "Visible_BL",
+          "uiName": "Wings Visibility On/Off",
+          "uiDescription": "Bottom Left Wing",
+          "uiOrder": 10,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Trail_BL",
+          "uiName": "Trail On/Off",
+          "uiOrder": 11,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "Feathered_BL",
+          "uiName": "Feathered",
+          "uiDescription": "Wing Theming:",
+          "descriptionType": "textbox",
+          "uiOrder": 12,
+          "radioGroup": 2,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Mechanical_BL",
+          "uiName": "Mechanical",
+          "uiOrder": 13,
+          "radioGroup": 2,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "false"
+        },
+        {
+          "name": "Primary_BL",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Primary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 14,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "0,120,220"
+        },
+        {
+          "name": "Secondary_BL",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Secondary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 15,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "255,73,255"
+        },
+        {
+          "name": "Visible_TR",
+          "uiName": "Wings Visibility On/Off",
+          "uiDescription": "Top Right Wing",
+          "uiOrder": 20,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Trail_TR",
+          "uiName": "Trail On/Off",
+          "uiOrder": 21,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "Feathered_TR",
+          "uiName": "Feathered",
+          "uiDescription": "Wing Theming:",
+          "descriptionType": "textbox",
+          "uiOrder": 22,
+          "radioGroup": 3,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Mechanical_TR",
+          "uiName": "Mechanical",
+          "uiOrder": 23,
+          "radioGroup": 3,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "false"
+        },
+        {
+          "name": "Primary_TR",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Primary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 24,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "0,120,220"
+        },
+        {
+          "name": "Secondary_TR",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Secondary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 25,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "255,73,255"
+        },
+        {
+          "name": "Visible_BR",
+          "uiName": "Wings Visibility On/Off",
+          "uiDescription": "Bottom Right Wing",
+          "uiOrder": 30,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Trail_BR",
+          "uiName": "Trail On/Off",
+          "uiOrder": 31,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "Feathered_BR",
+          "uiName": "Feathered",
+          "uiDescription": "Wing Theming:",
+          "descriptionType": "textbox",
+          "uiOrder": 32,
+          "radioGroup": 4,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "true"
+        },
+        {
+          "name": "Mechanical_BR",
+          "uiName": "Mechanical",
+          "uiOrder": 33,
+          "radioGroup": 4,
+          "forceFloats": true,
+          "maxLength": 5,
+          "default": "false"
+        },
+        {
+          "name": "Primary_BR",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Primary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 34,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "0,120,220"
+        },
+        {
+          "name": "Secondary_BR",
+          "uiName": "Color - R,G,B",
+          "uiDescription": "Secondary Color:",
+          "descriptionType": "textbox",
+          "uiOrder": 35,
+          "radioGroup": -1,
+          "forceFloats": true,
+          "maxLength": 13,
+          "default": "255,73,255"
+        }
+      ]
+    },
+    "16314": {
+      "name": "Spiezels' Galactic Scarf",
+      "renderer": "SpiezelsGalacticScarf.xml",
+      "entries": [
+        {
+          "name": "showCloak",
+          "uiName": "Show Cloak",
+          "uiOrder": 1,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "showTrail",
+          "uiName": "Show Trail",
+          "uiOrder": 2,
+          "radioGroup": -1,
+          "default": "true"
+        }
+      ]
+    },
+    "16316": {
+      "name": "swiftpie's Aura-Mantle",
+      "renderer": "swiftpiesAuraMantle.xml",
+      "entries": [
+        {
+          "name": "showHood",
+          "uiName": "Show Hood",
+          "uiOrder": 1,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "showStardust",
+          "uiName": "Show Stardust Aura",
+          "uiOrder": 2,
+          "radioGroup": -1,
+          "default": "true"
+        },
+        {
+          "name": "showAngelic",
+          "uiName": "Show Angelic Aura",
+          "uiOrder": 3,
+          "radioGroup": -1,
+          "default": "true"
+        }
+      ]
+    }
+  }
+}
