@@ -184,6 +184,7 @@ function makeControl(control) {
     const input = make("input", "item-wrench-input wrench-rgb-input");
     input.type = "text";
     input.inputMode = "decimal";
+    input.maxLength = control.maxLength ?? 13;
     input.autocomplete = "off";
     input.spellcheck = false;
     input.value = (draft[control.key] ?? [0, 0, 0]).join(", ");
