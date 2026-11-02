@@ -31,7 +31,12 @@ export function validateItemWrenchValue(control, value) {
       return (control.allowNone && value === "") ||
         (control.options ?? []).some(option => option.value === value);
     case "select":
+    case "choice-buttons":
       return (control.options ?? []).some(option => option.value === value);
+    case "slider":
+      return Number.isFinite(value) &&
+        (control.min == null || value >= control.min) &&
+        (control.max == null || value <= control.max);
     case "text":
       return typeof value === "string" &&
         (control.maxLength == null || value.length <= control.maxLength);
