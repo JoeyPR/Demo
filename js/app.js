@@ -15,6 +15,8 @@ import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
+import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
+import { buildItemWrenchDefinitionFromGameOptions } from "../src/item-wrench-game-options.mjs";
 import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset, blackenShadowMask } from "./player-shadow.mjs";
 import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
@@ -45,7 +47,7 @@ const state = {
   hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true,
   livePreview:false, editableWorld:null,
   pendingWorldEvents:[], dance:null,
-  itemWrenchDefinitions:null, itemWrenchGameOptions:null
+  itemWrenchDefinitions:null, itemWrenchVariableMaps:null, itemWrenchGameOptions:null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -85,8 +87,12 @@ function normalize(raw) {
   const item = normalizeCatalogItem(raw, state.catalog);
   item.native = state.nativeMetadata?.items?.[raw.id] ?? null;
   const id = String(raw.id);
-  item.wrenchDefinition = state.itemWrenchDefinitions?.items?.[id] ?? null;
-  item.wrenchGameOptions = state.itemWrenchGameOptions?.items?.[id]?.gameOptions ?? null;
+  const variableMap = state.itemWrenchVariableMaps?.items?.[id];
+  const gameOptionsRecord = state.itemWrenchGameOptions?.items?.[id];
+  item.wrenchGameOptions = gameOptionsRecord?.gameOptions ?? null;
+  item.wrenchDefinition = state.itemWrenchDefinitions?.items?.[id] ??
+    buildItemWrenchDefinitionFromVariableMap(variableMap, raw.id) ??
+    buildItemWrenchDefinitionFromGameOptions(gameOptionsRecord, raw.id) ?? null;
   item.wrenchSettings = P.itemWrench?.get(raw.id) ??
     P.store.get("itemWrenchSettings", {})?.[id] ?? null;
   ensureItemAssets(item);
@@ -1076,11 +1082,13 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     state.nativeMetadata = await (await fetch(moduleURL("../demo/native-metadata.json"))).json();
     state.abilityRegistry = await (await fetch(moduleURL("../demo/ability-registry.json"))).json();
     try {
-      const [wrenchDefinitionsResponse, wrenchOptionsResponse] = await Promise.all([
+      const [wrenchDefinitionsResponse, wrenchMapsResponse, wrenchOptionsResponse] = await Promise.all([
         fetch(moduleURL("../data/item-wrench-definitions.json")),
+        fetch(moduleURL("../data/item-wrench-variable-maps.json")),
         fetch(moduleURL("../data/item-wrench-game-options.json"))
       ]);
       if (wrenchDefinitionsResponse.ok) state.itemWrenchDefinitions = await wrenchDefinitionsResponse.json();
+      if (wrenchMapsResponse.ok) state.itemWrenchVariableMaps = await wrenchMapsResponse.json();
       if (wrenchOptionsResponse.ok) state.itemWrenchGameOptions = await wrenchOptionsResponse.json();
     } catch (error) {
       console.warn("[Item Wrench] Native customization data unavailable.", error);
