@@ -140,3 +140,35 @@ test("native colour metadata automatically creates RGB controls", () => {
   assert.deepEqual(defaults["crown-0"], [255, 0, 255]);
   assert.deepEqual(defaults["glow-1"], [0, 205, 249]);
 });
+
+
+test("the generic control state supports segmented buttons and sliders", () => {
+  const definition = {
+    sections: [{
+      controls: [
+        {
+          type: "choice-buttons", key: "mode", default: "open",
+          options: [{ value: "open", label: "Open" }, { value: "closed", label: "Closed" }]
+        },
+        { type: "slider", key: "strength", default: 5, min: 0, max: 10, step: 1 }
+      ]
+    }]
+  };
+  const defaults = createItemWrenchDefaults(definition);
+  assert.deepEqual(defaults, { mode: "open", strength: 5 });
+  assert.equal(validateItemWrenchState(definition, defaults).valid, true);
+  assert.equal(validateItemWrenchState(definition, { mode: "unknown", strength: 5 }).valid, false);
+  assert.equal(validateItemWrenchState(definition, { mode: "open", strength: 11 }).valid, false);
+});
+
+test("the custom checkbox has a transparent 1:1 surface and both blue shadows", () => {
+  const css = read("../css/item-wrench.css");
+  const start = css.indexOf(".wrench-checkbox-box {");
+  const end = css.indexOf("\n}", start);
+  const block = css.slice(start, end);
+  assert.match(block, /aspect-ratio:\s*1\s*\/\s*1/);
+  assert.match(block, /border:\s*var\(--bd\) solid #95C9FF/);
+  assert.match(block, /border-radius:\s*var\(--radius\)/);
+  assert.match(block, /background:\s*transparent/);
+  assert.match(block, /box-shadow:[\s\S]*#145EAE[\s\S]*inset[\s\S]*#145EAE/);
+});
