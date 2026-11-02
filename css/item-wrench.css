@@ -299,3 +299,49 @@
 @media (prefers-reduced-motion: reduce) {
   .item-wrench-dialog * { scroll-behavior: auto !important; }
 }
+
+
+/* Additional generated controls for items with segmented choices or numeric ranges. */
+.wrench-choice-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8px * var(--wrench-scale, 1));
+}
+.wrench-choice-button {
+  min-width: 0;
+  min-height: calc(44px * var(--wrench-scale, 1));
+  padding: calc(7px * var(--wrench-scale, 1)) calc(12px * var(--wrench-scale, 1));
+  border: var(--bd) solid #95C9FF;
+  border-radius: var(--radius);
+  background: #145EAE;
+  box-shadow: var(--sh) var(--sh) 0 #000;
+  color: #CEE1F3;
+  font: 700 calc(19px * var(--wrench-scale, 1))/1.1 var(--font-main);
+  cursor: pointer;
+}
+.wrench-choice-button.selected {
+  background: #7fb64a;
+  border-color: #ffe27e;
+  color: #10200c;
+}
+.wrench-choice-button:active {
+  transform: translate(var(--sh),var(--sh));
+  box-shadow: none;
+}
+.wrench-slider-row {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--wrench-scale, 1));
+}
+.wrench-slider {
+  flex: 1 1 auto;
+  min-width: 0;
+  accent-color: #95C9FF;
+}
+.wrench-slider-value {
+  flex: 0 0 auto;
+  min-width: 3ch;
+  color: #FFFFFF;
+  font: 700 calc(21px * var(--wrench-scale, 1))/1 var(--font-main);
+  text-align: right;
+}
