@@ -23,7 +23,10 @@
             "settingKey": "cycP",
             "offset": 10188,
             "format": "f32",
-            "source": "gameOptions.cycle.periodOff"
+            "source": "gameOptions.cycle.periodOff",
+            "settingKeys": [
+              "cycP"
+            ]
           },
           "bindingStatus": "source-backed"
         },
@@ -35,7 +38,10 @@
           "binding": {
             "settingKey": "cyc",
             "offset": 10184,
-            "source": "gameOptions.cycle.off"
+            "source": "gameOptions.cycle.off",
+            "settingKeys": [
+              "cyc"
+            ]
           },
           "bindingStatus": "source-backed-default-off"
         }
@@ -63,7 +69,10 @@
                 "settingKey": "c2",
                 "slot": 2,
                 "slot2": 3,
-                "source": "gameOptions.colours[0]"
+                "source": "gameOptions.colours[0]",
+                "settingKeys": [
+                  "c2"
+                ]
               },
               "bindingStatus": "source-backed"
             },
@@ -76,7 +85,11 @@
                 "settingKey": "f0",
                 "bit": 0,
                 "bit2": 1,
-                "source": "gameOptions.flags[1]"
+                "source": "gameOptions.flags[1]",
+                "settingKeys": [
+                  "f0",
+                  "f1"
+                ]
               },
               "bindingStatus": "source-backed"
             },
@@ -112,7 +125,11 @@
                 "bit": 2,
                 "bit2": 3,
                 "source": "gameOptions.flags[0]",
-                "transform": "inverse"
+                "transform": "inverse",
+                "settingKeys": [
+                  "f2",
+                  "f3"
+                ]
               },
               "bindingStatus": "source-backed-inverted"
             },
@@ -126,7 +143,11 @@
                 "bit": 4,
                 "bit2": 5,
                 "source": "gameOptions.flags[2]",
-                "transform": "inverse"
+                "transform": "inverse",
+                "settingKeys": [
+                  "f4",
+                  "f5"
+                ]
               },
               "bindingStatus": "source-backed-inverted"
             },
@@ -171,7 +192,12 @@
                   2,
                   3
                 ],
-                "pokes": "gameOptions.layers[0].pokes"
+                "pokes": "gameOptions.layers[0].pokes",
+                "settingKeys": [
+                  "l_aura",
+                  "l2_aura"
+                ],
+                "emptyValue": 0
               },
               "bindingStatus": "source-backed-choice-runtime-binding-pending",
               "visibleWhen": {
@@ -202,7 +228,10 @@
               "binding": {
                 "settingKey": "c3",
                 "slot": 3,
-                "source": "gameOptions.colours[0].slot2"
+                "source": "gameOptions.colours[0].slot2",
+                "settingKeys": [
+                  "c3"
+                ]
               },
               "bindingStatus": "source-backed-second-design"
             },
@@ -223,7 +252,10 @@
               "binding": {
                 "settingKey": "c5",
                 "slot": 5,
-                "source": "gameOptions.colours[1].slot2"
+                "source": "gameOptions.colours[1].slot2",
+                "settingKeys": [
+                  "c5"
+                ]
               },
               "bindingStatus": "source-backed-second-design"
             }
