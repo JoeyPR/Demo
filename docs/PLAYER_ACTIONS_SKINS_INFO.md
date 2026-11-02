@@ -73,8 +73,9 @@ item name, category or native breaking flag.
 
 The wiki's complete rendered infobox and
 [property module](https://growtopiawiki.com/w/Module:Item/Properties) supply the
-Transmutable, Untradable and NoSeed rules. The dialog shows CAN/CANNOT transmute,
-drop/trade status, and no-seed status where explicitly present. The existing
+Transmutable, Untradable and NoSeed rules. The dialog shows CAN/CANNOT transmute, untradable restrictions, and no-seed
+status where explicitly present. The positive “This item can be dropped and
+traded.” line is intentionally omitted. The existing
 Drop behavior is preserved independently of this information display.
 
 To rebuild the source snapshot, use Python with `lxml` and `curl`:

@@ -9,7 +9,7 @@ const native=JSON.parse(await readFile(new URL('../demo/native-metadata.json',im
 test('Shades and Legendbot preserve opposite wiki-backed permissions',()=>{
   const shades=resolveItemInfo(snapshot,{id:34,name:'Shades'});
   assert.equal(shades.description,"The future's so bright, you need these.");
-  assert.deepEqual(shades.properties,['This item CAN be transmuted.','This item can be dropped and traded.','This item never drops any seeds.']);
+  assert.deepEqual(shades.properties,['This item CAN be transmuted.','This item never drops any seeds.']);
   const bot=resolveItemInfo(snapshot,{id:1780,name:'Legendbot-009'});
   assert.deepEqual(bot.properties,['This item CANNOT be transmuted.','This item cannot be dropped or traded.','This item never drops any seeds.']);
 });
@@ -40,4 +40,23 @@ test('resolver returns isolated properties and permits only the verified wiki so
   assert.equal(result.name,'<b>literal</b>');result.properties.push('changed');
   assert.equal(snapshot.items[34].properties.includes('changed'),false);
   assert.equal(resolveItemInfo({items:{1:{wikiVerified:true,source:'javascript:alert(1)',properties:[]}}},{id:1}).source,null);
+});
+
+
+test('Fist and Wrench expose readable built-in tool information',()=>{
+  const fist=resolveItemInfo(snapshot,{id:-100001,name:'Fist',tool:true,toolType:'fist'});
+  const wrench=resolveItemInfo(snapshot,{id:-100002,name:'Wrench',tool:true,toolType:'wrench'});
+  assert.match(fist.description,/punch objects/i);
+  assert.match(wrench.description,/customization settings/i);
+  assert.deepEqual(fist.properties,[]);
+  assert.deepEqual(wrench.properties,[]);
+  assert.equal(fist.verified,false);
+  assert.equal(wrench.verified,false);
+});
+
+test('positive drop-and-trade permission is omitted while restrictions remain visible',()=>{
+  const tradable=resolveItemInfo(snapshot,{id:34,name:'Shades'});
+  const restricted=resolveItemInfo(snapshot,{id:1780,name:'Legendbot-009'});
+  assert.ok(!tradable.properties.includes('This item can be dropped and traded.'));
+  assert.ok(restricted.properties.includes('This item cannot be dropped or traded.'));
 });

@@ -195,10 +195,17 @@ test("the Wrench footer keeps Reset above Drop-style Cancel and OK actions", () 
   assert.match(ui, /resetActions\.append\(resetButton\)/);
   assert.match(ui, /actions\.append\(cancelButton, updateButton\)/);
   assert.match(ui, /make\("button", "wrench-cancel drop-cancel", "Cancel"\)/);
-  assert.match(ui, /make\("button", "wrench-update drop-confirm", "OK"\)/);
+  assert.match(ui, /make\("button", "wrench-update drop-confirm", "Update"\)/);
   assert.match(ui, /make\("button", "wrench-reset drop-confirm", "Reset to Default"\)/);
   assert.match(ui, /make\("div", "drop-actions wrench-reset-actions"\)/);
+  assert.match(ui, /const inner = make\("div", "item-wrench-inner"\)/);
+  assert.match(css, /\.item-wrench-inner\s*\{[^}]*transform-origin:\s*top left/);
+  assert.match(ui, /function fitContents\(\)/);
+  assert.match(ui, /inner\.style\.transform = "scale\(" \+ contentScale \+ "\)"/);
   assert.match(css, /width:\s*var\(--wrench-reset-width/);
+  assert.match(css, /\.wrench-footer-actions\s*\{[^}]*flex-wrap:\s*nowrap/);
+  assert.match(css, /\.wrench-footer-actions \.wrench-update\s*\{[^}]*text-align:\s*left/);
+  assert.doesNotMatch(css, /font-size:\s*calc\(var\(--drop-button-font,\s*52px\)\s*\*\s*\.84\)/);
   assert.match(css, /justify-content:\s*flex-start/);
   assert.match(read("../css/drop.css"), /\.drop-actions \.drop-confirm[\s\S]*?background:\s*#7BBAD2/);
   const footer = css.match(/\.item-wrench-footer\s*\{([^}]+)\}/)?.[1] ?? "";
@@ -398,14 +405,17 @@ test("Rift Cape collar flag removes only the separately identified collar tc lay
 });
 
 
-test("all favorited item boxes use fav-box.png without a separate favorite badge", () => {
+test("fav-box is a compact overlay and the ordinary inventory frame remains intact", () => {
   const css = read("../css/inv.css");
   const grid = read("../js/grid.js");
-  assert.match(css, /\.box\.fav,\.box\.fav\.sel,\.box\.fav\.art,\.box\.fav\.sel\.art[\s\S]*?fav-box\.png/);
-  assert.match(css, /\.box\.fav-special\s*\{[^}]*fav-box\.png/);
-  assert.doesNotMatch(css, /\.box \.fv|\.box\.fav \.fv/);
-  assert.doesNotMatch(grid, /favorite-badge\.png|\.fv/);
-  assert.doesNotMatch(css, /box-fav\.png/);
+  assert.match(css, /\.box\s*\{[^}]*background:url\(\.\.\/img\/box-white\.png\)/);
+  assert.match(css, /\.box \.fv\s*\{[^}]*width:28%[^}]*height:28%/);
+  assert.match(css, /\.box\.fav \.fv\s*\{\s*display:block/);
+  assert.match(grid, /mark\.src = 'img\/fav-box\.png'/);
+  assert.match(grid, /syncFavoriteMark\(b, favs\.has\(it\.id\)\)/);
+  assert.doesNotMatch(grid, /favorite-badge\.png/);
+  assert.doesNotMatch(css, /favorite-badge\.png|\.box\.fav-special/);
+  assert.doesNotMatch(css, /\.box\.fav,\.box\.fav\.sel[\s\S]*?background-image:/);
 });
 
 test("the item Wrench shares Drop/Info styling in a responsive 3:4 dialog", () => {

@@ -37,6 +37,7 @@ const content = make("div", "item-wrench-content");
 content.id = "item-wrench-content";
 
 const footer = make("footer", "item-wrench-footer");
+const inner = make("div", "item-wrench-inner");
 const resetActions = make("div", "drop-actions wrench-reset-actions");
 const resetButton = make("button", "wrench-reset drop-confirm", "Reset to Default");
 resetButton.type = "button";
@@ -44,11 +45,12 @@ resetActions.append(resetButton);
 const actions = make("div", "wrench-footer-actions drop-actions");
 const cancelButton = make("button", "wrench-cancel drop-cancel", "Cancel");
 cancelButton.type = "button";
-const updateButton = make("button", "wrench-update drop-confirm", "OK");
+const updateButton = make("button", "wrench-update drop-confirm", "Update");
 updateButton.type = "button";
 actions.append(cancelButton, updateButton);
 footer.append(resetActions, actions);
-dialog.append(header, content, footer);
+inner.append(header, content, footer);
+dialog.append(inner);
 overlay.append(dialog);
 document.body.append(overlay);
 
@@ -63,6 +65,7 @@ let draft = null;
 let previousFocus = null;
 let invalidInputs = new Set();
 let controlNodes = new Map();
+let layoutScale = 1;
 
 function storedSettings() {
   const value = P.store.get(STORE_KEY, {});
@@ -99,6 +102,10 @@ function position() {
   dialog.style.setProperty("--drop-pad-top", 20 * scale + "px");
   dialog.style.setProperty("--drop-pad-x", 24 * scale + "px");
   dialog.style.setProperty("--drop-pad-bottom", 16 * scale + "px");
+  dialog.style.setProperty("--wrench-pad-top", 20 * scale + "px");
+  dialog.style.setProperty("--wrench-pad-x", 24 * scale + "px");
+  dialog.style.setProperty("--wrench-pad-bottom", 16 * scale + "px");
+  layoutScale = scale;
   dialog.style.setProperty("--drop-row-gap", 12 * scale + "px");
   dialog.style.setProperty("--drop-title-size", 65 * scale + "px");
   dialog.style.setProperty("--drop-icon-size", 64 * scale + "px");
@@ -109,6 +116,37 @@ function position() {
   dialog.style.setProperty("--wrench-reset-width", (226 + 104 + 40) * scale + "px");
   dialog.style.setProperty("--wrench-cancel-width", 226 * scale + "px");
   dialog.style.setProperty("--wrench-ok-width", 104 * scale + "px");
+  fitContents();
+}
+
+function fitContents() {
+  if (overlay.hidden || !dialog.clientWidth || !dialog.clientHeight) return;
+  const padX = 24 * layoutScale;
+  const padTop = 20 * layoutScale;
+  const padBottom = 16 * layoutScale;
+  const availableWidth = Math.max(1, dialog.clientWidth - padX * 2);
+  const availableHeight = Math.max(1, dialog.clientHeight - padTop - padBottom);
+
+  inner.style.transform = "none";
+  inner.style.left = padX + "px";
+  inner.style.top = padTop + "px";
+
+  // Widen the unscaled layout as it shrinks, so the final rendered content
+  // still uses the full inner width rather than shrinking into a narrow column.
+  let contentScale = 1;
+  for (let pass = 0; pass < 5; pass++) {
+    inner.style.width = (availableWidth / contentScale) + "px";
+    const requiredHeight = Math.max(1, inner.scrollHeight);
+    const nextScale = Math.min(1, availableHeight / requiredHeight);
+    if (Math.abs(nextScale - contentScale) < 0.005) {
+      contentScale = nextScale;
+      break;
+    }
+    contentScale = nextScale;
+  }
+  inner.style.width = (availableWidth / contentScale) + "px";
+  inner.style.transform = "scale(" + contentScale + ")";
+  dialog.style.setProperty("--wrench-content-scale", String(contentScale));
 }
 
 function emitPreview() {
@@ -136,6 +174,7 @@ function setValue(key, value) {
   updateButtonState(validity.valid);
   syncChoiceChecks();
   syncDependentVisibility();
+  fitContents();
   emitPreview();
 }
 
@@ -443,6 +482,7 @@ async function open(item) {
     overlay.setAttribute("aria-hidden", "false");
     position();
     buildContent();
+    fitContents();
     dialog.scrollTop = 0;
     P.emit("item-wrench-open", { item, definition, values: cloneItemWrenchState(draft) });
     P.emit("input-reset");
@@ -459,6 +499,7 @@ function resetToDefault() {
   draft = createItemWrenchDefaults(currentDefinition);
   invalidInputs.clear();
   buildContent();
+  fitContents();
   emitPreview();
 }
 

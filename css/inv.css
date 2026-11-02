@@ -75,12 +75,6 @@
 .box.blue{background-image:url(../img/box-blue.png)}
 .box.sel{background-image:url(../img/box-sel.png)}
 .box.sel.art{background-image:url(../img/box-art.png)}
-/* Favorited items use the dedicated favorite frame, including when equipped. */
-.box.fav,.box.fav.sel,.box.fav.art,.box.fav.sel.art{
-  background-image:url(../img/fav-box.png);
-  background-position:center;
-  background-size:100% 100%;
-}
 .box::before{content:"";position:absolute;inset:-2.6% -4.9% -5.4% -3.1%;background:url(../img/box-focus.png) 0 0/100% 100%;opacity:0;pointer-events:none}
 .box.focus::before{opacity:1}
 /* empty quick-drawer slot: the regular box, dimmed */
@@ -99,8 +93,10 @@
   font-size:calc(46*var(--u));text-shadow:0 2px 0 rgba(0,0,0,.45)}
 .box .n{display:none}   /* item names never show — kept in the DOM as metadata only */
 .box img{pointer-events:none}
-.box.fav-special{background-image:url(../img/fav-box.png);background-position:center;background-size:100% 100%;cursor:default}
-.box.fav-special::before{display:none}
+/* Small favorite marker: it overlays the regular box without replacing its frame. */
+.box .fv{position:absolute;right:3%;top:3%;width:28%;height:28%;object-fit:contain;
+  image-rendering:pixelated;display:none;pointer-events:none;z-index:3}
+.box.fav .fv{display:block}
 
 /* 4. top drawer: every quick box uses the blue box (box-blue.png), including
    the equipped (.sel) and empty slots — the check overlay still marks equipped */

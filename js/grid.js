@@ -197,8 +197,23 @@
     const ck = document.createElement('img'); ck.className = 'ck o'; ck.src = 'img/chk.png'; ck.alt = '';
     const ckArt = document.createElement('img'); ckArt.className = 'ck p'; ckArt.src = 'img/chk-art.png'; ckArt.alt = '';
     b.append(ic, n, ck, ckArt);
+    syncFavoriteMark(b, favs.has(it.id));
     fillBox(b);
     return b;
+  }
+
+  function syncFavoriteMark(box, favorite) {
+    let mark = box.querySelector('.fv');
+    if (favorite && !mark) {
+      mark = document.createElement('img');
+      mark.className = 'fv';
+      mark.src = 'img/fav-box.png';
+      mark.alt = '';
+      mark.draggable = false;
+      box.append(mark);
+    } else if (!favorite && mark) {
+      mark.remove();
+    }
   }
 
   /* mount a box's thumbnail + name (only called when the box is seen) */
@@ -311,6 +326,7 @@
     b._it = it;
     b.classList.toggle('gone', !!it.gone);
     b.classList.toggle('fav', favs.has(it.id));
+    syncFavoriteMark(b, favs.has(it.id));
     const equippedIds = P.equippedIds || new Set();
     b.classList.toggle('art', equippedIds.has(it.id) && isArtifactItem(it));
     if (it.slot != null) b.dataset.slot = it.slot;

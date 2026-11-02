@@ -11,10 +11,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--drop-row-gap, 12px);
+  position: absolute;
+  display: block;
   box-sizing: border-box;
   width: var(--wrench-width, 315px);
   height: var(--wrench-height, 420px);
@@ -23,9 +21,17 @@
   max-height: 92%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  padding: var(--drop-pad-top, 20px) var(--drop-pad-x, 24px) var(--drop-pad-bottom, 16px);
+  padding: 0;
 }
 
+.item-wrench-inner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--drop-row-gap, 12px);
+  transform-origin: top left;
+}
 .item-wrench-header {
   flex: 0 0 auto;
   min-width: 0;
@@ -42,18 +48,13 @@
 
 .item-wrench-content {
   display: flex;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: calc(22px * var(--wrench-scale, 1));
   min-width: 0;
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
+  overflow: visible;
   padding: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) rgba(0,0,0,.2);
 }
 .item-wrench-section {
   display: flex;
@@ -201,26 +202,30 @@
   flex-direction: column;
   align-items: flex-start;
   gap: calc(12px * var(--wrench-scale, 1));
+  width: 100%;
   padding: 0;
   border-top: 0;
 }
 .wrench-reset-actions {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
 }
 .wrench-reset-actions .wrench-reset {
   box-sizing: border-box;
   width: var(--wrench-reset-width, 120px);
-  max-width: 100%;
-  font-size: calc(var(--drop-button-font, 52px) * .84);
+  max-width: none;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 .wrench-footer-actions {
   display: flex;
+  flex-wrap: nowrap;
   align-items: stretch;
   justify-content: flex-start;
   gap: var(--drop-button-gap, 40px);
   max-width: 100%;
-  width: max-content;
+  width: 100%;
 }
 .wrench-footer-actions button { box-sizing: border-box; flex: 0 0 auto; }
 .wrench-cancel {
@@ -229,7 +234,7 @@
 .wrench-footer-actions .wrench-update {
   box-sizing: border-box;
   width: var(--wrench-ok-width, 104px);
-  text-align: center;
+  text-align: left;
 }
 .wrench-footer-actions button:active,
 .wrench-reset:active {
@@ -241,6 +246,8 @@
   cursor: not-allowed;
   transform: none;
 }
+.item-wrench-footer .wrench-footer-actions { flex-wrap: nowrap; }
+
 .item-wrench-dialog :focus-visible {
   outline-color: #fff;
 }
