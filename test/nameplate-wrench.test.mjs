@@ -70,16 +70,23 @@ test("player name and guild role text use their requested independent size incre
   assert.ok(plate.includes("const inGuildRole = part.guildRoleStartIndex != null && ci >= part.guildRoleStartIndex"));
 });
 
-test("wrench Status is single-select and scales styles plus decorations", () => {
-  assert.ok(plate.includes("wrenchStatus: 'default'"));
-  assert.ok(plate.includes("setWrenchStatus(id)"));
-  assert.ok(plate.includes("WRENCH_STATUS_SCALE[state.wrenchStatus]"));
-  assert.ok(plate.includes("default: 0.48, supporter: 0.56, 'super-supporter': 0.64"));
-  assert.ok(wrenchUI.includes("default: 0.48, supporter: 0.56, 'super-supporter': 0.64"));
-  assert.ok(wrenchUI.includes("STATUS_OPTIONS = ["));
-  assert.ok(wrenchUI.includes("P.plateConfig.setWrenchStatus(id)"));
-  assert.ok(wrenchUI.includes("superOption.disabled = st.wrenchStatus !== 'super-supporter'"));
-  assert.ok(wrenchUI.includes("preview(entry, isStyle, st.wrenchStatus)"));
+test("Wrench size has one Super Supporter on/off setting and a much larger enabled scale", () => {
+  assert.ok(plate.includes("superSupporter: false"));
+  assert.ok(plate.includes("setSuperSupporter(on)"));
+  assert.ok(plate.includes("WRENCH_SIZE = Object.freeze({ default: 0.68, superSupporter: 1.0 })"));
+  assert.ok(plate.includes("state.superSupporter ? WRENCH_SIZE.superSupporter : WRENCH_SIZE.default"));
+  assert.ok(wrenchUI.includes("statusInput.type = 'checkbox'"));
+  assert.ok(wrenchUI.includes("P.plateConfig.setSuperSupporter(statusInput.checked)"));
+  assert.ok(wrenchUI.includes("superOption.disabled = !st.superSupporter"));
+  assert.ok(wrenchUI.includes("preview(entry, isStyle, st.superSupporter)"));
+  assert.doesNotMatch(wrenchUI, /STATUS_OPTIONS|wrenchStatus|Supporter',\s*\]/);
+  assert.doesNotMatch(plate, /WRENCH_STATUS_SCALE|setWrenchStatus/);
+});
+
+test("legacy Super Supporter status migrates into the single boolean preference", () => {
+  assert.ok(plate.includes("source.wrenchStatus === 'super-supporter'"));
+  assert.ok(plate.includes("delete next.wrenchStatus"));
+  assert.ok(plate.includes("if (!state.superSupporter && state.wrenchStyle === SUPER_SUPPORTER_WRENCH)"));
 });
 
 test("country flag metadata is complete and flag assets are bundled locally in Demo", () => {
