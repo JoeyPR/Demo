@@ -370,3 +370,19 @@ test("generated cycle controls honor their own names when selecting a design", (
   defaults.cycleEnabled = false;
   assert.equal(gameOptionDesign(metadata.items["11478"].gameOptions, defaults, 16002), 0);
 });
+
+
+test("Rift Cape collar flag removes only the separately identified collar tc layer", () => {
+  const gameOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["10424"].gameOptions;
+  const values = createItemWrenchDefaults(cape);
+  const item = {
+    id: 10424, wrenchDefinition: cape, wrenchGameOptions: gameOptions,
+    wrenchSettings: values, pieces: [{ tc: 0, sx: 320 }, { tc: 1, sx: 256 }]
+  };
+  applyItemWrenchAppearance(item, 0);
+  assert.deepEqual(item.pieces.map(piece => piece.tc), [0, 1]);
+  item.wrenchSettings = { ...values, collarEnabled: false };
+  item.pieces = [{ tc: 0, sx: 320 }, { tc: 1, sx: 256 }];
+  applyItemWrenchAppearance(item, 0);
+  assert.deepEqual(item.pieces.map(piece => piece.tc), [0]);
+});
