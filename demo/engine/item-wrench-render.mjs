@@ -104,6 +104,15 @@ export function applyItemWrenchAppearance(item, timeMs = 0) {
     return item.pieces;
   }
 
+  // The Cape's collar is a separate tc=1 gameIcon sprite and has its own
+  // native "Collar" flag. Hide that layer when the corresponding flag is off.
+  const collarColourIndex = gameOptions.colours.findIndex(colour => /collar/i.test(colour.name ?? ""));
+  const collarFlagIndex = (gameOptions.flags ?? []).findIndex(flag => /collar/i.test(flag.name ?? ""));
+  if (collarColourIndex >= 0 && collarFlagIndex >= 0 &&
+      nativeSettings[`f${collarFlagIndex}x`] === false) {
+    item.pieces = item.pieces.filter(piece => piece.tc !== collarColourIndex);
+  }
+
   item.pieces = item.pieces.map(piece => {
     if (!Number.isInteger(piece.tc)) return piece;
     const tint = pickedGameOptionColour(gameOptions, nativeSettings, piece.tc, design);
