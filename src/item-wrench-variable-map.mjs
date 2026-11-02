@@ -19,14 +19,14 @@ function fieldControl(entry) {
   };
   if (isBool(value)) return {
     type: "checkbox", key: entry.name, label: "`o" + entry.uiName, default: bool(value),
-    help: entry.uiDescription, binding: entry.name, bindingStatus: "source-variable-map"
+    help: entry.uiDescription ? "`1" + entry.uiDescription : undefined, binding: entry.name, bindingStatus: "source-variable-map"
   };
   if (value !== "" && Number.isFinite(Number(value))) return {
     type: "number", key: entry.name, label: "`o" + entry.uiName, default: Number(value),
     min: entry.minValue == null ? undefined : Number(entry.minValue),
     max: entry.maxValue == null ? undefined : Number(entry.maxValue),
     step: entry.forceFloats ? "any" : 1,
-    maxLength: entry.maxLength, help: entry.uiDescription,
+    maxLength: entry.maxLength, help: entry.uiDescription ? "`1" + entry.uiDescription : undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
   return {
@@ -80,7 +80,10 @@ export function buildItemWrenchDefinitionFromVariableMap(record, itemId) {
       continue;
     }
 
-    pushControl(fieldControl(entry));
+    const controlEntry = description && sectionDescription(description)
+      ? { ...entry, uiDescription: undefined }
+      : entry;
+    pushControl(fieldControl(controlEntry));
   }
 
   return {
