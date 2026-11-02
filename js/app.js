@@ -44,7 +44,8 @@ const state = {
   pickups: [], nextPickupId: 1,
   hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true,
   livePreview:false, editableWorld:null,
-  pendingWorldEvents:[], dance:null
+  pendingWorldEvents:[], dance:null,
+  itemWrenchDefinitions:null, itemWrenchGameOptions:null
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
@@ -83,9 +84,27 @@ function ensureItemAssets(item) {
 function normalize(raw) {
   const item = normalizeCatalogItem(raw, state.catalog);
   item.native = state.nativeMetadata?.items?.[raw.id] ?? null;
+  const id = String(raw.id);
+  item.wrenchDefinition = state.itemWrenchDefinitions?.items?.[id] ?? null;
+  item.wrenchGameOptions = state.itemWrenchGameOptions?.items?.[id]?.gameOptions ?? null;
+  item.wrenchSettings = P.itemWrench?.get(raw.id) ??
+    P.store.get("itemWrenchSettings", {})?.[id] ?? null;
   ensureItemAssets(item);
   return item;
 }
+
+// Wrench drafts update only the equipped instance; the dialog owns persistence.
+// Cancel emits the saved snapshot, so this same path also rolls preview changes back.
+function applyWrenchPreview(payload) {
+  const id = Number(payload?.itemId);
+  const item = [...state.equipped.values()].find(worn => worn.id === id);
+  if (!item) return;
+  item.wrenchSettings = payload?.values ?? null;
+  if (payload?.definition) item.wrenchDefinition = payload.definition;
+}
+P.on("item-wrench-preview", applyWrenchPreview);
+P.on("item-wrench-update", applyWrenchPreview);
+P.on("item-wrench-cancel", applyWrenchPreview);
 
 /* ---------------- equip ----------------------------------------------- */
 function equipToggle(id) {
@@ -1056,6 +1075,16 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     try { const cues=await fetch(moduleURL("../demo/punch-sfx.json"));if(cues.ok)state.catalog.punchSfx=await cues.json(); } catch {}
     state.nativeMetadata = await (await fetch(moduleURL("../demo/native-metadata.json"))).json();
     state.abilityRegistry = await (await fetch(moduleURL("../demo/ability-registry.json"))).json();
+    try {
+      const [wrenchDefinitionsResponse, wrenchOptionsResponse] = await Promise.all([
+        fetch(moduleURL("../data/item-wrench-definitions.json")),
+        fetch(moduleURL("../data/item-wrench-game-options.json"))
+      ]);
+      if (wrenchDefinitionsResponse.ok) state.itemWrenchDefinitions = await wrenchDefinitionsResponse.json();
+      if (wrenchOptionsResponse.ok) state.itemWrenchGameOptions = await wrenchOptionsResponse.json();
+    } catch (error) {
+      console.warn("[Item Wrench] Native customization data unavailable.", error);
+    }
 
     const names = ["player_body_only.png", "player_head.png", "player_extraleg.png", "player_feet.png", "player_eyes.png",
       "player_arm.png", "player_puncharm.png", "player_sleeve.png", "player_hair.png", "player_hairhair.png",
