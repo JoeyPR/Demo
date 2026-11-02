@@ -5,6 +5,7 @@ import {
   cloneItemWrenchState
 } from "../src/item-wrench-state.mjs";
 import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
+import { buildItemWrenchDefinitionFromGameOptions } from "../src/item-wrench-game-options.mjs";
 
 const STORE_KEY = "itemWrenchSettings";
 const preview = document.getElementById("preview");
@@ -51,6 +52,7 @@ document.body.append(overlay);
 
 let definitions = null;
 let variableMaps = null;
+let gameOptions = null;
 let loading = null;
 let currentItem = null;
 let currentDefinition = null;
@@ -339,16 +341,19 @@ async function loadDefinitions() {
   if (!loading) {
     loading = Promise.all([
       fetch(new URL("../data/item-wrench-definitions.json", import.meta.url)),
-      fetch(new URL("../data/item-wrench-variable-maps.json", import.meta.url))
+      fetch(new URL("../data/item-wrench-variable-maps.json", import.meta.url)),
+      fetch(new URL("../data/item-wrench-game-options.json", import.meta.url))
     ])
-      .then(async ([definitionsResponse, mapsResponse]) => {
+      .then(async ([definitionsResponse, mapsResponse, gameOptionsResponse]) => {
         if (!definitionsResponse.ok) throw new Error("Item Wrench definitions unavailable");
         if (!mapsResponse.ok) throw new Error("Renderer VariableMap index unavailable");
-        const [definitionData, mapData] = await Promise.all([
-          definitionsResponse.json(), mapsResponse.json()
+        if (!gameOptionsResponse.ok) throw new Error("Native gameOptions index unavailable");
+        const [definitionData, mapData, gameOptionsData] = await Promise.all([
+          definitionsResponse.json(), mapsResponse.json(), gameOptionsResponse.json()
         ]);
         definitions = definitionData;
         variableMaps = mapData;
+        gameOptions = gameOptionsData;
         return definitions;
       })
       .catch(error => { loading = null; throw error; });
@@ -366,8 +371,10 @@ async function open(item) {
     const itemId = String(item.id);
     const authoredDefinition = registry.items?.[itemId];
     const variableMapRecord = variableMaps?.items?.[itemId];
+    const gameOptionsRecord = gameOptions?.items?.[itemId];
     const definition = authoredDefinition ??
-      buildItemWrenchDefinitionFromVariableMap(variableMapRecord, item.id);
+      buildItemWrenchDefinitionFromVariableMap(variableMapRecord, item.id) ??
+      buildItemWrenchDefinitionFromGameOptions(gameOptionsRecord, item.id);
     if (!definition) {
       P.toast("Wrench settings are not configured for " + (item.name ?? "this item") + " yet.");
       return;
