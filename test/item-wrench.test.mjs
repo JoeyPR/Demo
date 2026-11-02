@@ -151,8 +151,8 @@ test("native colour metadata automatically creates RGB controls", () => {
   const metadata = JSON.parse(read("../data/item-wrench-game-options.json"));
   const generated = buildItemWrenchDefinitionFromGameOptions(metadata.items["12958"], 12958);
   const defaults = createItemWrenchDefaults(generated);
-  assert.deepEqual(defaults["crown-0"], [255, 0, 255]);
-  assert.deepEqual(defaults["glow-1"], [0, 205, 249]);
+  assert.deepEqual(defaults["colour-crown-0"], [255, 0, 255]);
+  assert.deepEqual(defaults["colour-glow-1"], [0, 205, 249]);
 });
 
 
