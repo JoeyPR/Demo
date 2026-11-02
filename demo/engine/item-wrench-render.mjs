@@ -49,16 +49,18 @@ export function buildNativeWrenchSettings(definition, values) {
  * a design remains in its current state through the short flip interval,
  * then the following cycle selects the alternate design.
  */
-export function gameOptionDesign(gameOptions, values, timeMs = 0) {
+export function gameOptionDesign(gameOptions, values, timeMs = 0, itemCycle = null) {
   const cycle = gameOptions?.cycle;
   if (!cycle) return 0;
   const enabled = values?.timeDilationEnabled ?? cycle.default ?? false;
   if (!enabled) return 0;
 
-  const configuredPeriod = Number(values?.timeDilationCycleTime ?? cycle.period);
-  const period = Math.max(1, configuredPeriod || Number(cycle.period) || 1);
-  const flip = Math.max(0, Number(cycle.flip) || 0);
-  const duration = period * 1000 + (cycle.restart === "swap" ? flip : 0);
+  // Mirrors Set Planner's designOf(): cycle period is in seconds, flip is ms.
+  const configuredPeriod = Number(values?.timeDilationCycleTime ?? cycle.period) ||
+    Number(cycle.period) || 1;
+  const periodMs = Math.max(1, configuredPeriod) * 1000;
+  const flip = Math.max(0, Number(itemCycle?.flip ?? cycle.flip) || 0);
+  const duration = periodMs + (cycle.restart === "swap" ? flip : 0);
   const elapsedTime = Math.max(0, Number(timeMs) || 0);
   const cycleNumber = Math.floor(elapsedTime / duration);
   const elapsedInCycle = elapsedTime - cycleNumber * duration;
