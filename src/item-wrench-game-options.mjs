@@ -28,7 +28,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
         key: "cyclePeriod",
         label: "`o" + String(cycle.name ?? "Cycle") + " Cycle Time:",
         default: Number(cycle.period ?? 0),
-        min: 0,
+        min: 1,
         step: cycle.periodInt ? 1 : "any",
         binding: { settingKey: "cycP", settingKeys: ["cycP"], off: cycle.periodOff, type: cycle.periodInt ? "int" : "float" },
         bindingStatus: "source-backed"
@@ -53,7 +53,10 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
       default: Number(field.default ?? 1) !== 0,
       binding: {
         settingKey: field.off != null ? "f" + field.off : "f" + index + "x",
-        settingKeys: [field.off != null ? "f" + field.off : "f" + index + "x"],
+        settingKeys: [
+          field.off != null ? "f" + field.off : "f" + index + "x",
+          field.off2 != null ? "f" + field.off2 : field.off != null ? "f" + field.off : "f" + index + "x"
+        ],
         off: field.off, off2: field.off2, bit: field.bit, bit2: field.bit2
       },
       bindingStatus: "source-backed"
