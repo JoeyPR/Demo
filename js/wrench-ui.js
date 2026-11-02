@@ -5,7 +5,7 @@
   'use strict';
   const SHEETS = 'demo/assets/';
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const WRENCH_PREVIEW_SCALE = Object.freeze({ default: 0.68, superSupporter: 1.0 });
+  const WRENCH_PREVIEW_SCALE = Object.freeze({ default: 0.68, base: 0.82, superSupporter: 1.0 });
   const quickWrenchImg = new Image(); quickWrenchImg.src = 'img/wrench-quick.png';
   const superWrenchImg = new Image(); superWrenchImg.src = 'img/wrench.png';
   let data = null;
@@ -32,7 +32,8 @@
     c.className = 'wprev';
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
-    const drawSize = 48 * (superSupporter ? WRENCH_PREVIEW_SCALE.superSupporter : WRENCH_PREVIEW_SCALE.default);
+    const drawSize = 48 * (superSupporter ? WRENCH_PREVIEW_SCALE.superSupporter
+      : isStyle && !entry ? WRENCH_PREVIEW_SCALE.base : WRENCH_PREVIEW_SCALE.default);
     const drawAt = (64 - drawSize) / 2;
     const draw = () => {
       x.clearRect(0, 0, 64, 64);

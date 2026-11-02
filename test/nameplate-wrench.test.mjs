@@ -73,8 +73,11 @@ test("player name and guild role text use their requested independent size incre
 test("Wrench size has one Super Supporter on/off setting and a much larger enabled scale", () => {
   assert.ok(plate.includes("superSupporter: false"));
   assert.ok(plate.includes("setSuperSupporter(on)"));
-  assert.ok(plate.includes("WRENCH_SIZE = Object.freeze({ default: 0.68, superSupporter: 1.0 })"));
-  assert.ok(plate.includes("state.superSupporter ? WRENCH_SIZE.superSupporter : WRENCH_SIZE.default"));
+  assert.ok(plate.includes("WRENCH_SIZE = Object.freeze({ default: 0.68, base: 0.82, superSupporter: 1.0 })"));
+  assert.ok(plate.includes("baseWrenchSelected = !state.wrenchStyle || state.wrenchStyle === BASE_WRENCH"));
+  assert.ok(plate.includes("baseWrenchSelected ? WRENCH_SIZE.base : WRENCH_SIZE.default"));
+  assert.ok(wrenchUI.includes("base: 0.82"));
+  assert.ok(wrenchUI.includes("isStyle && !entry ? WRENCH_PREVIEW_SCALE.base"));
   assert.ok(wrenchUI.includes("statusInput.type = 'checkbox'"));
   assert.ok(wrenchUI.includes("P.plateConfig.setSuperSupporter(statusInput.checked)"));
   assert.ok(wrenchUI.includes("superOption.disabled = !st.superSupporter"));

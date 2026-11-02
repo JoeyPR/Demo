@@ -27,7 +27,7 @@ dialog.setAttribute("aria-modal", "true");
 dialog.setAttribute("aria-labelledby", "item-wrench-title");
 dialog.tabIndex = -1;
 
-const header = make("header", "item-wrench-header");
+const header = make("header", "drop-item-row item-wrench-header");
 const iconBox = make("div", "drop-item-icon item-wrench-icon");
 const title = make("h2", "drop-title");
 title.id = "item-wrench-title";
@@ -37,15 +37,17 @@ const content = make("div", "item-wrench-content");
 content.id = "item-wrench-content";
 
 const footer = make("footer", "item-wrench-footer");
-const resetButton = make("button", "wrench-reset", "Reset to Default");
+const resetActions = make("div", "drop-actions wrench-reset-actions");
+const resetButton = make("button", "wrench-reset drop-confirm", "Reset to Default");
 resetButton.type = "button";
+resetActions.append(resetButton);
 const actions = make("div", "wrench-footer-actions drop-actions");
 const cancelButton = make("button", "wrench-cancel drop-cancel", "Cancel");
 cancelButton.type = "button";
 const updateButton = make("button", "wrench-update drop-confirm", "OK");
 updateButton.type = "button";
 actions.append(cancelButton, updateButton);
-footer.append(resetButton, actions);
+footer.append(resetActions, actions);
 dialog.append(header, content, footer);
 overlay.append(dialog);
 document.body.append(overlay);
@@ -77,11 +79,10 @@ function position() {
   const rect = preview.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
 
-  // A portrait 6:19 panel, scaled to the preview bounds without ever growing
-  // wide enough to cover the inventory. Its content scrolls inside the fixed
-  // aspect-ratio frame when a generated item exposes many controls.
-  const height = Math.min(rect.height * 0.92, rect.width * 0.96 * 19 / 6);
-  const width = height * 6 / 19;
+  // Match the Drop/Info dialog footprint while keeping a 3:4 panel inside
+  // the preview rectangle on both desktop and narrow mobile screens.
+  const width = Math.min(rect.width * 0.96, rect.height * 0.92 * 3 / 4);
+  const height = width * 4 / 3;
   const scale = Math.max(0.12, Math.min(1, width / 420));
   Object.assign(overlay.style, {
     left: rect.left + "px",
@@ -92,12 +93,22 @@ function position() {
   dialog.style.setProperty("--wrench-width", width + "px");
   dialog.style.setProperty("--wrench-height", height + "px");
   dialog.style.setProperty("--wrench-scale", String(scale));
+  dialog.style.setProperty("--drop-scale", String(scale));
+  dialog.style.setProperty("--drop-min-width", width + "px");
+  dialog.style.setProperty("--drop-max-width", width + "px");
+  dialog.style.setProperty("--drop-pad-top", 20 * scale + "px");
+  dialog.style.setProperty("--drop-pad-x", 24 * scale + "px");
+  dialog.style.setProperty("--drop-pad-bottom", 16 * scale + "px");
+  dialog.style.setProperty("--drop-row-gap", 12 * scale + "px");
+  dialog.style.setProperty("--drop-title-size", 65 * scale + "px");
+  dialog.style.setProperty("--drop-icon-size", 64 * scale + "px");
+  dialog.style.setProperty("--drop-button-height", 84 * scale + "px");
+  dialog.style.setProperty("--drop-button-font", 52 * scale + "px");
+  dialog.style.setProperty("--drop-cancel-width", 226 * scale + "px");
+  dialog.style.setProperty("--drop-button-gap", 40 * scale + "px");
   dialog.style.setProperty("--wrench-reset-width", (226 + 104 + 40) * scale + "px");
   dialog.style.setProperty("--wrench-cancel-width", 226 * scale + "px");
   dialog.style.setProperty("--wrench-ok-width", 104 * scale + "px");
-  dialog.style.setProperty("--wrench-button-gap", 40 * scale + "px");
-  dialog.style.setProperty("--wrench-button-height", 84 * scale + "px");
-  dialog.style.setProperty("--wrench-button-font", 52 * scale + "px");
 }
 
 function emitPreview() {
@@ -194,12 +205,6 @@ function makeControl(control) {
   const label = make("label", "wrench-label");
   richText(label, control.label);
   wrapper.append(label);
-  if (control.help) {
-    const help = make("p", "wrench-control-help");
-    richText(help, control.help);
-    wrapper.append(help);
-  }
-
   if (control.type === "rgb") {
     const input = make("input", "item-wrench-input wrench-rgb-input");
     input.type = "text";
@@ -338,12 +343,6 @@ function buildContent() {
   content.replaceChildren();
   controlNodes.clear();
   invalidInputs.clear();
-
-  for (const note of currentDefinition.notes ?? []) {
-    const p = make("p", "item-wrench-note");
-    richText(p, note);
-    content.append(p);
-  }
 
   for (const control of currentDefinition.sharedControls ?? []) {
     content.append(makeControl(control));

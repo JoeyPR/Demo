@@ -74,7 +74,7 @@
   const CENTERED_DECORATIONS = new Set([15542, 15688, 15940, 15988, 16056, 16156, 16222, 15554, 14890, 15772, 14574, 14590, 15134, 15420, 15012, 15510, 14712, 14822]);
   const BASE_WRENCH = 32;                    /* the plain green wrench (L0) */
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const WRENCH_SIZE = Object.freeze({ default: 0.68, superSupporter: 1.0 });
+  const WRENCH_SIZE = Object.freeze({ default: 0.68, base: 0.82, superSupporter: 1.0 });
   const COUNTRY_FLAGS_DIR = 'img/flags/';
   const TITLES_DIR = 'img/titles/', FLAGS_DIR = 'img/flags/', SHEETS_DIR = 'demo/assets/';
 
@@ -357,7 +357,10 @@
     const LE = parts.findIndex(x => x.flag || x.badge || x.guild);
     const LP = parts[LE];
     const LL = !!LP?.guild;                    /* has guild banner */
-    const LC = iconPR * 1.226 * 1.2 * (state.superSupporter ? WRENCH_SIZE.superSupporter : WRENCH_SIZE.default);
+    const baseWrenchSelected = !state.wrenchStyle || state.wrenchStyle === BASE_WRENCH;
+    const LC = iconPR * 1.226 * 1.2 * (state.superSupporter
+      ? WRENCH_SIZE.superSupporter
+      : baseWrenchSelected ? WRENCH_SIZE.base : WRENCH_SIZE.default);
     const widths = parts.map(part => {
       if (part.wrench) return LC;
       if (part.tag) return tagWidth(k, part.text, tagPR, PR);

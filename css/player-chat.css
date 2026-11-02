@@ -12,7 +12,7 @@
 #topBar{position:fixed;z-index:9;pointer-events:none;--topbar-height:0px}
 #player-chat-composer{position:relative;width:100%;height:var(--topbar-height);overflow:hidden;
   pointer-events:auto;padding:8px var(--topbar-right-reserve,8px) 8px var(--topbar-left-reserve,8px);
-  background:var(--fill);border:var(--bd) solid var(--line);border-radius:var(--radius);
+  background:var(--fill);border:var(--bd) solid #A5E3FB;border-radius:var(--radius);
   box-shadow:var(--sh) var(--sh) 0 0 #000,inset var(--sh) var(--sh) 0 0 #000;
   touch-action:pan-y;color:#fff}
 #player-chat-composer[hidden]{display:none}
@@ -35,7 +35,7 @@
 
 #player-chat-bubble{position:fixed;z-index:8;width:max-content;max-width:360px;opacity:0;background:#277d9f;
   padding:var(--player-chat-pad-y,2px) var(--player-chat-pad-x,4px);pointer-events:none;
-  border:max(1px,var(--bd)) solid var(--line);border-radius:var(--radius);
+  border:max(1px,var(--bd)) solid #A5E3FB;border-radius:var(--radius);
   box-shadow:1px 1px 0 #000,inset 1px 1px 0 #000;transition:opacity 1000ms ease-out;
   transform:translate(-50%,-50%);font:400 var(--player-chat-font-size,12px)/1.05 'PlayerChat CG',sans-serif;
   white-space:pre-wrap;overflow-wrap:anywhere;user-select:none;text-shadow:1px 1px 0 #000}

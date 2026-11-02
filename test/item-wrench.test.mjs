@@ -191,14 +191,18 @@ test("the custom checkbox has a transparent 1:1 surface and both blue shadows", 
 test("the Wrench footer keeps Reset above Drop-style Cancel and OK actions", () => {
   const ui = read("../js/item-wrench-ui.js");
   const css = read("../css/item-wrench.css");
-  assert.match(ui, /footer\.append\(resetButton, actions\)/);
+  assert.match(ui, /footer\.append\(resetActions, actions\)/);
+  assert.match(ui, /resetActions\.append\(resetButton\)/);
   assert.match(ui, /actions\.append\(cancelButton, updateButton\)/);
   assert.match(ui, /make\("button", "wrench-cancel drop-cancel", "Cancel"\)/);
   assert.match(ui, /make\("button", "wrench-update drop-confirm", "OK"\)/);
-  assert.match(ui, /make\("button", "wrench-reset", "Reset to Default"\)/);
-  assert.match(ui, /make\("div", "wrench-footer-actions drop-actions"\)/);
+  assert.match(ui, /make\("button", "wrench-reset drop-confirm", "Reset to Default"\)/);
+  assert.match(ui, /make\("div", "drop-actions wrench-reset-actions"\)/);
   assert.match(css, /width:\s*var\(--wrench-reset-width/);
   assert.match(css, /justify-content:\s*flex-start/);
+  assert.match(read("../css/drop.css"), /\.drop-actions \.drop-confirm[\s\S]*?background:\s*#7BBAD2/);
+  const footer = css.match(/\.item-wrench-footer\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(footer, /border-top:\s*0/);
 });
 
 test("the checkbox checkmark falls back cleanly while the image asset is absent", () => {
@@ -394,32 +398,44 @@ test("Rift Cape collar flag removes only the separately identified collar tc lay
 });
 
 
-test("favorite item boxes use fav-box.png, not the reversed box-fav.png asset", () => {
+test("all favorited item boxes use fav-box.png without a separate favorite badge", () => {
   const css = read("../css/inv.css");
-  assert.match(css, /\.box\.fav-special\s*\{[^}]*background-image:\s*url\(\.\.\/img\/fav-box\.png\)/);
-  assert.doesNotMatch(css, /\.box\.fav-special\s*\{[^}]*box-fav\.png/);
+  const grid = read("../js/grid.js");
+  assert.match(css, /\.box\.fav,\.box\.fav\.sel,\.box\.fav\.art,\.box\.fav\.sel\.art[\s\S]*?fav-box\.png/);
+  assert.match(css, /\.box\.fav-special\s*\{[^}]*fav-box\.png/);
+  assert.doesNotMatch(css, /\.box \.fv|\.box\.fav \.fv/);
+  assert.doesNotMatch(grid, /favorite-badge\.png|\.fv/);
+  assert.doesNotMatch(css, /box-fav\.png/);
 });
 
-test("the item Wrench is a responsive portrait 6:19 dialog instead of a wide stretched panel", () => {
+test("the item Wrench shares Drop/Info styling in a responsive 3:4 dialog", () => {
   const css = read("../css/item-wrench.css");
   const ui = read("../js/item-wrench-ui.js");
-  assert.match(css, /aspect-ratio:\s*6\s*\/\s*19/);
-  assert.match(ui, /const height = Math\.min\(rect\.height \* 0\.92, rect\.width \* 0\.96 \* 19 \/ 6\)/);
-  assert.match(ui, /const width = height \* 6 \/ 19/);
-  assert.match(ui, /--wrench-width/);
-  assert.match(ui, /--wrench-height/);
+  assert.match(css, /aspect-ratio:\s*3\s*\/\s*4/);
+  assert.match(ui, /const width = Math\.min\(rect\.width \* 0\.96, rect\.height \* 0\.92 \* 3 \/ 4\)/);
+  assert.match(ui, /const height = width \* 4 \/ 3/);
+  assert.match(ui, /--drop-button-height/);
+  assert.match(ui, /--drop-title-size/);
+  assert.match(ui, /drop-item-row item-wrench-header/);
+  const footer = css.match(/\.item-wrench-footer\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(footer, /border-top:\s*0/);
   const header = css.match(/\.item-wrench-header\s*\{([^}]+)\}/)?.[1] ?? "";
   assert.doesNotMatch(header, /border-bottom/);
+  assert.doesNotMatch(css, /aspect-ratio:\s*6\s*\/\s*19/);
 });
 
-test("Wrench descriptions stay plain, with no Properties blue code 1 prefix", () => {
+test("Wrench dialog omits explanatory notes and help while preserving generated controls", () => {
   const generator = read("../src/item-wrench-variable-map.mjs");
+  const ui = read("../js/item-wrench-ui.js");
   const css = read("../css/item-wrench.css");
   assert.match(generator, /help:\s*plainDescription\(entry\.uiDescription\)\s*\|\|\s*undefined/);
   assert.match(generator, /notes:\s*plainDescription\(record\.itemUiDescription\)/);
   assert.doesNotMatch(generator, /\x60\x31.*uiDescription/);
-  assert.match(css, /\.item-wrench-note\s*\{[^}]*color:\s*#fff/);
-  assert.match(css, /\.wrench-control-help\s*\{[^}]*color:\s*#fff/);
+  assert.doesNotMatch(ui, /currentDefinition\.notes/);
+  assert.doesNotMatch(ui, /if \(control\.help\)/);
+  assert.doesNotMatch(css, /\.item-wrench-note|\.wrench-control-help/);
+  assert.match(ui, /for \(const control of currentDefinition\.sharedControls/);
+  assert.match(ui, /for \(const section of currentDefinition\.sections/);
 });
 
 test("Wrench RGB inputs do not add color swatches and selects have no arrows", () => {
@@ -429,4 +445,30 @@ test("Wrench RGB inputs do not add color swatches and selects have no arrows", (
   assert.doesNotMatch(css, /\.wrench-color-preview/);
   assert.match(css, /\.wrench-select\s*\{[^}]*appearance:\s*none/);
   assert.match(css, /-webkit-appearance:\s*none/);
+});
+
+
+test("Wrench input borders use the standard #7BBAD2 color", () => {
+  const css = read("../css/item-wrench.css");
+  const input = css.match(/\.item-wrench-input\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.match(input, /border:\s*var\(--bd\) solid #7BBAD2/);
+  assert.match(css, /\.item-wrench-input:focus\s*\{\s*border-color:\s*#7BBAD2/);
+});
+
+test("the inventory WRENCH action is disabled without actual item controls", () => {
+  const app = read("../js/app.js");
+  const side = read("../js/side.js");
+  const grid = read("../js/grid.js");
+  assert.match(app, /for \(const rawItem of state\.catalog\.items\) attachItemWrenchMetadata\(rawItem\)/);
+  assert.match(side, /const definition = item\.wrenchDefinition/);
+  assert.match(side, /control\.type !== 'heading'/);
+  assert.match(side, /wrenchButton\.disabled = !available/);
+  assert.match(side, /P\.emit\('item-wrench-request', focused\)/);
+  assert.match(grid, /P\.emit\('item-focus', f \|\| null\)/);
+});
+
+test("player chat composer and speech bubble use #A5E3FB borders", () => {
+  const css = read("../css/player-chat.css");
+  assert.match(css, /#player-chat-composer[\s\S]*?border:[^;]*#A5E3FB/);
+  assert.match(css, /#player-chat-bubble[\s\S]*?border:[^;]*#A5E3FB/);
 });

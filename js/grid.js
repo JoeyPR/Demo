@@ -197,10 +197,6 @@
     const ck = document.createElement('img'); ck.className = 'ck o'; ck.src = 'img/chk.png'; ck.alt = '';
     const ckArt = document.createElement('img'); ckArt.className = 'ck p'; ckArt.src = 'img/chk-art.png'; ckArt.alt = '';
     b.append(ic, n, ck, ckArt);
-    if (favs.has(it.id)) {
-      const fv = document.createElement('img'); fv.className = 'fv'; fv.src = 'img/favorite-badge.png'; fv.alt = '';
-      b.append(fv);
-    }
     fillBox(b);
     return b;
   }
@@ -319,14 +315,6 @@
     b.classList.toggle('art', equippedIds.has(it.id) && isArtifactItem(it));
     if (it.slot != null) b.dataset.slot = it.slot;
     else delete b.dataset.slot;
-    const fv = b.querySelector('.fv');
-    if (favs.has(it.id)) {
-      if (!fv) {
-        const star = document.createElement('img');
-        star.className = 'fv'; star.src = 'img/favorite-badge.png'; star.alt = '';
-        b.append(star);
-      }
-    } else if (fv) fv.remove();
     const n = b.querySelector('.n');
     if (n) n.textContent = it.name;
   }
@@ -447,10 +435,11 @@
         : !b.classList.contains('tool') && +b.dataset.id === f.id);
       b.classList.toggle('focus', matches);
     }
-    for (const b of P.$$('#quick .box')) {
+    for (const b of P.$('#quick .box')) {
       if (b.classList.contains('tool')) b.classList.toggle('focus', !!f && !!f.tool);
       else if (b.dataset.id) b.classList.toggle('focus', !!f && !f.tool && +b.dataset.id === f.id);
     }
+    P.emit('item-focus', f || null);
   }
 
   P.on('equip-state', markEquipped);

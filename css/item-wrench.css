@@ -14,45 +14,30 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0;
+  gap: var(--drop-row-gap, 12px);
   box-sizing: border-box;
-  width: var(--wrench-width, 150px);
-  height: var(--wrench-height, 475px);
+  width: var(--wrench-width, 315px);
+  height: var(--wrench-height, 420px);
   min-width: 0;
-  max-width: none;
-  max-height: none;
-  aspect-ratio: 6 / 19;
+  max-width: 96%;
+  max-height: 92%;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  padding: 0;
-  background: var(--fill);
-  border: var(--bd) solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--sh) var(--sh) 0 0 #000,
-              inset var(--sh) var(--sh) 0 0 #000;
-  color: #fff;
-  font-family: var(--font-main);
-  text-align: left;
+  padding: var(--drop-pad-top, 20px) var(--drop-pad-x, 24px) var(--drop-pad-bottom, 16px);
 }
 
 .item-wrench-header {
-  display: flex;
   flex: 0 0 auto;
-  align-items: center;
-  gap: calc(18px * var(--wrench-scale, 1));
   min-width: 0;
-  padding: calc(20px * var(--wrench-scale, 1))
-           calc(24px * var(--wrench-scale, 1));
+  padding: 0;
 }
 .item-wrench-icon {
-  flex: 0 0 calc(64px * var(--wrench-scale, 1));
-  width: calc(64px * var(--wrench-scale, 1));
-  height: calc(64px * var(--wrench-scale, 1));
+  flex: 0 0 var(--drop-icon-size, 64px);
+  width: var(--drop-icon-size, 64px);
+  height: var(--drop-icon-size, 64px);
 }
 .item-wrench-header .drop-title {
   min-width: 0;
-  color: #fff;
-  font-size: calc(58px * var(--wrench-scale, 1));
-  line-height: 1.05;
 }
 
 .item-wrench-content {
@@ -66,8 +51,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   touch-action: pan-y;
-  padding: calc(20px * var(--wrench-scale, 1))
-           calc(24px * var(--wrench-scale, 1));
+  padding: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--line) rgba(0,0,0,.2);
 }
@@ -94,14 +78,6 @@
 .item-wrench-subheading {
   font-size: calc(30px * var(--wrench-scale, 1));
 }
-.item-wrench-note {
-  margin: 0;
-  color: #fff;
-  font-size: calc(18px * var(--wrench-scale, 1));
-  line-height: 1.35;
-  white-space: pre-wrap;
-}
-
 .wrench-control {
   display: flex;
   flex: 0 0 auto;
@@ -116,13 +92,6 @@
   font-weight: 700;
   line-height: 1.12;
 }
-.wrench-control-help {
-  margin: 0;
-  color: #fff;
-  font-size: calc(18px * var(--wrench-scale, 1));
-  line-height: 1.25;
-}
-
 /* Text and number inputs reuse the Demo's #145EAE / #95C9FF treatment. */
 .item-wrench-input {
   display: block;
@@ -130,7 +99,7 @@
   min-width: 0;
   min-height: calc(58px * var(--wrench-scale, 1));
   padding: 0 calc(12px * var(--wrench-scale, 1));
-  border: var(--bd) solid #95C9FF;
+  border: var(--bd) solid #7BBAD2;
   border-radius: var(--radius);
   outline: 0;
   background: rgba(39,125,159,.4);
@@ -141,7 +110,7 @@
   user-select: text;
   -webkit-user-select: text;
 }
-.item-wrench-input:focus { border-color: #fff; }
+.item-wrench-input:focus { border-color: #7BBAD2; }
 .item-wrench-input[aria-invalid="true"] {
   border-color: #FF271D;
   box-shadow: var(--sh) var(--sh) 0 0 #000,
@@ -232,9 +201,8 @@
   flex-direction: column;
   align-items: flex-start;
   gap: calc(12px * var(--wrench-scale, 1));
-  padding: calc(16px * var(--wrench-scale, 1))
-           calc(18px * var(--wrench-scale, 1));
-  border-top: var(--bd) solid var(--line);
+  padding: 0;
+  border-top: 0;
 }
 .wrench-reset,
 .wrench-footer-actions button {
@@ -252,24 +220,25 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.wrench-reset {
+.wrench-reset-actions {
+  width: max-content;
+  max-width: 100%;
+}
+.wrench-reset-actions .wrench-reset {
   width: var(--wrench-reset-width, 120px);
   max-width: 100%;
-  background: #145EAE;
-  font-size: calc(44px * var(--wrench-scale, 1));
 }
 .wrench-footer-actions {
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
-  gap: var(--wrench-button-gap, 12px);
+  gap: var(--drop-button-gap, 40px);
   max-width: 100%;
   width: max-content;
 }
 .wrench-footer-actions button { flex: 0 0 auto; }
 .wrench-cancel {
-  width: var(--wrench-cancel-width, 73px);
-  background: #FFCC00;
+  width: var(--wrench-cancel-width, 226px);
 }
 .wrench-footer-actions .wrench-update {
   width: var(--wrench-ok-width, 34px);

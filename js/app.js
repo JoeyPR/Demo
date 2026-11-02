@@ -83,18 +83,22 @@ function ensureItemAssets(item) {
   return Promise.all([...new Set([...item.pieces.map(p => p.a),
     ...Object.values(item.renderer?.sprites ?? {}).map(s => s.atlas)])].filter(Boolean).map(loadAtlas));
 }
-function normalize(raw) {
-  const item = normalizeCatalogItem(raw, state.catalog);
-  item.native = state.nativeMetadata?.items?.[raw.id] ?? null;
-  const id = String(raw.id);
+function attachItemWrenchMetadata(item) {
+  const id = String(item.id);
   const variableMap = state.itemWrenchVariableMaps?.items?.[id];
   const gameOptionsRecord = state.itemWrenchGameOptions?.items?.[id];
   item.wrenchGameOptions = gameOptionsRecord?.gameOptions ?? null;
   item.wrenchDefinition = state.itemWrenchDefinitions?.items?.[id] ??
-    buildItemWrenchDefinitionFromVariableMap(variableMap, raw.id) ??
-    buildItemWrenchDefinitionFromGameOptions(gameOptionsRecord, raw.id) ?? null;
+    buildItemWrenchDefinitionFromVariableMap(variableMap, item.id) ??
+    buildItemWrenchDefinitionFromGameOptions(gameOptionsRecord, item.id) ?? null;
+  return item;
+}
+function normalize(raw) {
+  const item = normalizeCatalogItem(raw, state.catalog);
+  item.native = state.nativeMetadata?.items?.[raw.id] ?? null;
+  attachItemWrenchMetadata(item);
   item.wrenchSettings = P.itemWrench?.get(raw.id) ??
-    P.store.get("itemWrenchSettings", {})?.[id] ?? null;
+    P.store.get("itemWrenchSettings", {})?.[String(raw.id)] ?? null;
   ensureItemAssets(item);
   return item;
 }
@@ -1093,6 +1097,9 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     } catch (error) {
       console.warn("[Item Wrench] Native customization data unavailable.", error);
     }
+    // Inventory items are raw catalog records; attach definitions before focus
+    // so the sidebar can disable WRENCH when no real controls exist.
+    for (const rawItem of state.catalog.items) attachItemWrenchMetadata(rawItem);
 
     const names = ["player_body_only.png", "player_head.png", "player_extraleg.png", "player_feet.png", "player_eyes.png",
       "player_arm.png", "player_puncharm.png", "player_sleeve.png", "player_hair.png", "player_hairhair.png",

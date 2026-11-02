@@ -2,6 +2,28 @@
    focused item. Item WRENCH opens its generated item-specific dialog. */
 (function(){
   const side = P.$('#side'), sw = P.$('#sw'), main = P.$('#main'), q = P.$('#q');
+  const wrenchButton = P.$('.sbtn[data-a="wrench"]');
+
+  function hasWrenchControls(item) {
+    if (!item || item.tool || item.gone || item.wearable === false) return false;
+    const definition = item.wrenchDefinition;
+    if (!definition) return false;
+    const hasControl = control => !!control?.type && control.type !== 'heading';
+    return (definition.sharedControls || []).some(hasControl) ||
+      (definition.sections || []).some(section => (section.controls || []).some(hasControl));
+  }
+  function syncWrenchAvailability(item) {
+    const focused = item === undefined ? (P.inv.focus || P.inv.sel) : item;
+    const available = hasWrenchControls(focused);
+    wrenchButton.disabled = !available;
+    wrenchButton.setAttribute('aria-disabled', String(!available));
+    wrenchButton.title = available ? 'Customize this item' : 'No Wrench settings for this item';
+  }
+  P.on('item-focus', syncWrenchAvailability);
+  P.on('catalog', () => syncWrenchAvailability());
+  P.on('equip-state', () => syncWrenchAvailability());
+  P.on('tab', () => syncWrenchAvailability());
+  syncWrenchAvailability();
   const nonSearchableTabs = new Set(['equip', 'custom', 'player', 'makeup']);
 
   const setSw = on => {
@@ -33,7 +55,10 @@
     /* Item WRENCH acts on the focused item, not the nameplate Wrench. */
     if (b.dataset.a === 'wrench') {
       const focused = P.inv.focus || P.inv.sel;
-      if (!focused || focused.tool) return P.toast('Select a wrenchable item first.');
+      if (!hasWrenchControls(focused)) {
+        syncWrenchAvailability(focused);
+        return;
+      }
       P.emit('item-wrench-request', focused);
       return;
     }

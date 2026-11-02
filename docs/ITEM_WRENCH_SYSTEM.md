@@ -14,15 +14,16 @@ The generator reads each item's labels, descriptions, default values, order, rad
 
 ## Dialog behavior
 
-- The generated dialog is a portrait 6:19 panel, auto-scaled and centered within the preview rectangle.
+- The generated dialog uses the same panel surface, borders, shadows, typography, and action-button styling as Drop and Info, with a responsive 3:4 panel centered inside the preview rectangle.
 - Content scrolls inside the dialog; the header and footer remain available.
-- Footer order is Reset to Default, then left-aligned Cancel and OK buttons styled like the Drop dialog.
+- Explanatory item notes and per-control help paragraphs are not displayed; functional labels, section headings, and controls are retained.
+- Footer order is Reset to Default, then left-aligned Cancel and OK buttons styled like the Drop dialog. Reset uses the standard `#7BBAD2` confirmation fill.
+- The footer has no separator border above its buttons.
 - Reset replaces the draft with definition defaults but does not save.
 - Cancel discards the draft and restores the saved settings.
 - Update validates and saves a per-item value object using the core `P.store`.
-- Labels are inserted as text and passed through `P.rtfont.scan`; descriptions strip the Properties-only blue code so they remain plain white text.
 
-RGB fields are plain text inputs with no color swatches. Select inputs hide their native dropdown arrows.
+RGB fields are plain text inputs with no color swatches. Text, number, and select input borders use `#7BBAD2`. Select inputs hide their native dropdown arrows.
 
 ## Checkbox specification
 
