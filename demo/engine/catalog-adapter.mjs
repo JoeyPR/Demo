@@ -4,6 +4,7 @@ import {bindXmlRenderer,advanceXmlRenderer} from "./xml-renderer.mjs";
 import {applyMountedGait} from "./mounted-gait.mjs";
 import {advancePet} from "./pet-system.mjs";
 import {handAttachment,handReferenceAngle} from "./hand-attachments.mjs";
+import {applyItemWrenchAppearance} from "./item-wrench-render.mjs";
 
 // Public reference adapter. gameIcon supplies an authored still, not native clips.
 export function normalizeCatalogItem(raw,catalog) {
@@ -183,5 +184,6 @@ export function advanceCatalogItem(item,timeMs,motion={}) {
   advancePet(item,timeMs,motion);
   advanceXmlRenderer(item,timeMs,motion);
   applyMountedGait(item,motion);
+  applyItemWrenchAppearance(item,timeMs);
   return item.pieces;
 }
