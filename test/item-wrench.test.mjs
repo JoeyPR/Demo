@@ -8,6 +8,12 @@ import {
 } from "../src/item-wrench-state.mjs";
 import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
 import { buildItemWrenchDefinitionFromGameOptions } from "../src/item-wrench-game-options.mjs";
+import {
+  applyItemWrenchAppearance,
+  buildNativeWrenchSettings,
+  gameOptionDesign,
+  pickedGameOptionColour
+} from "../demo/engine/item-wrench-render.mjs";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const registry = JSON.parse(read("../data/item-wrench-definitions.json"));
@@ -25,6 +31,12 @@ test("Rift Cape defaults preserve the native RGB values supplied by research", (
   const defaults = createItemWrenchDefaults(cape);
   assert.deepEqual(defaults.capeColor, [234, 88, 226]);
   assert.deepEqual(defaults.collarColor, [130, 49, 126]);
+  assert.deepEqual(defaults.capeColorStyle2, [234, 88, 226]);
+  assert.deepEqual(defaults.collarColorStyle2, [130, 49, 126]);
+  assert.equal(defaults.collarEnabled, true);
+  assert.equal(defaults.closedCape, false);
+  assert.equal(defaults.openCapeOnMovement, true);
+  assert.equal(defaults.timeDilationEnabled, false);
   assert.equal(defaults.auraType, "");
 });
 
@@ -191,4 +203,78 @@ test("the checkbox checkmark falls back cleanly while the image asset is absent"
   assert.match(ui, /img\/c-chk\.png/);
   assert.match(ui, /check\.addEventListener\("error"/);
   assert.match(css, /\.wrench-checkbox-box img\[hidden\]\s*\{\s*display:\s*none !important;/);
+});
+
+
+test("Rift Cape dialog values translate to source-backed native colour, flag, layer and cycle settings", () => {
+  const defaults = createItemWrenchDefaults(cape);
+  const native = buildNativeWrenchSettings(cape, defaults);
+  assert.deepEqual(native.c2, [234, 88, 226]);
+  assert.deepEqual(native.c3, [234, 88, 226]);
+  assert.deepEqual(native.c4, [130, 49, 126]);
+  assert.deepEqual(native.c5, [130, 49, 126]);
+  assert.equal(native.f0, true);
+  assert.equal(native.f1, true);
+  assert.equal(native.f2, true); // Closed Cape is inverse of native Open cape.
+  assert.equal(native.f3, true);
+  assert.equal(native.f4, false); // Open on movement is inverse of Close while moving.
+  assert.equal(native.f5, false);
+  assert.equal(native.l_aura, 0);
+  assert.equal(native.l2_aura, 0);
+  assert.equal(native.cyc, false);
+  assert.equal(native.cycP, 10);
+});
+
+test("Rift Cape Time Dilation selects the second colour slots after the native flip interval", () => {
+  const gameOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["10424"].gameOptions;
+  const values = { timeDilationEnabled: true, timeDilationCycleTime: 10 };
+  assert.equal(gameOptionDesign(gameOptions, values, 0), 0);
+  assert.equal(gameOptionDesign(gameOptions, values, 10000), 0);
+  assert.equal(gameOptionDesign(gameOptions, values, 10500), 1);
+  assert.equal(gameOptionDesign(gameOptions, values, 20000), 1);
+  assert.equal(gameOptionDesign(gameOptions, values, 20500), 0);
+  assert.equal(gameOptionDesign(gameOptions, { ...values, timeDilationEnabled: false }, 10500), 0);
+});
+
+test("Rift Cape gameIcon tc selectors resolve to the chosen cape and collar colours", () => {
+  const gameOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["10424"].gameOptions;
+  const values = createItemWrenchDefaults(cape);
+  values.capeColor = [11, 22, 33];
+  values.collarColor = [44, 55, 66];
+  values.capeColorStyle2 = [77, 88, 99];
+  values.collarColorStyle2 = [111, 122, 133];
+  const native = buildNativeWrenchSettings(cape, values);
+  assert.deepEqual(pickedGameOptionColour(gameOptions, native, 0, 0), [11, 22, 33]);
+  assert.deepEqual(pickedGameOptionColour(gameOptions, native, 1, 0), [44, 55, 66]);
+  assert.deepEqual(pickedGameOptionColour(gameOptions, native, 0, 1), [77, 88, 99]);
+  assert.deepEqual(pickedGameOptionColour(gameOptions, native, 1, 1), [111, 122, 133]);
+});
+
+test("per-frame Rift Cape appearance applies tc=0 cape and tc=1 collar tints without mutating reference pieces", () => {
+  const gameOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["10424"].gameOptions;
+  const values = createItemWrenchDefaults(cape);
+  values.capeColor = [10, 20, 30];
+  values.collarColor = [40, 50, 60];
+  values.capeColorStyle2 = [70, 80, 90];
+  values.collarColorStyle2 = [100, 110, 120];
+  values.timeDilationEnabled = true;
+  const referencePieces = [{ tc: 0, sx: 320 }, { tc: 1, sx: 256 }];
+  const item = {
+    id: 10424, wrenchDefinition: cape, wrenchGameOptions: gameOptions,
+    wrenchSettings: values, pieces: referencePieces.map(piece => ({ ...piece }))
+  };
+  applyItemWrenchAppearance(item, 0);
+  assert.deepEqual(item.pieces.map(piece => piece.t), [[10, 20, 30], [40, 50, 60]]);
+  applyItemWrenchAppearance(item, 10500);
+  assert.deepEqual(item.pieces.map(piece => piece.t), [[70, 80, 90], [100, 110, 120]]);
+  assert.deepEqual(referencePieces, [{ tc: 0, sx: 320 }, { tc: 1, sx: 256 }]);
+});
+
+test("the application loads Wrench metadata, hydrates per-item saved values and applies live draft events", () => {
+  const app = read("../js/app.js");
+  const adapter = read("../demo/engine/catalog-adapter.mjs");
+  assert.match(app, /item\.wrenchDefinition\s*=\s*state\.itemWrenchDefinitions/);
+  assert.match(app, /item\.wrenchGameOptions\s*=\s*state\.itemWrenchGameOptions/);
+  assert.match(app, /P\.on\("item-wrench-preview", applyWrenchPreview\)/);
+  assert.match(adapter, /applyItemWrenchAppearance\(item,timeMs\)/);
 });
