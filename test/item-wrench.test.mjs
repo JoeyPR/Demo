@@ -188,13 +188,17 @@ test("the custom checkbox has a transparent 1:1 surface and both blue shadows", 
 });
 
 
-test("the Wrench footer keeps Reset above Cancel and Update", () => {
+test("the Wrench footer keeps Reset above Drop-style Cancel and OK actions", () => {
   const ui = read("../js/item-wrench-ui.js");
+  const css = read("../css/item-wrench.css");
   assert.match(ui, /footer\.append\(resetButton, actions\)/);
   assert.match(ui, /actions\.append\(cancelButton, updateButton\)/);
-  assert.match(ui, /make\("button", "wrench-cancel", "Cancel"\)/);
-  assert.match(ui, /make\("button", "wrench-update", "Update"\)/);
+  assert.match(ui, /make\("button", "wrench-cancel drop-cancel", "Cancel"\)/);
+  assert.match(ui, /make\("button", "wrench-update drop-confirm", "OK"\)/);
   assert.match(ui, /make\("button", "wrench-reset", "Reset to Default"\)/);
+  assert.match(ui, /make\("div", "wrench-footer-actions drop-actions"\)/);
+  assert.match(css, /width:\s*var\(--wrench-reset-width/);
+  assert.match(css, /justify-content:\s*flex-start/);
 });
 
 test("the checkbox checkmark falls back cleanly while the image asset is absent", () => {
@@ -387,4 +391,42 @@ test("Rift Cape collar flag removes only the separately identified collar tc lay
   item.pieces = [{ tc: 0, sx: 320 }, { tc: 1, sx: 256 }];
   applyItemWrenchAppearance(item, 0);
   assert.deepEqual(item.pieces.map(piece => piece.tc), [0]);
+});
+
+
+test("favorite item boxes use fav-box.png, not the reversed box-fav.png asset", () => {
+  const css = read("../css/inv.css");
+  assert.match(css, /\.box\.fav-special\s*\{[^}]*background-image:\s*url\(\.\.\/img\/fav-box\.png\)/);
+  assert.doesNotMatch(css, /\.box\.fav-special\s*\{[^}]*box-fav\.png/);
+});
+
+test("the item Wrench is a responsive portrait 6:19 dialog instead of a wide stretched panel", () => {
+  const css = read("../css/item-wrench.css");
+  const ui = read("../js/item-wrench-ui.js");
+  assert.match(css, /aspect-ratio:\s*6\s*\/\s*19/);
+  assert.match(ui, /const height = Math\.min\(rect\.height \* 0\.92, rect\.width \* 0\.96 \* 19 \/ 6\)/);
+  assert.match(ui, /const width = height \* 6 \/ 19/);
+  assert.match(ui, /--wrench-width/);
+  assert.match(ui, /--wrench-height/);
+  const header = css.match(/\.item-wrench-header\s*\{([^}]+)\}/)?.[1] ?? "";
+  assert.doesNotMatch(header, /border-bottom/);
+});
+
+test("Wrench descriptions stay plain, with no Properties blue code 1 prefix", () => {
+  const generator = read("../src/item-wrench-variable-map.mjs");
+  const css = read("../css/item-wrench.css");
+  assert.match(generator, /help:\s*entry\.uiDescription\s*\|\|\s*undefined/);
+  assert.match(generator, /notes:\s*record\.itemUiDescription\s*\?\s*\[record\.itemUiDescription\]/);
+  assert.doesNotMatch(generator, /\x60\x31.*uiDescription/);
+  assert.match(css, /\.item-wrench-note\s*\{[^}]*color:\s*#fff/);
+  assert.match(css, /\.wrench-control-help\s*\{[^}]*color:\s*#fff/);
+});
+
+test("Wrench RGB inputs do not add color swatches and selects have no arrows", () => {
+  const ui = read("../js/item-wrench-ui.js");
+  const css = read("../css/item-wrench.css");
+  assert.doesNotMatch(ui, /wrench-color-preview/);
+  assert.doesNotMatch(css, /\.wrench-color-preview/);
+  assert.match(css, /\.wrench-select\s*\{[^}]*appearance:\s*none/);
+  assert.match(css, /-webkit-appearance:\s*none/);
 });
