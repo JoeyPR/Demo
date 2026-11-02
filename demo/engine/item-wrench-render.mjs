@@ -30,10 +30,7 @@ export function buildNativeWrenchSettings(definition, values) {
     if (!binding?.settingKey) continue;
 
     let value = values?.[control.key];
-    if (binding.deriveFrom) {
-      const enabled = values?.[binding.deriveFrom + "Enabled"];
-      value = enabled === false ? 0 : (value === "" || value == null ? 0 : value);
-    }
+    if (value === "" && binding.emptyValue !== undefined) value = binding.emptyValue;
     if (binding.transform === "inverse") value = !value;
     if (value === undefined) continue;
 
