@@ -271,7 +271,9 @@ test("the application loads Wrench metadata, hydrates per-item saved values and 
   const app = read("../js/app.js");
   const adapter = read("../demo/engine/catalog-adapter.mjs");
   assert.match(app, /item\.wrenchDefinition\s*=\s*state\.itemWrenchDefinitions/);
-  assert.match(app, /item\.wrenchGameOptions\s*=\s*state\.itemWrenchGameOptions/);
+  assert.match(app, /item\.wrenchGameOptions\s*=\s*gameOptionsRecord\?\.gameOptions/);
+  assert.match(app, /buildItemWrenchDefinitionFromVariableMap\(variableMap, raw\.id\)/);
+  assert.match(app, /buildItemWrenchDefinitionFromGameOptions\(gameOptionsRecord, raw\.id\)/);
   assert.match(app, /P\.on\("item-wrench-preview", applyWrenchPreview\)/);
   assert.match(adapter, /applyItemWrenchAppearance\(item,timeMs\)/);
 });
