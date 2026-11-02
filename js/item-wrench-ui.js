@@ -294,7 +294,8 @@ function buildContent() {
   invalidInputs.clear();
 
   for (const note of currentDefinition.notes ?? []) {
-    const p = make("p", "item-wrench-note", note);
+    const p = make("p", "item-wrench-note");
+    richText(p, note);
     content.append(p);
   }
 
