@@ -4,8 +4,9 @@ const parseRgb = value => {
   const parts = String(value ?? "").trim().split(/\s*,\s*/).map(Number);
   return parts.length === 3 && parts.every(n => Number.isInteger(n) && n >= 0 && n <= 255) ? parts : null;
 };
+const plainDescription = value => String(value ?? "").replace(/\x601/g, "").trim();
 const sectionDescription = value => {
-  const text = String(value ?? "").trim();
+  const text = plainDescription(value);
   return !!text && !text.endsWith(":");
 };
 
@@ -14,24 +15,24 @@ function fieldControl(entry) {
   const rgb = parseRgb(value);
   if (rgb) return {
     type: "rgb", key: entry.name, label: "`o" + entry.uiName, default: rgb,
-    maxLength: entry.maxLength, help: entry.uiDescription || undefined,
+    maxLength: entry.maxLength, help: plainDescription(entry.uiDescription) || undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
   if (isBool(value)) return {
     type: "checkbox", key: entry.name, label: "`o" + entry.uiName, default: bool(value),
-    help: entry.uiDescription || undefined, binding: entry.name, bindingStatus: "source-variable-map"
+    help: plainDescription(entry.uiDescription) || undefined, binding: entry.name, bindingStatus: "source-variable-map"
   };
   if (value !== "" && Number.isFinite(Number(value))) return {
     type: "number", key: entry.name, label: "`o" + entry.uiName, default: Number(value),
     min: entry.minValue == null ? undefined : Number(entry.minValue),
     max: entry.maxValue == null ? undefined : Number(entry.maxValue),
     step: entry.forceFloats ? "any" : 1,
-    maxLength: entry.maxLength, help: entry.uiDescription || undefined,
+    maxLength: entry.maxLength, help: plainDescription(entry.uiDescription) || undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
   return {
     type: "text", key: entry.name, label: "`o" + entry.uiName, default: value,
-    maxLength: entry.maxLength, help: entry.uiDescription || undefined,
+    maxLength: entry.maxLength, help: plainDescription(entry.uiDescription) || undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
 }
@@ -54,7 +55,7 @@ export function buildItemWrenchDefinitionFromVariableMap(record, itemId) {
 
   for (let index = 0; index < entries.length; index++) {
     const entry = entries[index];
-    const description = String(entry.uiDescription ?? "").trim();
+    const description = plainDescription(entry.uiDescription);
 
     if (description && sectionDescription(description)) {
       currentSection = { key: "section-" + (sections.length + 1), title: "`o" + description, controls: [] };
@@ -103,7 +104,7 @@ export function buildItemWrenchDefinitionFromVariableMap(record, itemId) {
       source: "renderer-xml-VariableMap",
       itemId: Number(itemId)
     },
-    notes: record.itemUiDescription ? [record.itemUiDescription] : [],
+    notes: plainDescription(record.itemUiDescription) ? [plainDescription(record.itemUiDescription)] : [],
     sharedControls,
     sections: sections.filter(section => section.controls.length > 0)
   };
