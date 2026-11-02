@@ -415,7 +415,7 @@ test("the item Wrench is a responsive portrait 6:19 dialog instead of a wide str
 test("Wrench descriptions stay plain, with no Properties blue code 1 prefix", () => {
   const generator = read("../src/item-wrench-variable-map.mjs");
   const css = read("../css/item-wrench.css");
-  assert.match(generator, /help:\s*entry\.uiDescription\s*\|\|\s*undefined/);
+  assert.match(generator, /help:\s*plainDescription\(entry\.uiDescription\)\s*\|\|\s*undefined/);
   assert.match(generator, /notes:\s*plainDescription\(record\.itemUiDescription\)/);
   assert.doesNotMatch(generator, /\x60\x31.*uiDescription/);
   assert.match(css, /\.item-wrench-note\s*\{[^}]*color:\s*#fff/);
