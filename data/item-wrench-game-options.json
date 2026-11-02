@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "archive": "Growtopia_Items_DAT_Research_Pack.zip",
+    "file": "growtopia_items_research/data/planner_item_metadata.jsonl",
+    "note": "Compact gameOptions records retained for automatic Wrench UI generation. Offsets and bit selectors are preserved as source metadata; runtime packet writing is a separate integration step."
+  },
+  "items": {
+    "5712": {
+      "name": "Will of the Wild",
+      "gameOptions": {
+        "choices": [
+          {
+            "obj": 208,
+            "name": "Element",
+            "values": [
+              0,
+              1,
+              2
+            ],
+            "labels": [
+              "Fire",
+              "Water",
+              "Earth"
+            ],
+            "also": [
+              {
+                "off": 8792,
+                "size": 2,
+                "values": [
+                  64,
+                  128,
+                  256
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "10044": {
+      "name": "Golem's Gift",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 8792,
+            "size": 2,
+            "name": "Element",
+            "values": [
+              0,
+              64,
+              128,
+              256
+            ],
+            "labels": [
+              "None",
+              "Fire",
+              "Water",
+              "Earth"
+            ]
+          }
+        ]
+      }
+    },
+    "10666": {
+      "name": "Grow Air Balloon",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 9980,
+            "size": 4,
+            "name": "Style",
+            "values": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "labels": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ]
+          }
+        ]
+      }
+    },
+    "10674": {
+      "name": "Crown of Seasons",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 10480,
+            "size": 4,
+            "name": "Crown",
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "labels": [
+              "None",
+              "Spring",
+              "Summer",
+              "Autumn",
+              "Winter"
+            ],
+            "default": 2
+          },
+          {
+            "off": 10476,
+            "size": 4,
+            "name": "Particles",
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "labels": [
+              "None",
+              "Spring",
+              "Summer",
+              "Autumn",
+              "Winter"
+            ],
+            "default": 2
+          }
+        ]
+      }
+    },
+    "10888": {
+      "name": "Giant Pineapple Pizza Paddle",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 12364,
+            "size": 4,
+            "name": "Look",
+            "values": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "labels": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ]
+          }
+        ]
+      }
+    },
+    "10914": {
+      "name": "Pure Being of Light and Shadow",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 11784,
+            "name": "Shade",
+            "values": [
+              1,
+              0
+            ],
+            "labels": [
+              "Shadow",
+              "Light"
+            ]
+          }
+        ]
+      }
+    },
+    "11748": {
+      "name": "Banner Bandolier",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 10272,
+            "size": 4,
+            "name": "Pattern",
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "labels": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
+          }
+        ],
+        "fixed": [
+          {
+            "off": 10280,
+            "value": 1
+          }
+        ]
+      }
+    },
+    "11818": {
+      "name": "Equinox Scarf",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 10304,
+            "size": 4,
+            "name": "Season",
+            "values": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "labels": [
+              "Spring",
+              "Summer",
+              "Autumn",
+              "Winter"
+            ]
+          }
+        ],
+        "punch": {
+          "off": 10300,
+          "size": 4,
+          "name": "Punch",
+          "values": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "labels": [
+            "Spring",
+            "Summer",
+            "Autumn",
+            "Winter"
+          ]
+        }
+      }
+    },
+    "12634": {
+      "name": "EQ Aura",
+      "gameOptions": {
+        "flags": [
+          {
+            "off": 10284,
+            "name": "Music playing",
+            "default": 0
+          }
+        ]
+      }
+    },
+    "12640": {
+      "name": "Minokawa Wings",
+      "gameOptions": {
+        "choices": [
+          {
+            "off": 10316,
+            "size": 4,
+            "name": "Show",
+            "values": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "labels": [
+              "Wings",
+              "Minokawa",
+              "Both",
+              "None"
+            ]
+          }
+        ],
+        "fixed": [
+          {
+            "off": 10312,
+            "value": 1
+          }
+        ]
+      }
+    },
+    "12958": {
+      "name": "Infinity Crown",
+      "gameOptions": {
+        "colours": [
+          {
+            "off": 10336,
+            "name": "Crown",
+            "default": [
+              255,
+              0,
+              255
+            ]
+          },
+          {
+            "off": 10344,
+            "name": "Glow",
+            "default": [
+              0,
+              205,
+              249
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
