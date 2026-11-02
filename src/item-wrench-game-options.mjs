@@ -50,12 +50,10 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
       type: "checkbox",
       key: safeKey(field.name) + "-" + index,
       label: "`o" + String(field.name ?? "Option"),
-      default: Number(field.default ?? 0) !== 0,
+      default: Number(field.default ?? 1) !== 0,
       binding: {
         settingKey: field.off != null ? "f" + field.off : "f" + index + "x",
-        settingKeys: field.off != null
-          ? ["f" + field.off, ...(field.off2 != null ? ["f" + field.off2] : [])]
-          : ["f" + index + "x"],
+        settingKeys: [field.off != null ? "f" + field.off : "f" + index + "x"],
         off: field.off, off2: field.off2, bit: field.bit, bit2: field.bit2
       },
       bindingStatus: "source-backed"
@@ -154,8 +152,9 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
           binding: {
             settingKey: field.slot != null ? "c" + field.slot : "c" + index + "x",
             settingKeys: [
-              field.slot != null ? "c" + field.slot : "c" + index + "x",
-              field.slot2 != null ? "c" + field.slot2 : "c" + index + "x"
+              (styleIndex === 1 ? field.slot2 ?? field.slot : field.slot) != null
+                ? "c" + (styleIndex === 1 ? field.slot2 ?? field.slot : field.slot)
+                : "c" + index + "x"
             ],
             off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2, variant: property
           },
