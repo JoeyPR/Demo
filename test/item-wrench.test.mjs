@@ -88,7 +88,7 @@ test("Wings of Infinity UI is generated from its XML VariableMap, including four
   assert.equal(generated.name, "Wings of Infinity");
   assert.equal(generated.sections.length, 4);
   assert.deepEqual(generated.sections.map(section => section.title),
-    ["Top Left Wing", "Bottom Left Wing", "Top Right Wing", "Bottom Right Wing"]);
+    ["`oTop Left Wing", "`oBottom Left Wing", "`oTop Right Wing", "`oBottom Right Wing"]);
   assert.equal(generated.sections[0].controls.length, 7);
   assert.equal(generated.sections[0].controls[3].type, "heading");
   assert.equal(generated.sections[0].controls[3].label, "`oPrimary Color:");
@@ -105,7 +105,7 @@ test("Anomaly Aura UI labels and Time Dilation fields are taken from VariableMap
   const maps = JSON.parse(read("../data/item-wrench-variable-maps.json"));
   const generated = buildItemWrenchDefinitionFromVariableMap(maps.items["15230"], 15230);
   const defaults = createItemWrenchDefaults(generated);
-  assert.equal(generated.sharedControls[0].label, "Time Dilation Cycle Time:");
+  assert.equal(generated.sharedControls[0].label, "`oTime Dilation Cycle Time:");
   assert.equal(defaults.timeCycle, 15);
   assert.equal(defaults.timeCycle_On, true);
   assert.equal(defaults.darkAnomaly, false);
