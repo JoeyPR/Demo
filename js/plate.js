@@ -86,16 +86,17 @@
   };
   const safeFile=value=>typeof value==='string'&&/^[a-z0-9_-]{1,32}$/i.test(value)?value:'';
   function normalizeState(value) {
-    const next=Object.assign({},DEFAULTS,value&&typeof value==='object'?value:{});
+    const source=value&&typeof value==='object'?value:{};
+    const next=Object.assign({},DEFAULTS,source);
+    next.superSupporter = typeof source.superSupporter === 'boolean'
+      ? source.superSupporter : source.wrenchStatus === 'super-supporter';
     next.growId=P.rtfont.sanitizeGrowId(String(next.growId??''),19);
     next.titles=normalizeTitles(next.titles);
     next.flag=safeFile(next.flag);
     next.role=['farmer','builder','surgeon','fisher','chef','startopian'].includes(next.role)?next.role:'';
     next.guildRole=Object.hasOwn(GUILD_ROLES,next.guildRole)?next.guildRole:'';
     next.guildFlag=Number.isSafeInteger(Number(next.guildFlag))&&Number(next.guildFlag)>0?Number(next.guildFlag):0;
-    // Migrate the old three-state selector to the one Super Supporter toggle.
-    next.superSupporter = typeof next.superSupporter === 'boolean'
-      ? next.superSupporter : next.wrenchStatus === 'super-supporter';
+    // Discard the old three-state field after migrating its Super Supporter state.
     delete next.wrenchStatus;
     for(const key of ['wrenchStyle','wrenchDecoration']) {
       if(key==='wrenchStyle'&&next[key]===SUPER_SUPPORTER_WRENCH&&next.superSupporter)continue;
