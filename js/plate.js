@@ -74,14 +74,14 @@
   const CENTERED_DECORATIONS = new Set([15542, 15688, 15940, 15988, 16056, 16156, 16222, 15554, 14890, 15772, 14574, 14590, 15134, 15420, 15012, 15510, 14712, 14822]);
   const BASE_WRENCH = 32;                    /* the plain green wrench (L0) */
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const WRENCH_STATUS_SCALE = Object.freeze({ default: 0.48, supporter: 0.56, 'super-supporter': 0.64 });
+  const WRENCH_SIZE = Object.freeze({ default: 0.68, superSupporter: 1.0 });
   const COUNTRY_FLAGS_DIR = 'img/flags/';
   const TITLES_DIR = 'img/titles/', FLAGS_DIR = 'img/flags/', SHEETS_DIR = 'demo/assets/';
 
   /* ---------------- state ---------------- */
   const DEFAULTS = {
     growId: '', flag: 'unitedstates', role: '', titles: [],
-    guildRole: '', guildFlag: 0, wrenchStatus: 'default', wrenchStyle: 0, wrenchDecoration: 0,
+    guildRole: '', guildFlag: 0, superSupporter: false, wrenchStyle: 0, wrenchDecoration: 0,
     wrenchOn: false          /* the Fist/Wrench quick box: wrench only shows with a GrowID */
   };
   const safeFile=value=>typeof value==='string'&&/^[a-z0-9_-]{1,32}$/i.test(value)?value:'';
@@ -93,9 +93,12 @@
     next.role=['farmer','builder','surgeon','fisher','chef','startopian'].includes(next.role)?next.role:'';
     next.guildRole=Object.hasOwn(GUILD_ROLES,next.guildRole)?next.guildRole:'';
     next.guildFlag=Number.isSafeInteger(Number(next.guildFlag))&&Number(next.guildFlag)>0?Number(next.guildFlag):0;
-    next.wrenchStatus=Object.hasOwn(WRENCH_STATUS_SCALE,next.wrenchStatus)?next.wrenchStatus:'default';
+    // Migrate the old three-state selector to the one Super Supporter toggle.
+    next.superSupporter = typeof next.superSupporter === 'boolean'
+      ? next.superSupporter : next.wrenchStatus === 'super-supporter';
+    delete next.wrenchStatus;
     for(const key of ['wrenchStyle','wrenchDecoration']) {
-      if(key==='wrenchStyle'&&next[key]===SUPER_SUPPORTER_WRENCH&&next.wrenchStatus==='super-supporter')continue;
+      if(key==='wrenchStyle'&&next[key]===SUPER_SUPPORTER_WRENCH&&next.superSupporter)continue;
       next[key]=Number.isSafeInteger(Number(next[key]))&&Number(next[key])>0?Number(next[key]):0;
     }
     next.wrenchOn=!!next.wrenchOn;
@@ -106,8 +109,7 @@
   // Older saved previews used ISO-style aliases that aren't filenames in the original flag catalog.
   if (state.flag === 'us') state.flag = 'unitedstates';
   if (state.flag === 'pr') state.flag = 'puertorico';
-  if (!Object.hasOwn(WRENCH_STATUS_SCALE, state.wrenchStatus)) state.wrenchStatus = 'default';
-  if (state.wrenchStatus !== 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
+  if (!state.superSupporter && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
   if (typeof savedState?.wrenchOn !== 'boolean') state.wrenchOn = !!(state.wrenchStyle || state.wrenchDecoration);
   const save = () => { state=normalizeState(state);P.store.set('plate', state); P.emit('plate-update'); };
 
@@ -354,7 +356,7 @@
     const LE = parts.findIndex(x => x.flag || x.badge || x.guild);
     const LP = parts[LE];
     const LL = !!LP?.guild;                    /* has guild banner */
-    const LC = iconPR * 1.226 * 1.2 * (WRENCH_STATUS_SCALE[state.wrenchStatus] ?? WRENCH_STATUS_SCALE.default);
+    const LC = iconPR * 1.226 * 1.2 * (state.superSupporter ? WRENCH_SIZE.superSupporter : WRENCH_SIZE.default);
     const widths = parts.map(part => {
       if (part.wrench) return LC;
       if (part.tag) return tagWidth(k, part.text, tagPR, PR);
@@ -399,7 +401,7 @@
       const formattedChars = hasFormatting ? P.rtfont.characters(part.formatText) : null;
       if (part.wrench) {
         const LD = Ld, Lu = LO + LD / 2, Ln = baselineY - PR * 0.393 - Ld / 2 + LD / 2;
-        const isSuperSupporterWrench = state.wrenchStatus === 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH;
+        const isSuperSupporterWrench = state.superSupporter && state.wrenchStyle === SUPER_SUPPORTER_WRENCH;
         const entry = !isSuperSupporterWrench && state.wrenchStyle !== BASE_WRENCH
           ? wrenchEntry('styles', state.wrenchStyle) : null;
         const wim = isSuperSupporterWrench ? superSupporterWrench() : entry ? sheet(entry[2]) : baseWrench();
@@ -571,9 +573,9 @@
     setFlag(v) { state.flag = v; save(); },
     setGuildRole(v) { state.guildRole = v; save(); },
     setGuildFlag(id) { state.guildFlag = +id || 0; save(); },
-    setWrenchStatus(id) {
-      state.wrenchStatus = Object.hasOwn(WRENCH_STATUS_SCALE, id) ? id : 'default';
-      if (state.wrenchStatus !== 'super-supporter' && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
+    setSuperSupporter(on) {
+      state.superSupporter = !!on;
+      if (!state.superSupporter && state.wrenchStyle === SUPER_SUPPORTER_WRENCH) state.wrenchStyle = 0;
       save();
     },
     setWrenchStyle(id) {
