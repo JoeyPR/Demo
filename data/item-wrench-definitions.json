@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 1,
+  "description": "Authored item-specific Wrench dialog definitions. UI labels and layouts are independent from renderer bindings.",
+  "items": {
+    "10424": {
+      "name": "Rift Cape",
+      "kind": "customization",
+      "itemId": 10424,
+      "source": {
+        "archive": "Growtopia_Items_DAT_Research_Pack.zip",
+        "file": "growtopia_items_research/data/planner_item_metadata.jsonl",
+        "recordId": 10424
+      },
+      "sharedControls": [
+        {
+          "type": "number",
+          "key": "timeDilationCycleTime",
+          "label": "`oTime Dilation Cycle Time:",
+          "default": 10,
+          "min": 0,
+          "step": "any",
+          "binding": "gameOptions.cycle.period",
+          "bindingStatus": "source-backed"
+        },
+        {
+          "type": "checkbox",
+          "key": "timeDilationEnabled",
+          "label": "`oTime Dilation On / Off",
+          "default": false,
+          "binding": "gameOptions.cycle.off",
+          "bindingStatus": "default-inferred"
+        }
+      ],
+      "sections": [
+        {
+          "key": "capeStyle1",
+          "title": "`oCape Style 1",
+          "controls": [
+            {
+              "type": "heading",
+              "key": "capeColorHeading",
+              "label": "`oCape Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "capeColor",
+              "label": "`oCape - R,G,B:",
+              "default": [
+                234,
+                88,
+                226
+              ],
+              "binding": "gameOptions.colours[0].default",
+              "bindingStatus": "source-backed"
+            },
+            {
+              "type": "checkbox",
+              "key": "collarEnabled",
+              "label": "`oCape Collar On / Off",
+              "default": false,
+              "binding": "gameOptions.flags[1]",
+              "bindingStatus": "default-inferred"
+            },
+            {
+              "type": "heading",
+              "key": "collarColorHeading",
+              "label": "`oCape Collar Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "collarColor",
+              "label": "`oCollar - R,G,B:",
+              "default": [
+                130,
+                49,
+                126
+              ],
+              "binding": "gameOptions.colours[1].default",
+              "bindingStatus": "source-backed"
+            },
+            {
+              "type": "checkbox",
+              "key": "closedCape",
+              "label": "`oClosed Cape",
+              "default": true,
+              "binding": "gameOptions.flags[0]",
+              "bindingStatus": "inverse-needs-validation"
+            },
+            {
+              "type": "checkbox",
+              "key": "openCapeOnMovement",
+              "label": "`oOpen Cape on Movement",
+              "default": true,
+              "binding": "gameOptions.flags[2]",
+              "bindingStatus": "inverse-needs-validation"
+            },
+            {
+              "type": "checkbox",
+              "key": "auraEnabled",
+              "label": "`oAura On / Off",
+              "default": false,
+              "binding": "gameOptions.layers[0]",
+              "bindingStatus": "source-backed-toggle-unverified"
+            },
+            {
+              "type": "choice-checkboxes",
+              "key": "auraType",
+              "label": "`oAura Type",
+              "allowNone": true,
+              "default": "",
+              "options": [
+                {
+                  "value": "portal",
+                  "label": "`oPortal Aura"
+                },
+                {
+                  "value": "starfield",
+                  "label": "`oStarfield Aura"
+                },
+                {
+                  "value": "electrical",
+                  "label": "`oElectrical Aura"
+                }
+              ],
+              "binding": "gameOptions.layers[0].labels",
+              "bindingStatus": "source-backed-options",
+              "visibleWhen": {
+                "key": "auraEnabled",
+                "equals": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "11478": {
+      "name": "Rift Wings",
+      "kind": "customization",
+      "itemId": 11478,
+      "source": {
+        "archive": "Growtopia_Items_DAT_Research_Pack.zip",
+        "file": "growtopia_items_research/data/planner_item_metadata.jsonl",
+        "recordId": 11478
+      },
+      "notes": [
+        "The two RGB defaults and Time Cycle period come from the supplied native gameOptions metadata.",
+        "The additional Feathers, Blades, Scales, Always Open/Closed, Stamp Particles and named trail toggles follow the requested dialog design. Their native storage/render bindings still require verification."
+      ],
+      "sharedControls": [
+        {
+          "type": "number",
+          "key": "timeDilationCycleTime",
+          "label": "`oTime Dilation Cycle Time:",
+          "default": 15,
+          "min": 0,
+          "step": "any",
+          "binding": "gameOptions.cycle.period",
+          "bindingStatus": "source-backed"
+        },
+        {
+          "type": "checkbox",
+          "key": "timeDilationEnabled",
+          "label": "`oTime Dilation On / Off",
+          "default": true,
+          "binding": "gameOptions.cycle.default",
+          "bindingStatus": "source-backed-default"
+        }
+      ],
+      "sections": [
+        {
+          "key": "wingsStyle1",
+          "title": "`oWings Style 1",
+          "controls": [
+            {
+              "type": "heading",
+              "key": "style1WingHeading",
+              "label": "`oWings Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "style1WingColor",
+              "label": "`oWings Color - R,G,B:",
+              "default": [
+                93,
+                22,
+                200
+              ],
+              "binding": "gameOptions.colours[0].default",
+              "bindingStatus": "source-backed"
+            },
+            {
+              "type": "heading",
+              "key": "style1MetalHeading",
+              "label": "`oWings Metal Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "style1MetalColor",
+              "label": "`oMetal - R,G,B:",
+              "default": [
+                220,
+                72,
+                255
+              ],
+              "binding": "gameOptions.colours[1].default",
+              "bindingStatus": "source-backed"
+            },
+            {
+              "type": "checkbox",
+              "key": "style1Feathers",
+              "label": "`oFeathers",
+              "default": true,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "style1Blades",
+              "label": "`oBlades",
+              "default": false,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "style1Scales",
+              "label": "`oScales",
+              "default": false,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            }
+          ]
+        },
+        {
+          "key": "wingsStyle2",
+          "title": "`oWings Style 2",
+          "controls": [
+            {
+              "type": "heading",
+              "key": "style2WingHeading",
+              "label": "`oWings Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "style2WingColor",
+              "label": "`oWings Color - R,G,B:",
+              "default": [
+                137,
+                30,
+                43
+              ],
+              "binding": "gameOptions.colours[0].default2",
+              "bindingStatus": "source-backed"
+            },
+            {
+              "type": "heading",
+              "key": "style2MetalHeading",
+              "label": "`oWings Metal Color:"
+            },
+            {
+              "type": "rgb",
+              "key": "style2MetalColor",
+              "label": "`oMetal - R,G,B:",
+              "default": [
+                35,
+                35,
+                63
+              ],
+              "binding": "gameOptions.colours[1].default2",
+              "bindingStatus": "source-backed"
+            },
+            {
+              "type": "choice-checkboxes",
+              "key": "wingOpening",
+              "label": "`oWing Opening",
+              "allowNone": true,
+              "default": "",
+              "options": [
+                {
+                  "value": "open",
+                  "label": "`oAlways Open Wings"
+                },
+                {
+                  "value": "closed",
+                  "label": "`oAlways Closed Wings"
+                }
+              ],
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "stampParticles",
+              "label": "`oStamp Particles",
+              "default": false,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "trailEnabled",
+              "label": "`oTrail On / Off",
+              "default": true,
+              "binding": "gameOptions.movingLayers[0]",
+              "bindingStatus": "native-trail-exists-specific-type-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "portalTrail",
+              "label": "`oPortal Trail",
+              "default": false,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "starfieldTrail",
+              "label": "`oStarfield Trail",
+              "default": false,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            },
+            {
+              "type": "checkbox",
+              "key": "electricalTrail",
+              "label": "`oElectrical Trail",
+              "default": false,
+              "bindingStatus": "ui-defined-native-mapping-pending"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
