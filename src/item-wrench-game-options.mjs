@@ -30,7 +30,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
         default: Number(cycle.period ?? 0),
         min: 0,
         step: cycle.periodInt ? 1 : "any",
-        binding: { off: cycle.periodOff, type: cycle.periodInt ? "int" : "float" },
+        binding: { settingKey: "cycP", settingKeys: ["cycP"], off: cycle.periodOff, type: cycle.periodInt ? "int" : "float" },
         bindingStatus: "source-backed"
       },
       {
@@ -38,7 +38,7 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
         key: "cycleEnabled",
         label: "`o" + String(cycle.name ?? "Cycle") + " On / Off",
         default: Number(cycle.default ?? 0) !== 0,
-        binding: { off: cycle.off },
+        binding: { settingKey: "cyc", settingKeys: ["cyc"], off: cycle.off },
         bindingStatus: cycle.default == null ? "default-inferred" : "source-backed"
       }
     );
@@ -51,7 +51,13 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
       key: safeKey(field.name) + "-" + index,
       label: "`o" + String(field.name ?? "Option"),
       default: Number(field.default ?? 0) !== 0,
-      binding: { off: field.off, bit: field.bit, bit2: field.bit2 },
+      binding: {
+        settingKey: field.off != null ? "f" + field.off : "f" + index + "x",
+        settingKeys: field.off != null
+          ? ["f" + field.off, ...(field.off2 != null ? ["f" + field.off2] : [])]
+          : ["f" + index + "x"],
+        off: field.off, off2: field.off2, bit: field.bit, bit2: field.bit2
+      },
       bindingStatus: "source-backed"
     });
   }
@@ -65,7 +71,11 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
       label: "`o" + String(field.name ?? "Choice"),
       options,
       default: defaultValue,
-      binding: { off: field.off, off2: field.off2, size: field.size, obj: field.obj },
+      binding: {
+        settingKey: "s" + index,
+        settingKeys: ["s" + index, "s" + index + "b"],
+        off: field.off, off2: field.off2, size: field.size, obj: field.obj
+      },
       bindingStatus: "source-backed"
     });
   }
@@ -78,7 +88,11 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
       options: optionList(field).length ? optionList(field) :
         (field.labels ?? []).map((label, value) => ({ value, label })),
       default: field.default ?? 0,
-      binding: { bit: field.bit, bit2: field.bit2, key: field.key, pokes: field.pokes },
+      binding: {
+        settingKey: "l_" + (field.key ?? index),
+        settingKeys: ["l_" + (field.key ?? index), "l2_" + (field.key ?? index)],
+        bit: field.bit, bit2: field.bit2, key: field.key, pokes: field.pokes
+      },
       bindingStatus: "source-backed"
     });
   }
@@ -91,7 +105,11 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
       label: "`o" + String(field.name ?? field.key ?? "Moving Layer"),
       options,
       default: field.default ?? 0,
-      binding: { key: field.key, pokes: field.pokes },
+      binding: {
+        settingKey: "l_" + (field.key ?? index),
+        settingKeys: ["l_" + (field.key ?? index), "l2_" + (field.key ?? index)],
+        key: field.key, pokes: field.pokes
+      },
       bindingStatus: "source-backed"
     });
   }
@@ -133,7 +151,14 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
           key: safeKey(field.name) + "-" + property,
           label: "`o" + String(field.name ?? "Color") + " - R,G,B:",
           default: rgbDefault(field[property]),
-          binding: { off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2, variant: property },
+          binding: {
+            settingKey: field.slot != null ? "c" + field.slot : "c" + index + "x",
+            settingKeys: [
+              field.slot != null ? "c" + field.slot : "c" + index + "x",
+              field.slot2 != null ? "c" + field.slot2 : "c" + index + "x"
+            ],
+            off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2, variant: property
+          },
           bindingStatus: "source-backed"
         }))
       };
@@ -146,7 +171,14 @@ export function buildItemWrenchDefinitionFromGameOptions(record, itemId) {
         key: safeKey(field.name) + "-" + index,
         label: "`o" + String(field.name ?? "Color") + " - R,G,B:",
         default: rgbDefault(field.default),
-        binding: { off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2 },
+        binding: {
+          settingKey: field.slot != null ? "c" + field.slot : "c" + index + "x",
+          settingKeys: [
+            field.slot != null ? "c" + field.slot : "c" + index + "x",
+            field.slot2 != null ? "c" + field.slot2 : "c" + index + "x"
+          ],
+          off: field.off, off2: field.off2, slot: field.slot, slot2: field.slot2
+        },
         bindingStatus: "source-backed"
       });
     }
