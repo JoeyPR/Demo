@@ -19,7 +19,11 @@
           "default": 10,
           "min": 0,
           "step": "any",
-          "binding": "gameOptions.cycle.period",
+          "binding": {
+            "offset": 10188,
+            "format": "f32",
+            "source": "gameOptions.cycle.periodOff"
+          },
           "bindingStatus": "source-backed"
         },
         {
@@ -27,8 +31,12 @@
           "key": "timeDilationEnabled",
           "label": "`oTime Dilation On / Off",
           "default": false,
-          "binding": "gameOptions.cycle.off",
-          "bindingStatus": "default-inferred"
+          "binding": {
+            "offset": 10184,
+            "source": "gameOptions.cycle.off",
+            "aggregate": "cycle enabled"
+          },
+          "bindingStatus": "source-backed-default-off"
         }
       ],
       "sections": [
@@ -50,7 +58,11 @@
                 88,
                 226
               ],
-              "binding": "gameOptions.colours[0].default",
+              "binding": {
+                "slot": 2,
+                "slot2": 3,
+                "source": "gameOptions.colours[0]"
+              },
               "bindingStatus": "source-backed"
             },
             {
@@ -58,8 +70,12 @@
               "key": "collarEnabled",
               "label": "`oCape Collar On / Off",
               "default": false,
-              "binding": "gameOptions.flags[1]",
-              "bindingStatus": "default-inferred"
+              "binding": {
+                "bit": 0,
+                "bit2": 1,
+                "source": "gameOptions.flags[1]"
+              },
+              "bindingStatus": "source-backed"
             },
             {
               "type": "heading",
@@ -75,7 +91,11 @@
                 49,
                 126
               ],
-              "binding": "gameOptions.colours[1].default",
+              "binding": {
+                "slot": 4,
+                "slot2": 5,
+                "source": "gameOptions.colours[1]"
+              },
               "bindingStatus": "source-backed"
             },
             {
@@ -83,24 +103,42 @@
               "key": "closedCape",
               "label": "`oClosed Cape",
               "default": true,
-              "binding": "gameOptions.flags[0]",
-              "bindingStatus": "inverse-needs-validation"
+              "binding": {
+                "bit": 2,
+                "bit2": 3,
+                "source": "gameOptions.flags[0]",
+                "transform": "inverse"
+              },
+              "bindingStatus": "source-backed-inverted"
             },
             {
               "type": "checkbox",
               "key": "openCapeOnMovement",
               "label": "`oOpen Cape on Movement",
               "default": true,
-              "binding": "gameOptions.flags[2]",
-              "bindingStatus": "inverse-needs-validation"
+              "binding": {
+                "bit": 4,
+                "bit2": 5,
+                "source": "gameOptions.flags[2]",
+                "transform": "inverse"
+              },
+              "bindingStatus": "source-backed-inverted"
             },
             {
               "type": "checkbox",
               "key": "auraEnabled",
               "label": "`oAura On / Off",
               "default": false,
-              "binding": "gameOptions.layers[0]",
-              "bindingStatus": "source-backed-toggle-unverified"
+              "binding": {
+                "bits": [
+                  6,
+                  7
+                ],
+                "source": "gameOptions.layers[0]",
+                "deriveFrom": "auraType",
+                "disabledValue": 0
+              },
+              "bindingStatus": "source-backed-aggregate-needs-encoder"
             },
             {
               "type": "choice-checkboxes",
@@ -110,20 +148,29 @@
               "default": "",
               "options": [
                 {
-                  "value": "portal",
+                  "value": 1,
                   "label": "`oPortal Aura"
                 },
                 {
-                  "value": "starfield",
+                  "value": 2,
                   "label": "`oStarfield Aura"
                 },
                 {
-                  "value": "electrical",
+                  "value": 3,
                   "label": "`oElectrical Aura"
                 }
               ],
-              "binding": "gameOptions.layers[0].labels",
-              "bindingStatus": "source-backed-options",
+              "binding": {
+                "source": "gameOptions.layers[0]",
+                "values": [
+                  0,
+                  1,
+                  2,
+                  3
+                ],
+                "pokes": "gameOptions.layers[0].pokes"
+              },
+              "bindingStatus": "source-backed-options-needs-encoder",
               "visibleWhen": {
                 "key": "auraEnabled",
                 "equals": true
@@ -154,7 +201,11 @@
           "default": 15,
           "min": 0,
           "step": "any",
-          "binding": "gameOptions.cycle.period",
+          "binding": {
+            "offset": 10264,
+            "format": "i32",
+            "source": "gameOptions.cycle.periodOff"
+          },
           "bindingStatus": "source-backed"
         },
         {
@@ -162,8 +213,12 @@
           "key": "timeDilationEnabled",
           "label": "`oTime Dilation On / Off",
           "default": true,
-          "binding": "gameOptions.cycle.default",
-          "bindingStatus": "source-backed-default"
+          "binding": {
+            "offset": 10260,
+            "source": "gameOptions.cycle.off",
+            "default": 1
+          },
+          "bindingStatus": "source-backed"
         }
       ],
       "sections": [
@@ -185,7 +240,11 @@
                 22,
                 200
               ],
-              "binding": "gameOptions.colours[0].default",
+              "binding": {
+                "offset": 10244,
+                "offset2": 10248,
+                "source": "gameOptions.colours"
+              },
               "bindingStatus": "source-backed"
             },
             {
@@ -202,7 +261,11 @@
                 72,
                 255
               ],
-              "binding": "gameOptions.colours[1].default",
+              "binding": {
+                "offset": 10252,
+                "offset2": 10256,
+                "source": "gameOptions.colours"
+              },
               "bindingStatus": "source-backed"
             },
             {
@@ -246,7 +309,12 @@
                 30,
                 43
               ],
-              "binding": "gameOptions.colours[0].default2",
+              "binding": {
+                "offset": 10244,
+                "offset2": 10248,
+                "source": "gameOptions.colours",
+                "variant": 2
+              },
               "bindingStatus": "source-backed"
             },
             {
@@ -263,7 +331,12 @@
                 35,
                 63
               ],
-              "binding": "gameOptions.colours[1].default2",
+              "binding": {
+                "offset": 10252,
+                "offset2": 10256,
+                "source": "gameOptions.colours",
+                "variant": 2
+              },
               "bindingStatus": "source-backed"
             },
             {
@@ -282,7 +355,16 @@
                   "label": "`oAlways Closed Wings"
                 }
               ],
-              "bindingStatus": "ui-defined-native-mapping-pending"
+              "bindingStatus": "source-backed-choice-needs-encoder",
+              "binding": {
+                "offset": 10222,
+                "offset2": 10223,
+                "source": "gameOptions.choices[1]",
+                "also": {
+                  "offset": 10220,
+                  "offset2": 10221
+                }
+              }
             },
             {
               "type": "checkbox",
