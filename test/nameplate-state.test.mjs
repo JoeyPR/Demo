@@ -29,7 +29,8 @@ test('nameplate state snapshots and resets do not share a mutable title array',(
 test('nameplate validates local asset keys and status while preserving formatted GrowID text',()=>{
   const p=plate({growId:'`4Joey',flag:'../../outside',role:'unknown',guildRole:'unknown',wrenchStatus:'unknown'});
   const state=p.plateConfig.get();assert.equal(state.flag,'');assert.equal(state.role,'');
-  assert.equal(state.guildRole,'');assert.equal(state.wrenchStatus,'default');
+  assert.equal(state.guildRole,'');assert.equal(state.superSupporter,false);
+  assert.equal(Object.hasOwn(state,'wrenchStatus'),false);
   assert.equal(state.growId,'`4Joey');
   assert.equal(p.plate.inspect().parts.find(part=>part.text!==undefined).text,'Joey');
 });
@@ -46,4 +47,14 @@ test('the recovered title and wrench indexes load with local sprite metadata',as
   assert.equal(Object.keys(p.plate.frames).length,278);
   assert.equal(p.plate.wrenchData.styles.length,32);assert.equal(p.plate.wrenchData.decorations.length,32);
   for(const key of ['weather','master'])assert.ok(p.plate.titles.some(title=>title.key===key));
+});
+
+
+test('legacy Super Supporter preferences migrate and can be switched off',()=>{
+  const p=plate({growId:'Joey',wrenchStatus:'super-supporter',wrenchStyle:'super-supporter'});
+  assert.equal(p.plateConfig.get().superSupporter,true);
+  assert.equal(p.plateConfig.get().wrenchStyle,'super-supporter');
+  p.plateConfig.setSuperSupporter(false);
+  assert.equal(p.plateConfig.get().superSupporter,false);
+  assert.equal(p.plateConfig.get().wrenchStyle,0);
 });
