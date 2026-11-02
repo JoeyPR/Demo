@@ -197,7 +197,8 @@
                   "l_aura",
                   "l2_aura"
                 ],
-                "emptyValue": 0
+                "emptyValue": 0,
+                "enabledKey": "auraEnabled"
               },
               "bindingStatus": "source-backed-choice-runtime-binding-pending",
               "visibleWhen": {
@@ -286,7 +287,7 @@
           "key": "timeDilationCycleTime",
           "label": "`oTime Dilation Cycle Time:",
           "default": 15,
-          "min": 0,
+          "min": 1,
           "step": "any",
           "binding": {
             "offset": 10264,
