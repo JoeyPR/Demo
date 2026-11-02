@@ -80,9 +80,17 @@ export function buildItemWrenchDefinitionFromVariableMap(record, itemId) {
       continue;
     }
 
-    const controlEntry = description && sectionDescription(description)
-      ? { ...entry, uiDescription: undefined }
-      : entry;
+    if (description.endsWith(":") && entry.descriptionType === "textbox") {
+      pushControl({
+        type: "heading",
+        key: entry.name + "-ui-heading",
+        label: "`o" + description
+      });
+    }
+    const controlEntry = description && (
+      sectionDescription(description) ||
+      (description.endsWith(":") && entry.descriptionType === "textbox")
+    ) ? { ...entry, uiDescription: undefined } : entry;
     pushControl(fieldControl(controlEntry));
   }
 
