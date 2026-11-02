@@ -114,6 +114,12 @@
   font-weight: 700;
   line-height: 1.12;
 }
+.wrench-control-help {
+  margin: 0;
+  color: #ADF4FF;
+  font-size: calc(18px * var(--wrench-scale, 1));
+  line-height: 1.25;
+}
 
 /* Text and number inputs reuse the Demo's #145EAE / #95C9FF treatment. */
 .item-wrench-input {
