@@ -204,29 +204,15 @@
   padding: 0;
   border-top: 0;
 }
-.wrench-reset,
-.wrench-footer-actions button {
-  box-sizing: border-box;
-  min-width: 0;
-  height: var(--wrench-button-height, 28px);
-  padding: 0 calc(10px * var(--wrench-scale, 1));
-  border: 0;
-  border-radius: var(--radius);
-  box-shadow: var(--sh) var(--sh) 0 0 #000;
-  color: #fff;
-  font: 700 var(--wrench-button-font, 18px)/1 var(--font-main);
-  text-align: left;
-  text-shadow: 1px 1px 0 #000;
-  white-space: nowrap;
-  cursor: pointer;
-}
 .wrench-reset-actions {
   width: max-content;
   max-width: 100%;
 }
 .wrench-reset-actions .wrench-reset {
+  box-sizing: border-box;
   width: var(--wrench-reset-width, 120px);
   max-width: 100%;
+  font-size: calc(var(--drop-button-font, 52px) * .84);
 }
 .wrench-footer-actions {
   display: flex;
@@ -236,14 +222,13 @@
   max-width: 100%;
   width: max-content;
 }
-.wrench-footer-actions button { flex: 0 0 auto; }
+.wrench-footer-actions button { box-sizing: border-box; flex: 0 0 auto; }
 .wrench-cancel {
   width: var(--wrench-cancel-width, 226px);
 }
 .wrench-footer-actions .wrench-update {
-  width: var(--wrench-ok-width, 34px);
-  padding-inline: calc(10px * var(--wrench-scale, 1));
-  background: #7BBAD2;
+  box-sizing: border-box;
+  width: var(--wrench-ok-width, 104px);
   text-align: center;
 }
 .wrench-footer-actions button:active,
