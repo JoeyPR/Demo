@@ -38,6 +38,15 @@ The UI emits:
 
 The saved values are also available through `P.itemWrench.get(itemId)`.
 
-## Current boundary
+## Runtime rendering and current boundary
 
-This phase implements UI generation, per-item state, validation and persistence. It does not yet write the settings into native item option packets or bind every control to player-renderer variables. Each definition carries binding metadata and a status so source-backed fields can be connected next without mistaking a stored UI value for a working visual effect. In particular, several Rift Wings controls are user-requested UI options whose native renderer mapping still requires verification.
+The app attaches the same definition precedence to equipped item instances, then hydrates their saved per-item settings. The renderer hook runs during each item's normal frame advance, so colour changes are reapplied after animation sampling rather than being lost on the next frame.
+
+The first source-backed visual bindings are:
+
+- **Rift Cape:** `tc=0` uses the Cape colour and `tc=1` uses the Collar colour. The Time Dilation cycle selects the first or second native colour slots using the recovered `cyc`, `cycP`, and 500 ms flip behavior. Its separate Collar flag hides the dedicated collar sprite when disabled.
+- **Rift Wings:** `tc=0` and `tc=1` use the two native wing/metal colour pairs. The Time Cycle uses its 15-second period, 501 ms flip interval, and `restart: swap` behavior. The Wing Opening choice is translated to the recovered `s1` / `s1b` setting keys.
+
+The runtime builds an in-memory Set Planner-style settings object (`c*`, `f*`, `l_*`, `l2_*`, `s*`, `cyc`, `cycP`). This is **not** a native game packet writer and does not send options to Growtopia.
+
+Several controls remain state-only until their original item variant/effect data is available: Rift Cape's open/closed animation and aura visuals; Rift Wings' alternate open/closed geometry, feather/blade/scale variants, stamp particles, and named trails; and XML `VariableMap` values that do not yet have renderer setters. These are clearly distinguished from the preview-backed colour/collar controls in their `bindingStatus` metadata.
