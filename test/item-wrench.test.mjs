@@ -321,3 +321,52 @@ test("authored Cape colour controls retain separate first- and second-design slo
   assert.deepEqual(byKey("collarColor"), ["c4"]);
   assert.deepEqual(byKey("collarColorStyle2"), ["c5"]);
 });
+
+
+test("Rift Wings authored controls write each colour to its native first or second design slot", () => {
+  const values = createItemWrenchDefaults(wings);
+  const native = buildNativeWrenchSettings(wings, values);
+  assert.deepEqual(native.c10244, [93, 22, 200]);
+  assert.deepEqual(native.c10248, [137, 30, 43]);
+  assert.deepEqual(native.c10252, [220, 72, 255]);
+  assert.deepEqual(native.c10256, [35, 35, 63]);
+  assert.equal(native.cyc, true);
+  assert.equal(native.cycP, 15);
+  assert.equal(native.s1, 0);
+  assert.equal(native.s1b, 0);
+
+  values.wingOpening = 1;
+  const open = buildNativeWrenchSettings(wings, values);
+  assert.equal(open.s1, 1);
+  assert.equal(open.s1b, 1);
+  values.wingOpening = 2;
+  const closed = buildNativeWrenchSettings(wings, values);
+  assert.equal(closed.s1, 2);
+  assert.equal(closed.s1b, 2);
+});
+
+test("Rift Wings gameIcon tc colours follow the source-backed 15 second swap cycle", () => {
+  const gameOptions = JSON.parse(read("../data/item-wrench-game-options.json")).items["11478"].gameOptions;
+  const values = createItemWrenchDefaults(wings);
+  values.style1WingColor = [1, 2, 3];
+  values.style1MetalColor = [4, 5, 6];
+  values.style2WingColor = [7, 8, 9];
+  values.style2MetalColor = [10, 11, 12];
+  const item = {
+    id: 11478, wrenchDefinition: wings, wrenchGameOptions: gameOptions,
+    wrenchSettings: values, pieces: [{ tc: 0 }, { tc: 1 }]
+  };
+  applyItemWrenchAppearance(item, 0);
+  assert.deepEqual(item.pieces.map(piece => piece.t), [[1, 2, 3], [4, 5, 6]]);
+  applyItemWrenchAppearance(item, 16002);
+  assert.deepEqual(item.pieces.map(piece => piece.t), [[7, 8, 9], [10, 11, 12]]);
+});
+
+test("generated cycle controls honor their own names when selecting a design", () => {
+  const metadata = JSON.parse(read("../data/item-wrench-game-options.json"));
+  const generated = buildItemWrenchDefinitionFromGameOptions(metadata.items["11478"], 11478);
+  const defaults = createItemWrenchDefaults(generated);
+  assert.equal(gameOptionDesign(metadata.items["11478"].gameOptions, defaults, 16002), 1);
+  defaults.cycleEnabled = false;
+  assert.equal(gameOptionDesign(metadata.items["11478"].gameOptions, defaults, 16002), 0);
+});
