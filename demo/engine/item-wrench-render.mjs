@@ -52,11 +52,11 @@ export function buildNativeWrenchSettings(definition, values) {
 export function gameOptionDesign(gameOptions, values, timeMs = 0, itemCycle = null) {
   const cycle = gameOptions?.cycle;
   if (!cycle) return 0;
-  const enabled = values?.timeDilationEnabled ?? cycle.default ?? false;
+  const enabled = values?.timeDilationEnabled ?? values?.cycleEnabled ?? cycle.default ?? false;
   if (!enabled) return 0;
 
   // Mirrors Set Planner's designOf(): cycle period is in seconds, flip is ms.
-  const configuredPeriod = Number(values?.timeDilationCycleTime ?? cycle.period) ||
+  const configuredPeriod = Number(values?.timeDilationCycleTime ?? values?.cyclePeriod ?? cycle.period) ||
     Number(cycle.period) || 1;
   const periodMs = Math.max(1, configuredPeriod) * 1000;
   const flip = Math.max(0, Number(itemCycle?.flip ?? cycle.flip) || 0);
@@ -72,7 +72,9 @@ export function gameOptionDesign(gameOptions, values, timeMs = 0, itemCycle = nu
 export function pickedGameOptionColour(gameOptions, nativeSettings, colourIndex, design = 0) {
   const colour = gameOptions?.colours?.[colourIndex];
   if (!colour) return null;
-  const slot = design && colour.slot2 !== undefined ? colour.slot2 : colour.slot;
+  const firstSlot = colour.slot ?? colour.off;
+  const secondSlot = colour.slot2 ?? colour.off2 ?? firstSlot;
+  const slot = design ? secondSlot : firstSlot;
   const settingKey = slot === undefined ? null : "c" + slot;
   const picked = settingKey ? nativeSettings?.[settingKey] : null;
   if (Array.isArray(picked) && picked.length === 3 &&
