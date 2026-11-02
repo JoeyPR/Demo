@@ -39,10 +39,10 @@ content.id = "item-wrench-content";
 const footer = make("footer", "item-wrench-footer");
 const resetButton = make("button", "wrench-reset", "Reset to Default");
 resetButton.type = "button";
-const actions = make("div", "wrench-footer-actions");
-const cancelButton = make("button", "wrench-cancel", "Cancel");
+const actions = make("div", "wrench-footer-actions drop-actions");
+const cancelButton = make("button", "wrench-cancel drop-cancel", "Cancel");
 cancelButton.type = "button";
-const updateButton = make("button", "wrench-update", "Update");
+const updateButton = make("button", "wrench-update drop-confirm", "OK");
 updateButton.type = "button";
 actions.append(cancelButton, updateButton);
 footer.append(resetButton, actions);
@@ -76,16 +76,28 @@ function position() {
   if (!preview) return;
   const rect = preview.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
-  const scale = 0.92 * Math.max(0.12, Math.min(rect.width / 643, rect.height / 480));
+
+  // A portrait 6:19 panel, scaled to the preview bounds without ever growing
+  // wide enough to cover the inventory. Its content scrolls inside the fixed
+  // aspect-ratio frame when a generated item exposes many controls.
+  const height = Math.min(rect.height * 0.92, rect.width * 0.96 * 19 / 6);
+  const width = height * 6 / 19;
+  const scale = Math.max(0.12, Math.min(1, width / 420));
   Object.assign(overlay.style, {
     left: rect.left + "px",
     top: rect.top + "px",
     width: rect.width + "px",
     height: rect.height + "px"
   });
+  dialog.style.setProperty("--wrench-width", width + "px");
+  dialog.style.setProperty("--wrench-height", height + "px");
   dialog.style.setProperty("--wrench-scale", String(scale));
-  dialog.style.setProperty("--wrench-min-width", Math.min(rect.width * 0.86, 565 * scale) + "px");
-  dialog.style.setProperty("--wrench-max-width", rect.width * 0.96 + "px");
+  dialog.style.setProperty("--wrench-reset-width", (226 + 104 + 40) * scale + "px");
+  dialog.style.setProperty("--wrench-cancel-width", 226 * scale + "px");
+  dialog.style.setProperty("--wrench-ok-width", 104 * scale + "px");
+  dialog.style.setProperty("--wrench-button-gap", 40 * scale + "px");
+  dialog.style.setProperty("--wrench-button-height", 84 * scale + "px");
+  dialog.style.setProperty("--wrench-button-font", 52 * scale + "px");
 }
 
 function emitPreview() {
@@ -189,7 +201,6 @@ function makeControl(control) {
   }
 
   if (control.type === "rgb") {
-    const row = make("div", "wrench-rgb-row");
     const input = make("input", "item-wrench-input wrench-rgb-input");
     input.type = "text";
     input.inputMode = "decimal";
@@ -198,9 +209,6 @@ function makeControl(control) {
     input.spellcheck = false;
     input.value = (draft[control.key] ?? [0, 0, 0]).join(", ");
     input.setAttribute("aria-label", String(control.label).replace(/^\x60[a-z0-9!@#$^&]/, ""));
-    const swatch = make("span", "wrench-color-preview");
-    const rgb = parseRgb(input.value) ?? [0, 0, 0];
-    swatch.style.backgroundColor = "rgb(" + rgb.join(",") + ")";
     input.addEventListener("input", () => {
       const parsed = parseRgb(input.value);
       if (!parsed) {
@@ -211,14 +219,12 @@ function makeControl(control) {
         input.removeAttribute("aria-invalid");
         wrapper.classList.remove("is-invalid");
         invalidInputs.delete(control.key);
-        swatch.style.backgroundColor = "rgb(" + parsed.join(",") + ")";
         draft[control.key] = parsed;
         emitPreview();
       }
       updateButtonState(validateItemWrenchState(currentDefinition, draft).valid);
     });
-    row.append(input, swatch);
-    wrapper.append(row);
+    wrapper.append(input);
   } else if (control.type === "number") {
     const input = make("input", "item-wrench-input wrench-number-input");
     input.type = "number";
