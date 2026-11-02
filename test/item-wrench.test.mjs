@@ -416,7 +416,7 @@ test("Wrench descriptions stay plain, with no Properties blue code 1 prefix", ()
   const generator = read("../src/item-wrench-variable-map.mjs");
   const css = read("../css/item-wrench.css");
   assert.match(generator, /help:\s*entry\.uiDescription\s*\|\|\s*undefined/);
-  assert.match(generator, /notes:\s*record\.itemUiDescription\s*\?\s*\[record\.itemUiDescription\]/);
+  assert.match(generator, /notes:\s*plainDescription\(record\.itemUiDescription\)/);
   assert.doesNotMatch(generator, /\x60\x31.*uiDescription/);
   assert.match(css, /\.item-wrench-note\s*\{[^}]*color:\s*#fff/);
   assert.match(css, /\.wrench-control-help\s*\{[^}]*color:\s*#fff/);
