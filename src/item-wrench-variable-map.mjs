@@ -14,24 +14,24 @@ function fieldControl(entry) {
   const rgb = parseRgb(value);
   if (rgb) return {
     type: "rgb", key: entry.name, label: "`o" + entry.uiName, default: rgb,
-    maxLength: entry.maxLength, help: entry.uiDescription ? "`1" + entry.uiDescription : undefined,
+    maxLength: entry.maxLength, help: entry.uiDescription || undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
   if (isBool(value)) return {
     type: "checkbox", key: entry.name, label: "`o" + entry.uiName, default: bool(value),
-    help: entry.uiDescription ? "`1" + entry.uiDescription : undefined, binding: entry.name, bindingStatus: "source-variable-map"
+    help: entry.uiDescription || undefined, binding: entry.name, bindingStatus: "source-variable-map"
   };
   if (value !== "" && Number.isFinite(Number(value))) return {
     type: "number", key: entry.name, label: "`o" + entry.uiName, default: Number(value),
     min: entry.minValue == null ? undefined : Number(entry.minValue),
     max: entry.maxValue == null ? undefined : Number(entry.maxValue),
     step: entry.forceFloats ? "any" : 1,
-    maxLength: entry.maxLength, help: entry.uiDescription ? "`1" + entry.uiDescription : undefined,
+    maxLength: entry.maxLength, help: entry.uiDescription || undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
   return {
     type: "text", key: entry.name, label: "`o" + entry.uiName, default: value,
-    maxLength: entry.maxLength, help: entry.uiDescription ? "`1" + entry.uiDescription : undefined,
+    maxLength: entry.maxLength, help: entry.uiDescription || undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
 }
@@ -103,7 +103,7 @@ export function buildItemWrenchDefinitionFromVariableMap(record, itemId) {
       source: "renderer-xml-VariableMap",
       itemId: Number(itemId)
     },
-    notes: record.itemUiDescription ? ["`1" + record.itemUiDescription] : [],
+    notes: record.itemUiDescription ? [record.itemUiDescription] : [],
     sharedControls,
     sections: sections.filter(section => section.controls.length > 0)
   };
