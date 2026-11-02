@@ -175,7 +175,8 @@ function makeControl(control) {
   richText(label, control.label);
   wrapper.append(label);
   if (control.help) {
-    const help = make("p", "wrench-control-help", control.help);
+    const help = make("p", "wrench-control-help");
+    richText(help, control.help);
     wrapper.append(help);
   }
 
