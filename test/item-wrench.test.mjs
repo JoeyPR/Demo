@@ -89,7 +89,10 @@ test("Wings of Infinity UI is generated from its XML VariableMap, including four
   assert.equal(generated.sections.length, 4);
   assert.deepEqual(generated.sections.map(section => section.title),
     ["Top Left Wing", "Bottom Left Wing", "Top Right Wing", "Bottom Right Wing"]);
-  assert.equal(generated.sections[0].controls.length, 5);
+  assert.equal(generated.sections[0].controls.length, 7);
+  assert.equal(generated.sections[0].controls[3].type, "heading");
+  assert.equal(generated.sections[0].controls[3].label, "`oPrimary Color:");
+  assert.equal(generated.sections[0].controls[4].type, "rgb");
   const values = createItemWrenchDefaults(generated);
   assert.equal(values.Visible_TL, true);
   assert.equal(values.Trail_TL, true);
