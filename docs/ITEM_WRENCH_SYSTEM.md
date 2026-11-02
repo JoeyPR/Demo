@@ -14,13 +14,15 @@ The generator reads each item's labels, descriptions, default values, order, rad
 
 ## Dialog behavior
 
-- The generated dialog is anchored to the preview rectangle and scales with it.
+- The generated dialog is a portrait 6:19 panel, auto-scaled and centered within the preview rectangle.
 - Content scrolls inside the dialog; the header and footer remain available.
-- Footer order is Reset to Default, then Cancel and Update.
+- Footer order is Reset to Default, then left-aligned Cancel and OK buttons styled like the Drop dialog.
 - Reset replaces the draft with definition defaults but does not save.
 - Cancel discards the draft and restores the saved settings.
 - Update validates and saves a per-item value object using the core `P.store`.
-- Labels are inserted as text and passed through the existing `P.rtfont.scan` color-code renderer.
+- Labels are inserted as text and passed through `P.rtfont.scan`; descriptions strip the Properties-only blue code so they remain plain white text.
+
+RGB fields are plain text inputs with no color swatches. Select inputs hide their native dropdown arrows.
 
 ## Checkbox specification
 
