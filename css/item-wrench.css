@@ -233,7 +233,7 @@
   align-items: flex-start;
   gap: calc(12px * var(--wrench-scale, 1));
   padding: calc(16px * var(--wrench-scale, 1))
-           calc(24px * var(--wrench-scale, 1));
+           calc(18px * var(--wrench-scale, 1));
   border-top: var(--bd) solid var(--line);
 }
 .wrench-reset,
@@ -270,7 +270,7 @@
   width: var(--wrench-cancel-width, 73px);
   background: #FFCC00;
 }
-.wrench-update {
+.wrench-footer-actions .wrench-update {
   width: var(--wrench-ok-width, 34px);
   background: #7BBAD2;
   text-align: center;
