@@ -8,17 +8,20 @@
 .item-wrench-overlay[hidden] { display: none !important; }
 
 .item-wrench-dialog {
-  top: 4%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 0;
-  width: max-content;
-  min-width: min(86%, var(--wrench-min-width, 565px));
-  max-width: min(96%, var(--wrench-max-width, 96%));
-  max-height: 92%;
+  box-sizing: border-box;
+  width: var(--wrench-width, 150px);
+  height: var(--wrench-height, 475px);
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: 6 / 19;
   overflow: hidden;
   padding: 0;
   background: var(--fill);
@@ -39,7 +42,6 @@
   min-width: 0;
   padding: calc(20px * var(--wrench-scale, 1))
            calc(24px * var(--wrench-scale, 1));
-  border-bottom: var(--bd) solid var(--line);
 }
 .item-wrench-icon {
   flex: 0 0 calc(64px * var(--wrench-scale, 1));
@@ -94,7 +96,7 @@
 }
 .item-wrench-note {
   margin: 0;
-  color: #ADF4FF;
+  color: #fff;
   font-size: calc(18px * var(--wrench-scale, 1));
   line-height: 1.35;
   white-space: pre-wrap;
@@ -116,7 +118,7 @@
 }
 .wrench-control-help {
   margin: 0;
-  color: #ADF4FF;
+  color: #fff;
   font-size: calc(18px * var(--wrench-scale, 1));
   line-height: 1.25;
 }
@@ -145,21 +147,20 @@
   box-shadow: var(--sh) var(--sh) 0 0 #000,
               inset var(--sh) var(--sh) 0 0 #000;
 }
-.wrench-rgb-row {
-  display: flex;
-  align-items: center;
-  gap: calc(12px * var(--wrench-scale, 1));
-  min-width: 0;
+.wrench-rgb-input { text-align: left; }
+.wrench-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: none;
+  cursor: pointer;
 }
-.wrench-color-preview {
-  flex: 0 0 calc(52px * var(--wrench-scale, 1));
-  width: calc(52px * var(--wrench-scale, 1));
-  aspect-ratio: 1 / 1;
-  border: var(--bd) solid #95C9FF;
-  border-radius: var(--radius);
-  box-shadow: var(--sh) var(--sh) 0 0 #000;
+.wrench-select::-ms-expand { display: none; }
+.wrench-number-input::-webkit-inner-spin-button,
+.wrench-number-input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
 }
-.wrench-select { appearance: auto; cursor: pointer; }
 
 /* Checkbox: transparent 1:1 square; no panel or fill.
    The inner and outer shadows deliberately use #145EAE, not black. */
@@ -194,7 +195,7 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: clamp(24px, calc(56px * var(--wrench-scale, 1)), 56px);
+  width: calc(56px * var(--wrench-scale, 1));
   aspect-ratio: 1 / 1;
   overflow: visible;
   border: var(--bd) solid #95C9FF;
@@ -224,11 +225,12 @@
 }
 .wrench-control[hidden] { display: none !important; }
 
-/* Footer: Reset sits above Cancel + Update. */
+/* Footer follows the Drop dialog button proportions and alignment. */
 .item-wrench-footer {
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
+  align-items: flex-start;
   gap: calc(12px * var(--wrench-scale, 1));
   padding: calc(16px * var(--wrench-scale, 1))
            calc(24px * var(--wrench-scale, 1));
@@ -236,32 +238,43 @@
 }
 .wrench-reset,
 .wrench-footer-actions button {
+  box-sizing: border-box;
   min-width: 0;
-  min-height: calc(66px * var(--wrench-scale, 1));
-  padding: calc(8px * var(--wrench-scale, 1))
-           calc(16px * var(--wrench-scale, 1));
+  height: var(--wrench-button-height, 28px);
+  padding: 0 calc(10px * var(--wrench-scale, 1));
   border: 0;
   border-radius: var(--radius);
-  box-shadow: var(--sh) var(--sh) 0 #000;
+  box-shadow: var(--sh) var(--sh) 0 0 #000;
   color: #fff;
-  font: 700 calc(30px * var(--wrench-scale, 1))/1.05 var(--font-main);
-  text-align: center;
+  font: 700 var(--wrench-button-font, 18px)/1 var(--font-main);
+  text-align: left;
   text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
   cursor: pointer;
 }
 .wrench-reset {
-  width: 100%;
-  border: var(--bd) solid #95C9FF;
+  width: var(--wrench-reset-width, 120px);
+  max-width: 100%;
   background: #145EAE;
 }
 .wrench-footer-actions {
   display: flex;
   align-items: stretch;
-  gap: calc(16px * var(--wrench-scale, 1));
+  justify-content: flex-start;
+  gap: var(--wrench-button-gap, 12px);
+  max-width: 100%;
+  width: max-content;
 }
-.wrench-footer-actions button { flex: 1 1 0; }
-.wrench-cancel { background: #FFCC00; }
-.wrench-update { background: #7BBAD2; }
+.wrench-footer-actions button { flex: 0 0 auto; }
+.wrench-cancel {
+  width: var(--wrench-cancel-width, 73px);
+  background: #FFCC00;
+}
+.wrench-update {
+  width: var(--wrench-ok-width, 34px);
+  background: #7BBAD2;
+  text-align: center;
+}
 .wrench-footer-actions button:active,
 .wrench-reset:active {
   transform: translate(var(--sh),var(--sh));
@@ -275,27 +288,7 @@
 .item-wrench-dialog :focus-visible {
   outline-color: #fff;
 }
-@media (max-width: 900px), (hover:none) and (pointer:coarse) {
-  .item-wrench-dialog { top: 3%; max-height: 94%; }
-  .item-wrench-header,
-  .item-wrench-content {
-    padding-left: calc(14px * var(--wrench-scale, 1));
-    padding-right: calc(14px * var(--wrench-scale, 1));
-  }
-  .item-wrench-icon {
-    flex-basis: calc(48px * var(--wrench-scale, 1));
-    width: calc(48px * var(--wrench-scale, 1));
-    height: calc(48px * var(--wrench-scale, 1));
-  }
-  .item-wrench-header .drop-title { font-size: calc(42px * var(--wrench-scale, 1)); }
-  .item-wrench-section-title { font-size: calc(31px * var(--wrench-scale, 1)); }
-  .item-wrench-subheading,
-  .wrench-label { font-size: calc(23px * var(--wrench-scale, 1)); }
-  .wrench-checkbox-row { font-size: calc(22px * var(--wrench-scale, 1)); }
-  .item-wrench-input { font-size: calc(22px * var(--wrench-scale, 1)); }
-  .wrench-reset,
-  .wrench-footer-actions button { font-size: calc(23px * var(--wrench-scale, 1)); }
-}
+
 @media (prefers-reduced-motion: reduce) {
   .item-wrench-dialog * { scroll-behavior: auto !important; }
 }
