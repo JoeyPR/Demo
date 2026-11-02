@@ -4,6 +4,7 @@ import {
   validateItemWrenchState,
   cloneItemWrenchState
 } from "../src/item-wrench-state.mjs";
+import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
 
 const STORE_KEY = "itemWrenchSettings";
 const preview = document.getElementById("preview");
@@ -49,6 +50,7 @@ overlay.append(dialog);
 document.body.append(overlay);
 
 let definitions = null;
+let variableMaps = null;
 let loading = null;
 let currentItem = null;
 let currentDefinition = null;
@@ -170,6 +172,10 @@ function makeControl(control) {
   const label = make("label", "wrench-label");
   richText(label, control.label);
   wrapper.append(label);
+  if (control.help) {
+    const help = make("p", "wrench-control-help", control.help);
+    wrapper.append(help);
+  }
 
   if (control.type === "rgb") {
     const row = make("div", "wrench-rgb-row");
@@ -331,12 +337,20 @@ function close(reason = "cancel") {
 
 async function loadDefinitions() {
   if (!loading) {
-    loading = fetch(new URL("../data/item-wrench-definitions.json", import.meta.url))
-      .then(response => {
-        if (!response.ok) throw new Error("Item Wrench definitions unavailable");
-        return response.json();
+    loading = Promise.all([
+      fetch(new URL("../data/item-wrench-definitions.json", import.meta.url)),
+      fetch(new URL("../data/item-wrench-variable-maps.json", import.meta.url))
+    ])
+      .then(async ([definitionsResponse, mapsResponse]) => {
+        if (!definitionsResponse.ok) throw new Error("Item Wrench definitions unavailable");
+        if (!mapsResponse.ok) throw new Error("Renderer VariableMap index unavailable");
+        const [definitionData, mapData] = await Promise.all([
+          definitionsResponse.json(), mapsResponse.json()
+        ]);
+        definitions = definitionData;
+        variableMaps = mapData;
+        return definitions;
       })
-      .then(value => (definitions = value))
       .catch(error => { loading = null; throw error; });
   }
   return loading;
@@ -349,7 +363,11 @@ async function open(item) {
   }
   try {
     const registry = await loadDefinitions();
-    const definition = registry.items?.[String(item.id)];
+    const itemId = String(item.id);
+    const authoredDefinition = registry.items?.[itemId];
+    const variableMapRecord = variableMaps?.items?.[itemId];
+    const definition = authoredDefinition ??
+      buildItemWrenchDefinitionFromVariableMap(variableMapRecord, item.id);
     if (!definition) {
       P.toast("Wrench settings are not configured for " + (item.name ?? "this item") + " yet.");
       return;
