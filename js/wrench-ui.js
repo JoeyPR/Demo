@@ -5,12 +5,7 @@
   'use strict';
   const SHEETS = 'demo/assets/';
   const SUPER_SUPPORTER_WRENCH = 'super-supporter';
-  const STATUS_SCALE = Object.freeze({ default: 0.48, supporter: 0.56, 'super-supporter': 0.64 });
-  const STATUS_OPTIONS = [
-    ['default', 'Default'],
-    ['supporter', 'Supporter'],
-    ['super-supporter', 'Super Supporter']
-  ];
+  const WRENCH_PREVIEW_SCALE = Object.freeze({ default: 0.68, superSupporter: 1.0 });
   const quickWrenchImg = new Image(); quickWrenchImg.src = 'img/wrench-quick.png';
   const superWrenchImg = new Image(); superWrenchImg.src = 'img/wrench.png';
   let data = null;
@@ -31,13 +26,13 @@
   const ready = im => im.complete && im.naturalWidth > 0;
 
   /* 64x64 preview: draw the 32x32 cell trimmed and centered, like the site */
-  function preview(entry, isStyle, status = 'default') {
+  function preview(entry, isStyle, superSupporter = false) {
     const c = document.createElement('canvas');
     c.width = 64; c.height = 64;
     c.className = 'wprev';
     const x = c.getContext('2d');
     x.imageSmoothingEnabled = false;
-    const drawSize = 48 * (STATUS_SCALE[status] ?? STATUS_SCALE.default);
+    const drawSize = 48 * (superSupporter ? WRENCH_PREVIEW_SCALE.superSupporter : WRENCH_PREVIEW_SCALE.default);
     const drawAt = (64 - drawSize) / 2;
     const draw = () => {
       x.clearRect(0, 0, 64, 64);
@@ -91,27 +86,20 @@
     }
     const st = P.plateConfig.get();
 
-    /* Status is single-select and controls the rendered scale of both wrenches and decorations. */
-    const statusWrap = document.createElement('div');
-    statusWrap.className = 'wrench-status';
-    const statusLabel = document.createElement('div');
-    statusLabel.className = 'wrench-status-label';
-    statusLabel.textContent = 'Status';
-    const statusOptions = document.createElement('div');
-    statusOptions.className = 'wrench-status-options';
-    for (const [id, label] of STATUS_OPTIONS) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'wrench-status-option' + (st.wrenchStatus === id ? ' on' : '');
-      b.textContent = label;
-      b.setAttribute('aria-pressed', String(st.wrenchStatus === id));
-      b.addEventListener('click', () => {
-        P.plateConfig.setWrenchStatus(id);
-        render(container);
-      });
-      statusOptions.append(b);
-    }
-    statusWrap.append(statusLabel, statusOptions);
+    /* One explicit toggle controls the larger Super Supporter wrench size. */
+    const statusWrap = document.createElement('label');
+    statusWrap.className = 'wrench-super-supporter-setting';
+    const statusInput = document.createElement('input');
+    statusInput.type = 'checkbox';
+    statusInput.checked = !!st.superSupporter;
+    statusInput.setAttribute('aria-label', 'Super Supporter');
+    statusInput.addEventListener('change', () => {
+      P.plateConfig.setSuperSupporter(statusInput.checked);
+      render(container);
+    });
+    const statusText = document.createElement('span');
+    statusText.textContent = 'Super Supporter';
+    statusWrap.append(statusInput, statusText);
     frag.append(statusWrap);
 
     /* Styles | Decorations toggle */
@@ -134,9 +122,9 @@
       b.type = 'button';
       b.className = 'wopt wrench-opt' + (id === (isStyle ? st.wrenchStyle : st.wrenchDecoration) ? ' on' : '');
       b.title = label;
-      if (!entry && isStyle) b.append(preview(null, true, st.wrenchStatus));
+      if (!entry && isStyle) b.append(preview(null, true, st.superSupporter));
       else if (!entry) b.append(document.createTextNode('None'));
-      else b.append(preview(entry, isStyle, st.wrenchStatus));
+      else b.append(preview(entry, isStyle, st.superSupporter));
       const name = document.createElement('span');
       name.className = 'wrench-opt-name';
       name.textContent = entry ? entry[1] : (isStyle ? 'Base' : 'None');
@@ -152,9 +140,9 @@
       grid.append(mk(0, 'Wrench (base)', null, true));
       const superOption = mk(SUPER_SUPPORTER_WRENCH, 'Super Supporter Wrench',
         [SUPER_SUPPORTER_WRENCH, 'Super Supporter', 'img/wrench.png', 0, 0], true);
-      superOption.disabled = st.wrenchStatus !== 'super-supporter';
-      superOption.title = st.wrenchStatus === 'super-supporter'
-        ? 'Super Supporter Wrench' : 'Switch Status to Super Supporter to unlock this wrench';
+      superOption.disabled = !st.superSupporter;
+      superOption.title = st.superSupporter
+        ? 'Super Supporter Wrench' : 'Turn on Super Supporter to unlock this wrench';
       grid.append(superOption);
       for (const s of data.styles) grid.append(mk(s[0], s[1] + ' Wrench Style', s, true));
     } else {
