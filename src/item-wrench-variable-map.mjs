@@ -31,7 +31,7 @@ function fieldControl(entry) {
   };
   return {
     type: "text", key: entry.name, label: "`o" + entry.uiName, default: value,
-    maxLength: entry.maxLength, help: entry.uiDescription,
+    maxLength: entry.maxLength, help: entry.uiDescription ? "`1" + entry.uiDescription : undefined,
     binding: entry.name, bindingStatus: "source-variable-map"
   };
 }
