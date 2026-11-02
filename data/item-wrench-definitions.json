@@ -110,7 +110,10 @@
                 "settingKey": "c4",
                 "slot": 4,
                 "slot2": 5,
-                "source": "gameOptions.colours[1]"
+                "source": "gameOptions.colours[1]",
+                "settingKeys": [
+                  "c4"
+                ]
               },
               "bindingStatus": "source-backed"
             },
