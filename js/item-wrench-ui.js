@@ -117,9 +117,9 @@ function position() {
   dialog.style.setProperty("--drop-button-font", 52 * scale + "px");
   dialog.style.setProperty("--drop-cancel-width", 226 * scale + "px");
   dialog.style.setProperty("--drop-button-gap", 40 * scale + "px");
-  dialog.style.setProperty("--wrench-reset-width", (226 + 104 + 40) * scale + "px");
-  dialog.style.setProperty("--wrench-cancel-width", 226 * scale + "px");
-  dialog.style.setProperty("--wrench-ok-width", 104 * scale + "px");
+  dialog.style.setProperty("--wrench-reset-width", (180 + 152 + 40) * scale + "px");
+  dialog.style.setProperty("--wrench-cancel-width", 180 * scale + "px");
+  dialog.style.setProperty("--wrench-ok-width", 152 * scale + "px");
   fitContents();
 }
 
