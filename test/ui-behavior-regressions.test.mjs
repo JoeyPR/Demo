@@ -120,11 +120,13 @@ test("player chat has a history pane above a compact Growtopia-style input row",
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(js, /P\.rtfont\?\.color\('7', 'Enter a message here'\)/);
   assert.match(js, /make\('span', 'player-chat-counter', '0\/120'\)/);
+  assert.match(js, /inputField.append\(textarea, inputHint\)/);
+  assert.match(js, /inputRow.append\(inputField, counter\)/);
   assert.match(js, /counter\.textContent = length \+ '\/' \+ MAX_LENGTH/);
   assert.match(js, /textarea\.maxLength = MAX_LENGTH \* 2/);
   assert.match(js, /Array\.from\(textarea\.value\)\.length/);
   assert.match(css, /#player-chat-log\{position:relative;flex:1 1 auto/);
-  assert.match(css, /\.player-chat-input-row\{[^}]*height:34px/);
+  assert.match(css, /\.player-chat-input-row\{[^}]*height:30px/);
 });
 
 test("chat history uses fixed EST timestamps, preserves RTFont, and formats title/world roles", () => {
@@ -173,9 +175,12 @@ test("topBar keeps its panel frame and the separate input field fills its width"
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?background:transparent;border:0/);
   assert.match(css, /#player-chat-log\{[\s\S]*?background:var\(--fill\);border:var\(--bd\) solid var\(--line\)/);
-  assert.match(css, /\.player-chat-input-row\{[\s\S]*?width:100%[\s\S]*?height:34px/);
-  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 16px/);
+  assert.match(css, /\.player-chat-input-row\{[\s\S]*?width:100%[\s\S]*?height:30px/);
+  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 20px/);
   assert.match(css, /\.player-chat-entry\{[^}]*text-align:left/);
+  assert.match(css, /#playerChat:focus-visible\{outline:none!important/);
+  assert.match(css, /\.player-chat-input-field\{position:relative/);
+  assert.match(css, /\.player-chat-counter\{position:static/);
 });
 
 test("live preview controls are small green Play and red two-bar Pause circles", () => {
@@ -183,6 +188,8 @@ test("live preview controls are small green Play and red two-bar Pause circles",
   const css = read("../css/preview-mode.css");
   assert.match(js, /icon\.textContent=live\?'':'>'/);
   assert.match(js, /Pause Live Preview/);
+  assert.match(js, /rect.top-height-8/);
+  assert.match(js, /rect.left\+\(rect.width-width\)\/2/);
   assert.doesNotMatch(js, /live-preview-run\.png|Live Preview'<\/span>/);
   assert.match(css, /width:32px;height:32px/);
   assert.match(css, /background:#249b4b/);
@@ -195,6 +202,20 @@ test("paused Preview hides player chat/menu controls and clears the live chat st
   const css = read("../css/player-chat.css");
   const js = read("../js/player-chat.js");
   assert.match(css, /body:not\(\.live-preview\) #preview-actions,[\s\S]*?body:not\(\.live-preview\) #topBar,[\s\S]*?body:not\(\.live-preview\) #player-chat-bubble\{display:none!important/);
+  assert.match(css, /body:not\(\.live-preview\) #pads\{display:none!important/);
   assert.match(js, /P\.on\('preview-mode', mode => \{/);
   assert.match(js, /if \(!mode\?\.live\) \{\s*close\(\);\s*clear\(\);/);
+});
+
+test("decoded role skins and expressions are connected to the player renderer", () => {
+  const custom = read("../js/customization.js");
+  const renderer = read("../demo/engine/render.mjs");
+  const app = read("../js/app.js");
+  assert.match(custom, /player_head_skin1\\.png/);
+  assert.match(custom, /player_head_skin6\\.png/);
+  assert.match(custom, /player_head_skin9\\.png/);
+  assert.match(custom, /player_eyes3\\.png/);
+  assert.match(renderer, /player_face2\\.png/);
+  assert.match(renderer, /player_iris1\\.png/);
+  assert.match(app, /playerAppearanceVisual\\(\\)/);
 });
