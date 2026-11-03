@@ -46,7 +46,7 @@
   chatLog.setAttribute('aria-label', 'Chat history');
   const inputRow = make('div', 'player-chat-input-row');
   const textarea = make('textarea', 'playerChat');
-  textarea.name = 'playerChat'; textarea.maxLength = MAX_LENGTH; textarea.rows = 1;
+  textarea.name = 'playerChat'; textarea.maxLength = MAX_LENGTH * 2; textarea.rows = 1;
   textarea.placeholder = ''; textarea.autocomplete = 'off'; textarea.spellcheck = false;
   textarea.setAttribute('aria-label', 'Player Chat message');
   textarea.setAttribute('enterkeyhint', 'send');
@@ -144,7 +144,14 @@
     chatLog.scrollTop = chatLog.scrollHeight;
   }
   function updateInputCounter() {
-    const length = textarea.value.length;
+    const characters = Array.from(textarea.value);
+    if (characters.length > MAX_LENGTH) {
+      const cursor = Array.from(textarea.value.slice(0, textarea.selectionStart ?? textarea.value.length)).length;
+      textarea.value = characters.slice(0, MAX_LENGTH).join('');
+      const nextCursor = characters.slice(0, Math.min(cursor, MAX_LENGTH)).join('').length;
+      textarea.setSelectionRange(nextCursor, nextCursor);
+    }
+    const length = Array.from(textarea.value).length;
     counter.textContent = length + '/' + MAX_LENGTH;
     inputHint.hidden = length > 0;
   }
