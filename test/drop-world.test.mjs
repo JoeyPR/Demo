@@ -11,8 +11,8 @@ import {
 const sample = (worldY = 0) => ({ spawnedAt:0, startX:0, targetX:18, worldX:18, startY:worldY + PICKUP_HOVER_HEIGHT-2, targetY:worldY + PICKUP_HOVER_HEIGHT, worldY:worldY + PICKUP_HOVER_HEIGHT, collectAt:null, collectStartX:null, collectStartY:null });
 const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
 
-test("the complete pickup box is two rendered pixels larger", () => {
-  assert.equal(PICKUP_BOX_EXTRA_SIZE, 2);
+test("the complete pickup box has four extra rendered pixels (two more than before)", () => {
+  assert.equal(PICKUP_BOX_EXTRA_SIZE, 4);
   assert.ok(app.includes("const boxBaseSize = baseSize + PICKUP_BOX_EXTRA_SIZE;"));
   assert.ok(app.includes("const size = boxBaseSize * pose.scale;"));
 });
