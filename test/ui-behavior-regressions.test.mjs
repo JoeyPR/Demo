@@ -211,11 +211,11 @@ test("decoded role skins and expressions are connected to the player renderer", 
   const custom = read("../js/customization.js");
   const renderer = read("../demo/engine/render.mjs");
   const app = read("../js/app.js");
-  assert.match(custom, /player_head_skin1\\.png/);
-  assert.match(custom, /player_head_skin6\\.png/);
-  assert.match(custom, /player_head_skin9\\.png/);
-  assert.match(custom, /player_eyes3\\.png/);
-  assert.match(renderer, /player_face2\\.png/);
-  assert.match(renderer, /player_iris1\\.png/);
-  assert.match(app, /playerAppearanceVisual\\(\\)/);
+  assert.ok(custom.includes("player_head_skin1.png"));
+  assert.ok(custom.includes("player_head_skin6.png"));
+  assert.ok(custom.includes("player_head_skin9.png"));
+  assert.ok(custom.includes("player_eyes3.png"));
+  assert.ok(renderer.includes("player_face2.png"));
+  assert.ok(renderer.includes("player_iris1.png"));
+  assert.ok(app.includes("playerAppearanceVisual()"));
 });
