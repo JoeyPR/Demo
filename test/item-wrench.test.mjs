@@ -405,17 +405,16 @@ test("Rift Cape collar flag removes only the separately identified collar tc lay
 });
 
 
-test("fav-box is a compact overlay and the ordinary inventory frame remains intact", () => {
+test("Codex favorite badge is a compact overlay and the ordinary inventory frame remains intact", () => {
   const css = read("../css/inv.css");
   const grid = read("../js/grid.js");
-  assert.match(css, /\.box\s*\{[^}]*background:url\(\.\.\/img\/box-white\.png\)/);
-  assert.match(css, /\.box \.fv\s*\{[^}]*width:28%[^}]*height:28%/);
-  assert.match(css, /\.box\.fav \.fv\s*\{\s*display:block/);
-  assert.match(grid, /mark\.src = 'img\/fav-box\.png'/);
-  assert.match(grid, /syncFavoriteMark\(b, favs\.has\(it\.id\)\)/);
-  assert.doesNotMatch(grid, /favorite-badge\.png/);
-  assert.doesNotMatch(css, /favorite-badge\.png|\.box\.fav-special/);
-  assert.doesNotMatch(css, /\.box\.fav,\.box\.fav\.sel[\s\S]*?background-image:/);
+  assert.ok(css.includes(".box .fv{position:absolute;right:2%;top:2%;width:30%;height:30%;object-fit:contain"));
+  assert.ok(css.includes(".box.fav .fv{display:block}"));
+  assert.ok(grid.includes("fv.src = 'img/favorite-badge.png'"));
+  assert.ok(!grid.includes("fav-box.png"));
+  assert.ok(!grid.includes("syncFavoriteMark"));
+  assert.ok(css.includes(".box.fav-special{background-image:url(../img/box-fav.png)"));
+  assert.ok(!css.includes(".box.fav,.box.fav.sel"));
 });
 
 test("the item Wrench shares Drop/Info styling in a responsive 3:4 dialog", () => {

@@ -103,7 +103,7 @@ test("player chat has a history pane above a compact Growtopia-style input row",
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(js, /P\.rtfont\?\.color\('7', 'Enter a message here'\)/);
   assert.match(js, /make\('span', 'player-chat-counter', '0\/120'\)/);
-  assert.match(js, /inputField.append\(textarea, inputHint\)/);
+  assert.match(js, /inputField\.append\(textarea, inputHint, inputText\)/);
   assert.match(js, /inputRow.append\(inputField, counter\)/);
   assert.match(js, /counter\.textContent = length \+ '\/' \+ MAX_LENGTH/);
   assert.match(js, /textarea\.maxLength = MAX_LENGTH \* 2/);
