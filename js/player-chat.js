@@ -176,12 +176,12 @@
     if (bubble.hidden || !anchor) return;
     const width = Math.max(80, Math.min(360, area.right - area.left - 20));
     bubble.style.maxWidth = width + 'px';
-    // Text follows the same world-to-screen scale as the player. A fixed 16px
-    // minimum made small phone avatars speak in oversized floating panels.
-    const fontSize = Math.max(6, Math.min(48, (anchor.scale || 1) * 7));
+    // The Growtopia speech box has one screen-space font size; its box grows
+    // naturally with the number of wrapped text lines, never with camera zoom.
+    const fontSize = 9;
     bubble.style.setProperty('--player-chat-font-size', fontSize + 'px');
-    bubble.style.setProperty('--player-chat-pad-y', Math.max(2, fontSize * .22) + 'px');
-    bubble.style.setProperty('--player-chat-pad-x', Math.max(4, fontSize * .36) + 'px');
+    bubble.style.setProperty('--player-chat-pad-y', '3px');
+    bubble.style.setProperty('--player-chat-pad-x', '6px');
     let rect = bubble.getBoundingClientRect(), right = area.right;
     const controls = actions.getBoundingClientRect();
     const proposedRight = Math.min(area.right - 8, anchor.x + rect.width / 2);
@@ -196,7 +196,7 @@
     }
     const x = Math.min(right - rect.width / 2 - 8, Math.max(area.left + rect.width / 2 + 8, anchor.x));
     const y = Math.max(area.top + rect.height / 2 + 4,
-      Math.min(area.bottom - rect.height / 2 - 4, anchor.y));
+      Math.min(area.bottom - rect.height / 2 - 4, anchor.y - 8));
     bubble.style.left = x + 'px'; bubble.style.top = y + 'px';
   }
   function layoutPreview() {
@@ -363,7 +363,6 @@
     if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) { anchor = { ...point }; positionBubble(); }
   });
   P.on('preview', position);
-  P.on('camzoom', position);
   P.on('preview-mode', position);
   P.on('drawer', position);
   P.on('boot', position);
