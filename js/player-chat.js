@@ -39,13 +39,26 @@
   const composer = make('form', 'player-chat-composer');
   composer.className = 'panel'; composer.hidden = true; composer.inert = true;
   composer.setAttribute('aria-label', 'Player Chat');
+  const chatLog = make('div', 'player-chat-log');
+  chatLog.setAttribute('role', 'log');
+  chatLog.setAttribute('aria-live', 'polite');
+  chatLog.setAttribute('aria-relevant', 'additions');
+  chatLog.setAttribute('aria-label', 'Chat history');
+  const inputRow = make('div', 'player-chat-input-row');
   const textarea = make('textarea', 'playerChat');
   textarea.name = 'playerChat'; textarea.maxLength = MAX_LENGTH; textarea.rows = 1;
-  textarea.placeholder = 'Enter message here'; textarea.autocomplete = 'off'; textarea.spellcheck = false;
-  textarea.setAttribute('aria-label', 'Player Chat');
+  textarea.placeholder = ''; textarea.autocomplete = 'off'; textarea.spellcheck = false;
+  textarea.setAttribute('aria-label', 'Player Chat message');
   textarea.setAttribute('enterkeyhint', 'send');
-  textarea.setAttribute('aria-description', 'Enter to speak. Shift+Enter for a new line.');
-  composer.append(textarea);
+  textarea.setAttribute('aria-description', '120 character maximum. Press Enter to send.');
+  const inputHint = make('span', 'player-chat-placeholder', P.rtfont?.color('7', 'Enter a message here') || 'Enter a message here');
+  inputHint.setAttribute('aria-hidden', 'true');
+  const counter = make('span', 'player-chat-counter', '0/120');
+  counter.setAttribute('aria-live', 'off');
+  inputRow.append(textarea, inputHint, counter);
+  chatLog.dataset.empty = 'true';
+  composer.append(chatLog, inputRow);
+  P.rtfont?.scan(inputHint);
   // Use the inventory's actual desktop/mobile artwork and frame variants.
   const inventoryHandle = document.getElementById('handle');
   const handle = inventoryHandle.cloneNode(true);
@@ -66,6 +79,10 @@
   let speechState = null, speechVersion = 0;
   let reveal = 0, maxReveal = 0, drag = null;
   let lastReveal = Number(P.store.get('topBarHeight', 0)) || 0;
+  let worldRole = ['owner', 'admin'].includes(P.store.get('playerChatWorldRole', ''))
+    ? P.store.get('playerChatWorldRole', '') : '';
+  const MAX_LOG_MESSAGES = 50;
+  const EST_OFFSET_MS = 5 * 60 * 60 * 1000;
   const MIN_REVEAL = 40;
   const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
   const now = () => window.performance?.now() ?? Date.now();
@@ -78,6 +95,59 @@
         : elapsedMs >= speechState.durationMs - FADE_OUT_MS ? 'leaving' : 'visible' };
   }
   const nextPaint = callback => (window.requestAnimationFrame ?? (fn => window.setTimeout(fn, 0)))(callback);
+  function formatESTTimestamp(atMs = Date.now()) {
+    const est = new Date(Number(atMs) - EST_OFFSET_MS);
+    const pad = value => String(value).padStart(2, '0');
+    const time = [pad(est.getUTCHours()), pad(est.getUTCMinutes()), pad(est.getUTCSeconds())].join(':');
+    return P.rtfont?.color('o', '[' + time + ']') || '[' + time + ']';
+  }
+  function formatPlayerName() {
+    const profile = P.plateConfig?.get?.() ?? {};
+    const rawGrowId = P.rtfont?.sanitizeGrowId
+      ? P.rtfont.sanitizeGrowId(String(profile.growId ?? ''), 19)
+      : String(profile.growId ?? '');
+    const titles = new Set(Array.isArray(profile.titles) ? profile.titles : []);
+    const isDoctor = titles.has('dr');
+    const isLegend = titles.has('legend');
+    let name = (isDoctor ? 'Dr. ' : '') + (P.rtfont?.strip(rawGrowId) ?? rawGrowId);
+    if (isLegend) name += ' of Legend';
+
+    // World ranks take precedence, then name titles; otherwise preserve custom GrowID colors.
+    const forcedCode = worldRole === 'owner' ? '2'
+      : worldRole === 'admin' ? '^'
+      : isDoctor ? '4'
+      : isLegend ? '9' : '';
+    if (forcedCode) return P.rtfont?.color(forcedCode, name) ?? name;
+    if (P.rtfont?.hasCodes(rawGrowId)) return rawGrowId;
+    return P.rtfont?.color('w', name) ?? name;
+  }
+  function appendChatLogMessage(message, atMs = Date.now()) {
+    const row = make('div');
+    row.className = 'player-chat-entry';
+    const time = make('span');
+    time.className = 'player-chat-time';
+    time.textContent = formatESTTimestamp(atMs) + ' ';
+    const name = make('span');
+    name.className = 'player-chat-name';
+    name.textContent = formatPlayerName();
+    const separator = make('span');
+    separator.className = 'player-chat-separator';
+    separator.textContent = ': ';
+    const body = make('span');
+    body.className = 'player-chat-message';
+    body.textContent = message;
+    row.append(time, name, separator, body);
+    chatLog.append(row);
+    P.rtfont?.scan(row);
+    while (chatLog.children.length > MAX_LOG_MESSAGES) chatLog.firstElementChild.remove();
+    chatLog.dataset.empty = chatLog.children.length ? 'false' : 'true';
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  function updateInputCounter() {
+    const length = textarea.value.length;
+    counter.textContent = length + '/' + MAX_LENGTH;
+    inputHint.hidden = length > 0;
+  }
   function visiblePreview() {
     const vv = window.visualViewport;
     const left = vv?.offsetLeft ?? 0, top = vv?.offsetTop ?? 0;
@@ -91,8 +161,9 @@
     return area;
   }
   function resizeInput() {
-    // The handle controls the available input height; long text scrolls inside it.
+    // The handle controls the chat-log height; the compact input row stays fixed.
     textarea.style.height = '100%';
+    updateInputCounter();
   }
   function positionBubble(area = visiblePreview()) {
     if (bubble.hidden || !anchor) return;
@@ -148,16 +219,16 @@
     actions.style.left = area.right - actions.offsetWidth - gap + 'px';
     actions.style.top = area.top + gap + 'px';
     const source = inventoryHandle.getBoundingClientRect();
-    const handleHeight = Math.max(1, source.height);
-    const width = Math.max(120, area.right - area.left - gap * 2);
-    topBar.style.left = area.left + gap + 'px';
-    topBar.style.top = area.top + 2 + 'px';
+    const handleWidth = Math.max(1, source.width * 0.9);
+    const handleHeight = Math.max(1, source.height * 0.9);
+    const width = Math.max(120, area.right - area.left);
+    topBar.style.left = area.left + 'px';
+    topBar.style.top = area.top + 'px';
     topBar.style.width = width + 'px';
-    handle.style.width = source.width + 'px';
-    const center = source.left + source.width / 2;
-    handle.style.left = clamp(center - (area.left + gap) - source.width / 2, 0,
-      Math.max(0, width - source.width)) + 'px';
-    maxReveal = Math.max(0, area.bottom - area.top - handleHeight - gap - 2);
+    handle.style.width = handleWidth + 'px';
+    handle.style.height = handleHeight + 'px';
+    handle.style.left = Math.max(0, (width - handleWidth) / 2) + 'px';
+    maxReveal = Math.max(0, area.bottom - area.top - handleHeight);
     const mode = document.getElementById('preview-mode-toggle')?.getBoundingClientRect();
     topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - area.left + 4 : 8) + 'px');
     topBar.style.setProperty('--topbar-right-reserve', actions.offsetWidth + 8 + 'px');
@@ -182,8 +253,8 @@
   }
   function open() {
     position();
-    const defaultHeight = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)').matches ? 44 : 58;
-    setReveal(Math.max(MIN_REVEAL, lastReveal || defaultHeight));
+    const defaultHeight = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)').matches ? 132 : 160;
+    setReveal(Math.min(maxReveal, Math.max(MIN_REVEAL, lastReveal || defaultHeight)));
     resizeInput();P.emit('player-chat-open');focusInput();
   }
   handle.addEventListener('pointerdown', event => {
@@ -247,6 +318,8 @@
       P.emit('player-command', { command: 'dance', atMs: now() });
       return true;
     }
+    const messageAtMs = Date.now();
+    appendChatLogMessage(text, messageAtMs);
     clear(); lastText = text; speech.textContent = text;
     P.rtfont?.scan(speech);
     bubble.hidden = false;
@@ -269,7 +342,7 @@
   }
   chatButton.addEventListener('click', () => opened ? close() : open());
   composer.addEventListener('submit', event => { event.preventDefault(); submit(); });
-  textarea.addEventListener('input', () => { resizeInput(); position(); });
+  textarea.addEventListener('input', () => { resizeInput(); updateInputCounter(); position(); });
   textarea.addEventListener('keydown', event => {
     event.stopPropagation();
     if (event.isComposing || event.keyCode === 229) return;
@@ -291,10 +364,21 @@
   window.visualViewport?.addEventListener('resize', position);
   window.visualViewport?.addEventListener('scroll', position);
   document.fonts?.ready.then(position);
-  P.playerChat = { open, close, submit, clear, reposition: position, stateAt, durationMs: SPEECH_MS,
+  P.playerChat = {
+    open, close, submit, clear, reposition: position, stateAt, durationMs: SPEECH_MS,
+    formatESTTimestamp, formatPlayerName, appendChatLogMessage,
+    getWorldRole: () => worldRole,
+    setWorldRole(role) {
+      worldRole = ['owner', 'admin'].includes(role) ? role : '';
+      P.store.set('playerChatWorldRole', worldRole);
+      return worldRole;
+    },
     get speech() { return stateAt(); },
     get isOpen() { return opened; }, get text() { return lastText; }, get draft() { return textarea.value; },
-    get maxLength() { return MAX_LENGTH; }, get height() { return reveal; }, get maxHeight() { return maxReveal; } };
+    get maxLength() { return MAX_LENGTH; }, get height() { return reveal; }, get maxHeight() { return maxReveal; },
+    get logCount() { return chatLog.children.length; }
+  };
+  updateInputCounter();
   position();
   nextPaint(position);
 })();

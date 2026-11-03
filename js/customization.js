@@ -108,6 +108,23 @@
     growWrap.append(growLabel, growInput);
     fields.append(growWrap);
 
+    /* world rank affects the displayed chat-log name only; it does not grant game permissions. */
+    const chatWorldWrap = el('div', 'custom-field');
+    const chatWorldLabel = el('label', 'custom-label', 'World Rank (Chat Preview)');
+    chatWorldLabel.htmlFor = 'player-chat-world-rank';
+    const chatWorldSelect = el('select', 'custom-select');
+    chatWorldSelect.id = 'player-chat-world-rank';
+    chatWorldSelect.setAttribute('aria-label', 'World rank for chat preview');
+    for (const [value, label] of [['', 'Regular Player'], ['owner', 'World Owner'], ['admin', 'World Admin']]) {
+      const option = el('option', '', label);
+      option.value = value;
+      chatWorldSelect.append(option);
+    }
+    chatWorldSelect.value = P.playerChat?.getWorldRole?.() ?? '';
+    chatWorldSelect.addEventListener('change', () => P.playerChat?.setWorldRole(chatWorldSelect.value));
+    chatWorldWrap.append(chatWorldLabel, chatWorldSelect);
+    fields.append(chatWorldWrap);
+
     /* role icon row */
     const roleWrap = el('div', 'custom-field');
     roleWrap.append(el('label', 'custom-label', 'Role Icon'));
