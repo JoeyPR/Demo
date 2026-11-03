@@ -34,9 +34,14 @@ const pickupSprite = new Image();
 pickupSprite.src = moduleURL("../img/pickup.png").href;
 
 const initialSkin = SKINS[resolveStoredSkin(P.store.get("skin", 0))];
+const savedAppearance = P.playerAppearance ?? P.store.get("playerAppearance", {});
+const appearanceCatalog = P.playerAppearanceCatalog ?? { roleSkins: [], faces: [] };
+const appearanceIndex = (value, length) => { const index=Number(value); return Number.isInteger(index)&&index>=0&&index<length?index:0; };
 
 const state = {
   catalog: null, equipped: new Map(), skin: initialSkin.rgb, skinPalette: initialSkin.palette,
+  roleSkin: appearanceIndex(savedAppearance?.roleSkin, appearanceCatalog.roleSkins.length),
+  expression: appearanceIndex(savedAppearance?.expression, appearanceCatalog.faces.length),
   resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
   lastFrame: null, lastResult: null, ready: false, remainder: 0,
   weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
@@ -51,6 +56,11 @@ const state = {
 };
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
+function playerAppearanceVisual() {
+  return { roleSkin: appearanceCatalog.roleSkins[state.roleSkin] ?? appearanceCatalog.roleSkins[0] ?? null,
+    expression: appearanceCatalog.faces[state.expression] ?? appearanceCatalog.faces[0] ?? null,
+    whites: P.dyes?.whites ?? [255,255,255], pupils: P.dyes?.pupils ?? [0,0,0] };
+}
 
 /* ---------------- atlas loading (from the Demo renderer) ---------------- */
 function loadAtlas(name) {
@@ -183,11 +193,11 @@ P.on("skin", id => {
   const skin = SKINS[resolveStoredSkin(id)];
   state.skin = skin.rgb;
   state.skinPalette = skin.palette;
-  // Refresh currently mounted inventory canvases that use skin-relative tint.
-  // The grid is virtualized, so this touches only the visible boxes.
-  document.querySelectorAll(".box .ic canvas").forEach(canvas => {
-    if (canvas.__demoItem) renderDemoInventoryIcon(canvas, canvas.__demoItem, state.skin);
-  });
+  document.querySelectorAll(".box .ic canvas").forEach(canvas => { if (canvas.__demoItem) renderDemoInventoryIcon(canvas, canvas.__demoItem, state.skin); });
+});
+P.on("player-appearance", appearance => {
+  state.roleSkin = appearanceIndex(appearance?.roleSkin, appearanceCatalog.roleSkins.length);
+  state.expression = appearanceIndex(appearance?.expression, appearanceCatalog.faces.length);
 });
 P.on("player-command", event => {
   if (event.command === "dance" && state.lastFrame?.ground) {
@@ -249,7 +259,7 @@ function step(dt) {
   state.lastFrame = frame;
   state.lastResult = player.step(
     withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
-    { skin: state.skin, skinPalette: state.skinPalette, effects: state.effectsEnabled, talking, dance });
+    { skin: state.skin, skinPalette: state.skinPalette, effects: state.effectsEnabled, talking, dance, ...playerAppearanceVisual() });
   if (dance && state.lastResult.pose.dance) {
     frame.facing = state.lastResult.pose.dance.facing;
     motion.facing = frame.facing;
@@ -1120,7 +1130,7 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     state.lastFrame = motion.snapshot();
     state.lastResult = player.step(
       withPetHost({ ...state.lastFrame, worldX: state.lastFrame.x, worldY: state.lastFrame.y, x: 0, y: 0 }), 0,
-      { skin: state.skin, skinPalette: state.skinPalette, effects: true });
+      { skin: state.skin, skinPalette: state.skinPalette, effects: true, ...playerAppearanceVisual() });
     state.equipped.clear();
     state.abilities = resolveAbilities([], state.abilityRegistry);
     motion.setAbilities(state.abilities);
