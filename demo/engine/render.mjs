@@ -49,7 +49,7 @@ function baseCalls(pose,wear,profile,visual={}) {
     const x=selected?.x??motionFace[0]??0, y=selected?.y??motionFace[1]??0, sheet=selected?.sheet??"player_eyes.png";
     const layer2=selected?selected.layer2===true:true;
     body("eyes",sheet,x*32,y*32,32,32,IDENTITY,"BODY",visual.whites??null,1);
-    if(layer2) body("eyelids",sheet,x*32,(y+4)*32,32,32,IDENTITY,"BODY",null,1);
+    if(layer2) body("eyelids",sheet,x*32,(y+4)*32,32,32,IDENTITY,"BODY",wear.skin.slice(0,3),1);
     else if(sheet==="player_eyes3.png") {
       body("expressionFace","player_face2.png",x*32,0,32,32,IDENTITY,"BODY",null,1);
       body("expressionIris","player_iris1.png",x*32,0,32,32,IDENTITY,"BODY",visual.pupils??[0,0,0],1);
