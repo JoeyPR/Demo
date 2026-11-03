@@ -154,21 +154,27 @@ test("Player Customization exposes Owner/Admin rank options for chat-name color 
 test("speech chatbox auto-sizes to its text, stays centered and screen-sized independent of zoom", () => {
   const js = read("../js/player-chat.js");
   const css = read("../css/player-chat.css");
-  assert.match(js, /const fontSize = 9/);
+  assert.match(js, /const fontSize = 13/);
   assert.doesNotMatch(js, /P\.on\('camzoom', position\)/);
-  assert.match(js, /anchor\.y - 8/);
+  assert.match(js, /anchor\.y - 18/);
+  assert.match(js, /const x = clamp\(anchor\.x/);
   assert.match(css, /width:max-content;height:auto/);
-  assert.match(css, /font:400 9px\/1\.15/);
+  assert.match(css, /font:400 var\(--player-chat-font-size,13px\)/);
+  assert.match(css, /max-width:min\(460px,calc\(100vw - 24px\)\)/);
   assert.match(css, /text-align:center/);
   assert.match(css, /border-radius:calc\(var\(--radius\) \+ 1px\)/);
 });
 
 test("topBar keeps its panel frame and the separate input field fills its width", () => {
   const css = read("../css/player-chat.css");
-  assert.match(css, /#player-chat-composer\{[\s\S]*?background:rgba\(39,125,159,\.88\)/);
-  assert.match(css, /border-radius:calc\(var\(--radius\) \+ 1px\)/);
+  const js = read("../js/player-chat.js");
+  assert.match(js, /chatLog\.className = 'player-chat-log panel'/);
+  assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
+  assert.match(css, /#player-chat-composer\{[\s\S]*?background:transparent;border:0/);
+  assert.match(css, /#player-chat-log\{[\s\S]*?background:var\(--fill\);border:var\(--bd\) solid var\(--line\)/);
   assert.match(css, /\.player-chat-input-row\{[\s\S]*?width:100%[\s\S]*?height:34px/);
   assert.match(css, /#player-chat-log\{[\s\S]*?font:400 16px/);
+  assert.match(css, /\.player-chat-entry\{[^}]*text-align:left/);
 });
 
 test("live preview controls are small green Play and red two-bar Pause circles", () => {
@@ -181,4 +187,13 @@ test("live preview controls are small green Play and red two-bar Pause circles",
   assert.match(css, /background:#249b4b/);
   assert.match(css, /background:#d63b3b/);
   assert.match(css, /linear-gradient\(to right,#fff 0 3px,transparent 3px 8px,#fff 8px 11px\)/);
+});
+
+
+test("paused Preview hides player chat/menu controls and clears the live chat state", () => {
+  const css = read("../css/player-chat.css");
+  const js = read("../js/player-chat.js");
+  assert.match(css, /body:not\(\.live-preview\) #preview-actions,[\s\S]*?body:not\(\.live-preview\) #topBar,[\s\S]*?body:not\(\.live-preview\) #player-chat-bubble\{display:none!important/);
+  assert.match(js, /P\.on\('preview-mode', mode => \{/);
+  assert.match(js, /if \(!mode\?\.live\) \{\s*close\(\);\s*clear\(\);/);
 });

@@ -37,14 +37,15 @@
   const topBar = make('section', 'topBar');
   topBar.setAttribute('aria-label', 'Chat top bar');
   const composer = make('form', 'player-chat-composer');
-  composer.className = 'panel'; composer.hidden = true; composer.inert = true;
+  composer.hidden = true; composer.inert = true;
   composer.setAttribute('aria-label', 'Player Chat');
   const chatLog = make('div', 'player-chat-log');
+  chatLog.className = 'player-chat-log panel';
   chatLog.setAttribute('role', 'log');
   chatLog.setAttribute('aria-live', 'polite');
   chatLog.setAttribute('aria-relevant', 'additions');
   chatLog.setAttribute('aria-label', 'Chat history');
-  const inputRow = make('div', 'player-chat-input-row');
+  const inputRow = make('div', 'player-chat-input-row panel');
   const textarea = make('textarea', 'playerChat');
   textarea.name = 'playerChat'; textarea.maxLength = MAX_LENGTH * 2; textarea.rows = 1;
   textarea.placeholder = ''; textarea.autocomplete = 'off'; textarea.spellcheck = false;
@@ -174,30 +175,23 @@
   }
   function positionBubble(area = visiblePreview()) {
     if (bubble.hidden || !anchor) return;
-    const width = Math.max(80, Math.min(360, area.right - area.left - 20));
-    bubble.style.maxWidth = width + 'px';
-    // The Growtopia speech box has one screen-space font size; its box grows
-    // naturally with the number of wrapped text lines, never with camera zoom.
-    const fontSize = 9;
+
+    // Keep the font in screen pixels; the bubble grows with the message content.
+    const maxWidth = Math.max(80, Math.min(460, area.right - area.left - 24));
+    bubble.style.maxWidth = maxWidth + 'px';
+    const fontSize = 13;
     bubble.style.setProperty('--player-chat-font-size', fontSize + 'px');
-    bubble.style.setProperty('--player-chat-pad-y', '3px');
-    bubble.style.setProperty('--player-chat-pad-x', '6px');
-    let rect = bubble.getBoundingClientRect(), right = area.right;
-    const controls = actions.getBoundingClientRect();
-    const proposedRight = Math.min(area.right - 8, anchor.x + rect.width / 2);
-    // A long message in the short phone preview can reach the top row. Keep
-    // its text beside the controls rather than drawing underneath the icons.
-    if (anchor.y - rect.height / 2 < controls.bottom + 8 && proposedRight > controls.left - 8) {
-      const besideControls = controls.left - area.left - 24;
-      if (besideControls >= 80) {
-        bubble.style.maxWidth = Math.min(width, besideControls) + 'px';
-        rect = bubble.getBoundingClientRect(); right = controls.left - 8;
-      }
-    }
-    const x = Math.min(right - rect.width / 2 - 8, Math.max(area.left + rect.width / 2 + 8, anchor.x));
-    const y = Math.max(area.top + rect.height / 2 + 4,
-      Math.min(area.bottom - rect.height / 2 - 4, anchor.y - 8));
-    bubble.style.left = x + 'px'; bubble.style.top = y + 'px';
+    bubble.style.setProperty('--player-chat-pad-y', '4px');
+    bubble.style.setProperty('--player-chat-pad-x', '8px');
+
+    const rect = bubble.getBoundingClientRect();
+    // Center on the player's nameplate anchor, only clamping at viewport edges.
+    const x = clamp(anchor.x, area.left + rect.width / 2 + 8,
+      area.right - rect.width / 2 - 8);
+    const y = clamp(anchor.y - 18, area.top + rect.height / 2 + 4,
+      area.bottom - rect.height / 2 - 4);
+    bubble.style.left = x + 'px';
+    bubble.style.top = y + 'px';
   }
   function layoutPreview() {
     const rect = preview.getBoundingClientRect();
@@ -363,7 +357,13 @@
     if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) { anchor = { ...point }; positionBubble(); }
   });
   P.on('preview', position);
-  P.on('preview-mode', position);
+  P.on('preview-mode', mode => {
+    position();
+    if (!mode?.live) {
+      close();
+      clear();
+    }
+  });
   P.on('drawer', position);
   P.on('boot', position);
   window.addEventListener('resize', position);

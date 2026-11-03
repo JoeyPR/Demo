@@ -13,10 +13,13 @@ the handle with arrows or Enter. Menu, Chat and Run remain anchored in their
 corners. The input reserves room for those controls.
 
 The old popup header, help row and action buttons are removed. The input's
-placeholder is **Enter message here**. topBar uses the same `--fill`, `--line`,
-`--bd`, `--radius` and `--sh` panel treatment as the existing dialogs. Input and
-drag gestures release held actions and cannot trigger canvas punches or zoom.
-The original inventory handle and drawer remain independent.
+placeholder is **Enter a message here**. The TopBar is built from two distinct,
+full-width panels: the message history above and the compact input panel below,
+matching the supplied in-game reference capture. Each uses the Demo's shared
+`.panel` fill, border, radius, outer shadow and inset edge treatment. The form
+itself is only a transparent layout wrapper. Input and drag gestures release
+held actions and cannot trigger canvas punches or zoom. The original inventory
+handle and drawer remain independent.
 
 ## Chat font and speech
 
@@ -27,9 +30,11 @@ commit `0ce4d28c8e20a549d81878b90cea57419f3eb46d`, before its removal in
 faces. Font hash and provenance are in
 [`evidence/player-chat-font.json`](../evidence/player-chat-font.json).
 
-Speech has more padding between the text and bubble border. Existing fixed
-five-second duration, one-second fades, safe RTFont runs, typing indicator and
-negative-Drop response remain.
+Speech is centered over the live player's nameplate anchor and lifted slightly
+above it. Its 13px screen-space text does not scale with camera zoom; the
+content-sized bubble grows with the message and wraps at the viewport width.
+Existing fixed five-second duration, 500ms fades, safe RTFont runs, typing
+indicator and negative-Drop response remain.
 
 ## Arms and held items
 
@@ -60,9 +65,9 @@ and limits are in
   filters or the dropped/stored state of an inventory copy. Membership updates
   immediately when equipment changes. Its search and category controls are
   disabled while that complete view is active.
-- The supplied Run artwork starts Live Preview; returning to Preview keeps the
-  existing accessible control. The status HUD moves aside if the artwork would
-  overlap it.
+- The compact Play/Pause control starts and stops Live Preview. Menu, Chat and
+TopBar controls are shown only during Live Preview; the Play control remains
+available while Preview is paused.
 - Favorited item boxes use the supplied favorite artwork. No new favorite
   dialog is introduced.
 - Info and Drop **OK** buttons fit their text with equal left/right spacing.
