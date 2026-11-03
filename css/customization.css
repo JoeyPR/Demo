@@ -187,6 +187,12 @@
   .dye-action { min-width: calc(80*var(--u)); min-height: calc(38*var(--u)); font-size: calc(16*var(--u)); }
   .dye-rgb, .dye-rgb code { font-size: calc(16*var(--u)); }
 }
+/* Growtopia decoded player role head selectors. */
+.c-role-skins{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;width:100%}
+.c-role-skin{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:66px;padding:6px 3px;border:2px solid #95C9FF;border-radius:3px;background:#145EAE;color:#CEE1F3;box-shadow:2px 2px 0 #000}
+.c-role-skin img{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
+.c-role-skin-name{max-width:100%;font-size:calc(14*var(--u));line-height:1.1;text-align:center;overflow-wrap:anywhere}
+.c-role-skin.on{border-color:#ffe27e;box-shadow:0 0 0 2px #ffe27e55}
 /* extras for the Website title system panels (roles, skins, titles grid) */
 .c-roles, .c-skins { display: flex; flex-wrap: wrap; gap: 6px; }
 .c-role, .c-skin {
