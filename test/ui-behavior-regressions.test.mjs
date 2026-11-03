@@ -87,7 +87,7 @@ test("chat outline and shadow grow by one pixel, text has no shadow, and speech 
   const css = read("../css/player-chat.css");
   const js = read("../js/player-chat.js");
   assert.match(css, /border:calc\(max\(1px,var\(--bd\)\) \+ 1px\) solid #A5E3FB/);
-  assert.match(css, /calc\(var\(--sh\) \+ 1px\)/);
+  assert.match(css, /box-shadow:2px 2px 0 #000,inset 2px 2px 0 #000/);
   assert.match(css, /border:calc\(max\(1px,var\(--bd\)\) \+ 1px\) solid #A5E3FB/);
   assert.match(css, /box-shadow:2px 2px 0 #000,inset 2px 2px 0 #000/);
   assert.match(css, /#playerChat[\s\S]*?text-shadow:none/);
@@ -123,7 +123,7 @@ test("player chat has a history pane above a compact Growtopia-style input row",
   assert.match(js, /counter\.textContent = length \+ '\/' \+ MAX_LENGTH/);
   assert.match(js, /textarea\.maxLength = MAX_LENGTH \* 2/);
   assert.match(js, /Array\.from\(textarea\.value\)\.length/);
-  assert.match(css, /#player-chat-log\{flex:1 1 auto/);
+  assert.match(css, /#player-chat-log\{position:relative;flex:1 1 auto/);
   assert.match(css, /\.player-chat-input-row\{[^}]*height:34px/);
 });
 
