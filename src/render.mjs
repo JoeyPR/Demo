@@ -28,40 +28,42 @@ export function resolveWear(items,baseSkin=[255,206,180,255]) {
     riderLift:(items.find(i=>i.slot===3&&i.vehicle)??items.find(i=>i.riderLift!==undefined))?.riderLift??0,
     riderShiftX:items.find(i=>i.slot===3&&i.vehicle)?.riderShiftX??0};
 }
-function baseCalls(pose,wear,profile) {
+function baseCalls(pose,wear,profile,visual={}) {
   const out=[];
+  const roleSkin=visual.roleSkin??{};
   const body=(tag,atlas,sx,sy,sw,sh,matrix,pass="BODY",tint=wear.skin.slice(0,3),alpha=wear.alpha)=>{
     if(wear.invisible||wear.hide.has(tag)) return;
     if(wear.hideLegs&&["backFoot","frontFoot","backLeg","frontLeg"].includes(tag)) return;
     out.push({...blank(),tag,atlas,sx,sy,sw,sh,matrix,pass,tint,alpha,skinPalette:tint?wear.skinPalette:null});
   };
   body("body","player_body_only.png",0,0,32,32,IDENTITY);
-  body("head","player_head.png",0,0,32,32,IDENTITY);
-  // Feet are two stacked source rows, not a 32x64 sprite stretched onto one foot.
+  body("head",roleSkin.head??"player_head.png",0,0,32,32,IDENTITY);
   body("backFoot","player_feet.png",0,32,32,32,translate(0,pose.backFoot));
   body("frontFoot","player_feet.png",0,0,32,32,translate(0,pose.frontFoot));
   for(const [tag,x,offset] of [["frontLeg",8,pose.frontFoot],["backLeg",16,pose.backFoot]]) {
-    const h=2+offset;
-    if(h>0.01) body(tag,"player_extraleg.png",x-8,0,8,1,compose(translate(x,28),scale(1,h)));
+    const h=2+offset; if(h>0.01) body(tag,"player_extraleg.png",x-8,0,8,1,compose(translate(x,28),scale(1,h)));
   }
-  if(!wear.hideFace) {
-    const [x,y]=pose.face??[0,0];
-    body("eyes","player_eyes.png",x*32,y*32,32,32,IDENTITY,"BODY",null,1);
-    body("eyelids","player_eyes.png",x*32,(y+4)*32,32,32,IDENTITY,"BODY",wear.skin.slice(0,3),1);
-    if(pose.blink?.closure>0&&blinkFitsFace([x,y])&&!wear.hide.has("eyes")&&!wear.hide.has("eyelids")) {
+  if(!wear.hideFace&&!roleSkin.noFace) {
+    const motionFace=pose.face??[0,0], hasMotionExpression=!!pose.talking?.active||motionFace[0]!==0||motionFace[1]!==0;
+    const selected=visual.expression&&!hasMotionExpression?visual.expression:null;
+    const x=selected?.x??motionFace[0]??0, y=selected?.y??motionFace[1]??0, sheet=selected?.sheet??"player_eyes.png";
+    const layer2=selected?selected.layer2===true:true;
+    body("eyes",sheet,x*32,y*32,32,32,IDENTITY,"BODY",visual.whites??null,1);
+    if(layer2) body("eyelids",sheet,x*32,(y+4)*32,32,32,IDENTITY,"BODY",null,1);
+    else if(sheet==="player_eyes3.png") {
+      body("expressionFace","player_face2.png",x*32,0,32,32,IDENTITY,"BODY",null,1);
+      body("expressionIris","player_iris1.png",x*32,0,32,32,IDENTITY,"BODY",visual.pupils??[0,0,0],1);
+      body("expressionSkin","player_face2.png",x*32,4*32,32,32,IDENTITY,"BODY",wear.skin.slice(0,3),1);
+    }
+    if(sheet!=="player_eyes3.png"&&pose.blink?.closure>0&&blinkFitsFace([x,y])&&!wear.hide.has("eyes")&&!wear.hide.has("eyelids")) {
       const height=Math.min(BLINK_LID.height,Math.ceil(BLINK_LID.height*pose.blink.closure));
-      body("blinkLids",BLINK_LID.atlas,BLINK_LID.sx,BLINK_LID.sy,BLINK_LID.sw,height,
-        translate(0,BLINK_LID.y),"BODY",wear.skin.slice(0,3),1);
+      body("blinkLids",BLINK_LID.atlas,BLINK_LID.sx,BLINK_LID.sy,BLINK_LID.sw,height,translate(0,BLINK_LID.y),"BODY",wear.skin.slice(0,3),1);
     }
   }
   for(const side of ["back","front"]) {
-    if(side==="back"&&pose.punch) {
-      body("backArm","player_puncharm.png",180,0,20,48,punchMatrix(pose.punch,profile),"RenderBackArm");
-    } else {
-      const at=profile.arm[side];
-      const matrix=compose(limbMatrix(side,pose[`${side}Angle`],profile),translate(...at));
-      body(`${side}Arm`,profile.arm.atlas,0,0,profile.arm.w,profile.arm.h,matrix,
-        side==="back"?"RenderBackArm":"RenderFrontArm");
+    if(side==="back"&&pose.punch) body("backArm","player_puncharm.png",180,0,20,48,punchMatrix(pose.punch,profile),"RenderBackArm");
+    else { const at=profile.arm[side], matrix=compose(limbMatrix(side,pose[side+"Angle"],profile),translate(...at));
+      body(side+"Arm",profile.arm.atlas,0,0,profile.arm.w,profile.arm.h,matrix,side==="back"?"RenderBackArm":"RenderFrontArm");
     }
   }
   return out;
@@ -148,7 +150,7 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   if(visibleItems.some(item=>item.slot===3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
   const blink=visual.blinking===false?sampleBlink(0,{enabled:false}):pose.blink??
     sampleBlink(motion.clockMs,{seed:visual.blinkSeed??1,override:visual.blink??motion.blink});
-  let calls=baseCalls({...pose,blink},wear,profile);
+  let calls=baseCalls({...pose,blink},wear,profile,visual);
   for(const item of visibleItems) {
     if(wear.noPants&&item.slot===2) continue;
     calls.push(...sampleItem(item,motion,pose,catalog,profile));
