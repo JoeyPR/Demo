@@ -8,6 +8,61 @@
   const clamp = n => Math.max(0, Math.min(255, Math.round(Number(n) || 0)));
   /* catalog constants (donor's customization-data + site's role/flag lists) */
   const ROLES = ['farmer', 'builder', 'surgeon', 'fisher', 'chef', 'startopian'];
+  const ROLE_SKINS = [
+    { name: 'None', head: 'player_head.png' },
+    { name: 'Farmer', head: 'player_head_skin1.png' },
+    { name: 'Surgeon', head: 'player_head_skin2.png' },
+    { name: 'Builder', head: 'player_head_skin3.png' },
+    { name: 'Fisher', head: 'player_head_skin4.png' },
+    { name: 'Star Captain', head: 'player_head_skin5.png' },
+    { name: 'Chef', head: 'player_head_skin6.png' },
+    { name: 'Headless', head: 'player_head_skin9.png', noFace: true }
+  ];
+  const EXPRESSIONS = [
+    { name: 'Default', sheet: 'player_eyes.png', x: 0, y: 0, layer2: true },
+    { name: 'Smile', sheet: 'player_eyes.png', x: 0, y: 1, layer2: true },
+    { name: 'Laugh', sheet: 'player_eyes.png', x: 7, y: 1, layer2: true },
+    { name: 'Wink', sheet: 'player_eyes.png', x: 4, y: 2, layer2: true },
+    { name: 'Love', sheet: 'player_eyes.png', x: 5, y: 2, layer2: true },
+    { name: 'Tongue', sheet: 'player_eyes.png', x: 2, y: 1, layer2: true },
+    { name: 'Sassy', sheet: 'player_eyes.png', x: 1, y: 2, layer2: true },
+    { name: 'Troll', sheet: 'player_eyes.png', x: 6, y: 2, layer2: true },
+    { name: 'Talk', sheet: 'player_eyes.png', x: 5, y: 1, layer2: true },
+    { name: 'Sing 1', sheet: 'player_eyes.png', x: 2, y: 3, layer2: true },
+    { name: 'Sing 2', sheet: 'player_eyes.png', x: 3, y: 3, layer2: true },
+    { name: 'OMG', sheet: 'player_eyes.png', x: 3, y: 1, layer2: true },
+    { name: 'IDK', sheet: 'player_eyes.png', x: 6, y: 1, layer2: true },
+    { name: 'Sad', sheet: 'player_eyes.png', x: 1, y: 1, layer2: true },
+    { name: 'Mad', sheet: 'player_eyes.png', x: 4, y: 1, layer2: true },
+    { name: 'Pain', sheet: 'player_eyes.png', x: 3, y: 0, layer2: true },
+    { name: 'Punch', sheet: 'player_eyes.png', x: 4, y: 0, layer2: true },
+    { name: 'Jump 1', sheet: 'player_eyes.png', x: 1, y: 0, layer2: true },
+    { name: 'Jump 2', sheet: 'player_eyes.png', x: 2, y: 0, layer2: true },
+    { name: 'Sleep 1', sheet: 'player_eyes.png', x: 2, y: 2, layer2: true },
+    { name: 'Sleep 2', sheet: 'player_eyes.png', x: 3, y: 2, layer2: true },
+    { name: 'Swim', sheet: 'player_eyes.png', x: 4, y: 3, layer2: true },
+    { name: 'Respawn', sheet: 'player_eyes.png', x: 5, y: 0, layer2: true },
+    { name: 'Duct Taped', sheet: 'player_eyes.png', x: 6, y: 0, layer2: true },
+    { name: 'Flushed', sheet: 'player_eyes3.png', x: 0, y: 0, layer2: false },
+    { name: '-_-', sheet: 'player_eyes3.png', x: 1, y: 0, layer2: false },
+    { name: 'Shy', sheet: 'player_eyes3.png', x: 2, y: 0, layer2: false },
+    { name: 'Grumpy', sheet: 'player_eyes3.png', x: 3, y: 0, layer2: false }
+  ];
+  const storedAppearance = P.store.get('playerAppearance', {});
+  const safeAppearanceIndex = (value, length) => {
+    const index = Number(value);
+    return Number.isInteger(index) && index >= 0 && index < length ? index : 0;
+  };
+  const playerAppearance = {
+    roleSkin: safeAppearanceIndex(storedAppearance?.roleSkin, ROLE_SKINS.length),
+    expression: safeAppearanceIndex(storedAppearance?.expression, EXPRESSIONS.length)
+  };
+  P.playerAppearance = playerAppearance;
+  P.playerAppearanceCatalog = { roleSkins: ROLE_SKINS, faces: EXPRESSIONS };
+  function savePlayerAppearance() {
+    P.store.set('playerAppearance', { ...playerAppearance });
+    P.emit('player-appearance', { ...playerAppearance });
+  }
   const FLAGS = [];
   const SKINS = window.GrowSkinColors.SKINS;
   const DYE_EFFECTS = {
@@ -215,9 +270,30 @@
       });
       skins.append(b);
     });
-    skinWrap.append(skins);
-    fields.append(skinWrap);
-    panel.append(fields);
+    skinWrap.append(skins); fields.append(skinWrap);
+    const roleSkinWrap = el('div', 'custom-field'); roleSkinWrap.style.gridColumn = '1 / -1';
+    roleSkinWrap.append(el('label', 'custom-label', 'Role Skin'));
+    roleSkinWrap.append(el('p', 'custom-note', 'Changes the player head sprite. This is separate from the Role Icon above.'));
+    const roleSkinGrid = el('div', 'c-role-skins');
+    ROLE_SKINS.forEach((roleSkin, index) => {
+      const selected = playerAppearance.roleSkin === index;
+      const button = el('button', 'c-role-skin' + (selected ? ' on' : ''));
+      button.type = 'button'; button.title = roleSkin.name;
+      button.setAttribute('aria-label', roleSkin.name + ' role skin'); button.setAttribute('aria-pressed', String(selected));
+      const image = el('img'); image.src = 'demo/assets/' + roleSkin.head; image.alt = ''; image.draggable = false;
+      button.append(image, el('span', 'c-role-skin-name', roleSkin.name));
+      button.addEventListener('click', () => { playerAppearance.roleSkin = index; savePlayerAppearance(); renderPlayerCustomization(); });
+      roleSkinGrid.append(button);
+    });
+    roleSkinWrap.append(roleSkinGrid); fields.append(roleSkinWrap);
+    const expressionWrap = el('div', 'custom-field');
+    expressionWrap.append(el('label', 'custom-label', 'Expression'));
+    const expressionSelect = el('select', 'custom-select'); expressionSelect.id = 'player-expression';
+    expressionSelect.setAttribute('aria-label', 'Player expression');
+    EXPRESSIONS.forEach((expression, index) => { const option = el('option', '', expression.name); option.value = String(index); expressionSelect.append(option); });
+    expressionSelect.value = String(playerAppearance.expression);
+    expressionSelect.addEventListener('change', () => { playerAppearance.expression = safeAppearanceIndex(expressionSelect.value, EXPRESSIONS.length); savePlayerAppearance(); });
+    expressionWrap.append(expressionSelect); fields.append(expressionWrap); panel.append(fields);
 
     /* titles grid — categories like the Website: Name / Badges / Title icons */
     const plate = P.plateConfig.get();
