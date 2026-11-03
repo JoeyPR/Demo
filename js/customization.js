@@ -15,8 +15,7 @@
     { name: 'Builder', head: 'player_head_skin3.png' },
     { name: 'Fisher', head: 'player_head_skin4.png' },
     { name: 'Star Captain', head: 'player_head_skin5.png' },
-    { name: 'Chef', head: 'player_head_skin6.png' },
-    { name: 'Headless', head: 'player_head_skin9.png', noFace: true }
+    { name: 'Chef', head: 'player_head_skin6.png' }
   ];
   const EXPRESSIONS = [
     { name: 'Default', sheet: 'player_eyes.png', x: 0, y: 0, layer2: true },

@@ -196,7 +196,8 @@ test("decoded role skins and expressions are connected to the player renderer", 
   const app = read("../js/app.js");
   assert.ok(custom.includes("player_head_skin1.png"));
   assert.ok(custom.includes("player_head_skin6.png"));
-  assert.ok(custom.includes("player_head_skin9.png"));
+  assert.ok(!custom.includes("Headless"));
+  assert.ok(!custom.includes("player_head_skin9.png"));
   assert.ok(custom.includes("player_eyes3.png"));
   assert.ok(renderer.includes("player_face2.png"));
   assert.ok(renderer.includes("player_iris1.png"));
@@ -215,4 +216,25 @@ test("oversized chat text belongs to the message input, not the history panel", 
   assert.ok(css.includes(".player-chat-input-text{"));
   assert.ok(css.includes(".player-chat-input-row{position:relative;display:flex;flex:0 0 30px"));
   assert.ok(css.includes(".player-chat-input-field{position:relative;flex:1 1 auto;min-width:0;height:100%;overflow:visible}"));
+});
+
+test("role skin atlases and all advanced expression layers are preloaded before player rendering", () => {
+  const app = read("../js/app.js");
+  assert.match(app, /const appearanceAtlases = \[/);
+  assert.match(app, /map\(roleSkin => roleSkin\.head\)/);
+  assert.match(app, /expression\.sheet === "player_eyes3\.png"/);
+  assert.match(app, /\.\.\.names, \.\.\.appearanceAtlases/);
+});
+
+test("Duct Taped selects the Grey swatch as a persistent player skin override", () => {
+  const app = read("../js/app.js");
+  const renderer = read("../demo/engine/render.mjs");
+  const skins = read("../js/skin-colors.js");
+  assert.match(skins, /\['grey','Grey','#7F7F7F'\]/);
+  assert.match(app, /SKINS\.find\(skin => skin\.id === "grey"\)/);
+  assert.match(app, /skinOverride: expression\?\.name === "Duct Taped" \? DUCT_TAPED_SKIN : null/);
+  assert.match(renderer, /resolveWear\(items,baseSkin=\[255,206,180,255\],skinOverride=null\)/);
+  assert.match(renderer, /skin=skinOverride\?\?items\.find\(i=>i\.skin\)\?\.skin\?\?baseSkin/);
+  assert.match(renderer, /resolveWear\(contributors,visual\.skin,visual\.skinOverride\)/);
+  assert.match(renderer, /wear\.skinPalette=!visual\.skinOverride/);
 });

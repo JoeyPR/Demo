@@ -17,10 +17,10 @@ function rawCall(record,pass,local=IDENTITY) {
     sourcePixelsPerUnit:record.pixelsPerUnit??1,add:!!record.add,blend:record.blend,
     renderOrder:record.renderOrder,pet:!!record.pet,smooth:!!record.sm};
 }
-export function resolveWear(items,baseSkin=[255,206,180,255]) {
-  // Priority is deterministic but not claimed to be official for conflicting items.
-  // A calibrated resolver can supply a different items order before calling this.
-  const skin=items.find(i=>i.skin)?.skin??baseSkin;
+export function resolveWear(items,baseSkin=[255,206,180,255],skinOverride=null) {
+  // Explicit appearance overrides (such as Duct Taped) outrank item skin colors.
+  // Otherwise the selected wear contribution retains the existing deterministic priority.
+  const skin=skinOverride??items.find(i=>i.skin)?.skin??baseSkin;
   return {skin,alpha:items.reduce((a,i)=>a*(i.bodyAlpha??1),((skin[3]??255)/255)),
     hide:new Set(items.flatMap(i=>[...(i.hide??[]),...(i.headless?["head","eyes","eyelids"]:[])])),invisible:items.some(i=>i.invisible),
     hideLegs:items.some(i=>i.hideLegs),hideFace:items.some(i=>i.hideFace),
@@ -43,7 +43,7 @@ function baseCalls(pose,wear,profile,visual={}) {
   for(const [tag,x,offset] of [["frontLeg",8,pose.frontFoot],["backLeg",16,pose.backFoot]]) {
     const h=2+offset; if(h>0.01) body(tag,"player_extraleg.png",x-8,0,8,1,compose(translate(x,28),scale(1,h)));
   }
-  if(!wear.hideFace&&!roleSkin.noFace) {
+  if(!wear.hideFace) {
     const motionFace=pose.face??[0,0], hasMotionExpression=!!pose.talking?.active||motionFace[0]!==0||motionFace[1]!==0;
     const selected=visual.expression&&!hasMotionExpression?visual.expression:null;
     const x=selected?.x??motionFace[0]??0, y=selected?.y??motionFace[1]??0, sheet=selected?.sheet??"player_eyes.png";
@@ -143,10 +143,10 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   // substitutions require an authored equipment resolver and are not guessed.
   const visibleItems=resolveLook(items).displayed;
   const contributors=visual.contributors??items;
-  const contributions=resolveWear(contributors,visual.skin);
-  const wear={...resolveWear(visibleItems,visual.skin),skin:contributions.skin,
+  const contributions=resolveWear(contributors,visual.skin,visual.skinOverride);
+  const wear={...resolveWear(visibleItems,visual.skin,visual.skinOverride),skin:contributions.skin,
     alpha:contributions.alpha,invisible:contributions.invisible};
-  wear.skinPalette=contributions.skin===visual.skin?visual.skinPalette??null:null;
+  wear.skinPalette=!visual.skinOverride&&contributions.skin===visual.skin?visual.skinPalette??null:null;
   if(visibleItems.some(item=>item.slot===3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
   const blink=visual.blinking===false?sampleBlink(0,{enabled:false}):pose.blink??
     sampleBlink(motion.clockMs,{seed:visual.blinkSeed??1,override:visual.blink??motion.blink});

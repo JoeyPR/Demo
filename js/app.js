@@ -36,6 +36,7 @@ pickupSprite.src = moduleURL("../img/pickup.png").href;
 const initialSkin = SKINS[resolveStoredSkin(P.store.get("skin", 0))];
 const savedAppearance = P.playerAppearance ?? P.store.get("playerAppearance", {});
 const appearanceCatalog = P.playerAppearanceCatalog ?? { roleSkins: [], faces: [] };
+const DUCT_TAPED_SKIN = SKINS.find(skin => skin.id === "grey")?.rgb ?? [127,127,127,255];
 const appearanceIndex = (value, length) => { const index=Number(value); return Number.isInteger(index)&&index>=0&&index<length?index:0; };
 
 const state = {
@@ -57,9 +58,10 @@ const state = {
 let player, motion, lastTimestamp = 0;
 const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
 function playerAppearanceVisual() {
+  const expression = appearanceCatalog.faces[state.expression] ?? appearanceCatalog.faces[0] ?? null;
   return { roleSkin: appearanceCatalog.roleSkins[state.roleSkin] ?? appearanceCatalog.roleSkins[0] ?? null,
-    expression: appearanceCatalog.faces[state.expression] ?? appearanceCatalog.faces[0] ?? null,
-    whites: P.dyes?.whites ?? [255,255,255], pupils: P.dyes?.pupils ?? [0,0,0] };
+    expression, whites: P.dyes?.whites ?? [255,255,255], pupils: P.dyes?.pupils ?? [0,0,0],
+    skinOverride: expression?.name === "Duct Taped" ? DUCT_TAPED_SKIN : null };
 }
 
 /* ---------------- atlas loading (from the Demo renderer) ---------------- */
@@ -1115,7 +1117,12 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
       "player_arm.png", "player_puncharm.png", "player_sleeve.png", "player_hair.png", "player_hairhair.png",
       "player_shirt.png", "player_pants.png", "player_handitem.png", "player_back.png", "player_horsepants.png",
       "particles.png", "particles2.png", "tiles_page1.png"];
-    await Promise.all(names.map(loadAtlas));
+    const appearanceAtlases = [
+      ...(appearanceCatalog.roleSkins ?? []).map(roleSkin => roleSkin.head),
+      ...(appearanceCatalog.faces ?? []).flatMap(expression => expression.sheet === "player_eyes3.png"
+        ? [expression.sheet, "player_face2.png", "player_iris1.png"] : [expression.sheet])
+    ].filter(Boolean);
+    await Promise.all([...new Set([...names, ...appearanceAtlases])].map(loadAtlas));
 
     /* procedural reference FX sheet (same as the Demo boot): plain shapes
        the fx renderers reference when an item has no dedicated particles */

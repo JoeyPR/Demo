@@ -37,3 +37,19 @@ test('selected skin palette applies to body, eyelids, feet and skin-relative att
   assert.equal(sameColorOverride.find(call=>call.tag==='head').skinPalette,null,
     'item-owned RGB skin stays an RGB tint even when its color equals Buddy Legacy');
 });
+
+
+test('Duct Taped overrides the selected swatch and item-owned skin colors with Grey',()=>{
+  const selected=SKINS.find(skin=>skin.id==='buddy-legacy');
+  const grey=SKINS.find(skin=>skin.id==='grey');
+  const motion={x:0,y:0,facing:1,clockMs:0,moveMs:0,ground:true,locomotion:'idle'};
+  const pose={backAngle:0,frontAngle:0,backFoot:0,frontFoot:0,face:[0,0]};
+  const item={id:99,slot:0,raw:{},pieces:[],skin:[20,30,40,255]};
+  const calls=buildDrawList({catalog:{},items:[item],motion,pose,
+    visual:{skin:selected.rgb,skinPalette:selected.palette,skinOverride:grey.rgb}});
+  for(const tag of ['body','head','backFoot','frontFoot','eyelids','frontArm']){
+    const call=calls.find(entry=>entry.tag===tag);
+    assert.deepEqual(call.tint,grey.rgb.slice(0,3),tag+' must use Grey');
+    assert.equal(call.skinPalette,null,tag+' must not be recolored by an item palette');
+  }
+});
