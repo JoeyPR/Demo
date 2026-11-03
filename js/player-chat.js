@@ -45,7 +45,8 @@
   chatLog.setAttribute('aria-live', 'polite');
   chatLog.setAttribute('aria-relevant', 'additions');
   chatLog.setAttribute('aria-label', 'Chat history');
-  const inputRow = make('div', 'player-chat-input-row panel');
+  const inputRow = make('div', 'player-chat-input-row');
+  inputRow.className = 'player-chat-input-row panel';
   const textarea = make('textarea', 'playerChat');
   textarea.name = 'playerChat'; textarea.maxLength = MAX_LENGTH * 2; textarea.rows = 1;
   textarea.placeholder = ''; textarea.autocomplete = 'off'; textarea.spellcheck = false;

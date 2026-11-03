@@ -86,7 +86,7 @@ test("Fist and Wrench pass through INFO rather than being blocked by the tool gu
 test("chat outline and shadow grow by one pixel, text has no shadow, and speech fades in 500ms", () => {
   const css = read("../css/player-chat.css");
   const js = read("../js/player-chat.js");
-  assert.match(css, /border:calc\(var\(--bd\) \+ 1px\) solid #A5E3FB/);
+  assert.match(css, /border:calc\(max\(1px,var\(--bd\)\) \+ 1px\) solid #A5E3FB/);
   assert.match(css, /calc\(var\(--sh\) \+ 1px\)/);
   assert.match(css, /border:calc\(max\(1px,var\(--bd\)\) \+ 1px\) solid #A5E3FB/);
   assert.match(css, /box-shadow:2px 2px 0 #000,inset 2px 2px 0 #000/);
@@ -116,7 +116,8 @@ test("player chat has a history pane above a compact Growtopia-style input row",
   const js = read("../js/player-chat.js");
   const css = read("../css/player-chat.css");
   assert.match(js, /make\('div', 'player-chat-log'\)/);
-  assert.match(js, /make\('div', 'player-chat-input-row'\)/);
+  assert.match(js, /const inputRow = make\('div', 'player-chat-input-row'\)/);
+  assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(js, /P\.rtfont\?\.color\('7', 'Enter a message here'\)/);
   assert.match(js, /make\('span', 'player-chat-counter', '0\/120'\)/);
   assert.match(js, /counter\.textContent = length \+ '\/' \+ MAX_LENGTH/);
