@@ -6,7 +6,7 @@
   const P = window.P;
   if (!P) return;
   const MAX_LENGTH = 120;
-  const SPEECH_MS = 5000, FADE_IN_MS = 1000, FADE_OUT_MS = 1000;
+  const SPEECH_MS = 5000, FADE_IN_MS = 500, FADE_OUT_MS = 500;
   const preview = document.getElementById('pv');
   const make = (tag, id, text) => {
     const node = document.createElement(tag);

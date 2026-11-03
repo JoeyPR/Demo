@@ -12,12 +12,18 @@
     return (definition.sharedControls || []).some(hasControl) ||
       (definition.sections || []).some(section => (section.controls || []).some(hasControl));
   }
+  function isEquipped(item) {
+    const equipped = P.equippedIds;
+    const id = Number(item?.id);
+    return !!equipped && (equipped.has(item?.id) || equipped.has(id));
+  }
   function syncWrenchAvailability(item) {
     const focused = item === undefined ? (P.inv.focus || P.inv.sel) : item;
     const available = hasWrenchControls(focused);
     wrenchButton.disabled = !available;
     wrenchButton.setAttribute('aria-disabled', String(!available));
-    wrenchButton.title = available ? 'Customize this item' : 'No Wrench settings for this item';
+    wrenchButton.title = !available ? 'No Wrench settings for this item'
+      : isEquipped(focused) ? 'Customize this equipped item' : 'Equip the item first.';
   }
   P.on('item-focus', syncWrenchAvailability);
   P.on('catalog', () => syncWrenchAvailability());
@@ -59,6 +65,10 @@
         syncWrenchAvailability(focused);
         return;
       }
+      if (!isEquipped(focused)) {
+        P.blackbox?.("Equip the item first.", 1800, wrenchButton);
+        return;
+      }
       P.emit('item-wrench-request', focused);
       return;
     }
@@ -67,6 +77,7 @@
     if (!it) return P.toast('Select an item first');
     if (it.tool) {
       if (b.dataset.a === 'drop') return P.blackbox?.("You can't drop that.");
+      if (b.dataset.a === 'info') { A.info(it); return; }
       return;
     }
     if (b.dataset.a === 'drop') {

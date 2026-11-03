@@ -14,8 +14,10 @@ The generator reads each item's labels, descriptions, default values, order, rad
 
 ## Dialog behavior
 
-- The generated dialog uses the same panel surface, borders, shadows, typography, and action-button styling as Drop and Info, with a responsive 3:4 panel centered inside the preview rectangle.
+- The generated dialog uses the same panel surface, borders, shadows, typography, and action-button styling as Drop and Info, with a responsive 3:4 panel centered in the visible screen viewport above the preview.
 - The complete inner dialog content (header, controls, Reset, Cancel, and Update) scales uniformly to fit inside the fixed 3:4 outer panel; the outer frame does not resize.
+- Drop, Info, and Wrench use a shared modal-open event so only one of these dialogs can be open at a time.
+- An item-specific Wrench dialog can only open while that exact item is equipped; otherwise the app displays “Equip the item first.”
 - Explanatory item notes and per-control help paragraphs are not displayed; functional labels, section headings, and controls are retained.
 - Footer order is Reset to Default, then left-aligned Cancel and Update buttons styled like the Drop dialog. Reset uses the standard `#7BBAD2` confirmation fill; its width stays fixed while its text uses the same font size as the neighboring buttons.
 - The footer has no separator border above its buttons.

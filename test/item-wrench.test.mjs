@@ -422,8 +422,10 @@ test("the item Wrench shares Drop/Info styling in a responsive 3:4 dialog", () =
   const css = read("../css/item-wrench.css");
   const ui = read("../js/item-wrench-ui.js");
   assert.match(css, /aspect-ratio:\s*3\s*\/\s*4/);
-  assert.match(ui, /const width = Math\.min\(rect\.width \* 0\.96, rect\.height \* 0\.92 \* 3 \/ 4\)/);
+  assert.match(ui, /const width = Math\.min\(viewWidth \* 0\.94, viewHeight \* 0\.94 \* 3 \/ 4\)/);
   assert.match(ui, /const height = width \* 4 \/ 3/);
+  assert.match(ui, /window\.visualViewport/);
+  assert.match(ui, /P\.on\("dialog-open", name =>/);
   assert.match(ui, /--drop-button-height/);
   assert.match(ui, /--drop-title-size/);
   assert.match(ui, /drop-item-row item-wrench-header/);

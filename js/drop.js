@@ -101,6 +101,8 @@
     if (previousFocus && previousFocus.isConnected) previousFocus.focus({ preventScroll: true });
   }
 
+  P.on("dialog-open", name => { if (name !== "drop") close(); });
+
   function open(item) {
     if (item?.tool) {
       P.blackbox?.("You can't drop that.");
@@ -110,6 +112,7 @@
       P.toast("Select a valid item first.");
       return;
     }
+    P.emit("dialog-open", "drop");
     currentItem = item;
     previousFocus = document.activeElement;
     title.textContent = "Drop " + item.name;

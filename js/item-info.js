@@ -68,6 +68,7 @@ function close() {
 }
 async function open(item) {
   if(!item||item.gone)return;
+  P.emit('dialog-open','info');
   const version=++requestVersion;
   if(overlay.hidden)previousFocus=document.activeElement;
   current=item;title.textContent=item.name;
@@ -81,6 +82,7 @@ async function open(item) {
   try{await load();if(version===requestVersion&&!overlay.hidden)render(item);}
   catch{if(version===requestVersion&&!overlay.hidden){formatted(description,'Item information could not be loaded.','o');dialog.setAttribute('aria-busy','false');}}
 }
+P.on('dialog-open',name=>{if(name!=='info')close();});
 closeButton.addEventListener('click',close);
 overlay.addEventListener('pointerdown',event=>{event.stopPropagation();if(event.target===overlay)close();});
 dialog.addEventListener('pointerdown',event=>event.stopPropagation());

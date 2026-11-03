@@ -18,7 +18,7 @@
   height: var(--wrench-height, 420px);
   min-width: 0;
   max-width: 96%;
-  max-height: 92%;
+  max-height: 94%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   padding: 0;
@@ -214,7 +214,7 @@
   box-sizing: border-box;
   width: var(--wrench-reset-width, 120px);
   max-width: none;
-  overflow: hidden;
+  overflow: visible;
   text-overflow: clip;
   white-space: nowrap;
 }
@@ -247,6 +247,9 @@
   transform: none;
 }
 .item-wrench-footer .wrench-footer-actions { flex-wrap: nowrap; }
+.item-wrench-dialog .drop-actions button {
+  font-size: calc(var(--drop-button-font, 52px) * var(--wrench-button-text-scale, 1));
+}
 
 .item-wrench-dialog :focus-visible {
   outline-color: #fff;

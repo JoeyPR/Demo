@@ -1,6 +1,6 @@
 /* The Info dialog shares the existing Drop panel's border, corners and shadows. */
 #item-info-overlay{z-index:82}
-.item-info-dialog{top:8%;max-height:84%;gap:var(--drop-row-gap)}
+.item-info-dialog{top:12.2%;max-height:75%;gap:var(--drop-row-gap)}
 .item-info-description,.item-info-properties p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;
   font-size:var(--info-font-size,27px);font-weight:700;line-height:1.15}
 .item-info-description{color:#FCE6BA}

@@ -17,7 +17,9 @@
   const isArtifactItem = item => item != null && String(item.slot) === String(artifactSlot);
   let activeFilter = String(P.store.get('filterCategory', 'all'));
   let searchOn = P.store.get('searchOn', true);
-  let favs = new Set(P.store.get('favs', []));
+  const favoriteIds = P.favoriteStore.normalize(P.store.get('favs', []));
+  let favs = new Set(favoriteIds);
+  P.store.set('favs', favoriteIds);
   let all = [];            /* decorated items: tab / eq / fav flags */
   let render = [];
   /* virtualization: #grid (scroll container) > #grid-inner (full height) >
@@ -472,9 +474,15 @@
   });
   P.on('fav-toggle', it => {
     if (!it) return;
-    if (favs.has(it.id)) { favs.delete(it.id); P.toast('Unfavorited ' + it.name); }
-    else { favs.add(it.id); P.toast('Favorited ' + it.name); }
-    P.store.set('favs', [...favs]);
+    const result = P.favoriteStore.toggle([...favs], it.id);
+    if (result.limitReached) {
+      P.blackbox?.('You can only favorite up to 20 items.', 1800);
+      return;
+    }
+    if (result.action === 'invalid') return;
+    favs = new Set(result.ids);
+    P.store.set('favs', result.ids);
+    P.toast((result.action === 'removed' ? 'Unfavorited ' : 'Favorited ') + it.name);
     syncFlags(); renderQuick(); P.inv.refresh();
   });
 

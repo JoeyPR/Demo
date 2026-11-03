@@ -66,6 +66,7 @@ let previousFocus = null;
 let invalidInputs = new Set();
 let controlNodes = new Map();
 let layoutScale = 1;
+let openRequestVersion = 0;
 
 function storedSettings() {
   const value = P.store.get(STORE_KEY, {});
@@ -78,20 +79,23 @@ function richText(node, value) {
 }
 
 function position() {
-  if (!preview) return;
-  const rect = preview.getBoundingClientRect();
-  if (!rect.width || !rect.height) return;
+  const viewport = window.visualViewport;
+  const left = viewport?.offsetLeft ?? 0;
+  const top = viewport?.offsetTop ?? 0;
+  const viewWidth = viewport?.width ?? window.innerWidth;
+  const viewHeight = viewport?.height ?? window.innerHeight;
+  if (!viewWidth || !viewHeight) return;
 
-  // Match the Drop/Info dialog footprint while keeping a 3:4 panel inside
-  // the preview rectangle on both desktop and narrow mobile screens.
-  const width = Math.min(rect.width * 0.96, rect.height * 0.92 * 3 / 4);
+  // Wrench sits above the preview and uses the available screen area.
+  // Keep its 3:4 outer frame inside the visible viewport on phones and desktops.
+  const width = Math.min(viewWidth * 0.94, viewHeight * 0.94 * 3 / 4);
   const height = width * 4 / 3;
-  const scale = Math.max(0.12, Math.min(1, width / 420));
+  const scale = Math.max(0.12, Math.min(1.6, width / 420));
   Object.assign(overlay.style, {
-    left: rect.left + "px",
-    top: rect.top + "px",
-    width: rect.width + "px",
-    height: rect.height + "px"
+    left: left + "px",
+    top: top + "px",
+    width: viewWidth + "px",
+    height: viewHeight + "px"
   });
   dialog.style.setProperty("--wrench-width", width + "px");
   dialog.style.setProperty("--wrench-height", height + "px");
@@ -146,6 +150,12 @@ function fitContents() {
   }
   inner.style.width = (availableWidth / contentScale) + "px";
   inner.style.transform = "scale(" + contentScale + ")";
+  const buttonTextScale = Math.min(1, ...[resetButton, cancelButton, updateButton].map(button => {
+    const width = Math.max(1, button.clientWidth);
+    const contentWidth = Math.max(1, button.scrollWidth);
+    return width / contentWidth;
+  }));
+  dialog.style.setProperty("--wrench-button-text-scale", String(Math.max(0.55, buttonTextScale)));
   dialog.style.setProperty("--wrench-content-scale", String(contentScale));
 }
 
@@ -447,13 +457,25 @@ async function loadDefinitions() {
   return loading;
 }
 
+function isItemEquipped(item) {
+  const equipped = P.equippedIds;
+  const id = Number(item?.id);
+  return !!equipped && (equipped.has(item?.id) || equipped.has(id));
+}
+
 async function open(item) {
   if (!item || item.tool || item.gone) {
     P.toast("Select a wrenchable item first.");
     return;
   }
+  if (!isItemEquipped(item)) {
+    P.blackbox?.("Equip the item first.", 1800, document.querySelector('.sbtn[data-a="wrench"]'));
+    return;
+  }
+  const requestVersion = ++openRequestVersion;
   try {
     const registry = await loadDefinitions();
+    if (requestVersion !== openRequestVersion) return;
     const itemId = String(item.id);
     const authoredDefinition = registry.items?.[itemId];
     const variableMapRecord = variableMaps?.items?.[itemId];
@@ -465,6 +487,8 @@ async function open(item) {
       P.toast("Wrench settings are not configured for " + (item.name ?? "this item") + " yet.");
       return;
     }
+    if (requestVersion !== openRequestVersion) return;
+    P.emit("dialog-open", "wrench");
     if (overlay.hidden) previousFocus = document.activeElement;
     currentItem = item;
     currentDefinition = definition;
@@ -562,6 +586,14 @@ document.addEventListener("keydown", event => {
 }, true);
 window.addEventListener("resize", position);
 P.on("preview", position);
+window.visualViewport?.addEventListener("resize", position);
+window.visualViewport?.addEventListener("scroll", position);
+P.on("dialog-open", name => {
+  if (name !== "wrench") {
+    openRequestVersion++;
+    close("cancel");
+  }
+});
 P.on("item-wrench-request", open);
 
 P.itemWrench = {
