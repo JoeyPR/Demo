@@ -14,10 +14,12 @@ body:not(.live-preview) #pads{display:none!important}
 .player-chat-time,.player-chat-name,.player-chat-separator,.player-chat-message{white-space:pre-wrap;overflow-wrap:anywhere;text-shadow:none;text-align:left}
 .player-chat-time,.player-chat-name,.player-chat-message{display:inline}
 .player-chat-input-row{position:relative;display:flex;flex:0 0 30px;align-items:center;gap:8px;width:100%;height:30px;min-height:30px;box-sizing:border-box;overflow:visible;padding:0 8px;background:var(--fill);border:var(--bd) solid var(--line);border-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:var(--sh) var(--sh) 0 0 #000}
-.player-chat-input-field{position:relative;flex:1 1 auto;min-width:0;height:100%;overflow:hidden}
-#playerChat{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;resize:none;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;padding:3px 4px;border:0;background:transparent;color:#fff;outline:none;font:400 19px/1.2 'PlayerChat CG',sans-serif;text-shadow:none;user-select:text;-webkit-user-select:text;touch-action:pan-y;white-space:pre-wrap;overflow-wrap:anywhere}
+.player-chat-input-field{position:relative;flex:1 1 auto;min-width:0;height:100%;overflow:visible}
+#playerChat{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;min-height:0;resize:none;overflow-x:auto;overflow-y:hidden;box-sizing:border-box;padding:2px 4px;border:0;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:#fff;outline:none;font:400 36px/1 'PlayerChat CG',sans-serif;text-shadow:none;user-select:text;-webkit-user-select:text;touch-action:pan-y;white-space:pre;overflow-wrap:normal}
 #playerChat:focus,#playerChat:focus-visible{outline:none!important;box-shadow:none}
-.player-chat-placeholder{position:absolute;left:4px;top:50%;z-index:1;max-width:calc(100% - 8px);overflow:hidden;white-space:nowrap;pointer-events:none;transform:translateY(-50%);font:400 18px/1.2 'PlayerChat CG',sans-serif;text-shadow:none}
+.player-chat-placeholder{position:absolute;left:4px;top:50%;z-index:1;width:max-content;max-width:none;overflow:visible;white-space:nowrap;pointer-events:none;transform:translateY(-50%);font:400 36px/1 'PlayerChat CG',sans-serif;text-shadow:none}
+.player-chat-input-text{position:absolute;left:4px;top:50%;z-index:2;display:block;width:max-content;max-width:none;overflow:visible;white-space:pre;pointer-events:none;transform:translateY(-50%);color:#fff;font:400 36px/1 'PlayerChat CG',sans-serif;text-shadow:none}
+.player-chat-input-text[hidden]{display:none}
 .player-chat-placeholder[hidden]{display:none}
 .player-chat-counter{position:static;flex:0 0 auto;display:block;min-width:38px;color:#fff;font:400 14px/1 'PlayerChat CG',sans-serif;text-align:right;text-shadow:none;pointer-events:none}
 #topBar-handle{position:absolute;top:calc(var(--topbar-height) - 1px);z-index:1;cursor:grab;pointer-events:auto;transform:scaleY(-1);transform-origin:center;touch-action:none;outline:0}
@@ -33,6 +35,6 @@ body:not(.live-preview) #pads{display:none!important}
 #player-chat-bubble.is-visible{opacity:1;transition-duration:500ms;transition-timing-function:ease-in}
 #player-chat-bubble[hidden]{display:none}
 #player-chat-text{display:block;white-space:inherit;overflow-wrap:inherit}
-@media(max-width:900px),(hover:none) and (pointer:coarse){#preview-actions{gap:4px}#preview-actions button{width:40px;height:40px;padding:2px}#topBar-handle .hm{display:block}#topBar-handle .hd{display:none}#player-chat-composer{gap:0}.player-chat-input-row{height:30px;min-height:30px}#playerChat{font-size:19px}.player-chat-placeholder{font-size:18px}}
+@media(max-width:900px),(hover:none) and (pointer:coarse){#preview-actions{gap:4px}#preview-actions button{width:40px;height:40px;padding:2px}#topBar-handle .hm{display:block}#topBar-handle .hd{display:none}#player-chat-composer{gap:0}.player-chat-input-row{height:30px;min-height:30px}}
 body:not(.live-preview) #preview-actions,body:not(.live-preview) #topBar,body:not(.live-preview) #player-chat-bubble{display:none!important}
 @media(prefers-reduced-motion:reduce){#player-chat-bubble{transition:none}}

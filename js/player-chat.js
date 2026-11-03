@@ -55,10 +55,13 @@
   textarea.setAttribute('aria-description', '120 character maximum. Press Enter to send.');
   const inputHint = make('span', 'player-chat-placeholder', P.rtfont?.color('7', 'Enter a message here') || 'Enter a message here');
   inputHint.className = 'player-chat-placeholder'; inputHint.setAttribute('aria-hidden', 'true');
+  const inputText = make('span', 'player-chat-input-text');
+  inputText.setAttribute('aria-hidden', 'true');
+  inputText.hidden = true;
   const counter = make('span', 'player-chat-counter', '0/120'); counter.className = 'player-chat-counter';
   counter.setAttribute('aria-live', 'off');
   const inputField = document.createElement('div'); inputField.className = 'player-chat-input-field';
-  inputField.append(textarea, inputHint); inputRow.append(inputField, counter);
+  inputField.append(textarea, inputHint, inputText); inputRow.append(inputField, counter);
   chatLog.dataset.empty = 'true';
   composer.append(chatLog, inputRow);
   P.rtfont?.scan(inputHint);
@@ -157,6 +160,9 @@
     const length = Array.from(textarea.value).length;
     counter.textContent = length + '/' + MAX_LENGTH;
     inputHint.hidden = length > 0;
+    inputText.textContent = textarea.value;
+    inputText.hidden = length === 0;
+    if (length) P.rtfont?.scan(inputText);
   }
   function visiblePreview() {
     const vv = window.visualViewport;

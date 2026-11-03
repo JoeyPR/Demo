@@ -1,40 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import vm from "node:vm";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("favorites persist as an ID list, deduplicate, and enforce the 20-item cap", () => {
-  const context = { window: { P: {} } };
-  vm.runInNewContext(read("../js/favorites.js"), context);
-  const favorites = context.window.P.favoriteStore;
-  assert.equal(favorites.MAX_FAVORITES, 20);
-
-  const twentyIds = Array.from({ length: 20 }, (_, index) => index + 1);
-  assert.deepEqual(Array.from(favorites.normalize([...twentyIds, 2, "bad"])), twentyIds);
-
-  const blocked = favorites.toggle(twentyIds, 21);
-  assert.equal(blocked.limitReached, true);
-  assert.equal(blocked.action, "limit");
-  assert.deepEqual(Array.from(blocked.ids), twentyIds);
-
-  const removed = favorites.toggle(twentyIds, 1);
-  assert.equal(removed.action, "removed");
-  const added = favorites.toggle(removed.ids, 21);
-  assert.equal(added.action, "added");
-  assert.equal(added.ids.length, 20);
-  assert.equal(added.ids.at(-1), 21);
-});
-
-test("the donor ID-list favorite system is restored before inventory boot and saved on every toggle", () => {
+test("favorites use the Codex ID-set and favorite badge box system", () => {
   const html = read("../index.html");
   const grid = read("../js/grid.js");
-  assert.ok(html.indexOf("js/favorites.js") < html.indexOf("js/grid.js"));
-  assert.match(grid, /P\.favoriteStore\.normalize\(P\.store\.get\('favs', \[\]\)\)/);
-  assert.match(grid, /P\.store\.set\('favs', result\.ids\)/);
-  assert.match(grid, /You can only favorite up to 20 items/);
-  assert.match(grid, /syncFlags\(\); renderQuick\(\); P\.inv\.refresh\(\)/);
+  const css = read("../css/inv.css");
+  assert.ok(!html.includes("js/favorites.js"));
+  assert.ok(grid.includes("let favs = new Set(P.store.get('favs', []));"));
+  assert.ok(grid.includes("fv.src = 'img/favorite-badge.png'"));
+  assert.ok(grid.includes("P.store.set('favs', [...favs])"));
+  assert.ok(grid.includes("if (favs.has(it.id)) { favs.delete(it.id)"));
+  assert.ok(!grid.includes("favoriteStore"));
+  assert.ok(!grid.includes("You can only favorite up to 20 items"));
+  assert.ok(!grid.includes("fav-box.png"));
+  assert.ok(css.includes(".box .fv{position:absolute;right:2%;top:2%;width:30%;height:30%;object-fit:contain"));
+  assert.ok(css.includes(".box.fav-special{background-image:url(../img/box-fav.png)"));
 });
 
 test("Wrench uses the visible screen at 3:4 and fits button labels together", () => {
@@ -218,4 +201,18 @@ test("decoded role skins and expressions are connected to the player renderer", 
   assert.ok(renderer.includes("player_face2.png"));
   assert.ok(renderer.includes("player_iris1.png"));
   assert.ok(app.includes("playerAppearanceVisual()"));
+});
+
+
+test("oversized chat text belongs to the message input, not the history panel", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.ok(js.includes("const inputText = make('span', 'player-chat-input-text')"));
+  assert.ok(js.includes("inputField.append(textarea, inputHint, inputText)"));
+  assert.ok(js.includes("inputText.textContent = textarea.value"));
+  assert.ok(css.includes("font:400 20px/1.25 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 36px/1 'PlayerChat CG'"));
+  assert.ok(css.includes(".player-chat-input-text{"));
+  assert.ok(css.includes(".player-chat-input-row{position:relative;display:flex;flex:0 0 30px"));
+  assert.ok(css.includes(".player-chat-input-field{position:relative;flex:1 1 auto;min-width:0;height:100%;overflow:visible}"));
 });

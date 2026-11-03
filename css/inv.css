@@ -92,11 +92,11 @@
 .box .ic{position:absolute;inset:10.2%;display:flex;align-items:center;justify-content:center;overflow:hidden;
   font-size:calc(46*var(--u));text-shadow:0 2px 0 rgba(0,0,0,.45)}
 .box .n{display:none}   /* item names never show — kept in the DOM as metadata only */
-.box img{pointer-events:none}
-/* Small favorite marker: it overlays the regular box without replacing its frame. */
-.box .fv{position:absolute;right:3%;top:3%;width:28%;height:28%;object-fit:contain;
-  image-rendering:pixelated;display:none;pointer-events:none;z-index:3}
+.box .fv{position:absolute;right:2%;top:2%;width:30%;height:30%;object-fit:contain;image-rendering:pixelated;display:none;z-index:2}
 .box.fav .fv{display:block}
+.box img{pointer-events:none}
+.box.fav-special{background-image:url(../img/box-fav.png);background-position:center;background-size:100% 100%;cursor:default}
+.box.fav-special::before{display:none}
 
 /* 4. top drawer: every quick box uses the blue box (box-blue.png), including
    the equipped (.sel) and empty slots — the check overlay still marks equipped */
