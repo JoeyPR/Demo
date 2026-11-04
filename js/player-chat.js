@@ -224,7 +224,9 @@
   function position() {
     const area = layoutPreview(), gap = 8;
     // Icons and topBar belong to the preview, not the keyboard's visual viewport.
-    actions.style.left = area.right - actions.offsetWidth - gap + 'px';
+    const compactActions = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)').matches;
+    const actionWidth = actions.offsetWidth || (compactActions ? 40 : 44);
+    actions.style.left = area.right - actionWidth - gap + 'px';
     actions.style.top = area.top + gap + 'px';
     const source = inventoryHandle.getBoundingClientRect();
     const handleWidth = Math.max(1, source.width * 0.9);
@@ -370,6 +372,9 @@
       close();
       clear();
     }
+    // preview-mode listeners toggle .live-preview, which changes display:none
+    // on the action stack. Re-measure after every listener has applied the class.
+    nextPaint(position);
   });
   P.on('drawer', position);
   P.on('boot', position);

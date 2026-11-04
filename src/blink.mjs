@@ -10,32 +10,38 @@ const hash01=(seed,index,salt)=>{
   value^=value>>>13;
   return (value>>>0)/4294967296;
 };
-const triangular=(seed,index,salt)=>
-  (hash01(seed,index,salt)+hash01(seed,index,salt^0x02e5be93))/2;
-
+function openGap(seed,index) {
+  const band=hash01(seed,index,0x68bc21eb);
+  const detail=hash01(seed,index,0x02e5be93);
+  // Deliberately uneven: occasional quick blinks, ordinary pauses, and longer
+  // open-eye holds so the animation does not settle into a metronome.
+  if(band<0.20)return Math.round(1800+detail*2500);        // 1.8–4.3s
+  if(band<0.82)return Math.round(4300+detail*5200);        // 4.3–9.5s
+  return Math.round(9800+detail*9000);                     // 9.8–18.8s
+}
 function makeBlink(seed,index,gap,salt) {
-  const close=55+Math.floor(hash01(seed,index,salt^0x27d4eb2f)*25);
-  const hold=55+Math.floor(hash01(seed,index,salt^0x165667b1)*45);
-  const open=80+Math.floor(hash01(seed,index,salt^0xd3a2646c)*50);
+  const close=55+Math.floor(hash01(seed,index,salt^0x27d4eb2f)*26);
+  const hold=65+Math.floor(hash01(seed,index,salt^0x165667b1)*41);
+  const open=85+Math.floor(hash01(seed,index,salt^0xd3a2646c)*41);
   return {gap,close,hold,open,duration:close+hold+open};
 }
 function buildBlinkSchedule(seed) {
   const sequence=[];
+  const earlyDoubleAt=(seed>>>0)%4;
   for(let index=0;index<SCHEDULE_GROUPS;index++) {
-    // Most open intervals cluster around 4-5 seconds, with natural short/long variation.
-    const gap=Math.round(2200+triangular(seed,index,0x68bc21eb)*5000);
-    sequence.push(makeBlink(seed,index,gap,0x27d4eb2f));
-    // A subtle second blink occurs occasionally, like a human double-blink.
-    if(hash01(seed,index,0x9e3779b9)<0.13) {
-      const secondGap=100+Math.floor(hash01(seed,index,0x7f4a7c15)*140);
+    sequence.push(makeBlink(seed,index,openGap(seed,index),0x27d4eb2f));
+    // Guarantee one early paired blink, then allow occasional seeded repeats.
+    // The short open gap makes the second closure clearly read as a double blink.
+    if(index===earlyDoubleAt||hash01(seed,index,0x9e3779b9)<0.12) {
+      const secondGap=70+Math.floor(hash01(seed,index,0x7f4a7c15)*110);
       sequence.push(makeBlink(seed,index,secondGap,0x94d049bb));
     }
   }
   return sequence;
 }
 
-// Sampling an absolute simulation clock keeps pauses, exports and frame rates aligned.
-// No frame-by-frame randomness or unbounded event history is used.
+// Sampling an absolute simulation clock keeps pause/export/frame-rate behavior stable.
+// Randomness is generated once from the player's seed, never per display frame.
 export function sampleBlink(clockMs,{enabled=true,seed=1,override}={}) {
   if(!enabled)return {phase:"open",closure:0};
   if(Number.isFinite(override)) {

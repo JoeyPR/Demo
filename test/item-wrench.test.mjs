@@ -409,7 +409,7 @@ test("fav-box is a compact overlay and the ordinary inventory frame remains inta
   const css = read("../css/inv.css");
   const grid = read("../js/grid.js");
   assert.match(css, /\.box\s*\{[^}]*background:url\(\.\.\/img\/box-white\.png\)/);
-  assert.match(css, /\.box \.fv\s*\{[^}]*width:28%[^}]*height:28%/);
+  assert.match(css, /\.box \.fv\s*\{[^}]*width:38%[^}]*height:38%/);
   assert.match(css, /\.box\.fav \.fv\s*\{\s*display:block/);
   assert.match(grid, /mark\.src = 'img\/fav-box\.png'/);
   assert.match(grid, /syncFavoriteMark\(b, favs\.has\(it\.id\)\)/);

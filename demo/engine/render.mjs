@@ -46,8 +46,10 @@ function baseCalls(pose,wear,profile,visual={}) {
   if(!wear.hideFace) {
     const motionFace=pose.face??[0,0];
     const punching=!!pose.punch||!!pose.punching;
+    const neutralExpression=visual.expression?.sheet==="player_eyes.png"&&
+      visual.expression?.x===0&&visual.expression?.y===0;
     const hasMotionExpression=!!pose.talking?.active||(!punching&&(motionFace[0]!==0||motionFace[1]!==0));
-    const selected=visual.expression&&!hasMotionExpression?visual.expression:null;
+    const selected=visual.expression&&!hasMotionExpression&&!(punching&&neutralExpression)?visual.expression:null;
     const x=selected?.x??motionFace[0]??0, y=selected?.y??motionFace[1]??0, sheet=selected?.sheet??"player_eyes.png";
     const layer2=selected?selected.layer2===true:true;
     body("eyes",sheet,x*32,y*32,32,32,IDENTITY,"BODY",visual.whites??null,1);

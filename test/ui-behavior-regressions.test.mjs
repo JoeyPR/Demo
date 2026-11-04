@@ -231,8 +231,10 @@ test("oversized chat text belongs to the message input, not the history panel", 
 test("preview menu and chat buttons use the 14eaf6 top-right placement", () => {
   const js = read("../js/player-chat.js");
   const css = read("../css/player-chat.css");
-  assert.ok(js.includes("actions.style.left = area.right - actions.offsetWidth - gap + 'px';"));
+  assert.ok(js.includes("const actionWidth = actions.offsetWidth || (compactActions ? 40 : 44)"));
+  assert.ok(js.includes("actions.style.left = area.right - actionWidth - gap + 'px';"));
   assert.ok(js.includes("actions.style.top = area.top + gap + 'px';"));
+  assert.ok(js.includes("nextPaint(position);"));
   assert.ok(css.includes("#preview-actions{position:fixed;z-index:10"));
   assert.ok(css.includes("align-items:center;gap:5px"));
 });
