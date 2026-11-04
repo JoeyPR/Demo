@@ -54,14 +54,13 @@
   textarea.setAttribute('enterkeyhint', 'send');
   textarea.setAttribute('aria-description', '120 character maximum. Press Enter to send.');
   const inputHint = make('span', 'player-chat-placeholder', P.rtfont?.color('7', 'Enter a message here') || 'Enter a message here');
-  inputHint.className = 'player-chat-placeholder'; inputHint.setAttribute('aria-hidden', 'true');
+  inputHint.setAttribute('aria-hidden', 'true');
   const inputText = make('span', 'player-chat-input-text');
   inputText.setAttribute('aria-hidden', 'true');
   inputText.hidden = true;
-  const counter = make('span', 'player-chat-counter', '0/120'); counter.className = 'player-chat-counter';
+  const counter = make('span', 'player-chat-counter', '0/120');
   counter.setAttribute('aria-live', 'off');
-  const inputField = document.createElement('div'); inputField.className = 'player-chat-input-field';
-  inputField.append(textarea, inputHint, inputText); inputRow.append(inputField, counter);
+  inputRow.append(textarea, inputHint, inputText, counter);
   chatLog.dataset.empty = 'true';
   composer.append(chatLog, inputRow);
   P.rtfont?.scan(inputHint);
@@ -202,10 +201,9 @@
     bubble.style.top = y + 'px';
   }
   function layoutPreview() {
-    const rect = preview.getBoundingClientRect(), vv = window.visualViewport;
-    const left = vv?.offsetLeft ?? 0, top = vv?.offsetTop ?? 0;
-    const right = left + (vv?.width ?? innerWidth), bottom = top + (vv?.height ?? innerHeight);
-    return { left: Math.max(left, rect.left), right: Math.min(right, rect.right), top: Math.max(top, rect.top), bottom: Math.min(bottom, rect.bottom) };
+    const rect = preview.getBoundingClientRect();
+    return { left: Math.max(0, rect.left), right: Math.min(innerWidth, rect.right),
+      top: Math.max(0, rect.top), bottom: Math.min(innerHeight, rect.bottom) };
   }
   function syncInputState() {
     opened = reveal >= MIN_REVEAL;
@@ -226,10 +224,8 @@
   function position() {
     const area = layoutPreview(), gap = 8;
     // Icons and topBar belong to the preview, not the keyboard's visual viewport.
-    const actionWidth = actions.offsetWidth || 88, actionHeight = actions.offsetHeight || 88;
-    const actionLeft = clamp(area.right-actionWidth-gap, area.left+gap, Math.max(area.left+gap, area.right-actionWidth-gap));
-    const actionTop = clamp(area.top+gap, area.top+gap, Math.max(area.top+gap, area.bottom-actionHeight-gap));
-    actions.style.left = actionLeft + 'px'; actions.style.top = actionTop + 'px';
+    actions.style.left = area.right - actions.offsetWidth - gap + 'px';
+    actions.style.top = area.top + gap + 'px';
     const source = inventoryHandle.getBoundingClientRect();
     const handleWidth = Math.max(1, source.width * 0.9);
     const handleHeight = Math.max(1, source.height * 0.9);

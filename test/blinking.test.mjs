@@ -9,12 +9,12 @@ const motion={x:0,y:0,facing:1,clockMs:0,ground:true,locomotion:"idle",events:[]
 const calls=(visual={},items=[],face=[0,0])=>buildDrawList({catalog:{},pose:{...pose,face},motion,visual,items});
 
 test("a blink closes, briefly holds, reopens and returns to the original face",()=>{
-  const samples=Array.from({length:1400},(_,i)=>sampleBlink(i*5));
+  const samples=Array.from({length:1800},(_,i)=>sampleBlink(i*5));
   const start=samples.findIndex(blink=>blink.phase==="closing");
   assert.ok(start>0);
   assert.ok(samples.slice(start).some(blink=>blink.phase==="closed"&&blink.closure===1));
   assert.ok(samples.slice(start).some(blink=>blink.phase==="opening"&&blink.closure>0&&blink.closure<1));
-  assert.deepEqual(samples[start+50],{phase:"open",closure:0});
+  assert.ok(samples.slice(start+1,start+100).some(blink=>blink.phase==="open"));
 });
 test("blink timing depends on simulation time, not sampling rate or previous frames",()=>{
   for(const time of [0,4000,4500,9250,31000,1e12]) {
@@ -26,6 +26,27 @@ test("blink timing depends on simulation time, not sampling rate or previous fra
   const b=Array.from({length:1000},(_,i)=>sampleBlink(i*10,{seed:2}).closure);
   assert.notDeepEqual(a,b);
   assert.deepEqual(sampleBlink(NaN),{phase:"open",closure:0});
+});
+test("human-like blink thresholds vary and occasionally produce a quick double blink",()=>{
+  const seed=13,starts=[];
+  let previous="open";
+  for(let time=0;time<360000;time+=10){
+    const phase=sampleBlink(time,{seed}).phase;
+    if(phase==="closing"&&previous!=="closing")starts.push(time);
+    previous=phase;
+  }
+  const intervals=starts.slice(1).map((time,index)=>time-starts[index]);
+  assert.ok(intervals.some(interval=>interval>=300&&interval<=700),"expected a paired blink");
+  const ordinary=intervals.filter(interval=>interval>1500);
+  assert.ok(ordinary.length>30,"expected normal open-eye intervals");
+  assert.ok(new Set(ordinary).size>8,"open-eye thresholds should not repeat mechanically");
+  assert.deepEqual(sampleBlink(12345,{seed}),sampleBlink(12345,{seed}));
+});
+test("a selected expression overrides the punch animation's temporary face",()=>{
+  const expression={name:"Smile",sheet:"player_eyes.png",x:0,y:1,layer2:true};
+  const result=buildDrawList({catalog:{},motion:{...motion,punch:{ageMs:50}},
+    pose:{...pose,face:[4,0],punch:{ageMs:50},punching:true},visual:{expression},items:[]});
+  assert.equal(result.find(call=>call.tag==="eyes").sy,32);
 });
 test("the actual skin-tinted lid crop closes the eyes without replacing the mouth or expression",()=>{
   const open=calls(),shut=calls({blink:1,skin:[100,150,200,255]});

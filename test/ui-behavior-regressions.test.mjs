@@ -1,23 +1,40 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import vm from "node:vm";
 
 const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("favorites use the Codex ID-set and favorite badge box system", () => {
+test("favorites persist as an ID list, deduplicate, and enforce the 20-item cap", () => {
+  const context = { window: { P: {} } };
+  vm.runInNewContext(read("../js/favorites.js"), context);
+  const favorites = context.window.P.favoriteStore;
+  assert.equal(favorites.MAX_FAVORITES, 20);
+
+  const twentyIds = Array.from({ length: 20 }, (_, index) => index + 1);
+  assert.deepEqual(Array.from(favorites.normalize([...twentyIds, 2, "bad"])), twentyIds);
+
+  const blocked = favorites.toggle(twentyIds, 21);
+  assert.equal(blocked.limitReached, true);
+  assert.equal(blocked.action, "limit");
+  assert.deepEqual(Array.from(blocked.ids), twentyIds);
+
+  const removed = favorites.toggle(twentyIds, 1);
+  assert.equal(removed.action, "removed");
+  const added = favorites.toggle(removed.ids, 21);
+  assert.equal(added.action, "added");
+  assert.equal(added.ids.length, 20);
+  assert.equal(added.ids.at(-1), 21);
+});
+
+test("the donor ID-list favorite system is restored before inventory boot and saved on every toggle", () => {
   const html = read("../index.html");
   const grid = read("../js/grid.js");
-  const css = read("../css/inv.css");
-  assert.ok(!html.includes("js/favorites.js"));
-  assert.ok(grid.includes("let favs = new Set(P.store.get('favs', []));"));
-  assert.ok(grid.includes("fv.src = 'img/favorite-badge.png'"));
-  assert.ok(grid.includes("P.store.set('favs', [...favs])"));
-  assert.ok(grid.includes("if (favs.has(it.id)) { favs.delete(it.id)"));
-  assert.ok(!grid.includes("favoriteStore"));
-  assert.ok(!grid.includes("You can only favorite up to 20 items"));
-  assert.ok(!grid.includes("fav-box.png"));
-  assert.ok(css.includes(".box .fv{position:absolute;right:2%;top:2%;width:30%;height:30%;object-fit:contain"));
-  assert.ok(css.includes(".box.fav-special{background-image:url(../img/box-fav.png)"));
+  assert.ok(html.indexOf("js/favorites.js") < html.indexOf("js/grid.js"));
+  assert.match(grid, /P\.favoriteStore\.normalize\(P\.store\.get\('favs', \[\]\)\)/);
+  assert.match(grid, /P\.store\.set\('favs', result\.ids\)/);
+  assert.match(grid, /You can only favorite up to 20 items/);
+  assert.match(grid, /syncFlags\(\); renderQuick\(\); P\.inv\.refresh\(\)/);
 });
 
 test("Wrench uses the visible screen at 3:4 and fits button labels together", () => {
@@ -95,21 +112,16 @@ test("preview chat handle is 10 percent smaller and the topBar opens from the pr
   assert.match(css, /#topBar\{position:fixed/);
 });
 
-test("player chat has a history pane above a compact Growtopia-style input row", () => {
+test("player chat has the fb93e23 history pane and 34px compact entry row", () => {
   const js = read("../js/player-chat.js");
   const css = read("../css/player-chat.css");
   assert.match(js, /make\('div', 'player-chat-log'\)/);
   assert.match(js, /const inputRow = make\('div', 'player-chat-input-row'\)/);
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
-  assert.match(js, /P\.rtfont\?\.color\('7', 'Enter a message here'\)/);
-  assert.match(js, /make\('span', 'player-chat-counter', '0\/120'\)/);
-  assert.match(js, /inputField\.append\(textarea, inputHint, inputText\)/);
-  assert.match(js, /inputRow.append\(inputField, counter\)/);
-  assert.match(js, /counter\.textContent = length \+ '\/' \+ MAX_LENGTH/);
-  assert.match(js, /textarea\.maxLength = MAX_LENGTH \* 2/);
-  assert.match(js, /Array\.from\(textarea\.value\)\.length/);
-  assert.match(css, /#player-chat-log\{position:relative;flex:1 1 auto/);
-  assert.match(css, /\.player-chat-input-row\{[^}]*height:30px/);
+  assert.match(js, /inputRow\.append\(textarea, inputHint, inputText, counter\)/);
+  assert.match(css, /#player-chat-composer\{[\s\S]*?gap:7px/);
+  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 16px/);
+  assert.match(css, /\.player-chat-input-row\{[^}]*height:34px/);
 });
 
 test("chat history uses fixed EST timestamps, preserves RTFont, and formats title/world roles", () => {
@@ -151,19 +163,17 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
   assert.match(css, /border-radius:calc\(var\(--radius\) \+ 1px\)/);
 });
 
-test("topBar keeps its panel frame and the separate input field fills its width", () => {
+test("topBar restores the fb93e23 panel geometry and retains the large entry overlay", () => {
   const css = read("../css/player-chat.css");
   const js = read("../js/player-chat.js");
   assert.match(js, /chatLog\.className = 'player-chat-log panel'/);
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?background:transparent;border:0/);
   assert.match(css, /#player-chat-log\{[\s\S]*?background:var\(--fill\);border:var\(--bd\) solid var\(--line\)/);
-  assert.match(css, /\.player-chat-input-row\{[\s\S]*?width:100%[\s\S]*?height:30px/);
-  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 20px/);
-  assert.match(css, /\.player-chat-entry\{[^}]*text-align:left/);
-  assert.match(css, /#playerChat:focus-visible\{outline:none!important/);
-  assert.match(css, /\.player-chat-input-field\{position:relative/);
-  assert.match(css, /\.player-chat-counter\{position:static/);
+  assert.match(css, /\.player-chat-input-row\{[\s\S]*?width:100%[\s\S]*?height:34px/);
+  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 16px/);
+  assert.match(css, /\.player-chat-input-text\{[^}]*font:400 36px/);
+  assert.match(css, /#player-chat-composer\{overflow:visible\}/);
 });
 
 test("live preview controls are small green Play and red two-bar Pause circles", () => {
@@ -209,13 +219,22 @@ test("oversized chat text belongs to the message input, not the history panel", 
   const js = read("../js/player-chat.js");
   const css = read("../css/player-chat.css");
   assert.ok(js.includes("const inputText = make('span', 'player-chat-input-text')"));
-  assert.ok(js.includes("inputField.append(textarea, inputHint, inputText)"));
+  assert.ok(js.includes("inputRow.append(textarea, inputHint, inputText, counter)"));
   assert.ok(js.includes("inputText.textContent = textarea.value"));
-  assert.ok(css.includes("font:400 20px/1.25 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 16px/1.25 'PlayerChat CG'"));
   assert.ok(css.includes("font:400 36px/1 'PlayerChat CG'"));
   assert.ok(css.includes(".player-chat-input-text{"));
-  assert.ok(css.includes(".player-chat-input-row{position:relative;display:flex;flex:0 0 30px"));
-  assert.ok(css.includes(".player-chat-input-field{position:relative;flex:1 1 auto;min-width:0;height:100%;overflow:visible}"));
+  assert.ok(css.includes("height:34px;min-height:34px"));
+  assert.ok(css.includes("#player-chat-composer{overflow:visible}"));
+});
+
+test("preview menu and chat buttons use the 14eaf6 top-right placement", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.ok(js.includes("actions.style.left = area.right - actions.offsetWidth - gap + 'px';"));
+  assert.ok(js.includes("actions.style.top = area.top + gap + 'px';"));
+  assert.ok(css.includes("#preview-actions{position:fixed;z-index:10"));
+  assert.ok(css.includes("align-items:center;gap:5px"));
 });
 
 test("role skin atlases and all advanced expression layers are preloaded before player rendering", () => {

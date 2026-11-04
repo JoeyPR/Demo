@@ -44,7 +44,9 @@ function baseCalls(pose,wear,profile,visual={}) {
     const h=2+offset; if(h>0.01) body(tag,"player_extraleg.png",x-8,0,8,1,compose(translate(x,28),scale(1,h)));
   }
   if(!wear.hideFace) {
-    const motionFace=pose.face??[0,0], hasMotionExpression=!!pose.talking?.active||motionFace[0]!==0||motionFace[1]!==0;
+    const motionFace=pose.face??[0,0];
+    const punching=!!pose.punch||!!pose.punching;
+    const hasMotionExpression=!!pose.talking?.active||(!punching&&(motionFace[0]!==0||motionFace[1]!==0));
     const selected=visual.expression&&!hasMotionExpression?visual.expression:null;
     const x=selected?.x??motionFace[0]??0, y=selected?.y??motionFace[1]??0, sheet=selected?.sheet??"player_eyes.png";
     const layer2=selected?selected.layer2===true:true;
@@ -150,7 +152,7 @@ export function buildDrawList({motion,pose,items=[],catalog,profile=PLANNER_PROF
   if(visibleItems.some(item=>item.slot===3)&&!visual.renderBareFeetWithShoes) {wear.hide.add("backFoot");wear.hide.add("frontFoot");}
   const blink=visual.blinking===false?sampleBlink(0,{enabled:false}):pose.blink??
     sampleBlink(motion.clockMs,{seed:visual.blinkSeed??1,override:visual.blink??motion.blink});
-  let calls=baseCalls({...pose,blink},wear,profile,visual);
+  let calls=baseCalls({...pose,blink,punching:!!motion.punch},wear,profile,visual);
   for(const item of visibleItems) {
     if(wear.noPants&&item.slot===2) continue;
     calls.push(...sampleItem(item,motion,pose,catalog,profile));

@@ -14,7 +14,7 @@ import {DanceSampler,sampleTalkingFace} from "./dance.mjs";
 
 // Integration entry point for Claude: supply catalog, items and MotionFrames.
 export class PlannerPlayer {
-  constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();this.punchData=catalog?.punchData??null;this.xmlfx=new XmlParticleLayer(catalog?.fxRenderers??catalog?.renderers??{});this.appearance={};this.timeline=new PunchTimeline(catalog?.punchSfx);this.danceSampler=new DanceSampler();}
+  constructor(catalog,items=[]) {this.catalog=catalog;this.items=items;this.rig=new PlayerRig();this.lastEvents=new Set();this.effects=new ItemEffects();this.punchData=catalog?.punchData??null;this.xmlfx=new XmlParticleLayer(catalog?.fxRenderers??catalog?.renderers??{});this.appearance={};this.timeline=new PunchTimeline(catalog?.punchSfx);this.danceSampler=new DanceSampler();this.blinkSeed=Math.floor(Math.random()*0x7fffffff);}
   equip(items) {this.items=items;this.timeline.reset();this.xmlfx.retain(items);}
   setAppearance(appearance={}) {resolveLook(this.items,appearance);this.appearance=appearance;}
   reset() {this.lastEvents.clear();this.effects.reset();this.xmlfx.reset();this.timeline.reset();this.danceSampler.reset();}
@@ -74,7 +74,7 @@ export class PlannerPlayer {
     }
     const punchPose=motion.punch&&visual.punchData!==false?punchPoseFor(this.items,this.punchData):null;
     if(punchPose&&!shotOwner)applyPunchPose(pose,punchPose);
-    pose.blink=sampleBlink(motion.clockMs,{enabled:visual.blinking!==false,seed:visual.blinkSeed??1,
+    pose.blink=sampleBlink(motion.clockMs,{enabled:visual.blinking!==false,seed:visual.blinkSeed??this.blinkSeed,
       override:visual.blink??motion.blink});
     const items=look.displayed.map(item=>({...item,hide:[...(item.hide??[]),...(dynamicHide.get(item.id)??[])]}));
     const lift=resolvePlayerLift(items,motion.clockMs,visual);
