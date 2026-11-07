@@ -94,7 +94,7 @@
     server: Object.freeze({ signal: 'S', color: 'w', includePlayerName: false }),
     broadcast: Object.freeze({ signal: 'B', color: '#', includePlayerName: false })
   });
-  const MIN_REVEAL = 40;
+  const MIN_REVEAL = 1;
   const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
   const now = () => window.performance?.now() ?? Date.now();
   function stateAt(atMs = now()) {
@@ -244,7 +244,7 @@
       top: Math.max(0, rect.top), bottom: Math.min(innerHeight, rect.bottom) };
   }
   function syncInputState() {
-    opened = reveal >= MIN_REVEAL;
+    opened = reveal > 0;
     composer.hidden = reveal <= 0;
     composer.inert = !opened;
     chatButton.setAttribute('aria-expanded', String(opened));
@@ -286,7 +286,7 @@
     positionBubble();
   }
   function rememberHeight() {
-    if (reveal >= MIN_REVEAL) {
+    if (reveal > 0) {
       lastReveal = reveal;
       P.store.set('topBarHeight', Math.round(reveal));
     }
@@ -331,11 +331,13 @@
     const moved = drag.moved;drag = null;
     handle.classList.remove('drag', 'up', 'dn');
     if (!moved && event.type === 'pointerup') { opened ? close() : open();return; }
-    if (reveal < MIN_REVEAL / 2) close();
+    // Keep the exact free-roam reveal height on release. Only the top boundary closes it.
+    if (reveal <= 0) close();
     else {
-      setReveal(Math.max(MIN_REVEAL, reveal));rememberHeight();
+      rememberHeight();
       P.emit('player-chat-open');
-      if (event.type === 'pointerup') focusInput();
+      if (event.type === 'pointerup' && reveal >= 40) focusInput();
+      else if (reveal < 40) textarea.blur();
     }
   }
   for (const event of ['pointerup','pointercancel','lostpointercapture']) handle.addEventListener(event, finishDrag);
@@ -347,8 +349,8 @@
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();event.stopPropagation();
       const next = reveal + (event.key === 'ArrowDown' ? 30 : -30);
-      if (next < MIN_REVEAL / 2) close();
-      else {setReveal(Math.max(MIN_REVEAL,next));rememberHeight();P.emit('player-chat-open');}
+      if (next <= 0) close();
+      else {setReveal(next);rememberHeight();P.emit('player-chat-open');}
     }
   });
   function clear() {

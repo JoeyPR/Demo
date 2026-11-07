@@ -2,7 +2,7 @@
 export const PICKUP_ATLAS_RECT = Object.freeze({ x: 160, y: 0, width: 20, height: 20 }); // X8, Y0
 export const PICKUP_SIZE = 12;
 // Extra rendered pixels applied to the complete pickup box (frame, contents, and shadow).
-export const PICKUP_BOX_EXTRA_SIZE = 4;
+export const PICKUP_BOX_EXTRA_SIZE = 6;
 export const PICKUP_HOVER_HEIGHT = -8.25;
 export const PICKUP_SPAWN_DURATION = 400;
 export const PICKUP_COLLECTION_DELAY = 500;

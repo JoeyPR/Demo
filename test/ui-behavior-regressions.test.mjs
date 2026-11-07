@@ -99,7 +99,7 @@ test("chat outline and shadow grow by one pixel, text has no shadow, and speech 
 
 test("pickup box gains two more rendered pixels", () => {
   const source = read("../js/drop-world.mjs");
-  assert.match(source, /PICKUP_BOX_EXTRA_SIZE = 4/);
+  assert.match(source, /PICKUP_BOX_EXTRA_SIZE = 6/);
 });
 
 
@@ -123,7 +123,7 @@ test("player chat uses the large two-lane TopBar reference design", () => {
   assert.match(css, /#player-chat-log\{[\s\S]*?font:400 clamp\(10px,2\.65vw,48px\)/);
   assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
-  assert.match(css, /\.player-chat-input-row\{[^}]*height:7\.4vw/);
+  assert.match(css, /\.player-chat-input-row\{[^}]*height:5\.8vw/);
 });
 
 test("chat history uses fixed EST timestamps, preserves RTFont, and formats title/world roles", () => {
@@ -169,13 +169,15 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
 test("TopBar uses Demo colors, thin borders, compact corners and message-sized stripes", () => {
   const css = read("../css/player-chat.css");
   assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("padding:0;box-sizing:border-box"));
   assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
   assert.ok(css.includes("background-size:100% 2.2em"));
+  assert.ok(css.includes("background-position:0 0"));
   assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(!css.includes("border-radius:1.6vw"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1\.1em,transparent 1\.1em 2\.2em\)/);
-  assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:7\.4vw/);
+  assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:5\.8vw/);
   assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(10px,2\.65vw,48px\)/);
 });
 
@@ -226,7 +228,7 @@ test("oversized message text stays in the input lane, not the history lane", () 
   assert.ok(js.includes("inputText.textContent = textarea.value"));
   assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/1 'PlayerChat CG'"));
   assert.ok(css.includes(".player-chat-input-text{"));
-  assert.ok(css.includes("height:7.4vw;min-height:28px;max-height:134px"));
+  assert.ok(css.includes("height:5.8vw;min-height:24px;max-height:105px"));
   assert.match(css, /#player-chat-composer\{[\s\S]*?overflow:visible/);
 });
 
@@ -366,7 +368,7 @@ test("oversized message text stays in the input lane, not the history lane", () 
   assert.ok(js.includes("inputText.textContent = textarea.value"));
   assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/1 'PlayerChat CG'"));
   assert.ok(css.includes(".player-chat-input-text{"));
-  assert.ok(css.includes("height:7.4vw;min-height:28px;max-height:134px"));
+  assert.ok(css.includes("height:5.8vw;min-height:24px;max-height:105px"));
   assert.match(css, /#player-chat-composer\{[\s\S]*?overflow:visible/);
 });
 
@@ -426,7 +428,7 @@ test("TopBar placeholder and typed message layer are vertically centered in the 
   assert.ok(css.includes(".player-chat-placeholder{position:absolute;left:.45em;top:0;bottom:0;z-index:2;"));
   assert.ok(css.includes("display:flex;align-items:center;width:max-content;height:100%"));
   assert.ok(css.includes(".player-chat-input-text{position:absolute;left:.45em;top:0;bottom:0;z-index:3;"));
-  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/clamp(28px,7.4vw,134px) 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/clamp(24px,5.8vw,105px) 'PlayerChat CG'"));
 });
 
 test("GrowID plate and pickup rendering remain intact beneath the translucent TopBar", () => {
@@ -438,4 +440,26 @@ test("GrowID plate and pickup rendering remain intact beneath the translucent To
   assert.ok(plate.includes("rgba(0,0,0,.5)"));
   assert.ok(plate.includes("img/flags/"));
   assert.ok(drop.includes("x: 160, y: 0, width: 20, height: 20"));
+});
+
+
+test("TopBar dragging retains the exact release height and closes only at the top boundary", () => {
+  const js = read("../js/player-chat.js");
+  assert.ok(js.includes("const MIN_REVEAL = 1;"));
+  assert.ok(js.includes("opened = reveal > 0;"));
+  assert.ok(js.includes("const delta = event.clientY - drag.y;"));
+  assert.ok(js.includes("setReveal(drag.start + delta);"));
+  assert.ok(js.includes("maxReveal = Math.max(0, area.bottom - area.top - handleHeight);"));
+  assert.ok(js.includes("if (reveal <= 0) close();"));
+  assert.ok(js.includes("rememberHeight();\n      P.emit('player-chat-open');"));
+  assert.ok(!js.includes("reveal < MIN_REVEAL / 2"));
+  assert.ok(!js.includes("setReveal(Math.max(MIN_REVEAL, reveal))"));
+});
+
+test("TopBar input bar is shorter while retaining centered placeholder and message text", () => {
+  const css = read("../css/player-chat.css");
+  assert.ok(css.includes("flex:0 0 5.8vw"));
+  assert.ok(css.includes("height:5.8vw;min-height:24px;max-height:105px"));
+  assert.ok(css.includes("clamp(24px,5.8vw,105px) 'PlayerChat CG'"));
+  assert.ok(css.includes("display:flex;align-items:center;width:max-content;height:100%"));
 });

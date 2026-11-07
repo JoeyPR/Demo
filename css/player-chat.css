@@ -19,17 +19,16 @@
 /* Demo's --fill is #277D9F at 75% opacity. The 25% stripe belongs to each
    message lane, so a wrapped message expands its own stripe naturally. */
 #player-chat-log{position:relative;isolation:isolate;flex:1 1 auto;min-height:0;width:100%;
-  overflow-x:hidden;overflow-y:auto;padding:.35em 0 0;box-sizing:border-box;overscroll-behavior:contain;
+  overflow-x:hidden;overflow-y:auto;padding:0;box-sizing:border-box;overscroll-behavior:contain;
   background-color:var(--fill);
   background-image:repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em);
-  background-size:100% 2.2em;background-repeat:repeat-y;
+  background-size:100% 2.2em;background-repeat:repeat-y;background-position:0 0;background-origin:padding-box;
   color:#fff;font:400 clamp(10px,2.65vw,48px)/1.1 'PlayerChat CG',sans-serif;
   text-align:left;white-space:normal;overflow-wrap:anywhere;scrollbar-width:thin}
 #player-chat-log:empty{min-height:0}
 .player-chat-entry{position:relative;display:block;width:100%;min-width:0;margin:0;
   padding:0 .45em;box-sizing:border-box;line-height:1.1;text-align:left;
   white-space:normal;overflow-wrap:anywhere;text-shadow:none;background-color:transparent}
-.player-chat-entry{background-color:transparent}
 .player-chat-signal,.player-chat-time,.player-chat-name-bracket,.player-chat-name,.player-chat-message{
   white-space:pre-wrap;overflow-wrap:anywhere;text-shadow:none}
 .player-chat-signal{font-weight:700;white-space:nowrap}
@@ -37,13 +36,13 @@
 .player-chat-message{display:inline;white-space:pre-wrap;overflow-wrap:anywhere}
 
 /* The input lane also inherits the shared .panel fill, edge and inner/outer shadows. */
-.player-chat-input-row{position:relative;display:block;flex:0 0 7.4vw;
-  width:100%;height:7.4vw;min-height:28px;max-height:134px;box-sizing:border-box;overflow:visible}
+.player-chat-input-row{position:relative;display:block;flex:0 0 5.8vw;
+  width:100%;height:5.8vw;min-height:24px;max-height:105px;box-sizing:border-box;overflow:visible}
 #playerChat{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;min-height:0;
   resize:none;overflow-x:auto;overflow-y:hidden;box-sizing:border-box;
   padding:0 11vw 0 .45em;border:0;background:transparent;color:transparent;
   -webkit-text-fill-color:transparent;caret-color:#fff;outline:none;
-  font:400 clamp(10px,2.65vw,48px)/clamp(28px,7.4vw,134px) 'PlayerChat CG',sans-serif;text-shadow:none;
+  font:400 clamp(10px,2.65vw,48px)/clamp(24px,5.8vw,105px) 'PlayerChat CG',sans-serif;text-shadow:none;
   user-select:text;-webkit-user-select:text;touch-action:pan-y;white-space:pre;overflow-wrap:normal}
 #playerChat:focus,#playerChat:focus-visible{outline:none!important;box-shadow:none}
 
