@@ -10,6 +10,7 @@ function plate(saved={}, ImageClass=null) {
     document:{createElement(){return new Canvas();}},
     fetch:async path=>({ok:true,json:async()=>JSON.parse(read('../'+path))}),
     P:{store:{get:()=>saved,set(){}},emit(){}}});
+  ctx.location={origin:'https://example.test'};
   ctx.window=ctx;
   vm.runInContext(read('../js/rtfont.js'),ctx);
   vm.runInContext(read('../js/plate.js'),ctx);
@@ -88,11 +89,11 @@ test('nameplate preload waits for the current role and country-flag images',asyn
 test('failed nameplate images settle preload cleanly rather than hanging startup',async()=>{
   const pending=[];
   class DelayedImage {
-    constructor(){this.complete=false;this.naturalWidth=0;this.naturalHeight=0;this.dataset={};this.listeners={};}
+    constructor(){this.complete=false;this.naturalWidth=0;this.naturalHeight=0;this.dataset={demoRootRetry:'1'};this.listeners={};}
     set src(value){this._src=value;pending.push(this);}
     get src(){return this._src;}
     addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);}
-    finish(){this.complete=true;this.naturalWidth=0;this.naturalHeight=0;for(const fn of this.listeners.error??[])fn();this.onerror?.();}
+    finish(){this.complete=true;this.naturalWidth=0;this.naturalHeight=0;this.onerror?.();for(const fn of this.listeners.error??[])fn();}
   }
   const p=plate({growId:'Joey',flag:'unitedstates',role:'farmer'},DelayedImage);
   const loading=p.plate.preload();
