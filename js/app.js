@@ -1016,16 +1016,19 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="ar
       if (pickup.artCanvas) {
         c.drawImage(pickup.artCanvas, left, top, size, size);
       } else {
-        if (pickup.icon) {
+        // Never blit the horizontal pickup atlas directly into the world.
+        // Only normalized square canvases are allowed on the world canvas.
+        if (pickup.iconCanvas) {
+          const iconSize = size * PICKUP_ICON_ART_SIZE / 64;
+          const inset = (size - iconSize) / 2;
+          c.drawImage(pickup.iconCanvas, left + inset, top + inset, iconSize, iconSize);
+        } else if (pickup.icon) {
           const iconSize = size * PICKUP_ICON_ART_SIZE / 64;
           const inset = (size - iconSize) / 2;
           c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
         }
-        if (pickupSpriteHasFrame()) {
-          c.drawImage(pickupSprite,
-            PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
-            PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
-            left, top, size, size);
+        if (pickup.frameCanvas) {
+          c.drawImage(pickup.frameCanvas, left, top, size, size);
         } else {
           c.strokeStyle = "#fff";
           c.lineWidth = Math.max(1, size * 0.06);
@@ -1037,11 +1040,6 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="ar
       if (size >= 0.5) {
         if (pickup.frameCanvas) {
           c.drawImage(pickup.frameCanvas, left, top, size, size);
-        } else if (pickupSpriteHasFrame()) {
-          c.drawImage(pickupSprite,
-            PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
-            PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
-            left, top, size, size);
         } else {
           c.strokeStyle = "#fff";
           c.lineWidth = Math.max(1, size * 0.06);

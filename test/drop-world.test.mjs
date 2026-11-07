@@ -152,3 +152,15 @@ test("dropVary stays within a five-pixel radial range", () => {
   assert.ok(Math.abs(maximum.y)<1e-9);
   assert.equal(maximum.radius,PICKUP_DROP_VARY_MAX);
 });
+
+test("pickup renderer never blits the raw horizontal atlas into the world canvas", () => {
+  const start = app.indexOf("function drawPickups(");
+  const end = app.indexOf('P.on("drop-confirm"', start);
+  assert.ok(start >= 0 && end > start);
+  const draw = app.slice(start, end);
+  assert.ok(!draw.includes("drawImage(pickupSprite"));
+  assert.ok(draw.includes("pickup.artCanvas"));
+  assert.ok(draw.includes("pickup.frameCanvas"));
+  assert.ok(draw.includes("c.strokeRect("), "missing normalized art gets a clean square placeholder");
+  assert.ok(app.includes("await pickupSprite.decode()"), "pickup sheet is decoded before startup enables Drop");
+});
