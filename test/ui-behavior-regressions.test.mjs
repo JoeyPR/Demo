@@ -362,10 +362,10 @@ test("oversized chat text belongs to the message input, not the history panel", 
   assert.ok(js.includes("const inputText = make('span', 'player-chat-input-text')"));
   assert.ok(js.includes("inputRow.append(textarea, inputHint, inputText, counter)"));
   assert.ok(js.includes("inputText.textContent = textarea.value"));
-  assert.ok(css.includes("font:400 16px/1.25 'PlayerChat CG'"));
-  assert.ok(css.includes("font:400 36px/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(16px,3.1vw,48px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(32px,3vw,46px)/1 'PlayerChat CG'"));
   assert.ok(css.includes(".player-chat-input-text{"));
-  assert.ok(css.includes("height:34px;min-height:34px"));
+  assert.ok(css.includes("height:clamp(42px,7vw,106px);min-height:clamp(42px,7vw,106px)"));
   assert.ok(css.includes("#player-chat-composer{overflow:visible}"));
 });
 
