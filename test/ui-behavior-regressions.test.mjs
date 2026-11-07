@@ -112,29 +112,173 @@ test("preview chat handle is 10 percent smaller and the topBar opens from the pr
   assert.match(css, /#topBar\{position:fixed/);
 });
 
-test("player chat has the fb93e23 history pane and 34px compact entry row", () => {
+test("player chat uses the large two-lane TopBar reference design", () => {
   const js = read("../js/player-chat.js");
   const css = read("../css/player-chat.css");
   assert.match(js, /make\('div', 'player-chat-log'\)/);
   assert.match(js, /const inputRow = make\('div', 'player-chat-input-row'\)/);
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(js, /inputRow\.append\(textarea, inputHint, inputText, counter\)/);
-  assert.match(css, /#player-chat-composer\{[\s\S]*?gap:7px/);
-  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 16px/);
-  assert.match(css, /\.player-chat-input-row\{[^}]*height:34px/);
+  assert.match(css, /#player-chat-composer\{[\s\S]*?gap:clamp\(6px,\.65vw,10px\)/);
+  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 clamp\(16px,3\.1vw,48px\)/);
+  assert.match(css, /border:calc\(16\*var\(--u\)\) solid #05090c/);
+  assert.match(css, /box-shadow:0 0 0 calc\(12\*var\(--u\)\) var\(--line\)/);
+  assert.match(css, /\.player-chat-input-row\{[^}]*height:clamp\(42px,7vw,106px\)/);
 });
 
 test("chat history uses fixed EST timestamps, preserves RTFont, and formats title/world roles", () => {
   const js = read("../js/player-chat.js");
   assert.match(js, /const EST_OFFSET_MS = 5 \* 60 \* 60 \* 1000/);
-  assert.match(js, /P\.rtfont\?\.color\('o', '\[' \+ time \+ '\]'\)/);
+  assert.match(js, /P\.rtfont\?\.color\('w', '\[' \+ time \+ '\]'\)/);
   assert.match(js, /worldRole === 'owner' \? '2'/);
   assert.match(js, /worldRole === 'admin' \? '\^'/);
   assert.match(js, /isDoctor \? '4'/);
   assert.match(js, /isLegend \? '9'/);
   assert.match(js, /name \+= ' of Legend'/);
   assert.match(js, /name = \(isDoctor \? 'Dr\. ' : ''\)/);
-  assert.match(js, /body\.textContent = message/);
+  assert.match(js, /body\.textContent = P\.rtfont\?\.color\(messageColor, text\) \|\| text/);
+  assert.match(js, /const messageColor = String\(options\.messageColor \?\? '\
+  assert.match(js, /P\.rtfont\?\.scan\(row\)/);
+  assert.match(js, /P\.rtfont\?\.hasCodes\(rawGrowId\)\) return rawGrowId/);
+  assert.match(js, /const MAX_LOG_MESSAGES = 50/);
+});
+
+test("Player Customization exposes Owner/Admin rank options for chat-name color preview", () => {
+  const custom = read("../js/customization.js");
+  assert.match(custom, /World Rank \(Chat Preview\)/);
+  assert.match(custom, /\['owner', 'World Owner'\]/);
+  assert.match(custom, /\['admin', 'World Admin'\]/);
+  assert.match(custom, /P\.playerChat\?\.setWorldRole\(chatWorldSelect\.value\)/);
+});
+
+
+test("speech chatbox auto-sizes to its text, stays centered and screen-sized independent of zoom", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.match(js, /const fontSize = 13/);
+  assert.doesNotMatch(js, /P\.on\('camzoom', position\)/);
+  assert.match(js, /anchor\.y - 18/);
+  assert.match(js, /const x = clamp\(anchor\.x/);
+  assert.match(css, /width:max-content;height:auto/);
+  assert.match(css, /font:400 var\(--player-chat-font-size,13px\)/);
+  assert.match(css, /max-width:min\(460px,calc\(100vw - 24px\)\)/);
+  assert.match(css, /text-align:center/);
+  assert.match(css, /border-radius:calc\(var\(--radius\) \+ 1px\)/);
+});
+
+test("topBar uses Demo palette, the thick framed lane and message-scaled stripes", () => {
+  const css = read("../css/player-chat.css");
+  assert.match(css, /background-color:var\(--fill\)/);
+  assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1em,transparent 1em 2em\)/);
+  assert.match(css, /background-size:100% 2em/);
+  assert.match(css, /border:calc\(16\*var\(--u\)\) solid #05090c/);
+  assert.match(css, /border-radius:calc\(40\*var\(--u\)\)/);
+  assert.match(css, /box-shadow:0 0 0 calc\(12\*var\(--u\)\) var\(--line\)/);
+  assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:clamp\(42px,7vw,106px\)/);
+  assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(32px,3vw,46px\)/);
+});
+
+test("live preview controls are small green Play and red two-bar Pause circles", () => {
+  const js = read("../js/preview-mode.js");
+  const css = read("../css/preview-mode.css");
+  assert.match(js, /icon\.textContent=live\?'':'>'/);
+  assert.match(js, /Pause Live Preview/);
+  assert.match(js, /rect.top-height-8/);
+  assert.match(js, /rect.left\+\(rect.width-width\)\/2/);
+  assert.doesNotMatch(js, /live-preview-run\.png|Live Preview'<\/span>/);
+  assert.match(css, /width:32px;height:32px/);
+  assert.match(css, /background:#249b4b/);
+  assert.match(css, /background:#d63b3b/);
+  assert.match(css, /linear-gradient\(to right,#fff 0 3px,transparent 3px 8px,#fff 8px 11px\)/);
+});
+
+
+test("paused Preview hides player chat/menu controls and clears the live chat state", () => {
+  const css = read("../css/player-chat.css");
+  const js = read("../js/player-chat.js");
+  assert.match(css, /body:not\(\.live-preview\) #preview-actions,[\s\S]*?body:not\(\.live-preview\) #topBar,[\s\S]*?body:not\(\.live-preview\) #player-chat-bubble\{display:none!important/);
+  assert.match(css, /body:not\(\.live-preview\) #pads\{display:none!important/);
+  assert.match(js, /P\.on\('preview-mode', mode => \{/);
+  assert.match(js, /if \(!mode\?\.live\) \{\s*close\(\);\s*clear\(\);/);
+});
+
+test("decoded role skins and expressions are connected to the player renderer", () => {
+  const custom = read("../js/customization.js");
+  const renderer = read("../demo/engine/render.mjs");
+  const app = read("../js/app.js");
+  assert.ok(custom.includes("player_head_skin1.png"));
+  assert.ok(custom.includes("player_head_skin6.png"));
+  assert.ok(!custom.includes("Headless"));
+  assert.ok(!custom.includes("player_head_skin9.png"));
+  assert.ok(custom.includes("player_eyes3.png"));
+  assert.ok(renderer.includes("player_face2.png"));
+  assert.ok(renderer.includes("player_iris1.png"));
+  assert.ok(app.includes("playerAppearanceVisual()"));
+});
+
+
+test("oversized chat text belongs to the message input, not the history panel", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.ok(js.includes("const inputText = make('span', 'player-chat-input-text')"));
+  assert.ok(js.includes("inputRow.append(textarea, inputHint, inputText, counter)"));
+  assert.ok(js.includes("inputText.textContent = textarea.value"));
+  assert.ok(css.includes("font:400 clamp(16px,3.1vw,48px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(32px,3vw,46px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes(".player-chat-input-text{"));
+  assert.ok(css.includes("height:clamp(42px,7vw,106px);min-height:clamp(42px,7vw,106px)"));
+  assert.ok(css.includes("#player-chat-composer{overflow:visible}"));
+});
+
+test("preview menu and chat buttons use the 14eaf6 top-right placement", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.ok(js.includes("const actionWidth = actions.offsetWidth || (compactActions ? 40 : 44)"));
+  assert.ok(js.includes("actions.style.left = area.right - actionWidth - gap + 'px';"));
+  assert.ok(js.includes("actions.style.top = area.top + gap + 'px';"));
+  assert.ok(js.includes("nextPaint(position);"));
+  assert.ok(css.includes("#preview-actions{position:fixed;z-index:10"));
+  assert.ok(css.includes("align-items:center;gap:5px"));
+});
+
+test("role skin atlases and all advanced expression layers are preloaded before player rendering", () => {
+  const app = read("../js/app.js");
+  assert.match(app, /const appearanceAtlases = \[/);
+  assert.match(app, /map\(roleSkin => roleSkin\.head\)/);
+  assert.match(app, /expression\.sheet === "player_eyes3\.png"/);
+  assert.match(app, /\.\.\.names, \.\.\.appearanceAtlases/);
+});
+
+test("Duct Taped selects the Grey swatch as a persistent player skin override", () => {
+  const app = read("../js/app.js");
+  const renderer = read("../demo/engine/render.mjs");
+  const skins = read("../js/skin-colors.js");
+  assert.match(skins, /\['grey','Grey','#7F7F7F'\]/);
+  assert.match(app, /SKINS\.find\(skin => skin\.id === "grey"\)/);
+  assert.match(app, /skinOverride: expression\?\.name === "Duct Taped" \? DUCT_TAPED_SKIN : null/);
+  assert.match(renderer, /resolveWear\(items,baseSkin=\[255,206,180,255\],skinOverride=null\)/);
+  assert.match(renderer, /skin=skinOverride\?\?items\.find\(i=>i\.skin\)\?\.skin\?\?baseSkin/);
+  assert.match(renderer, /resolveWear\(contributors,visual\.skin,visual\.skinOverride\)/);
+  assert.match(renderer, /wear\.skinPalette=!visual\.skinOverride/);
+});
+
+
+test("TopBar messages use Growtopia Signal lanes and default player message color $", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.ok(js.includes("signal: 'W', color: '6', includePlayerName: true"));
+  assert.ok(js.includes("signal: 'S', color: 'w', includePlayerName: false"));
+  assert.ok(js.includes("signal: 'B', color: '#', includePlayerName: false"));
+  assert.ok(js.includes("P.rtfont?.color(signalColor, '[' + signalText + ']')"));
+  assert.ok(js.includes("P.rtfont?.color('w', '[' + time + ']')"));
+  assert.ok(js.includes("options.messageColor ?? '$'"));
+  assert.ok(js.includes("appendChatLogMessage(text, messageAtMs, { type: 'world', messageColor: '$' })"));
+  assert.ok(js.includes("P.rtfont?.color(String(options.nameBracketColor ?? '6'), '<')"));
+  assert.ok(css.includes(".player-chat-signal"));
+  assert.ok(css.includes("rgba(123,186,210,.25)"));
+  assert.ok(css.includes("background-size:100% 2em"));
+});
+\)/);
   assert.match(js, /P\.rtfont\?\.scan\(row\)/);
   assert.match(js, /P\.rtfont\?\.hasCodes\(rawGrowId\)\) return rawGrowId/);
   assert.match(js, /const MAX_LOG_MESSAGES = 50/);
