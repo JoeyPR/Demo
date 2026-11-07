@@ -170,7 +170,7 @@ test("TopBar uses Demo colors, thin borders, compact corners and message-sized s
   const css = read("../css/player-chat.css");
   assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
-  assert.ok(!css.includes("background-size:100% 2.2em"));
+  assert.ok(css.includes("background-size:100% 2.2em"));
   assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(!css.includes("border-radius:1.6vw"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
