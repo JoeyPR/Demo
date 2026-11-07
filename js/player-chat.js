@@ -269,8 +269,10 @@
     const source = inventoryHandle.getBoundingClientRect();
     const handleWidth = Math.max(1, source.width * 0.9);
     const handleHeight = Math.max(1, source.height * 0.9);
-    const width = Math.max(120, area.right - area.left);
-    topBar.style.left = area.left + 'px';
+    const previewWidth = Math.max(0, area.right - area.left);
+    const width = previewWidth * 0.75;
+    const left = area.left + (previewWidth - width) / 2;
+    topBar.style.left = left + 'px';
     topBar.style.top = area.top + 'px';
     topBar.style.width = width + 'px';
     handle.style.width = handleWidth + 'px';
@@ -278,7 +280,7 @@
     handle.style.left = Math.max(0, (width - handleWidth) / 2) + 'px';
     maxReveal = Math.max(0, area.bottom - area.top - handleHeight);
     const mode = document.getElementById('preview-mode-toggle')?.getBoundingClientRect();
-    topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - area.left + 4 : 8) + 'px');
+    topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - left + 4 : 8) + 'px');
     topBar.style.setProperty('--topbar-right-reserve', actions.offsetWidth + 8 + 'px');
     setReveal(reveal);
     positionBubble();

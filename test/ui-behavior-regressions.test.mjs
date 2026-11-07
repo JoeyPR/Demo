@@ -121,8 +121,8 @@ test("player chat uses the large two-lane TopBar reference design", () => {
   assert.match(js, /inputRow\.append\(textarea, inputHint, inputText, counter\)/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?gap:\.55vw/);
   assert.match(css, /#player-chat-log\{[\s\S]*?font:400 clamp\(10px,2\.65vw,48px\)/);
-  assert.match(css, /border:\.55vw solid var\(--line\)/);
-  assert.match(css, /inset 0 0 0 \.3vw #05090c/);
+  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /\.player-chat-input-row\{[^}]*height:7\.4vw/);
 });
 
@@ -168,12 +168,12 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
 
 test("TopBar uses Demo colors, thin borders, compact corners and message-sized stripes", () => {
   const css = read("../css/player-chat.css");
-  assert.match(css, /background-color:#277D9F/);
-  assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1\.1em,transparent 1\.1em 2\.2em\)/);
-  assert.match(css, /background-size:100% 2\.2em/);
-  assert.match(css, /border:\.55vw solid var\(--line\)/);
-  assert.match(css, /border-radius:1\.6vw/);
-  assert.match(css, /inset 0 0 0 \.3vw #05090c/);
+  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
+  assert.ok(!css.includes("background-size:100% 2.2em"));
+  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(!css.includes("border-radius:1.6vw"));
+  assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /\.player-chat-entry:nth-child\(odd\)\{background-color:rgba\(123,186,210,\.25\)\}/);
   assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:7\.4vw/);
   assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(10px,2\.65vw,48px\)/);
@@ -276,7 +276,7 @@ test("TopBar messages use Growtopia Signal lanes and default player message colo
   assert.ok(js.includes("P.rtfont?.color(String(options.nameBracketColor ?? '6'), '<')"));
   assert.ok(css.includes(".player-chat-signal"));
   assert.ok(css.includes("rgba(123,186,210,.25)"));
-  assert.ok(css.includes("background-size:100% 2.2em"));
+  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
 });
 
 test("Player Customization exposes Owner/Admin rank options for chat-name color preview", () => {
@@ -310,9 +310,9 @@ test("topBar matches the reference without oversized black strokes or inflated c
   assert.match(css, /#player-chat-composer\{[\s\S]*?background:transparent;border:0/);
   assert.match(css, /#player-chat-log\{[\s\S]*?background-color:#277D9F/);
   assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\)/);
-  assert.match(css, /border:\.55vw solid var\(--line\)/);
-  assert.match(css, /border-radius:1\.6vw/);
-  assert.match(css, /box-shadow:var\(--sh\) var\(--sh\) 0 0 #000,inset 0 0 0 \.3vw #05090c/);
+  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(!css.includes("border-radius:1.6vw"));
+  assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:7\.4vw/);
   assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(10px,2\.65vw,48px\)/);
 });
@@ -401,3 +401,39 @@ test("Duct Taped selects the Grey swatch as a persistent player skin override", 
 });
 
 
+
+
+test("TopBar uses the shared Demo 75%-fill panel contract and 25% per-message stripes", () => {
+  const css = read("../css/player-chat.css");
+  const base = read("../css/base.css");
+  assert.ok(base.includes("--fill:rgba(39,125,159,.75)"));
+  assert.ok(base.includes("--line:#7BBAD2"));
+  assert.ok(base.includes("border:var(--bd) solid var(--edge,var(--line))"));
+  assert.ok(base.includes("border-radius:var(--radius)"));
+  assert.ok(base.includes("box-shadow:var(--sh) var(--sh) 0 0 #000"));
+  assert.ok(base.includes("box-shadow:inset var(--sh) var(--sh) 0 0 #000"));
+  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
+  assert.ok(!css.includes("repeating-linear-gradient"));
+  assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
+  assert.ok(!css.includes("border-radius:1.6vw"));
+});
+
+test("TopBar placeholder and typed message layer are vertically centered in the input lane", () => {
+  const css = read("../css/player-chat.css");
+  assert.ok(css.includes(".player-chat-placeholder{position:absolute;left:.45em;top:0;bottom:0;z-index:2;"));
+  assert.ok(css.includes("display:flex;align-items:center;width:max-content;height:100%"));
+  assert.ok(css.includes(".player-chat-input-text{position:absolute;left:.45em;top:0;bottom:0;z-index:3;"));
+  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/clamp(28px,7.4vw,134px) 'PlayerChat CG'"));
+});
+
+test("GrowID plate and pickup rendering remain intact beneath the translucent TopBar", () => {
+  const app = read("../js/app.js");
+  const plate = read("../js/plate.js");
+  const drop = read("../js/drop-world.mjs");
+  assert.ok(app.includes("drawPickups(c, frame, s, cameraPivotX, cameraPivotY, zoom)"));
+  assert.ok(app.includes("P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.80)"));
+  assert.ok(plate.includes("rgba(0,0,0,.5)"));
+  assert.ok(plate.includes("img/flags/"));
+  assert.ok(drop.includes("x: 160, y: 0, width: 20, height: 20"));
+});
