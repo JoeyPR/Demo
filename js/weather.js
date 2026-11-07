@@ -65,7 +65,7 @@
     if (!response.ok) throw new Error("Weather config unavailable (" + response.status + ")");
     const cfg = await response.json();
     if (CLOUD_FIX_PENDING.has(key)) m.applyCloudFix(cfg);   /* sunny/monochrome/spring */
-    const imgs = await m.loadSheets(cfg, new URL('sheets/', location.href).href);
+    const imgs = await m.loadSheets(cfg, new URL('sheets/', location.href).href, 'https://setplannergt.com/weather/sheets/');
     const bg = document.createElement('canvas'), fg = document.createElement('canvas');
     bg.width = fg.width = TILE; bg.height = fg.height = TILE;
     const renderer = new m.WeatherRenderer(cfg, imgs, bg, fg);

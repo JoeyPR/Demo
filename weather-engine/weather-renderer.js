@@ -517,16 +517,24 @@ export function hillSceneOffset(playerTravelWorldPx, worldPxPerUnit, pxPerSceneU
  * Load every sprite sheet a weather config needs.
  * @returns {Promise<Object<string,HTMLImageElement>>}
  */
-export async function loadSheets(cfg, baseUrl = 'sheets/') {
+export async function loadSheets(cfg, baseUrl = 'sheets/', fallbackBaseUrl = '') {
   const imgs = {};
-  await Promise.all((cfg.sheets || []).map(name =>
-    new Promise((resolve) => {
+  await Promise.all((cfg.sheets || []).map(async name => {
+    const load = url => new Promise(resolve => {
       const img = new Image();
-      img.onload = img.onerror = resolve;
-      img.src = baseUrl + name;
-      imgs[name] = img;
-    })
-  ));
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+    let img = await load(baseUrl + name);
+    // Paradise City alone references the bg_pc_* family. The Demo snapshot
+    // omitted these six sheets; the supplied Set Planner asset package confirms
+    // their original public location under /weather/sheets/.
+    if (!img && fallbackBaseUrl && /^bg_pc_/i.test(name)) {
+      img = await load(fallbackBaseUrl + name);
+    }
+    imgs[name] = img;
+  }));
   return imgs;
 }
 

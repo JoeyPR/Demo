@@ -1,88 +1,44 @@
-/* The main planner: shared avatar/FX composition, terrain motion, weather,
-   equipment and the original inventory/Drop contracts. */
-import { PlannerPlayer } from "../demo/engine/player.mjs";
+/* Planner runtime with player/item rendering removed.
+   Simulation, tile collision, Land drawing, weather, inventory and Drop remain. */
 import { WorldMotion, WORLD_ORIGIN_X, WORLD_ORIGIN_Y, WORLD_TILE_SIZE } from "./world-motion.mjs";
 import { SKINS, resolveStoredSkin } from "./skin-colors.mjs";
 import { normalizeCatalogItem } from "../demo/engine/catalog-adapter.mjs";
-import { drawCanvas } from "../demo/engine/render.mjs";
-import { registerAtlas } from "../demo/engine/canvas-assets.mjs";
-import { drawBounds } from "../demo/engine/draw-bounds.mjs";
 import { resolveAbilities } from "../demo/engine/abilities.mjs";
-import { rendererScripts } from "../demo/engine/research-data.mjs";
-import { resolveLook } from "../demo/engine/look.mjs";
-import { createReferenceFxAtlas } from "../demo/engine/reference-fx.mjs";
 import { WeatherRenderer, loadSheets, hillSceneOffset } from "../weather-engine/weather-renderer.js";
 import { applyCloudFix, CLOUD_FIX_KEYS } from "../weather-engine/custom-weathers.js";
 import { registerBlocks, registerBackgroundBlocks, renderWorld, BLOCKS, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelection, uniformLandWorld } from "./land-system.mjs";
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { buildItemWrenchDefinitionFromVariableMap } from "../src/item-wrench-variable-map.mjs";
 import { buildItemWrenchDefinitionFromGameOptions } from "../src/item-wrench-game-options.mjs";
-import { clampCameraZoom, computeCameraLayout, projectCameraPoint, unprojectCameraPoint } from "./camera.mjs";
-import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, getPlayerShadowCalls, playerVisualRect, playerShadowOffset, blackenShadowMask } from "./player-shadow.mjs";
+import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
+import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, playerShadowOffset } from "./player-shadow.mjs";
 import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
 const world = $("#pv"), ctx = world.getContext("2d");
-const avatar = document.createElement("canvas"), avatarCtx = avatar.getContext("2d");
-const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarShadow.getContext("2d");
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
 const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getContext("2d");
-const worldShadowCanvas = document.createElement("canvas"), worldShadowCtx = worldShadowCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
 const pickupSprite = new Image();
 pickupSprite.src = moduleURL("../img/pickup.png").href;
-
 const initialSkin = SKINS[resolveStoredSkin(P.store.get("skin", 0))];
 
 const state = {
   catalog: null, equipped: new Map(), skin: initialSkin.rgb, skinPalette: initialSkin.palette,
-  resolution: 128, clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null,
-  lastFrame: null, lastResult: null, ready: false, remainder: 0,
-  weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0, weatherStill: null,
-  weatherFailedKey: null,
-  ancestralMap: null, ancestralPath: [], abilities: null, hiddenPasses: new Set(),
-  landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
+  clock: 0, jumpUntil: 0, punchUntil: 0, doubleAt: null, lastFrame: null,
+  ready: false, remainder: 0,
+  weatherRenderer: null, weatherKey: null, weatherAnimAt: 0, weatherT0: 0,
+  weatherStill: null, weatherFailedKey: null,
+  landBlock: null, landWorld: null, view: null, aim: null,
+  punchHold: false, punchPointer: null, gesturePunchUntil: 0,
   pickups: [], nextPickupId: 1,
   hiddenItems: new Set(), transmutes: new Map(), effectsEnabled: true,
-  livePreview:false, editableWorld:null,
-  pendingWorldEvents:[], dance:null,
-  itemWrenchDefinitions:null, itemWrenchVariableMaps:null, itemWrenchGameOptions:null
+  livePreview: false, editableWorld: null, pendingWorldEvents: [],
+  itemWrenchDefinitions: null, itemWrenchVariableMaps: null, itemWrenchGameOptions: null
 };
-let player, motion, lastTimestamp = 0;
-const atlases = new Map(), images = new Map(), atlasLoads = new Map(), failedAtlases = new Set();
-
-/* ---------------- atlas loading (from the Demo renderer) ---------------- */
-function loadAtlas(name) {
-  if (atlases.has(name)) return Promise.resolve(images.get(name));
-  if (atlasLoads.has(name)) return atlasLoads.get(name);
-  const load = (async () => {
-    try {
-      const image = new Image();
-      image.crossOrigin = "anonymous";
-      image.src = moduleURL(`../demo/assets/${name}${name==="tiles_page17.png"?"?v=20261031-new": ""}`).href;
-      await image.decode();
-      images.set(name, image);
-      const atlas = registerAtlas(image), tint = atlas.tintedCrop;
-      atlas.tintedCrop = call => {
-        try { return tint(call); } catch {
-          const crop = document.createElement("canvas");
-          crop.width = call.sw; crop.height = call.sh;
-          crop.getContext("2d").drawImage(image, call.sx, call.sy, call.sw, call.sh, 0, 0, call.sw, call.sh);
-          return crop;
-        }
-      };
-      atlases.set(name, atlas);
-      return image;
-    } catch { failedAtlases.add(name); return null; }
-  })();
-  atlasLoads.set(name, load);
-  return load;
-}
-function ensureItemAssets(item) {
-  return Promise.all([...new Set([...item.pieces.map(p => p.a),
-    ...Object.values(item.renderer?.sprites ?? {}).map(s => s.atlas)])].filter(Boolean).map(loadAtlas));
-}
+let motion;
+/* Wrench metadata remains available to inventory controls; no wearable atlas is loaded. */
 function attachItemWrenchMetadata(item, raw = item) {
   const id = String(raw.id);
   const variableMap = state.itemWrenchVariableMaps?.items?.[id];
@@ -99,7 +55,7 @@ function normalize(raw) {
   attachItemWrenchMetadata(item, raw);
   item.wrenchSettings = P.itemWrench?.get(raw.id) ??
     P.store.get("itemWrenchSettings", {})?.[String(raw.id)] ?? null;
-  ensureItemAssets(item);
+  
   return item;
 }
 
@@ -116,59 +72,34 @@ P.on("item-wrench-preview", applyWrenchPreview);
 P.on("item-wrench-update", applyWrenchPreview);
 P.on("item-wrench-cancel", applyWrenchPreview);
 
-/* ---------------- equip ----------------------------------------------- */
+
+// Inventory equip state and movement abilities remain independent of player drawing.
 function equipToggle(id) {
   const raw = state.catalog.items.find(i => i.id === id);
   if (!raw) return;
   if (state.equipped.get(raw.slot)?.id === id) state.equipped.delete(raw.slot);
   else state.equipped.set(raw.slot, normalize(raw));
-  // A different ancestral starts a fresh motion sequence; don't inherit the
-  // previous item's walking/jump history or its in-flight FX birth positions.
-  if (raw.slot === 9) state.ancestralPath.length = 0;
-  player.equip([...state.equipped.values()]);
-  const equippedIds=new Set([...state.equipped.values()].map(item=>item.id));
-  for(const key of state.hiddenItems)if(!equippedIds.has(key))state.hiddenItems.delete(key);
-  for(const key of state.transmutes.keys())if(!equippedIds.has(key))state.transmutes.delete(key);
-  player.setAppearance({hiddenItemIds:state.hiddenItems,transmutes:state.transmutes});
-  syncAuraPass();
-  state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
+  const equippedIds = new Set([...state.equipped.values()].map(item => item.id));
+  for (const key of state.hiddenItems) if (!equippedIds.has(key)) state.hiddenItems.delete(key);
+  for (const key of state.transmutes.keys()) if (!equippedIds.has(key)) state.transmutes.delete(key);
+  const wornItems = [...state.equipped.values()];
+  state.abilities = resolveAbilities(wornItems, state.abilityRegistry);
   motion?.setAbilities(state.abilities);
-  P.equippedIds = new Set([...state.equipped.values()].map(i => i.id));
+  P.equippedIds = equippedIds;
   P.emit("equip-state");
   P.emit("look-update");
   updateHUD();
 }
-/* Ancestral auras are drawn by the ancestral FX renderer (drawAncestralAura)
-   below — the engine's own static RenderAura pass (the artifact's old sprite
-   drawn on the character) is hidden so only the animated aura shows. */
-function syncAuraPass() {
-  const item = displayedItem(9);
-  const handled = !!(item && state.ancestralMap?.has(item.id));
-  if (handled) state.hiddenPasses.add("RenderAura");
-  else state.hiddenPasses.delete("RenderAura");
-}
-function displayedItem(slot) {
-  return resolveLook([...state.equipped.values()],{
-    hiddenItemIds:state.hiddenItems,transmutes:state.transmutes
-  }).displayed.find(item=>item.slot===slot);
-}
-function applyAppearance() {
-  player?.setAppearance({hiddenItemIds:state.hiddenItems,transmutes:state.transmutes});
-  state.ancestralPath.length=0;
-  syncAuraPass();
-  P.emit("look-update");
-}
-// Existing customization controls consume this API; inventory equipment IDs
-// and Drop retain their existing contracts.
-P.look = {
-  get() { return [...state.equipped.values()].map(item=>({id:item.id,name:item.name,slot:item.slot,
-    visible:!state.hiddenItems.has(item.id),displayId:state.transmutes.get(item.id)?.id??item.id})); },
-  setVisible(id,visible) {
+function applyAppearance(){P.emit("look-update");}
+P.look={
+  get(){return [...state.equipped.values()].map(item=>({id:item.id,name:item.name,slot:item.slot,
+    visible:!state.hiddenItems.has(item.id),displayId:state.transmutes.get(item.id)?.id??item.id}));},
+  setVisible(id,visible){
     if(![...state.equipped.values()].some(item=>item.id===id))return;
     if(visible)state.hiddenItems.delete(id);else state.hiddenItems.add(id);
     applyAppearance();
   },
-  transmute(id,targetId) {
+  transmute(id,targetId){
     const equipped=[...state.equipped.values()].find(item=>item.id===id);
     const target=state.catalog?.items.find(item=>item.id===Number(targetId));
     if(!equipped||!target||target.slot!==equipped.slot)return false;
@@ -178,7 +109,7 @@ P.look = {
   get effectsEnabled(){return state.effectsEnabled;},
   setEffects(enabled){state.effectsEnabled=!!enabled;P.emit("look-update");}
 };
-P.on("equip", payload => equipToggle(typeof payload === "object" && payload !== null ? payload.id : payload));
+P.on("equip",payload=>equipToggle(typeof payload==="object"&&payload!==null?payload.id:payload));
 P.on("skin", id => {
   const skin = SKINS[resolveStoredSkin(id)];
   state.skin = skin.rgb;
@@ -189,72 +120,34 @@ P.on("skin", id => {
     if (canvas.__demoItem) renderDemoInventoryIcon(canvas, canvas.__demoItem, state.skin);
   });
 });
-P.on("player-command", event => {
-  if (event.command === "dance" && state.lastFrame?.ground) {
-    state.dance = { startedAtMs: event.atMs, startFacing: state.lastFrame.facing };
+/* ---------------- movement and collision ------------------------------- */
+function step(dt){
+  state.clock+=dt;
+  if(state.doubleAt!==null&&state.clock>=state.doubleAt){
+    state.jumpUntil=state.clock+100;state.doubleAt=null;
   }
-});
-P.on("player-chat", () => { state.dance = null; });
-
-/* ---------------- simulation ------------------------------------------- */
-/* Pet and particle hosts query the active world using their own rig-to-feet
-   coordinate conversion. The outfit-only mode retains the flat preview. */
-function withPetHost(motion) {
-  return { ...motion,
-    armAngle: state.lastResult?.pose?.frontAngle ?? 0,
-    petBareHead: !state.equipped.get(0),
-    petLift: state.lastResult?.lift?.y ?? 0,
-    petWorld: { solidAt: (x,y) => state.landBlock!=null ? worldSolidAt(x-16,y) : true },
-    particleWorld: { solidAt: (x,y) => state.landBlock!=null ? worldSolidAt(x-16,y-32) : y>=32 } };
-}
-function worldSolidAt(x,y) { return motion instanceof WorldMotion ? motion.solidAt(x,y) : false; }
-function step(dt) {
-  state.clock += dt;
-  if (state.doubleAt !== null && state.clock >= state.doubleAt) {
-    state.jumpUntil = state.clock + 100; state.doubleAt = null;
-  }
-  const input = {
-    right: state.livePreview && !!P.input.right, left: state.livePreview && !!P.input.left,
-    jump: state.livePreview && (state.clock < state.jumpUntil || !!P.input.jump),
-    punch: state.livePreview && (state.clock < state.punchUntil || !!P.input.punch || state.punchHold || state.clock < state.gesturePunchUntil)
+  const input={
+    right:state.livePreview&&!!P.input.right,
+    left:state.livePreview&&!!P.input.left,
+    jump:state.livePreview&&(state.clock<state.jumpUntil||!!P.input.jump),
+    punch:state.livePreview&&(state.clock<state.punchUntil||!!P.input.punch||
+      state.punchHold||state.clock<state.gesturePunchUntil)
   };
-  /* touch punch aim: the gesture's canvas point steers the punch at the
-     character — same contract as the Demo render lab (punchTarget is in
-     32-unit world space relative to the avatar root, facing-adjusted).
-     Only the gesture's own punches (hold, or the tap queued by
-     gesturePunchUntil) consume the aim — a keyboard/pad punch keeps the
-     engine's default target. */
-  const gesturePunch = state.punchHold || state.clock < state.gesturePunchUntil;
-  if (gesturePunch && state.aim && state.view) {
-    const { rootX, rootY, s, lift } = state.view;
-    /* Unproject the pointer through the camera scope before aiming in the
-       player's fixed 32-unit rig coordinates. */
-    const { x: aimX, y: aimY } = unprojectCameraPoint(
-      state.aim.x, state.aim.y,
-      state.view.cameraPivotX, state.view.cameraPivotY, state.view.cameraZoom
-    );
-    const cx = rootX + 16 * s, cy = rootY + 32 * s;
-    motion.facing = aimX >= cx ? 1 : -1;
-    let x = 16 + (aimX - cx) / s;
-    if (motion.facing < 0) x = 32 - x;
-    input.punchTarget = [x, 32 + (aimY - cy) / s - (lift ?? 0)];
+  const gesturePunch=state.punchHold||state.clock<state.gesturePunchUntil;
+  if(gesturePunch&&state.aim&&state.view){
+    const {rootX,rootY,s,cameraPivotX,cameraPivotY,cameraZoom}=state.view;
+    const aim=unprojectCameraPoint(state.aim.x,state.aim.y,cameraPivotX,cameraPivotY,cameraZoom);
+    const cx=rootX+16*s,cy=rootY+32*s;
+    motion.facing=aim.x>=cx?1:-1;
+    let x=16+(aim.x-cx)/s;
+    if(motion.facing<0)x=32-x;
+    input.punchTarget=[x,32+(aim.y-cy)/s];
   }
-  const frame = motion.step(dt, input);
-  if (input.left || input.right || input.jump || input.punch || !frame.ground) state.dance = null;
-  const talking = P.playerChat?.stateAt();
-  const dance = state.dance && { elapsedMs: Math.max(0, performance.now()-state.dance.startedAtMs),
-    startFacing: state.dance.startFacing };
+  const frame=motion.step(dt,input);
+  if(!Array.isArray(frame.events))frame.events=[];
   frame.events.push(...state.pendingWorldEvents.splice(0));
-  if (frame.ground && !input.right && !input.left) frame.locomotion = "idle";
-  state.lastFrame = frame;
-  state.lastResult = player.step(
-    withPetHost({ ...frame, worldX: frame.x, worldY: frame.y, x: 0, y: 0 }), dt,
-    { skin: state.skin, skinPalette: state.skinPalette, effects: state.effectsEnabled, talking, dance });
-  if (dance && state.lastResult.pose.dance) {
-    frame.facing = state.lastResult.pose.dance.facing;
-    motion.facing = frame.facing;
-  }
-  for(const cue of state.lastResult.audioCues??[])P.emit("punch-cue",cue);
+  if(frame.ground&&!input.right&&!input.left)frame.locomotion="idle";
+  state.lastFrame=frame;
   updatePickupLifecycle(frame);
 }
 P.on("pad", pad => {
@@ -263,6 +156,11 @@ P.on("pad", pad => {
   if (pad.k === "punch" && pad.down) state.punchUntil = state.clock + 34;
 });
 window.addEventListener("blur", () => { P.input.left = P.input.right = P.input.jump = P.input.punch = 0; });
+
+
+window.addEventListener("blur",()=>{
+  P.input.left=P.input.right=P.input.jump=P.input.punch=0;
+});
 
 /* ---------------- touch punch (tap/hold/drag on the preview) ------------- */
 /* Hold a touch on the preview to hold the punch, drag to steer it, and let go
@@ -331,50 +229,8 @@ P.on("player-chat-open", punchCancel);
 P.on("input-reset", punchCancel);
 P.on("item-info-open", () => { P.emit("input-reset"); punchCancel(); });
 
-/* ---------------- rendering ------------------------------------------- */
-function drawScene(w, h) {
-  /* A failed/missing weather must never expose the old demo placeholder sky. */
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, w, h);
-}
-function renderAvatar() {
-  /* dynamically load any atlas a draw call references but we have not
-     registered yet (same as the Demo boot) — pieces appear next frame */
-  /* the pet leash string is a line primitive with no atlas; it needs none */
-  const missing = [...new Set(state.lastResult.calls.filter(c => !c.line && !atlases.has(c.atlas)).map(c => c.atlas))];
-  for (const name of missing) loadAtlas(name);
-  const wornAncestral = displayedItem(9);
-  const customAncestralId = wornAncestral && state.ancestralMap?.has(wornAncestral.id)
-    ? wornAncestral.id : null;
-  const calls = state.lastResult.calls.filter(c =>
-    !state.hiddenPasses.has(c.pass) &&
-    // The dedicated ancestral renderer owns the worn artifact's appearance.
-    // Suppress its legacy sprite draws even when they use RenderInFront.
-    !(customAncestralId !== null && c.owner === customAncestralId) &&
-    (c.line || atlases.has(c.atlas)));
-  const bounds = drawBounds(calls), scale = state.resolution / 32;
-  const width = Math.ceil(bounds.width * scale), height = Math.ceil(bounds.height * scale);
-  if (avatar.width !== width || avatar.height !== height) { avatar.width = width; avatar.height = height; }
-  if (avatarShadow.width !== width || avatarShadow.height !== height) { avatarShadow.width = width; avatarShadow.height = height; }
-  avatarCtx.setTransform(1, 0, 0, 1, 0, 0);
-  avatarCtx.clearRect(0, 0, width, height);
-  state.avatarBounds = bounds;
-  drawCanvas(avatarCtx, calls, atlases, { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
 
-  // Project a separate pure-black alpha mask from the player, wearable sprites,
-  // and punch arm/hand. FX, particles, pets, and ancestral effects stay excluded;
-  // each included part keeps its own draw matrix so the punch shadow follows it.
-  const shadows = getPlayerShadowCalls(calls, {
-    ancestralId: displayedItem(9)?.id ?? null,
-  });
-  avatarShadowCtx.setTransform(1, 0, 0, 1, 0, 0);
-  avatarShadowCtx.clearRect(0, 0, width, height);
-  if (shadows.length) drawCanvas(avatarShadowCtx, shadows, atlases,
-    { tilePixels: state.resolution, camera: [bounds.x, bounds.y] });
-  blackenShadowMask(avatarShadowCtx, width, height);
-  return calls.length;
-}
-
+/* ---------------- weather ------------------------------------------------ */
 /* ---------------- weather --------------------------------------------- */
 /* Loading a weather goes through a static preview first: once the weather's
    sheets are decoded, its fully-rendered first frame is held still for a
@@ -439,23 +295,23 @@ P.on("preview", pv => {
   }
 });
 
-/* ---------------- land -------------------------------------------------- */
-/* Preview and Live Preview share one terrain surface and one collision grid. */
-function landPage(name) {
-  if (landImages.has(name)) return Promise.resolve(landImages.get(name));
-  if (landLoads.has(name)) return landLoads.get(name);
-  const load = new Promise(res => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => { landImages.set(name, img); res(img); };
-    img.onerror = () => { landImages.set(name, null); res(null); };
-    img.src = moduleURL(`../sheets/tiles/${name}.png?v=20261031-world`).href;
+
+/* ---------------- playable Land ------------------------------------------ */
+function landPage(name){
+  if(landImages.has(name))return Promise.resolve(landImages.get(name));
+  if(landLoads.has(name))return landLoads.get(name);
+  const load=new Promise(resolve=>{
+    const img=new Image();
+    img.crossOrigin="anonymous";
+    img.onload=()=>{landImages.set(name,img);resolve(img);};
+    img.onerror=()=>{landImages.set(name,null);resolve(null);};
+    img.src=moduleURL(`../sheets/tiles/${name}.png?v=20261031-world`).href;
   });
-  landLoads.set(name, load);
+  landLoads.set(name,load);
   return load;
 }
-const DEFAULT_LAND = DEFAULT_LAND_ID;   /* Dirt — the default land the player walks on */
-function setLand(id) {
+const DEFAULT_LAND=DEFAULT_LAND_ID;
+function setLand(id){
   const resolved=resolveLandSelection(id);
   state.landBlock=resolved===LAND_NONE?null:resolved;
   state.editableWorld=uniformLandWorld(state.landBlock??0,24,0);
@@ -464,13 +320,16 @@ function setLand(id) {
   if(motion)resetMotionForScene();
 }
 P.on("land",setLand);
-function resetMotionForScene() {
+function resetMotionForScene(){
   motion=new WorldMotion({world:state.landBlock==null?null:state.editableWorld,blocks:BLOCKS});
-  motion.clockMs=state.clock;motion.setAbilities(state.abilities??{});
-  state.jumpUntil=state.punchUntil=0;state.doubleAt=null;state.dance=null;
-  state.lastFrame=motion.snapshot();state.ancestralPath.length=0;
-  state.pendingWorldEvents.length=0;player?.reset();
-  P.emit("input-reset");punchCancel();
+  motion.clockMs=state.clock;
+  motion.setAbilities(state.abilities??{});
+  state.jumpUntil=state.punchUntil=0;
+  state.doubleAt=null;
+  state.lastFrame=motion.snapshot();
+  state.pendingWorldEvents.length=0;
+  P.emit("input-reset");
+  punchCancel();
 }
 P.previewMode={
   get live(){return state.livePreview;},
@@ -481,92 +340,29 @@ P.previewMode={
   respawn(){resetMotionForScene();},
   get world(){return state.editableWorld;}
 };
-function drawTerrainLayer(w,h,s,camera,pass="all",shadow=false) {
+function drawTerrainLayer(w,h,s,camera){
   if(!state.editableWorld||state.landBlock==null)return;
   const start=unprojectCameraPoint(0,0,camera.cameraPivotX,camera.cameraPivotY,camera.zoom);
   const end=unprojectCameraPoint(w,h,camera.cameraPivotX,camera.cameraPivotY,camera.zoom);
   const tileScale=s*(WORLD_TILE_SIZE/32),pad=16;
   const bw=Math.ceil((end.x-start.x)/tileScale)+pad*2;
   const bh=Math.ceil((end.y-start.y)/tileScale)+pad*2;
-  const canvas=shadow?worldShadowCanvas:landCanvas,c=shadow?worldShadowCtx:landCtx;
-  if(canvas.width!==bw||canvas.height!==bh){canvas.width=bw;canvas.height=bh;}
-  c.clearRect(0,0,bw,bh);c.imageSmoothingEnabled=false;
+  if(landCanvas.width!==bw||landCanvas.height!==bh){landCanvas.width=bw;landCanvas.height=bh;}
+  landCtx.clearRect(0,0,bw,bh);
+  landCtx.imageSmoothingEnabled=false;
   const feetFocus=camera.cameraPivotY+16*PLAYER_VISUAL_SCALE*s;
   const camX=(WORLD_ORIGIN_X+camera.cameraWorldX+(start.x-camera.cameraPivotX)/s)*32/WORLD_TILE_SIZE-pad;
   const camY=(WORLD_ORIGIN_Y+camera.cameraWorldY+(start.y-feetFocus)/s)*32/WORLD_TILE_SIZE-pad;
   const rasterX=Math.floor(camX),rasterY=Math.floor(camY);
   const atlas=page=>{if(!landImages.has(page))landPage(page);return landImages.get(page)??null;};
-  const stats=renderWorld(c,state.editableWorld,atlas,rasterX,rasterY,bw,bh,state.clock,
-    {layers:['fg'],repeatX:true,foregroundPass:pass});
-  state.landStats=stats;
-  const offset=shadow?playerShadowOffset(-1):{x:0,y:0};
-  if(shadow)blackenShadowMask(c,bw,bh);
-  ctx.save();if(shadow)ctx.globalAlpha=PLAYER_SHADOW_OPACITY;
-  ctx.drawImage(canvas,0,0,bw,bh,start.x+(rasterX-camX-pad)*tileScale+offset.x,
-    start.y+(rasterY-camY-pad)*tileScale+offset.y,bw*tileScale,bh*tileScale);
-  ctx.restore();
+  state.landStats=renderWorld(landCtx,state.editableWorld,atlas,rasterX,rasterY,bw,bh,state.clock,
+    {layers:["fg"],repeatX:true,foregroundPass:"all"});
+  ctx.drawImage(landCanvas,0,0,bw,bh,
+    start.x+(rasterX-camX-pad)*tileScale,
+    start.y+(rasterY-camY-pad)*tileScale,bw*tileScale,bh*tileScale);
 }
 
-/* ---------------- ancestral -------------------------------------------- */
-async function loadAncestrals() {
-  try {
-    const data = await (await fetch(moduleURL("../docs/ancestral/data.json"))).json();
-    const map = new Map();
-    for (const [famKey, fam] of Object.entries(data.families))
-      for (const lv of fam.levels) map.set(lv.id, { family: famKey, level: lv, name: lv.name });
-    state.ancestralMap = map;
-    syncAuraPass();
-    /* the inventory grid uses this to give leveled ancestrals the box-art item box */
-    P.ancestralIds = new Set(map.keys());
-  } catch { state.ancestralMap = new Map(); }
-}
-const { drawAncestral, TintCache } = await import("../docs/ancestral/renderer.js");
-const ancestralTint = new TintCache();
-function drawAncestralAura(s, rootX, ground, frame, layer, cameraPivotX, cameraPivotY, zoom) {
-  const item = displayedItem(9);
-  if(!state.effectsEnabled)return;
-  if (!item || !state.ancestralMap) return;
-  const info = state.ancestralMap.get(item.id);
-  if (!info) return;
-  const lift = state.lastResult.lift?.y ?? 0;
-  // The effect renderer writes absolute transforms. Scale its authored rig
-  // space with the player, while pinning the FX anchor (16,32) to the same
-  // current feet/chest point and applying camera zoom exactly once.
-  const anchorX = rootX + 16 * s;
-  const anchorY = ground + (frame.y + lift) * s;
-  const screenAnchorX = cameraPivotX + (anchorX - cameraPivotX) * zoom;
-  const screenAnchorY = cameraPivotY + (anchorY - cameraPivotY) * zoom;
-  const fxScale = s * PLAYER_VISUAL_SCALE * zoom;
-  const base = [fxScale, 0, 0, fxScale,
-    screenAnchorX - 16 * fxScale,
-    screenAnchorY - 32 * fxScale];
-  // The ancestral renderer's movement-aware sequence needs the avatar's
-  // actual position history, not just its current facing. It samples this
-  // path at each FX instance's birth time, so walking, jumps, and turns all
-  // choose the correct authored animation sequence for every ancestral.
-  const charX = 16 + frame.x;
-  const charY = 32 + frame.y + lift;
-  // The behind pass runs first: record exactly once per displayed frame so
-  // both depth passes receive the same current sample. Keep the last 6 s,
-  // which covers the lifetime of the authored FX particles without growing
-  // history forever. Frame time can repeat when RAF outruns the sim step.
-  if (layer === "behind") {
-    const sample = [state.clock, charX, charY, motion.facing];
-    const last = state.ancestralPath[state.ancestralPath.length - 1];
-    if (last && last[0] === state.clock) state.ancestralPath[state.ancestralPath.length - 1] = sample;
-    else state.ancestralPath.push(sample);
-    while (state.ancestralPath.length && state.ancestralPath[0][0] < state.clock - 6000)
-      state.ancestralPath.shift();
-  }
-  drawAncestral(ctx, info.level, state.clock, {
-    facing: motion.facing,
-    sheets: Object.fromEntries(images),
-    tint: ancestralTint,
-    base, layer,
-    motion: { x: charX, y: charY, facing: motion.facing, path: state.ancestralPath }
-  });
-}
-
+/* Preserve weather's world-travel parallax; there is no longer an avatar FX pass. */
 /* Hill bands use the inverse of camera travel so the landscape moves opposite
    the player, reversing naturally when the player changes direction. Travel
    is never clamped at the decorative scene's edge. */
@@ -587,231 +383,78 @@ function hillOffsetsNow(w, h, s, cameraWorldX) {
   return offsets;
 }
 
-/* ---------------- frame loop ------------------------------------------- */
-let hudTimer = 0;
-let lastFrameError = null;
-function updateHUD() {
-  const hud = $("#hud");
-  if (!state.lastFrame) return;
-  const f = state.lastFrame;
-  const act = !state.livePreview ? "PREVIEW" : f.punch ? "PUNCH" : f.locomotion ? f.locomotion.toUpperCase() : "IDLE";
-  const ab = state.abilities;
-  const extra = [ab?.doubleJump ? "double jump" : null, ab?.highJump ? "high jump" : null, ab?.speedy ? "speedy" : null].filter(Boolean).join(" · ");
-  hud.textContent = `${act}${extra ? " · " + extra : ""} · ${state.equipped.size} pieces`;
+
+
+/* ---------------- frame loop -------------------------------------------- */
+let hudTimer=0,lastFrameError=null;
+function drawScene(w,h){ctx.fillStyle="#000";ctx.fillRect(0,0,w,h);}
+function updateHUD(){
+  const hud=$("#hud");if(!state.lastFrame)return;
+  const frame=state.lastFrame;
+  const action=!state.livePreview?"PREVIEW":frame.punch?"PUNCH":
+    frame.locomotion?frame.locomotion.toUpperCase():"IDLE";
+  const abilities=state.abilities;
+  const extra=[abilities?.doubleJump?"double jump":null,abilities?.highJump?"high jump":null,
+    abilities?.speedy?"speedy":null].filter(Boolean).join(" · ");
+  hud.textContent=`${action}${extra?" · "+extra:""} · ${state.equipped.size} pieces`;
 }
-P.on("frame", ({ dt, ctx: c, w, h }) => {
-  if (!state.ready || !state.lastResult) return;
-  try {
-  const ms = Math.min(100, dt * 1000);
-  state.remainder += ms;
-  while (state.remainder >= 1000 / 60) { step(1000 / 60); state.remainder -= 1000 / 60; }
-
-  const frame = state.lastFrame, result = state.lastResult;
-  // Logical draw scale never includes zoom. Only the camera transform changes.
-  const s = Math.min(4, Math.max(3, w / 480));
-  const zoom = clampCameraZoom((P.camZoom?.v ?? 1)*(state.livePreview?1:1.65));
-
-  renderAvatar();
-  const b = state.avatarBounds;
-  const lift = result.lift?.y ?? 0;
-  /* Track the player continuously in world X/Y. The camera has no edge clamps;
-     the foreground and parallax layers consume this live camera position. */
-  const camera = computeCameraLayout({
-    width: w, height: h, scale: s, frameX: frame.x, frameY: frame.y, zoom
-  });
-  const { ground, rootX, rootY, cameraPivotX, cameraPivotY } = camera;
-  state.view = {
-    rootX, rootY, s, lift, cameraZoom: zoom, cameraPivotX, cameraPivotY,
-    cameraWorldX: camera.cameraWorldX, cameraWorldY: camera.cameraWorldY
-  };
-
-  c.imageSmoothingEnabled = false;
-  // Backdrop remains viewport-filling; otherwise zoom-out would reveal blanks.
-  try {
-    if (state.weatherRenderer) {
-      const now = performance.now();
-      const t = now < state.weatherAnimAt ? state.weatherT0 : state.weatherT0 + now - state.weatherAnimAt;
-      /* Hill offsets use the camera's live world X; other weather elements keep
-         their own animation timeline. */
-      state.weatherRenderer.render(t, hillOffsetsNow(w, h, s, camera.cameraWorldX));
-      c.drawImage(weatherBG, 0, 0, w, h);
-    } else if (state.weatherStill && state.weatherFailedKey !== state.weatherKey) {
-      c.drawImage(state.weatherStill, 0, 0, w, h);
-    } else {
-      drawScene(w, h);
-    }
-  } catch (weatherError) {
-    markWeatherFailed(state.weatherKey, weatherError);
-    drawScene(w, h);
-  }
-
-  // Apply the one player-centered scope transform to all foreground world art:
-  // zoom scales the actor's position, jump displacement, ground and land
-  // together around the player's ground point. Physics positions, tile
-  // coordinates and the avatar's source pixels do not change when zooming.
-  c.save();
-  c.translate(cameraPivotX, cameraPivotY);
-  c.scale(zoom, zoom);
-  c.translate(-cameraPivotX, -cameraPivotY);
-
-  // World shadows sit behind their own art. Walk-through foreground (doors,
-  // decorations and platforms) sits behind actor/pickup shadows; solids cover them.
-  drawTerrainLayer(w,h,s,camera,"all",true);
-  drawTerrainLayer(w,h,s,camera,"walkthrough");
-  const playerRect = playerVisualRect(b, rootX, rootY, s);
-  const shadowOffset = playerShadowOffset(-1);
-  c.save();c.globalAlpha = PLAYER_SHADOW_OPACITY;
-  c.drawImage(avatarShadow,
-    playerRect.x + shadowOffset.x, playerRect.y + shadowOffset.y,
-    playerRect.width, playerRect.height);
-  c.restore();
-  // Pickups use the same explicit screen projection for both composition passes.
-  c.save();c.setTransform(1,0,0,1,0,0);
-  drawPickups(c,frame,s,cameraPivotX,cameraPivotY,zoom,"shadow");
-  c.restore();
-  drawTerrainLayer(w,h,s,camera,"solid");
-  drawAncestralAura(s, rootX, ground, frame, "behind", cameraPivotX, cameraPivotY, zoom);
-  // Player components and terrain both retain their native 32-unit scale.
-  c.imageSmoothingEnabled = false;
-  c.drawImage(avatar, playerRect.x, playerRect.y, playerRect.width, playerRect.height);
-  drawAncestralAura(s, rootX, ground, frame, "front", cameraPivotX, cameraPivotY, zoom);
-  const playerTop = ground + frame.y * s - 32 * PLAYER_VISUAL_SCALE * s + lift * PLAYER_VISUAL_SCALE * s;
-  c.restore();
-  // Pickups use an explicit world-to-screen projection outside the world transform.
-  // This keeps their world anchor fixed as the camera follows the player; offscreen
-  // pickups remain in state and naturally reappear when the camera comes back.
-  drawPickups(c, frame, s, cameraPivotX, cameraPivotY, zoom);
-  // The plate renderer resets the canvas transform internally, so project its
-  // head-height anchor explicitly and scale its lettering with the camera.
-  if (P.plate) {
-    const platePoint = projectCameraPoint(
-      w / 2 - 3, playerTop - 6 * s, cameraPivotX, cameraPivotY, zoom
-    );
-    P.plate.draw(c, platePoint.x, platePoint.y, s * zoom, state.clock, 0.80);
-    const rect=world.getBoundingClientRect();
-    P.emit("player-chat-anchor",{x:rect.left+platePoint.x*rect.width/world.width,
-      y:rect.top+platePoint.y*rect.height/world.height,
-      scale:s*zoom*rect.width/world.width});
-  }
-  // Foreground weather is viewport-space, as it was before camera-scope
-  // rendering; zooming the world must not move or scale rain/snow overlays.
-  if (state.weatherRenderer) {
-    try { c.drawImage(weatherFG, 0, 0, w, h); }
-    catch (weatherError) { markWeatherFailed(state.weatherKey, weatherError); }
-  }
-
-  if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
-  lastFrameError = null;
-  } catch (err) {
-    /* Keep the simulation alive after a transient drawing error. A single
-       renderer exception must not permanently disable Drop, movement or tabs. */
-    const message = String(err?.message || err || "Unknown render error");
-    if (message !== lastFrameError) {
-      console.error("[Planner] frame render failed; continuing.", err);
-      lastFrameError = message;
-    }
+P.on("frame",({dt,ctx:c,w,h})=>{
+  if(!state.ready||!state.lastFrame)return;
+  try{
+    const ms=Math.min(100,dt*1000);state.remainder+=ms;
+    while(state.remainder>=1000/60){step(1000/60);state.remainder-=1000/60;}
+    const frame=state.lastFrame,s=Math.min(4,Math.max(3,w/480));
+    const zoom=clampCameraZoom((P.camZoom?.v??1)*(state.livePreview?1:1.65));
+    const camera=computeCameraLayout({width:w,height:h,scale:s,frameX:frame.x,frameY:frame.y,zoom});
+    const {rootX,rootY,cameraPivotX,cameraPivotY}=camera;
+    state.view={rootX,rootY,s,lift:0,cameraZoom:zoom,cameraPivotX,cameraPivotY,
+      cameraWorldX:camera.cameraWorldX,cameraWorldY:camera.cameraWorldY};
+    c.imageSmoothingEnabled=false;
+    try{
+      if(state.weatherRenderer){
+        const now=performance.now();
+        const t=now<state.weatherAnimAt?state.weatherT0:state.weatherT0+now-state.weatherAnimAt;
+        state.weatherRenderer.render(t,hillOffsetsNow(w,h,s,camera.cameraWorldX));
+        c.drawImage(weatherBG,0,0,w,h);
+      }else if(state.weatherStill&&state.weatherFailedKey!==state.weatherKey){
+        c.drawImage(state.weatherStill,0,0,w,h);
+      }else drawScene(w,h);
+    }catch(error){markWeatherFailed(state.weatherKey,error);drawScene(w,h);}
     c.save();
-    c.setTransform(1, 0, 0, 1, 0, 0);
-    c.fillStyle = "#000";
-    c.fillRect(0, 0, w, h);
+    c.translate(cameraPivotX,cameraPivotY);c.scale(zoom,zoom);
+    c.translate(-cameraPivotX,-cameraPivotY);
+    drawTerrainLayer(w,h,s,camera);
     c.restore();
-    $("#hud").textContent = "Render warning: " + message;
+    drawPickups(c,frame,s,cameraPivotX,cameraPivotY,zoom);
+    if(state.weatherRenderer){
+      try{c.drawImage(weatherFG,0,0,w,h);}
+      catch(error){markWeatherFailed(state.weatherKey,error);}
+    }
+    if(performance.now()-hudTimer>250){hudTimer=performance.now();updateHUD();}
+    lastFrameError=null;
+  }catch(error){
+    const message=String(error?.message||error||"Unknown world error");
+    if(message!==lastFrameError){
+      console.error("[Planner] world frame failed; simulation remains active.",error);
+      lastFrameError=message;
+    }
+    c.save();c.setTransform(1,0,0,1,0,0);c.fillStyle="#000";c.fillRect(0,0,w,h);c.restore();
+    $("#hud").textContent="World warning: "+message;
   }
 });
 
-/* ---------------- export ------------------------------------------------ */
-document.querySelector('[data-a="export"]')?.addEventListener("click", () => {
-  try {
-    /* the live preview renders on the 32px tile grid (matching the land's
-       32x32 style); exports still come out at the dense 128px scale */
-    const live = state.resolution;
-    state.resolution = 128;
-    renderAvatar();
-    state.resolution = live;
-    const a = document.createElement("a");
-    a.download = `growtopia-${avatar.width}px.png`;
-    a.href = avatar.toDataURL("image/png");
-    a.click();
-    P.toast(`Exported ${avatar.width} × ${avatar.height} PNG`);
-    renderAvatar();   /* restore the preview-resolution canvas */
-  } catch { P.toast("Export blocked by image security."); }
+document.querySelector('[data-a="export"]')?.addEventListener("click",()=>{
+  P.toast("Character rendering is temporarily disabled.");
 });
-
-/* ---------------- dyes (Makeup tab) ------------------------------------- */
-P.dyes = { hair: [255, 255, 255], whites: [255, 255, 255], pupils: [0, 0, 0] };
-P.applyDyes = function () {
-  tintSheets(["player_hair.png", "player_hairhair.png"], P.dyes.hair);
-  tintEyes();
+/* Inventory thumbnails are retained; these are catalog UI art, not avatar passes. */
+P.dyes={hair:[255,255,255],whites:[255,255,255],pupils:[0,0,0]};
+P.applyDyes=function(){ /* wearable rendering is disconnected during the rebuild */ };
+P.thumb=function(raw,size=64){
+  const canvas=document.createElement("canvas");canvas.width=64;canvas.height=64;
+  canvas.style.width="100%";canvas.style.height="100%";
+  canvas.setAttribute("aria-hidden","true");canvas.__demoItem=raw;
+  renderDemoInventoryIcon(canvas,raw,state.skin);return canvas;
 };
-function tintSheets(names, rgb) {
-  const t = rgb.map(v => v / 255);
-  for (const name of names) {
-    const src = images.get(name);
-    if (!src || !src.complete || !src.naturalWidth) continue;
-    const c = document.createElement("canvas");
-    c.width = src.naturalWidth; c.height = src.naturalHeight;
-    const g = c.getContext("2d", { willReadFrequently: true });
-    g.drawImage(src, 0, 0);
-    const id = g.getImageData(0, 0, c.width, c.height);
-    for (let i = 0; i < id.data.length; i += 4) {
-      id.data[i] *= t[0]; id.data[i + 1] *= t[1]; id.data[i + 2] *= t[2];
-    }
-    g.putImageData(id, 0, 0);
-    atlases.set(name, registerAtlas(c));
-  }
-}
-function tintEyes() {
-  const name = "player_eyes.png", src = images.get(name);
-  if (!src || !src.complete || !src.naturalWidth) return;
-  const wT = P.dyes.whites.map(v => v / 255), pT = P.dyes.pupils.map(v => v / 255);
-  const c = document.createElement("canvas");
-  c.width = src.naturalWidth; c.height = src.naturalHeight;
-  const g = c.getContext("2d", { willReadFrequently: true });
-  g.drawImage(src, 0, 0);
-  const id = g.getImageData(0, 0, c.width, c.height);
-  for (let i = 0; i < id.data.length; i += 4) {
-    const lum = (id.data[i] + id.data[i + 1] + id.data[i + 2]) / 3;
-    const t = lum < 60 ? pT : wT;   /* dark pixels are the pupils, light the sclera */
-    id.data[i] *= t[0]; id.data[i + 1] *= t[1]; id.data[i + 2] *= t[2];
-  }
-  g.putImageData(id, 0, 0);
-  atlases.set(name, registerAtlas(c));
-}
-
-/* ---------------- Demo-native inventory icons -----------------------------
-   Item-specific source cells and tint/layer indicators are loaded from Demo's
-   generated inventory icon index; all render code and source images stay local. */
-P.thumb = function (raw, size = 64) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 64;
-  canvas.height = 64;
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-  canvas.setAttribute("aria-hidden", "true");
-  canvas.__demoItem = raw;
-  renderDemoInventoryIcon(canvas, raw, state.skin);
-  return canvas;
-};
-
-function unequipDroppedItem(item) {
-  let removed = false;
-  for (const [slot, worn] of state.equipped) {
-    if (worn.id === item.id) {
-      state.equipped.delete(slot);
-      removed = true;
-    }
-  }
-  if (!removed) return;
-  const wornItems = [...state.equipped.values()];
-  player.equip(wornItems);
-  syncAuraPass();
-  state.abilities = resolveAbilities(wornItems, state.abilityRegistry);
-  motion?.setAbilities(state.abilities);
-  P.equippedIds = new Set(wornItems.map(worn => worn.id));
-  P.emit("equip-state");
-  updateHUD();
-}
-
 function dropWorldItem(item, amount) {
   if (!state.ready || !state.lastFrame || !item || item.gone) {
     P.toast("This item cannot be dropped right now.");
@@ -1056,6 +699,7 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="ar
   }
 }
 
+
 P.on("drop-confirm", payload => {
   const amount = Number(payload?.amount);
   if (!payload?.item || !Number.isSafeInteger(amount) || amount < 1 || amount > 999999) {
@@ -1066,95 +710,51 @@ P.on("drop-confirm", payload => {
 });
 
 
-/* ---------------- boot -------------------------------------------------- */
-window.plannerApp = state;   /* debug/QA hook */
-state.avatarShadow=avatarShadow;state.worldShadow=worldShadowCanvas;
-state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels = land holes) */
-(async function init() {
-  try {
-    const response = await fetch(moduleURL("../demo/catalog.json"));
-    if (!response.ok) throw Error("Catalog did not load");
-    state.catalog = await response.json();
-    P.catalog = state.catalog;
-    const liftData = await (await fetch(moduleURL("../demo/lift-profiles.json"))).json();
-    state.catalog.liftProfiles = Object.fromEntries(liftData.profiles.map(p => [p.id, p]));
-    const rendererResponse = await fetch(moduleURL("../demo/renderer-data.json"));
-    if (rendererResponse.ok) state.catalog.renderers = rendererScripts(await rendererResponse.json());
-    try { const fx = await fetch(moduleURL("../demo/fx-data.json")); if (fx.ok) state.catalog.fxRenderers = rendererScripts(await fx.json()); } catch {}
-    try { const pd = await fetch(moduleURL("../demo/punch-data.json")); if (pd.ok) state.catalog.punchData = await pd.json(); } catch {}
-    try { const cues=await fetch(moduleURL("../demo/punch-sfx.json"));if(cues.ok)state.catalog.punchSfx=await cues.json(); } catch {}
-    state.nativeMetadata = await (await fetch(moduleURL("../demo/native-metadata.json"))).json();
-    state.abilityRegistry = await (await fetch(moduleURL("../demo/ability-registry.json"))).json();
-    try {
-      const [wrenchDefinitionsResponse, wrenchMapsResponse, wrenchOptionsResponse] = await Promise.all([
+
+/* ---------------- boot --------------------------------------------------- */
+window.plannerApp=state;state.landCanvas=landCanvas;
+(async function init(){
+  try{
+    const response=await fetch(moduleURL("../demo/catalog.json"));
+    if(!response.ok)throw Error("Catalog did not load");
+    state.catalog=await response.json();P.catalog=state.catalog;
+    try{state.nativeMetadata=await(await fetch(moduleURL("../demo/native-metadata.json"))).json();}
+    catch{state.nativeMetadata={items:{}};}
+    try{state.abilityRegistry=await(await fetch(moduleURL("../demo/ability-registry.json"))).json();}
+    catch{state.abilityRegistry={};}
+    try{
+      const [definitions,maps,options]=await Promise.all([
         fetch(moduleURL("../data/item-wrench-definitions.json")),
         fetch(moduleURL("../data/item-wrench-variable-maps.json")),
         fetch(moduleURL("../data/item-wrench-game-options.json"))
       ]);
-      if (wrenchDefinitionsResponse.ok) state.itemWrenchDefinitions = await wrenchDefinitionsResponse.json();
-      if (wrenchMapsResponse.ok) state.itemWrenchVariableMaps = await wrenchMapsResponse.json();
-      if (wrenchOptionsResponse.ok) state.itemWrenchGameOptions = await wrenchOptionsResponse.json();
-    } catch (error) {
-      console.warn("[Item Wrench] Native customization data unavailable.", error);
-    }
-    // Inventory items are raw catalog records; attach definitions before focus
-    // so the sidebar can disable WRENCH when no real controls exist.
-    for (const rawItem of state.catalog.items) attachItemWrenchMetadata(rawItem);
-
-    const names = ["player_body_only.png", "player_head.png", "player_extraleg.png", "player_feet.png", "player_eyes.png",
-      "player_arm.png", "player_puncharm.png", "player_sleeve.png", "player_hair.png", "player_hairhair.png",
-      "player_shirt.png", "player_pants.png", "player_handitem.png", "player_back.png", "player_horsepants.png",
-      "particles.png", "particles2.png", "tiles_page1.png"];
-    await Promise.all(names.map(loadAtlas));
-
-    /* procedural reference FX sheet (same as the Demo boot): plain shapes
-       the fx renderers reference when an item has no dedicated particles */
-    {
-      const c = createReferenceFxAtlas();
-      images.set("reference-fx.png", c);
-      atlases.set("reference-fx.png", registerAtlas(c));
-    }
-
-    motion = new WorldMotion({blocks:BLOCKS});
-    player = new PlannerPlayer(state.catalog);
-    state.lastFrame = motion.snapshot();
-    state.lastResult = player.step(
-      withPetHost({ ...state.lastFrame, worldX: state.lastFrame.x, worldY: state.lastFrame.y, x: 0, y: 0 }), 0,
-      { skin: state.skin, skinPalette: state.skinPalette, effects: true });
+      if(definitions.ok)state.itemWrenchDefinitions=await definitions.json();
+      if(maps.ok)state.itemWrenchVariableMaps=await maps.json();
+      if(options.ok)state.itemWrenchGameOptions=await options.json();
+    }catch(error){console.warn("[Item Wrench] Native customization data unavailable.",error);}
+    for(const rawItem of state.catalog.items)attachItemWrenchMetadata(rawItem);
+    motion=new WorldMotion({blocks:BLOCKS});
+    state.lastFrame=motion.snapshot();
     state.equipped.clear();
-    state.abilities = resolveAbilities([], state.abilityRegistry);
+    state.abilities=resolveAbilities([],state.abilityRegistry);
     motion.setAbilities(state.abilities);
-    await loadAncestrals();
-    try {
-      const [landResponse, backgroundResponse, worldResponse] = await Promise.all([
+    try{
+      const [landResponse,backgroundResponse,worldResponse]=await Promise.all([
         fetch(moduleURL("../data/land-blocks.json?v=2")),
         fetch(moduleURL("../data/blocks.json")),
         fetch(moduleURL("../data/world-blocks.json"))
       ]);
-      if (!landResponse.ok || !backgroundResponse.ok) throw new Error("Block catalog unavailable");
-      const [landRows, backgroundRows] = await Promise.all([landResponse.json(), backgroundResponse.json()]);
-      registerBlocks(landRows);
-      registerBackgroundBlocks(backgroundRows);
+      if(!landResponse.ok||!backgroundResponse.ok)throw Error("Block catalog unavailable");
+      const [landRows,backgroundRows]=await Promise.all([landResponse.json(),backgroundResponse.json()]);
+      registerBlocks(landRows);registerBackgroundBlocks(backgroundRows);
       if(!worldResponse.ok)throw Error("World block catalog unavailable");
       registerBlocks(await worldResponse.json());
-    } catch (error) {
-      console.warn("[Background] Block catalog could not be loaded.", error);
-    }
-    // Preview and Live Preview share the selected land and weather. Background
-    // walls and generated exploration terrain are no longer separate modes.
-    setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
-
-    state.ready = true;
-    P.equippedIds = new Set();
-    P.emit("catalog");
-    P.emit("boot");
-    updateHUD();
-    /* restore the saved weather (Sunny by default — there is no "None" weather) */
-    setWeather(P.store.get("weather", "sunny"));
-  } catch (error) {
-    console.error(error);
-    $("#hud").textContent = "Unable to start: " + error.message;
-  }
+    }catch(error){console.warn("[World] Block catalog could not be loaded.",error);}
+    setLand(resolveLandSelection(P.store.get("land",String(DEFAULT_LAND))));
+    state.ready=true;P.equippedIds=new Set();
+    P.emit("catalog");P.emit("boot");updateHUD();
+    setWeather(P.store.get("weather","sunny"));
+  }catch(error){console.error(error);$("#hud").textContent="Unable to start: "+error.message;}
 })();
 
 document.addEventListener("keydown",event=>{
