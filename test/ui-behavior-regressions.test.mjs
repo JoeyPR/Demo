@@ -121,7 +121,7 @@ test("player chat uses the large two-lane TopBar reference design", () => {
   assert.match(js, /inputRow\.append\(textarea, inputHint, inputText, counter\)/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?gap:\.55vw/);
   assert.match(css, /#player-chat-log\{[\s\S]*?font:400 clamp\(10px,2\.65vw,48px\)/);
-  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /\.player-chat-input-row\{[^}]*height:7\.4vw/);
 });
@@ -168,10 +168,10 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
 
 test("TopBar uses Demo colors, thin borders, compact corners and message-sized stripes", () => {
   const css = read("../css/player-chat.css");
-  assert.ok(css.includes("background:var(--fill);background-image:none"));
-  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
+  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
   assert.ok(!css.includes("background-size:100% 2.2em"));
-  assert.ok(css.includes("background:var(--fill);background-image:none"));
+  assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(!css.includes("border-radius:1.6vw"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /\.player-chat-entry:nth-child\(odd\)\{background-color:rgba\(123,186,210,\.25\)\}/);
@@ -276,7 +276,7 @@ test("TopBar messages use Growtopia Signal lanes and default player message colo
   assert.ok(js.includes("P.rtfont?.color(String(options.nameBracketColor ?? '6'), '<')"));
   assert.ok(css.includes(".player-chat-signal"));
   assert.ok(css.includes("rgba(123,186,210,.25)"));
-  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
+  assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
 });
 
 test("Player Customization exposes Owner/Admin rank options for chat-name color preview", () => {
@@ -308,15 +308,15 @@ test("topBar matches the reference using Demo's native panel styling", () => {
   const js = read("../js/player-chat.js");
   assert.ok(js.includes("const width = previewWidth * 0.75"));
   assert.ok(js.includes("const left = area.left + (previewWidth - width) / 2"));
-  assert.ok(css.includes("background:var(--fill);background-image:none"));
-  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
+  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
   assert.ok(base.includes("--fill:rgba(39,125,159,.75)"));
   assert.ok(base.includes("border-radius:var(--radius)"));
   assert.ok(base.includes("box-shadow:var(--sh) var(--sh) 0 0 #000"));
   assert.ok(base.includes("box-shadow:inset var(--sh) var(--sh) 0 0 #000"));
   assert.ok(!css.includes("background-color:#277D9F"));
   assert.ok(!css.includes("border-radius:1.6vw"));
-  assert.ok(!css.includes("repeating-linear-gradient"));
+  assert.ok(css.includes("repeating-linear-gradient"));
 });
 
 test("live preview controls are small green Play and red two-bar Pause circles", () => {
@@ -405,7 +405,7 @@ test("Duct Taped selects the Grey swatch as a persistent player skin override", 
 
 
 
-test("TopBar uses the shared Demo 75%-fill panel contract and 25% per-message stripes", () => {
+test("TopBar uses the shared Demo 75%-fill panel contract and 25% em-scaled panel stripes", () => {
   const css = read("../css/player-chat.css");
   const base = read("../css/base.css");
   assert.ok(base.includes("--fill:rgba(39,125,159,.75)"));
@@ -414,9 +414,9 @@ test("TopBar uses the shared Demo 75%-fill panel contract and 25% per-message st
   assert.ok(base.includes("border-radius:var(--radius)"));
   assert.ok(base.includes("box-shadow:var(--sh) var(--sh) 0 0 #000"));
   assert.ok(base.includes("box-shadow:inset var(--sh) var(--sh) 0 0 #000"));
-  assert.ok(css.includes("background:var(--fill);background-image:none"));
-  assert.ok(css.includes(".player-chat-entry:nth-child(odd){background-color:rgba(123,186,210,.25)}"));
-  assert.ok(!css.includes("repeating-linear-gradient"));
+  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
+  assert.ok(css.includes("repeating-linear-gradient"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.ok(!css.includes("border-radius:1.6vw"));
 });
