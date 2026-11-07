@@ -166,19 +166,22 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
   assert.match(css, /border-radius:calc\(var\(--radius\) \+ 1px\)/);
 });
 
-test("TopBar uses Demo colors, thin borders, compact corners and message-sized stripes", () => {
+test("TopBar uses message-aligned stripes and shared Demo backplate styling", () => {
   const css = read("../css/player-chat.css");
-  assert.ok(css.includes("#player-chat-backdrop .panel"));
-  assert.ok(css.includes("padding:0;box-sizing:border-box"));
+  const base = read("../css/base.css");
+  assert.ok(css.includes("#player-chat-backdrop-history::before"));
   assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
   assert.ok(css.includes("background-size:100% 2.2em"));
   assert.ok(css.includes("background-position:0 0"));
-  assert.ok(css.includes("#player-chat-backdrop .panel"));
-  assert.ok(!css.includes("border-radius:1.6vw"));
+  assert.ok(css.includes("#player-chat-backdrop .panel{position:fixed;display:none;overflow:hidden;pointer-events:none}"));
+  assert.ok(css.includes("padding:var(--bd) 0 0"));
+  assert.ok(css.includes("background:transparent!important;border:0!important"));
+  assert.ok(base.includes("--fill:rgba(39,125,159,.75)"));
+  assert.ok(base.includes("--line:#7BBAD2"));
+  assert.ok(base.includes("border-radius:var(--radius)"));
+  assert.ok(base.includes("box-shadow:var(--sh) var(--sh) 0 0 #000"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
-  assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1\.1em,transparent 1\.1em 2\.2em\)/);
-  assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:5\.8vw/);
-  assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(10px,2\.65vw,48px\)/);
+  assert.ok(!css.includes("border-radius:1.6vw"));
 });
 
 test("live preview controls are small green Play and red two-bar Pause circles", () => {
