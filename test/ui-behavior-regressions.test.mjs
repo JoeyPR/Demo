@@ -278,7 +278,6 @@ test("TopBar messages use Growtopia Signal lanes and default player message colo
   assert.ok(css.includes("rgba(123,186,210,.25)"));
   assert.ok(css.includes("background-size:100% 2em"));
 });
-\)/);
   assert.match(js, /P\.rtfont\?\.scan\(row\)/);
   assert.match(js, /P\.rtfont\?\.hasCodes\(rawGrowId\)\) return rawGrowId/);
   assert.match(js, /const MAX_LOG_MESSAGES = 50/);
