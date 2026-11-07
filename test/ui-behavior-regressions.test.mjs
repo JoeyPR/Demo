@@ -121,7 +121,7 @@ test("player chat uses the large two-lane TopBar reference design", () => {
   assert.match(js, /inputRow\.append\(textarea, inputHint, inputText, counter\)/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?gap:\.55vw/);
   assert.match(css, /#player-chat-log\{[\s\S]*?font:400 clamp\(10px,2\.65vw,48px\)/);
-  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("#player-chat-backdrop .panel"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /\.player-chat-input-row\{[^}]*height:5\.8vw/);
 });
@@ -168,12 +168,12 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
 
 test("TopBar uses Demo colors, thin borders, compact corners and message-sized stripes", () => {
   const css = read("../css/player-chat.css");
-  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("#player-chat-backdrop .panel"));
   assert.ok(css.includes("padding:0;box-sizing:border-box"));
   assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
   assert.ok(css.includes("background-size:100% 2.2em"));
   assert.ok(css.includes("background-position:0 0"));
-  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("#player-chat-backdrop .panel"));
   assert.ok(!css.includes("border-radius:1.6vw"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1\.1em,transparent 1\.1em 2\.2em\)/);
@@ -310,7 +310,7 @@ test("topBar matches the reference using Demo's native panel styling", () => {
   const js = read("../js/player-chat.js");
   assert.ok(js.includes("const width = previewWidth * 0.75"));
   assert.ok(js.includes("const left = area.left + (previewWidth - width) / 2"));
-  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("#player-chat-backdrop .panel"));
   assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
   assert.ok(base.includes("--fill:rgba(39,125,159,.75)"));
   assert.ok(base.includes("border-radius:var(--radius)"));
