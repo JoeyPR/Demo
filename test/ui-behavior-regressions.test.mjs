@@ -121,8 +121,8 @@ test("player chat uses the large two-lane TopBar reference design", () => {
   assert.match(js, /inputRow\.append\(textarea, inputHint, inputText, counter\)/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?gap:clamp\(6px,\.65vw,10px\)/);
   assert.match(css, /#player-chat-log\{[\s\S]*?font:400 clamp\(16px,3\.1vw,48px\)/);
-  assert.match(css, /border:calc\(16\*var\(--u\)\) solid #05090c/);
-  assert.match(css, /box-shadow:0 0 0 calc\(12\*var\(--u\)\) var\(--line\)/);
+  assert.match(css, /border:\.55vw solid var\(--line\)/);
+  assert.match(css, /inset 0 0 0 \.3vw #05090c/);
   assert.match(css, /\.player-chat-input-row\{[^}]*height:clamp\(42px,7vw,106px\)/);
 });
 
@@ -170,7 +170,7 @@ test("topBar uses Demo palette, the thick framed lane and message-scaled stripes
   const css = read("../css/player-chat.css");
   assert.match(css, /background-color:var\(--fill\)/);
   assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1em,transparent 1em 2em\)/);
-  assert.match(css, /background-size:100% 2em/);
+  assert.match(css, /background-size:100% 2.2em/);
   assert.match(css, /border:calc\(16\*var\(--u\)\) solid #05090c/);
   assert.match(css, /border-radius:calc\(40\*var\(--u\)\)/);
   assert.match(css, /box-shadow:0 0 0 calc\(12\*var\(--u\)\) var\(--line\)/);
@@ -223,10 +223,10 @@ test("oversized chat text belongs to the message input, not the history panel", 
   assert.ok(js.includes("const inputText = make('span', 'player-chat-input-text')"));
   assert.ok(js.includes("inputRow.append(textarea, inputHint, inputText, counter)"));
   assert.ok(js.includes("inputText.textContent = textarea.value"));
-  assert.ok(css.includes("font:400 clamp(16px,3.1vw,48px)/1 'PlayerChat CG'"));
-  assert.ok(css.includes("font:400 clamp(32px,3vw,46px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/1 'PlayerChat CG'"));
   assert.ok(css.includes(".player-chat-input-text{"));
-  assert.ok(css.includes("height:clamp(42px,7vw,106px);min-height:clamp(42px,7vw,106px)"));
+  assert.ok(css.includes("height:7.4vw;min-height:7.4vw"));
   assert.ok(css.includes("#player-chat-composer{overflow:visible}"));
 });
 
@@ -276,7 +276,7 @@ test("TopBar messages use Growtopia Signal lanes and default player message colo
   assert.ok(js.includes("P.rtfont?.color(String(options.nameBracketColor ?? '6'), '<')"));
   assert.ok(css.includes(".player-chat-signal"));
   assert.ok(css.includes("rgba(123,186,210,.25)"));
-  assert.ok(css.includes("background-size:100% 2em"));
+  assert.ok(css.includes("background-size:100% 2.2em"));
 });
 
 test("Player Customization exposes Owner/Admin rank options for chat-name color preview", () => {
@@ -362,10 +362,10 @@ test("oversized chat text belongs to the message input, not the history panel", 
   assert.ok(js.includes("const inputText = make('span', 'player-chat-input-text')"));
   assert.ok(js.includes("inputRow.append(textarea, inputHint, inputText, counter)"));
   assert.ok(js.includes("inputText.textContent = textarea.value"));
-  assert.ok(css.includes("font:400 clamp(16px,3.1vw,48px)/1 'PlayerChat CG'"));
-  assert.ok(css.includes("font:400 clamp(32px,3vw,46px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/1 'PlayerChat CG'"));
+  assert.ok(css.includes("font:400 clamp(10px,2.65vw,48px)/1 'PlayerChat CG'"));
   assert.ok(css.includes(".player-chat-input-text{"));
-  assert.ok(css.includes("height:clamp(42px,7vw,106px);min-height:clamp(42px,7vw,106px)"));
+  assert.ok(css.includes("height:7.4vw;min-height:7.4vw"));
   assert.ok(css.includes("#player-chat-composer{overflow:visible}"));
 });
 
