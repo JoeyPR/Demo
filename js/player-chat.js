@@ -101,11 +101,11 @@
   }
   function positionBubble(area = visiblePreview()) {
     if (bubble.hidden || !anchor) return;
-    const maxWidth = Math.max(80, Math.min(460, area.right - area.left - 24));
+    const maxWidth = Math.max(80, Math.min(400, area.right - area.left - 24));
     bubble.style.maxWidth = maxWidth + 'px';
-    bubble.style.setProperty('--player-chat-font-size', '13px');
-    bubble.style.setProperty('--player-chat-pad-y', '4px');
-    bubble.style.setProperty('--player-chat-pad-x', '8px');
+    bubble.style.setProperty('--player-chat-font-size', '16px');
+    bubble.style.setProperty('--player-chat-pad-y', '2px');
+    bubble.style.setProperty('--player-chat-pad-x', '5px');
     const rect = bubble.getBoundingClientRect();
     const x = clamp(anchor.x, area.left + rect.width / 2 + 8, area.right - rect.width / 2 - 8);
     const y = clamp(anchor.y - 18, area.top + rect.height / 2 + 4, area.bottom - rect.height / 2 - 4);
