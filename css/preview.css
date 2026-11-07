@@ -4,3 +4,7 @@
   transform:translate(-50%,-50%) scale(var(--ps,1));pointer-events:auto;touch-action:none}
 #pv{position:relative;display:block;background:transparent;border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 #000;touch-action:none}
 #ui{z-index:2}
+
+/* Foreground for player nameplate/pickup art under the translucent TopBar. */
+#pv-foreground{position:fixed;left:0;top:0;z-index:9;display:block;width:0;height:0;
+  padding:0;border:0;border-radius:0;box-shadow:none;background:transparent;pointer-events:none}

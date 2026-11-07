@@ -1,6 +1,6 @@
 /* Preview icons remain fixed to their preview corner. */
 #logo{display:none}
-#preview-actions{position:fixed;z-index:10;display:flex;flex-direction:column;align-items:center;gap:5px;
+#preview-actions{position:fixed;z-index:11;display:flex;flex-direction:column;align-items:center;gap:5px;
   width:max-content;touch-action:manipulation}
 #preview-actions button{width:44px;height:44px;padding:3px;display:flex;align-items:center;justify-content:center;
   border-radius:var(--radius);touch-action:manipulation;background:transparent;box-shadow:none;border:0}
@@ -9,7 +9,13 @@
 #preview-menu-button{cursor:default}
 
 /* Growtopia-style TopBar. The shared .panel rules own its border and shadows. */
-#topBar{position:fixed;z-index:9;pointer-events:none;--topbar-height:0px}
+#player-chat-backdrop{position:fixed;inset:0;z-index:8;pointer-events:none}
+#player-chat-backdrop .panel{position:fixed;display:none;overflow:hidden;pointer-events:none}
+#player-chat-backdrop-history{font:400 clamp(10px,2.65vw,48px)/1.1 'PlayerChat CG',sans-serif}
+#player-chat-backdrop-history::before{content:'';position:absolute;inset:var(--bd);pointer-events:none;
+  background-image:repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em);
+  background-size:100% 2.2em;background-repeat:repeat-y;background-position:0 0}
+#topBar{position:fixed;z-index:10;pointer-events:none;--topbar-height:0px}
 #player-chat-composer{position:relative;display:flex;flex-direction:column;align-items:stretch;
   gap:.55vw;box-sizing:border-box;width:100%;height:var(--topbar-height);overflow:visible;
   pointer-events:auto;padding:0;background:transparent;border:0;border-radius:0;
@@ -19,12 +25,11 @@
 /* Demo's --fill is #277D9F at 75% opacity. The 25% stripe belongs to each
    message lane, so a wrapped message expands its own stripe naturally. */
 #player-chat-log{position:relative;isolation:isolate;flex:1 1 auto;min-height:0;width:100%;
-  overflow-x:hidden;overflow-y:auto;padding:0;box-sizing:border-box;overscroll-behavior:contain;
-  background-color:var(--fill);
-  background-image:repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em);
-  background-size:100% 2.2em;background-repeat:repeat-y;background-position:0 0;background-origin:padding-box;
+  overflow-x:hidden;overflow-y:auto;padding:var(--bd) 0 0;box-sizing:border-box;overscroll-behavior:contain;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
   color:#fff;font:400 clamp(10px,2.65vw,48px)/1.1 'PlayerChat CG',sans-serif;
   text-align:left;white-space:normal;overflow-wrap:anywhere;scrollbar-width:thin}
+#player-chat-log::after{display:none}
 #player-chat-log:empty{min-height:0}
 .player-chat-entry{position:relative;display:block;width:100%;min-width:0;margin:0;
   padding:0 .45em;box-sizing:border-box;line-height:1.1;text-align:left;
@@ -37,7 +42,9 @@
 
 /* The input lane also inherits the shared .panel fill, edge and inner/outer shadows. */
 .player-chat-input-row{position:relative;display:block;flex:0 0 5.8vw;
-  width:100%;height:5.8vw;min-height:24px;max-height:105px;box-sizing:border-box;overflow:visible}
+  width:100%;height:5.8vw;min-height:24px;max-height:105px;box-sizing:border-box;overflow:visible;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.player-chat-input-row::after{display:none}
 #playerChat{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;min-height:0;
   resize:none;overflow-x:auto;overflow-y:hidden;box-sizing:border-box;
   padding:0 11vw 0 .45em;border:0;background:transparent;color:transparent;
@@ -77,7 +84,7 @@
 #topBar-handle.up .hd-u,#topBar-handle.dn .hd-d{opacity:1}
 #topBar-handle.up .hd-n,#topBar-handle.dn .hd-n{opacity:0}
 
-#player-chat-bubble{position:fixed;z-index:8;display:block;width:max-content;height:auto;min-width:0;
+#player-chat-bubble{position:fixed;z-index:12;display:block;width:max-content;height:auto;min-width:0;
   max-width:min(460px,calc(100vw - 24px));opacity:0;background:#277d9f;
   padding:var(--player-chat-pad-y,4px) var(--player-chat-pad-x,8px);pointer-events:none;
   border:calc(max(1px,var(--bd)) + 1px) solid #A5E3FB;border-radius:calc(var(--radius) + 1px);
@@ -101,3 +108,5 @@ body:not(.live-preview) #player-chat-bubble{display:none!important}
 
 /* Input overlay sizing is defined with the responsive TopBar lanes above. */
 body:not(.live-preview) #pads{display:none!important}
+
+body:not(.live-preview) #player-chat-backdrop{display:none!important}

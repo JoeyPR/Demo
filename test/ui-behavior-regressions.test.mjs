@@ -239,7 +239,7 @@ test("preview menu and chat buttons use the 14eaf6 top-right placement", () => {
   assert.ok(js.includes("actions.style.left = area.right - actionWidth - gap + 'px';"));
   assert.ok(js.includes("actions.style.top = area.top + gap + 'px';"));
   assert.ok(js.includes("nextPaint(position);"));
-  assert.ok(css.includes("#preview-actions{position:fixed;z-index:10"));
+  assert.ok(css.includes("#preview-actions{position:fixed;z-index:11"));
   assert.ok(css.includes("align-items:center;gap:5px"));
 });
 
@@ -379,7 +379,7 @@ test("preview menu and chat buttons use the 14eaf6 top-right placement", () => {
   assert.ok(js.includes("actions.style.left = area.right - actionWidth - gap + 'px';"));
   assert.ok(js.includes("actions.style.top = area.top + gap + 'px';"));
   assert.ok(js.includes("nextPaint(position);"));
-  assert.ok(css.includes("#preview-actions{position:fixed;z-index:10"));
+  assert.ok(css.includes("#preview-actions{position:fixed;z-index:11"));
   assert.ok(css.includes("align-items:center;gap:5px"));
 });
 
@@ -407,7 +407,7 @@ test("Duct Taped selects the Grey swatch as a persistent player skin override", 
 
 
 
-test("TopBar uses the shared Demo 75%-fill panel contract and 25% em-scaled panel stripes", () => {
+test("TopBar uses the shared Demo panel contract with stripes on the backplate", () => {
   const css = read("../css/player-chat.css");
   const base = read("../css/base.css");
   assert.ok(base.includes("--fill:rgba(39,125,159,.75)"));
@@ -416,9 +416,10 @@ test("TopBar uses the shared Demo 75%-fill panel contract and 25% em-scaled pane
   assert.ok(base.includes("border-radius:var(--radius)"));
   assert.ok(base.includes("box-shadow:var(--sh) var(--sh) 0 0 #000"));
   assert.ok(base.includes("box-shadow:inset var(--sh) var(--sh) 0 0 #000"));
-  assert.ok(css.includes("background-color:var(--fill)"));
+  assert.ok(css.includes("#player-chat-backdrop-history::before"));
   assert.ok(css.includes("repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.1em,transparent 1.1em 2.2em)"));
-  assert.ok(css.includes("repeating-linear-gradient"));
+  assert.ok(css.includes("#player-chat-log{position:relative"));
+  assert.ok(css.includes("background:transparent!important;border:0!important"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
   assert.ok(!css.includes("border-radius:1.6vw"));
 });
@@ -462,4 +463,27 @@ test("TopBar input bar is shorter while retaining centered placeholder and messa
   assert.ok(css.includes("height:5.8vw;min-height:24px;max-height:105px"));
   assert.ok(css.includes("clamp(24px,5.8vw,105px) 'PlayerChat CG'"));
   assert.ok(css.includes("display:flex;align-items:center;width:max-content;height:100%"));
+});
+
+
+test("TopBar backplates, world foreground props and chat text are separate visual layers", () => {
+  const chat = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  const preview = read("../css/preview.css");
+  const app = read("../js/app.js");
+  assert.ok(chat.includes("const backdrop = make('div', 'player-chat-backdrop')"));
+  assert.ok(chat.includes("historyBackdrop.className = 'player-chat-backdrop-panel player-chat-backdrop-history panel'"));
+  assert.ok(chat.includes("inputBackdrop.className = 'player-chat-backdrop-panel player-chat-backdrop-input panel'"));
+  assert.ok(chat.includes("function syncTopBarBackdrop()"));
+  assert.ok(chat.includes("place(historyBackdrop, chatLog)"));
+  assert.ok(chat.includes("place(inputBackdrop, inputRow)"));
+  assert.ok(css.includes("#player-chat-backdrop{position:fixed;inset:0;z-index:8"));
+  assert.ok(css.includes("#topBar{position:fixed;z-index:10"));
+  assert.ok(css.includes("#player-chat-bubble{position:fixed;z-index:12"));
+  assert.ok(preview.includes("#pv-foreground{position:fixed;left:0;top:0;z-index:9"));
+  assert.ok(app.includes("playerForeground.id = \"pv-foreground\""));
+  assert.ok(app.includes("function drawTopBarForeground("));
+  assert.ok(app.includes('drawPickups(foreground, frame, scale, cameraPivotX, cameraPivotY, zoom, "art")'));
+  assert.ok(app.includes("P.plate.draw(foreground, platePoint.x, platePoint.y, scale * zoom, state.clock, 0.80)"));
+  assert.ok(app.includes("foreground.clip()"));
 });

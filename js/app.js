@@ -24,6 +24,12 @@ import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEI
 const $ = s => document.querySelector(s);
 const moduleURL = path => new URL(path, import.meta.url);
 const world = $("#pv"), ctx = world.getContext("2d");
+const playerForeground = document.createElement("canvas");
+playerForeground.id = "pv-foreground";
+playerForeground.width = world.width;
+playerForeground.height = world.height;
+const playerForegroundCtx = playerForeground.getContext("2d");
+document.body.appendChild(playerForeground);
 const avatar = document.createElement("canvas"), avatarCtx = avatar.getContext("2d");
 const avatarShadow = document.createElement("canvas"), avatarShadowCtx = avatarShadow.getContext("2d");
 const weatherBG = document.createElement("canvas"), weatherFG = document.createElement("canvas");
@@ -711,6 +717,7 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     try { c.drawImage(weatherFG, 0, 0, w, h); }
     catch (weatherError) { markWeatherFailed(state.weatherKey, weatherError); }
   }
+  drawTopBarForeground(frame, s, cameraPivotX, cameraPivotY, zoom, playerTop);
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
   lastFrameError = null;
@@ -1066,6 +1073,68 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="ar
     }
     c.restore();
   }
+}
+
+
+
+// Foreground pass between the TopBar's panel backplates and its text DOM.
+// This keeps GrowID flags/shadows and pickup-box artwork from being masked
+// by the translucent fill/stripe layer.
+function drawTopBarForeground(frame, scale, cameraPivotX, cameraPivotY, zoom, playerTop) {
+  const rect = world.getBoundingClientRect();
+  const offsetWidth = world.offsetWidth || rect.width;
+  const offsetHeight = world.offsetHeight || rect.height;
+  if (!rect.width || !rect.height || !offsetWidth || !offsetHeight) {
+    playerForegroundCtx.clearRect(0, 0, playerForeground.width, playerForeground.height);
+    return;
+  }
+  const scaleX = rect.width / offsetWidth;
+  const scaleY = rect.height / offsetHeight;
+  const contentLeft = rect.left + world.clientLeft * scaleX;
+  const contentTop = rect.top + world.clientTop * scaleY;
+
+  if (playerForeground.width !== world.width) playerForeground.width = world.width;
+  if (playerForeground.height !== world.height) playerForeground.height = world.height;
+  playerForeground.style.left = contentLeft + "px";
+  playerForeground.style.top = contentTop + "px";
+  playerForeground.style.width = world.clientWidth * scaleX + "px";
+  playerForeground.style.height = world.clientHeight * scaleY + "px";
+
+  const clips = ["player-chat-backdrop-history", "player-chat-backdrop-input"]
+    .map(id => document.getElementById(id))
+    .filter(panel => panel && panel.style.display !== "none")
+    .map(panel => {
+      const r = panel.getBoundingClientRect();
+      return {
+        x: (r.left - contentLeft) / scaleX,
+        y: (r.top - contentTop) / scaleY,
+        width: r.width / scaleX,
+        height: r.height / scaleY
+      };
+    })
+    .filter(r => r.width > 0 && r.height > 0);
+
+  const foreground = playerForegroundCtx;
+  foreground.setTransform(1, 0, 0, 1, 0, 0);
+  foreground.clearRect(0, 0, world.width, world.height);
+  if (!clips.length) return;
+
+  foreground.save();
+  foreground.beginPath();
+  for (const clip of clips) foreground.rect(clip.x, clip.y, clip.width, clip.height);
+  foreground.clip();
+  foreground.imageSmoothingEnabled = false;
+  // Same scene coordinates as the main pass; this clipped copy replaces
+  // only the pickup/nameplate pixels underneath the translucent TopBar.
+  drawPickups(foreground, frame, scale, cameraPivotX, cameraPivotY, zoom, "art");
+  if (P.plate) {
+    const platePoint = projectCameraPoint(
+      world.width / 2 - 3, playerTop - 6 * scale,
+      cameraPivotX, cameraPivotY, zoom
+    );
+    P.plate.draw(foreground, platePoint.x, platePoint.y, scale * zoom, state.clock, 0.80);
+  }
+  foreground.restore();
 }
 
 P.on("drop-confirm", payload => {

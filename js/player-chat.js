@@ -34,6 +34,16 @@
   chatButton.setAttribute('aria-controls', 'player-chat-composer');
   chatButton.setAttribute('aria-expanded', 'false');
 
+  const backdrop = make('div', 'player-chat-backdrop');
+  backdrop.setAttribute('aria-hidden', 'true');
+  const historyBackdrop = make('div', 'player-chat-backdrop-history');
+  historyBackdrop.className = 'player-chat-backdrop-panel player-chat-backdrop-history panel';
+  historyBackdrop.id = 'player-chat-backdrop-history';
+  const inputBackdrop = make('div', 'player-chat-backdrop-input');
+  inputBackdrop.className = 'player-chat-backdrop-panel player-chat-backdrop-input panel';
+  inputBackdrop.id = 'player-chat-backdrop-input';
+  backdrop.append(historyBackdrop, inputBackdrop);
+
   const topBar = make('section', 'topBar');
   topBar.setAttribute('aria-label', 'Chat top bar');
   const composer = make('form', 'player-chat-composer');
@@ -78,7 +88,7 @@
   bubble.setAttribute('role', 'status'); bubble.setAttribute('aria-live', 'polite');
   bubble.setAttribute('aria-atomic', 'true');
   const speech = make('span', 'player-chat-text'); bubble.append(speech);
-  document.body.append(actions, topBar, bubble);
+  document.body.append(backdrop, actions, topBar, bubble);
 
   let anchor = null, lastText = '', hideTimer = null, fadeTimer = null, opened = false;
   let speechState = null, speechVersion = 0;
@@ -243,6 +253,21 @@
     return { left: Math.max(0, rect.left), right: Math.min(innerWidth, rect.right),
       top: Math.max(0, rect.top), bottom: Math.min(innerHeight, rect.bottom) };
   }
+  function syncTopBarBackdrop() {
+    const visible = !composer.hidden && document.body.classList.contains('live-preview');
+    const place = (panel, target) => {
+      if (!visible) { panel.style.display = 'none'; return; }
+      const rect = target.getBoundingClientRect();
+      if (!rect.width || !rect.height) { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      panel.style.left = rect.left + 'px';
+      panel.style.top = rect.top + 'px';
+      panel.style.width = rect.width + 'px';
+      panel.style.height = rect.height + 'px';
+    };
+    place(historyBackdrop, chatLog);
+    place(inputBackdrop, inputRow);
+  }
   function syncInputState() {
     opened = reveal > 0;
     composer.hidden = reveal <= 0;
@@ -254,6 +279,7 @@
     handle.setAttribute('aria-valuetext', opened ? 'Chat open' : 'Chat closed');
     topBar.style.setProperty('--topbar-height', reveal + 'px');
     topBar.classList.toggle('is-open', opened);
+    syncTopBarBackdrop();
   }
   function setReveal(value) {
     reveal = clamp(value, 0, maxReveal);
@@ -283,6 +309,7 @@
     topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - left + 4 : 8) + 'px');
     topBar.style.setProperty('--topbar-right-reserve', actions.offsetWidth + 8 + 'px');
     setReveal(reveal);
+    syncTopBarBackdrop();
     positionBubble();
   }
   function rememberHeight() {
