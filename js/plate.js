@@ -173,14 +173,22 @@
       im = new Image();
       // Country flags are local Demo assets. If hosted under a nested route,
       // retry the same local file at this site's root; never use another site.
-      im.onload = () => P.emit('plate-update');
+      im.onload = () => {
+        im.dataset.demoRootRetryPending = '0';
+        P.emit('plate-update');
+      };
       im.onerror = () => {
-        if (src.startsWith(COUNTRY_FLAGS_DIR) && !im.dataset.demoFlagRootRetry) {
-          im.dataset.demoFlagRootRetry = '1';
+        if (src.startsWith('img/') && !im.dataset.demoRootRetry) {
           const localPath = src.split('/').filter(Boolean).join('/');
           const rootSrc = new URL('/' + localPath, window.location.origin).href;
-          if (rootSrc !== im.src) { im.src = rootSrc; return; }
+          if (rootSrc !== im.src) {
+            im.dataset.demoRootRetry = '1';
+            im.dataset.demoRootRetryPending = '1';
+            im.src = rootSrc;
+            return;
+          }
         }
+        im.dataset.demoRootRetryPending = '0';
         P.emit('plate-update');
       };
       im.src = src;
@@ -227,6 +235,25 @@
     // A missing catalog/thumb can become available after boot; don't cache null.
     if(canvas)guildFlagCache.set(itemId, canvas);
     return canvas;
+  }
+
+
+  function waitForImage(src) {
+    const existing = img(src);
+    const im = existing ?? imageCache.get(src);
+    if (!im) return Promise.resolve(false);
+    if (ready(im)) return Promise.resolve(true);
+    return new Promise(resolve => {
+      let settled = false;
+      const finish = () => {
+        if (settled || im.dataset?.demoRootRetryPending === '1') return;
+        settled = true;
+        resolve(ready(im));
+      };
+      im.addEventListener('load', finish, { once: true });
+      im.addEventListener('error', finish, { once: true });
+      if (im.complete && im.dataset?.demoRootRetryPending !== '1') finish();
+    });
   }
 
   /* ---------------- color cyclers (s$ / f0 on the site) ---------------- */
@@ -563,6 +590,15 @@
       return draw(ctx, scale, cx, baselineY, false, textScale);
     },
     measure(ctx, cx, baselineY, scale, textScale = 1) { return draw(ctx, scale, cx, baselineY, true, textScale); },
+    async preload() {
+      const parts = buildParts()?.parts ?? [];
+      const sources = [...new Set(parts.filter(part => typeof part.img === 'string').map(part => part.img))];
+      // The G4G role icon is conditionally requested while drawing the role badge.
+      if (state.role && state.titles.includes('g4g')) sources.push(TITLES_DIR + 'g4g.png');
+      const results = await Promise.all([...new Set(sources)].map(waitForImage));
+      const loaded = results.filter(Boolean).length;
+      return { requested: results.length, loaded, failed: results.length - loaded };
+    },
     titles: TITLES, conflicts: CONFLICTS, guildRoles: GUILD_ROLES, baseWrenchId: BASE_WRENCH,
     get wrenchData() { return wrenchData; },
     get frames(){return frames;},

@@ -31,7 +31,27 @@ const landCanvas = document.createElement("canvas"), landCtx = landCanvas.getCon
 const worldShadowCanvas = document.createElement("canvas"), worldShadowCtx = worldShadowCanvas.getContext("2d");
 const landImages = new Map(), landLoads = new Map();
 const pickupSprite = new Image();
+pickupSprite.decoding = "async";
 pickupSprite.src = moduleURL("../img/pickup.png").href;
+const pickupSpriteHasFrame = () => pickupSprite.complete &&
+  pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width &&
+  pickupSprite.naturalHeight >= PICKUP_ATLAS_RECT.y + PICKUP_ATLAS_RECT.height;
+const pickupSpriteReady = (async () => {
+  try {
+    if (typeof pickupSprite.decode === "function") {
+      await pickupSprite.decode();
+    } else if (!pickupSprite.complete) {
+      await new Promise(resolve => {
+        pickupSprite.addEventListener("load", resolve, { once: true });
+        pickupSprite.addEventListener("error", resolve, { once: true });
+      });
+    }
+  } catch {
+    // Decode can reject on a failed request; the dimension check below
+    // decides whether the real frame is safe to use.
+  }
+  return pickupSpriteHasFrame();
+})();
 
 const initialSkin = SKINS[resolveStoredSkin(P.store.get("skin", 0))];
 const savedAppearance = P.playerAppearance ?? P.store.get("playerAppearance", {});
@@ -905,7 +925,7 @@ function pickupShadowFrom(source) {
 function ensurePickupArt(pickup) {
   if (pickup.artCanvas && pickup.shadowCanvas && pickup.frameCanvas &&
       pickup.frameShadowCanvas && pickup.iconCanvas) return;
-  if (!pickupSprite.complete || pickupSprite.naturalWidth < PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) return;
+  if (!pickupSpriteHasFrame()) return;
 
   // Keep the frame and item on separate transparent layers so the icon can
   // jump out of the frame during collection while the empty frame shrinks.
@@ -1001,7 +1021,7 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="ar
           const inset = (size - iconSize) / 2;
           c.drawImage(pickup.icon, left + inset, top + inset, iconSize, iconSize);
         }
-        if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
+        if (pickupSpriteHasFrame()) {
           c.drawImage(pickupSprite,
             PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
             PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
@@ -1017,7 +1037,7 @@ function drawPickups(c, frame, scale, cameraPivotX, cameraPivotY, zoom, pass="ar
       if (size >= 0.5) {
         if (pickup.frameCanvas) {
           c.drawImage(pickup.frameCanvas, left, top, size, size);
-        } else if (pickupSprite.complete && pickupSprite.naturalWidth >= PICKUP_ATLAS_RECT.x + PICKUP_ATLAS_RECT.width) {
+        } else if (pickupSpriteHasFrame()) {
           c.drawImage(pickupSprite,
             PICKUP_ATLAS_RECT.x, PICKUP_ATLAS_RECT.y,
             PICKUP_ATLAS_RECT.width, PICKUP_ATLAS_RECT.height,
@@ -1160,6 +1180,16 @@ state.landCanvas = landCanvas;   /* QA: terrain-layer probe (transparent pixels 
     // Preview and Live Preview share the selected land and weather. Background
     // walls and generated exploration terrain are no longer separate modes.
     setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
+
+    // The first visible frame must not race pickup-box and nameplate images.
+    const [pickupReady, plateAssets] = await Promise.all([
+      pickupSpriteReady,
+      P.plate?.preload?.() ?? Promise.resolve({ requested: 0, loaded: 0, failed: 0 })
+    ]);
+    try { await document.fonts?.load("700 20px 'Nameplate CG'"); } catch {}
+    state.startupAssets = { pickupSprite: pickupReady, plate: plateAssets };
+    if (!pickupReady) console.warn("[Pickup] pickup.png did not decode to the required 180x20 atlas; using a clean fallback frame.");
+    if (plateAssets.failed) console.warn("[Plate] " + plateAssets.failed + " nameplate image(s) failed to load during startup.");
 
     state.ready = true;
     P.equippedIds = new Set();

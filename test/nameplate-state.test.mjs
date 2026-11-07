@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL(path,import.meta.url),'utf8');
-function plate(saved={}) {
-  class Image {complete=true;naturalWidth=32;naturalHeight=32;dataset={};}
+function plate(saved={}, ImageClass=null) {
+  class ReadyImage {complete=true;naturalWidth=32;naturalHeight=32;dataset={};}
   class Canvas {width=32;height=32;}
-  const ctx=vm.createContext({Image,HTMLCanvasElement:Canvas,console,
+  const ctx=vm.createContext({Image:ImageClass??ReadyImage,HTMLCanvasElement:Canvas,console,
     document:{createElement(){return new Canvas();}},
     fetch:async path=>({ok:true,json:async()=>JSON.parse(read('../'+path))}),
     P:{store:{get:()=>saved,set(){}},emit(){}}});
@@ -57,4 +57,48 @@ test('legacy Super Supporter preferences migrate and can be switched off',()=>{
   p.plateConfig.setSuperSupporter(false);
   assert.equal(p.plateConfig.get().superSupporter,false);
   assert.equal(p.plateConfig.get().wrenchStyle,0);
+});
+
+
+test('nameplate preload waits for the current role and country-flag images',async()=>{
+  const pending=[];
+  class DelayedImage {
+    constructor(){this.complete=false;this.naturalWidth=0;this.naturalHeight=0;this.dataset={};this.listeners={};}
+    set src(value){this._src=value;pending.push(this);}
+    get src(){return this._src;}
+    addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);}
+    finish(ok=true){
+      this.complete=true;this.naturalWidth=ok?32:0;this.naturalHeight=ok?32:0;
+      const event=ok?'load':'error';
+      for(const fn of this.listeners[event]??[])fn();
+      if(ok)this.onload?.();else this.onerror?.();
+    }
+  }
+  const p=plate({growId:'Joey',flag:'unitedstates',role:'farmer'},DelayedImage);
+  const loading=p.plate.preload();
+  assert.equal(pending.length,2);
+  let resolved=false;loading.then(()=>{resolved=true;});
+  await Promise.resolve();
+  assert.equal(resolved,false);
+  pending.forEach(image=>image.finish(true));
+  const result=await loading;
+  assert.deepEqual(result,{requested:2,loaded:2,failed:0});
+});
+
+test('failed nameplate images settle preload cleanly rather than hanging startup',async()=>{
+  const pending=[];
+  class DelayedImage {
+    constructor(){this.complete=false;this.naturalWidth=0;this.naturalHeight=0;this.dataset={};this.listeners={};}
+    set src(value){this._src=value;pending.push(this);}
+    get src(){return this._src;}
+    addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);}
+    finish(){this.complete=true;this.naturalWidth=0;this.naturalHeight=0;for(const fn of this.listeners.error??[])fn();this.onerror?.();}
+  }
+  const p=plate({growId:'Joey',flag:'unitedstates',role:'farmer'},DelayedImage);
+  const loading=p.plate.preload();
+  pending.forEach(image=>image.finish());
+  const result=await loading;
+  assert.equal(result.requested,2);
+  assert.equal(result.loaded,0);
+  assert.equal(result.failed,2);
 });
