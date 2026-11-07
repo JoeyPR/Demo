@@ -88,6 +88,12 @@
     ? P.store.get('playerChatWorldRole', '') : '';
   const MAX_LOG_MESSAGES = 50;
   const EST_OFFSET_MS = 5 * 60 * 60 * 1000;
+  // Growtopia chat lanes: the signal identifies the source of each message.
+  const CHAT_LANES = Object.freeze({
+    world: Object.freeze({ signal: 'W', color: '6', includePlayerName: true }),
+    server: Object.freeze({ signal: 'S', color: 'w', includePlayerName: false }),
+    broadcast: Object.freeze({ signal: 'B', color: '#', includePlayerName: false })
+  });
   const MIN_REVEAL = 40;
   const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
   const now = () => window.performance?.now() ?? Date.now();
@@ -104,7 +110,7 @@
     const est = new Date(Number(atMs) - EST_OFFSET_MS);
     const pad = value => String(value).padStart(2, '0');
     const time = [pad(est.getUTCHours()), pad(est.getUTCMinutes()), pad(est.getUTCSeconds())].join(':');
-    return P.rtfont?.color('o', '[' + time + ']') || '[' + time + ']';
+    return P.rtfont?.color('w', '[' + time + ']') || '[' + time + ']';
   }
   function formatPlayerName() {
     const profile = P.plateConfig?.get?.() ?? {};
@@ -126,27 +132,59 @@
     if (P.rtfont?.hasCodes(rawGrowId)) return rawGrowId;
     return P.rtfont?.color('w', name) ?? name;
   }
-  function appendChatLogMessage(message, atMs = Date.now()) {
+  function appendChatLogMessage(message, atMs = Date.now(), laneOptions = {}) {
+    // Supports an options object as the second argument or a timestamp plus options.
+    if (atMs && typeof atMs === 'object') {
+      laneOptions = atMs;
+      atMs = laneOptions.atMs ?? Date.now();
+    }
+    const options = laneOptions && typeof laneOptions === 'object' ? laneOptions : {};
+    const requested = String(options.type ?? options.lane ?? options.kind ?? 'world').toLowerCase();
+    const aliases = { bc: 'broadcast', sb: 'broadcast', cb: 'broadcast',
+      'super-broadcast': 'broadcast', 'custom-broadcast': 'broadcast' };
+    const laneType = aliases[requested] ?? (CHAT_LANES[requested] ? requested : 'world');
+    const lane = CHAT_LANES[laneType];
+    const signalText = String(options.signal ?? lane.signal);
+    const signalColor = String(options.signalColor ?? lane.color);
+    const text = String(message ?? '');
     const row = make('div');
-    row.className = 'player-chat-entry';
+    row.className = 'player-chat-entry player-chat-entry--' + laneType;
+    row.dataset.lane = laneType;
+    row.dataset.signal = signalText;
+
+    const signal = make('span');
+    signal.className = 'player-chat-signal';
+    signal.textContent = P.rtfont?.color(signalColor, '[' + signalText + ']') || '[' + signalText + ']';
     const time = make('span');
     time.className = 'player-chat-time';
     time.textContent = formatESTTimestamp(atMs) + ' ';
-    const name = make('span');
-    name.className = 'player-chat-name';
-    name.textContent = formatPlayerName();
-    const separator = make('span');
-    separator.className = 'player-chat-separator';
-    separator.textContent = ': ';
+    row.append(signal, document.createTextNode(' '), time);
+
+    const includeName = options.showName ?? (options.playerName != null || lane.includePlayerName);
+    if (includeName) {
+      const openBracket = make('span');
+      openBracket.className = 'player-chat-name-bracket';
+      openBracket.textContent = P.rtfont?.color(String(options.nameBracketColor ?? '6'), '<') || '<';
+      const name = make('span');
+      name.className = 'player-chat-name';
+      name.textContent = options.playerName != null ? String(options.playerName) : formatPlayerName();
+      const closeBracket = make('span');
+      closeBracket.className = 'player-chat-name-bracket';
+      closeBracket.textContent = P.rtfont?.color(String(options.nameBracketColor ?? '6'), '>') || '>';
+      row.append(openBracket, name, closeBracket, document.createTextNode(' '));
+    }
+
     const body = make('span');
     body.className = 'player-chat-message';
-    body.textContent = message;
-    row.append(time, name, separator, body);
+    const messageColor = String(options.messageColor ?? '$');
+    body.textContent = P.rtfont?.color(messageColor, text) || text;
+    row.append(body);
     chatLog.append(row);
     P.rtfont?.scan(row);
     while (chatLog.children.length > MAX_LOG_MESSAGES) chatLog.firstElementChild.remove();
     chatLog.dataset.empty = chatLog.children.length ? 'false' : 'true';
     chatLog.scrollTop = chatLog.scrollHeight;
+    return row;
   }
   function updateInputCounter() {
     const characters = Array.from(textarea.value);
@@ -329,7 +367,7 @@
       return true;
     }
     const messageAtMs = Date.now();
-    appendChatLogMessage(text, messageAtMs);
+    appendChatLogMessage(text, messageAtMs, { type: 'world', messageColor: '$' });
     clear(); lastText = text; speech.textContent = text;
     P.rtfont?.scan(speech);
     bubble.hidden = false;
@@ -384,7 +422,7 @@
   document.fonts?.ready.then(position);
   P.playerChat = {
     open, close, submit, clear, reposition: position, stateAt, durationMs: SPEECH_MS,
-    formatESTTimestamp, formatPlayerName, appendChatLogMessage,
+    formatESTTimestamp, formatPlayerName, appendChatLogMessage, chatLanes: CHAT_LANES,
     getWorldRole: () => worldRole,
     setWorldRole(role) {
       worldRole = ['owner', 'admin'].includes(role) ? role : '';

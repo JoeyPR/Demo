@@ -259,3 +259,20 @@ test("Duct Taped selects the Grey swatch as a persistent player skin override", 
   assert.match(renderer, /resolveWear\(contributors,visual\.skin,visual\.skinOverride\)/);
   assert.match(renderer, /wear\.skinPalette=!visual\.skinOverride/);
 });
+
+
+test("TopBar messages use Growtopia Signal lanes and default player message color $", () => {
+  const js = read("../js/player-chat.js");
+  const css = read("../css/player-chat.css");
+  assert.ok(js.includes("signal: 'W', color: '6', includePlayerName: true"));
+  assert.ok(js.includes("signal: 'S', color: 'w', includePlayerName: false"));
+  assert.ok(js.includes("signal: 'B', color: '#', includePlayerName: false"));
+  assert.ok(js.includes("P.rtfont?.color(signalColor, '[' + signalText + ']')"));
+  assert.ok(js.includes("P.rtfont?.color('w', '[' + time + ']')"));
+  assert.ok(js.includes("options.messageColor ?? '$'"));
+  assert.ok(js.includes("appendChatLogMessage(text, messageAtMs, { type: 'world', messageColor: '$' })"));
+  assert.ok(js.includes("P.rtfont?.color(String(options.nameBracketColor ?? '6'), '<')"));
+  assert.ok(css.includes(".player-chat-signal"));
+  assert.ok(css.includes("rgba(123,186,210,.25)"));
+  assert.ok(css.includes("background-size:100% 2em"));
+});
