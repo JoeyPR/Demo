@@ -29,6 +29,19 @@
   menuButton.append(menuImage);
   actions.append(menuButton);
 
+  // Chat launcher is independent of the removed TopBar. It sends the entered
+  // message through the existing player speech bubble without creating a bar.
+  const chatButton = make('button', 'player-chat-button');
+  chatButton.type = 'button';
+  chatButton.setAttribute('aria-label', 'Player Chat');
+  chatButton.title = 'Player Chat';
+  const chatImage = make('img');
+  chatImage.src = 'img/chat-button.png';
+  chatImage.alt = '';
+  chatImage.draggable = false;
+  chatButton.append(chatImage);
+  actions.append(chatButton);
+
   // Player speech is separate from the TopBar and remains available to the demo.
   const bubble = make('div', 'player-chat-bubble');
   bubble.className = 'panel';
@@ -164,6 +177,11 @@
     P.emit('player-chat', { text, atMs: startedAtMs, durationMs });
     return true;
   }
+
+  chatButton.addEventListener('click', () => {
+    const message = window.prompt('Enter a message');
+    if (message !== null) submit(message);
+  });
 
   P.on('player-chat-anchor', point => {
     if (point && Number.isFinite(point.x) && Number.isFinite(point.y)) {
