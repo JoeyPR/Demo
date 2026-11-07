@@ -137,7 +137,7 @@ test("chat history uses fixed EST timestamps, preserves RTFont, and formats titl
   assert.match(js, /name \+= ' of Legend'/);
   assert.match(js, /name = \(isDoctor \? 'Dr\. ' : ''\)/);
   assert.match(js, /body\.textContent = P\.rtfont\?\.color\(messageColor, text\) \|\| text/);
-  assert.match(js, /const messageColor = String\(options\.messageColor \?\? '\
+  assert.ok(js.includes("const messageColor = String(options.messageColor ?? '$')"));
   assert.match(js, /P\.rtfont\?\.scan\(row\)/);
   assert.match(js, /P\.rtfont\?\.hasCodes\(rawGrowId\)\) return rawGrowId/);
   assert.match(js, /const MAX_LOG_MESSAGES = 50/);
