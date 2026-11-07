@@ -53,7 +53,7 @@
   textarea.setAttribute('aria-label', 'Player Chat message');
   textarea.setAttribute('enterkeyhint', 'send');
   textarea.setAttribute('aria-description', '120 character maximum. Press Enter to send.');
-  const inputHint = make('span', 'player-chat-placeholder', P.rtfont?.color('7', 'Enter a message here') || 'Enter a message here');
+  const inputHint = make('span', 'player-chat-placeholder', P.rtfont?.color('7', 'Enter Message Here') || 'Enter Message Here');
   inputHint.setAttribute('aria-hidden', 'true');
   const inputText = make('span', 'player-chat-input-text');
   inputText.setAttribute('aria-hidden', 'true');
@@ -88,6 +88,11 @@
     ? P.store.get('playerChatWorldRole', '') : '';
   const MAX_LOG_MESSAGES = 50;
   const EST_OFFSET_MS = 5 * 60 * 60 * 1000;
+  const CHAT_LANES = Object.freeze({
+    world: Object.freeze({ signal: 'W', color: '6', includePlayerName: true }),
+    server: Object.freeze({ signal: 'S', color: 'w', includePlayerName: false }),
+    broadcast: Object.freeze({ signal: 'B', color: '#', includePlayerName: false })
+  });
   const MIN_REVEAL = 40;
   const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
   const now = () => window.performance?.now() ?? Date.now();
@@ -104,7 +109,7 @@
     const est = new Date(Number(atMs) - EST_OFFSET_MS);
     const pad = value => String(value).padStart(2, '0');
     const time = [pad(est.getUTCHours()), pad(est.getUTCMinutes()), pad(est.getUTCSeconds())].join(':');
-    return P.rtfont?.color('o', '[' + time + ']') || '[' + time + ']';
+    return P.rtfont?.color('w', '[' + time + ']') || '[' + time + ']';
   }
   function formatPlayerName() {
     const profile = P.plateConfig?.get?.() ?? {};
@@ -124,29 +129,61 @@
       : isLegend ? '9' : '';
     if (forcedCode) return P.rtfont?.color(forcedCode, name) ?? name;
     if (P.rtfont?.hasCodes(rawGrowId)) return rawGrowId;
-    return P.rtfont?.color('w', name) ?? name;
+    return P.rtfont?.color('2', name) ?? name;
   }
-  function appendChatLogMessage(message, atMs = Date.now()) {
+  function appendChatLogMessage(message, atMs = Date.now(), laneOptions = {}) {
+    // Accept an options object as argument two, or a timestamp followed by options.
+    if (atMs && typeof atMs === 'object') {
+      laneOptions = atMs;
+      atMs = laneOptions.atMs ?? Date.now();
+    }
+    const options = laneOptions && typeof laneOptions === 'object' ? laneOptions : {};
+    const requested = String(options.type ?? options.lane ?? options.kind ?? 'world').toLowerCase();
+    const aliases = { bc: 'broadcast', sb: 'broadcast', cb: 'broadcast',
+      'super-broadcast': 'broadcast', 'custom-broadcast': 'broadcast' };
+    const laneType = aliases[requested] ?? (CHAT_LANES[requested] ? requested : 'world');
+    const lane = CHAT_LANES[laneType];
+    const signalText = String(options.signal ?? lane.signal);
+    const signalColor = String(options.signalColor ?? lane.color);
+    const text = String(message ?? '');
+
     const row = make('div');
-    row.className = 'player-chat-entry';
+    row.className = 'player-chat-entry player-chat-entry--' + laneType;
+    row.dataset.lane = laneType;
+
+    const signal = make('span');
+    signal.className = 'player-chat-signal';
+    signal.textContent = P.rtfont?.color(signalColor, '[' + signalText + ']') || '[' + signalText + ']';
     const time = make('span');
     time.className = 'player-chat-time';
-    time.textContent = formatESTTimestamp(atMs) + ' ';
-    const name = make('span');
-    name.className = 'player-chat-name';
-    name.textContent = formatPlayerName();
-    const separator = make('span');
-    separator.className = 'player-chat-separator';
-    separator.textContent = ': ';
+    time.textContent = formatESTTimestamp(atMs);
+    row.append(signal, document.createTextNode(' '), time, document.createTextNode(' '));
+
+    const includeName = options.showName ?? (options.playerName != null || lane.includePlayerName);
+    if (includeName) {
+      const openBracket = make('span');
+      openBracket.className = 'player-chat-name-bracket';
+      openBracket.textContent = P.rtfont?.color(String(options.nameBracketColor ?? '2'), '<') || '<';
+      const name = make('span');
+      name.className = 'player-chat-name';
+      name.textContent = options.playerName != null ? String(options.playerName) : formatPlayerName();
+      const closeBracket = make('span');
+      closeBracket.className = 'player-chat-name-bracket';
+      closeBracket.textContent = P.rtfont?.color(String(options.nameBracketColor ?? '2'), '>') || '>';
+      row.append(openBracket, name, closeBracket, document.createTextNode(' '));
+    }
+
     const body = make('span');
     body.className = 'player-chat-message';
-    body.textContent = message;
-    row.append(time, name, separator, body);
+    const messageColor = String(options.messageColor ?? '$');
+    body.textContent = P.rtfont?.color(messageColor, text) || text;
+    row.append(body);
     chatLog.append(row);
     P.rtfont?.scan(row);
     while (chatLog.children.length > MAX_LOG_MESSAGES) chatLog.firstElementChild.remove();
     chatLog.dataset.empty = chatLog.children.length ? 'false' : 'true';
     chatLog.scrollTop = chatLog.scrollHeight;
+    return row;
   }
   function updateInputCounter() {
     const characters = Array.from(textarea.value);
@@ -231,8 +268,10 @@
     const source = inventoryHandle.getBoundingClientRect();
     const handleWidth = Math.max(1, source.width * 0.9);
     const handleHeight = Math.max(1, source.height * 0.9);
-    const width = Math.max(120, area.right - area.left);
-    topBar.style.left = area.left + 'px';
+    const previewWidth = Math.max(0, area.right - area.left);
+    const width = previewWidth * 0.75;
+    const left = area.left + (previewWidth - width) / 2;
+    topBar.style.left = left + 'px';
     topBar.style.top = area.top + 'px';
     topBar.style.width = width + 'px';
     handle.style.width = handleWidth + 'px';
@@ -240,7 +279,7 @@
     handle.style.left = Math.max(0, (width - handleWidth) / 2) + 'px';
     maxReveal = Math.max(0, area.bottom - area.top - handleHeight);
     const mode = document.getElementById('preview-mode-toggle')?.getBoundingClientRect();
-    topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - area.left + 4 : 8) + 'px');
+    topBar.style.setProperty('--topbar-left-reserve', Math.max(8, mode ? mode.right - left + 4 : 8) + 'px');
     topBar.style.setProperty('--topbar-right-reserve', actions.offsetWidth + 8 + 'px');
     setReveal(reveal);
     positionBubble();
@@ -329,7 +368,7 @@
       return true;
     }
     const messageAtMs = Date.now();
-    appendChatLogMessage(text, messageAtMs);
+    appendChatLogMessage(text, messageAtMs, { type: 'world', messageColor: '$' });
     clear(); lastText = text; speech.textContent = text;
     P.rtfont?.scan(speech);
     bubble.hidden = false;
@@ -384,7 +423,7 @@
   document.fonts?.ready.then(position);
   P.playerChat = {
     open, close, submit, clear, reposition: position, stateAt, durationMs: SPEECH_MS,
-    formatESTTimestamp, formatPlayerName, appendChatLogMessage,
+    formatESTTimestamp, formatPlayerName, appendChatLogMessage, chatLanes: CHAT_LANES,
     getWorldRole: () => worldRole,
     setWorldRole(role) {
       worldRole = ['owner', 'admin'].includes(role) ? role : '';

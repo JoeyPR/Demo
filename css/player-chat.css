@@ -8,41 +8,62 @@
 #preview-actions img{width:100%;height:100%;object-fit:contain}
 #preview-menu-button{cursor:default}
 
-/* Pull-down topBar: history above a compact input row, flush with the preview's top edge. */
+/* Growtopia-style TopBar: 75% preview width, using Demo's native .panel treatment. */
 #topBar{position:fixed;z-index:9;pointer-events:none;--topbar-height:0px}
-#player-chat-composer{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:7px;
-  box-sizing:border-box;width:100%;height:var(--topbar-height);overflow:hidden;
-  pointer-events:auto;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;
-  touch-action:pan-y;color:#fff}
+#player-chat-composer{position:relative;display:flex;flex-direction:column;align-items:stretch;
+  gap:clamp(6px,.7vw,12px);box-sizing:border-box;width:100%;height:var(--topbar-height);
+  overflow:visible;pointer-events:auto;padding:0;background:transparent;border:0;border-radius:0;
+  box-shadow:none;touch-action:pan-y;color:#fff}
 #player-chat-composer[hidden]{display:none}
-#player-chat-log{position:relative;flex:1 1 auto;min-height:0;width:100%;overflow-x:hidden;overflow-y:auto;
-  padding:8px 12px 7px;box-sizing:border-box;overscroll-behavior:contain;
-  background:var(--fill);border:var(--bd) solid var(--line);border-radius:var(--radius);
-  box-shadow:var(--sh) var(--sh) 0 0 #000;
-  color:#fff;font:400 16px/1.25 'PlayerChat CG',sans-serif;text-shadow:none;
-  text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;scrollbar-width:thin}
+
+/* History lane: native 75%-opaque Demo fill with a 25% #7BBAD2 stripe overlay. */
+#player-chat-log{position:relative;flex:1 1 auto;min-height:0;width:100%;
+  overflow-x:hidden;overflow-y:auto;padding:8px 12px 7px;box-sizing:border-box;
+  overscroll-behavior:contain;background-color:var(--fill);
+  background-image:repeating-linear-gradient(to bottom,rgba(123,186,210,.25) 0 1.25em,transparent 1.25em 2.5em);
+  background-size:100% 2.5em;background-repeat:repeat-y;background-position:0 8px;
+  color:#fff;font:400 clamp(14px,3.1vw,48px)/1.25 'PlayerChat CG',sans-serif;
+  text-shadow:none;text-align:left;white-space:normal;overflow-wrap:anywhere;scrollbar-width:thin}
 #player-chat-log:empty{min-height:0}
-.player-chat-entry{display:block;min-width:0;margin:0;padding:2px 0;text-align:left;text-shadow:none}
-.player-chat-time,.player-chat-name,.player-chat-separator,.player-chat-message{white-space:pre-wrap;overflow-wrap:anywhere;text-shadow:none}
-.player-chat-time,.player-chat-name,.player-chat-message{display:inline}
-.player-chat-input-row{position:relative;display:block;flex:0 0 34px;width:100%;height:34px;min-height:34px;
-  box-sizing:border-box;overflow:hidden;background:var(--fill);
-  border:var(--bd) solid var(--line);border-radius:var(--radius);
-  box-shadow:var(--sh) var(--sh) 0 0 #000}
-#playerChat{position:absolute;inset:0;display:block;width:100%;height:100%;min-height:0;resize:none;
-  overflow-x:hidden;overflow-y:auto;box-sizing:border-box;padding:7px 48px 6px 9px;
-  border:0;background:transparent;color:#fff;outline:none;
-  font:400 16px/1.2 'PlayerChat CG',sans-serif;text-shadow:none;
-  user-select:text;-webkit-user-select:text;touch-action:pan-y;white-space:pre-wrap;overflow-wrap:anywhere}
-#playerChat:focus-visible{outline:1px solid var(--line);outline-offset:-2px}
-.player-chat-placeholder{position:absolute;left:9px;top:50%;z-index:1;max-width:calc(100% - 64px);
-  overflow:hidden;white-space:nowrap;pointer-events:none;transform:translateY(-50%);
-  font:400 16px/1.2 'PlayerChat CG',sans-serif;text-shadow:none}
+.player-chat-entry{display:block;min-width:0;margin:0;padding:0;text-align:left;
+  line-height:1.25;white-space:normal;overflow-wrap:anywhere;text-shadow:none;background:transparent}
+.player-chat-signal,.player-chat-time,.player-chat-name-bracket,.player-chat-name,.player-chat-message{
+  display:inline;white-space:pre-wrap;overflow-wrap:anywhere;text-shadow:none}
+.player-chat-signal,.player-chat-time,.player-chat-name-bracket,.player-chat-name{white-space:nowrap}
+.player-chat-signal{font-weight:700}
+.player-chat-message{white-space:pre-wrap}
+
+/* Separate message-entry panel, same native Demo border and paired shadows. */
+.player-chat-input-row{position:relative;display:block;flex:0 0 clamp(36px,6.8vw,104px);
+  width:100%;height:clamp(36px,6.8vw,104px);min-height:36px;max-height:104px;
+  box-sizing:border-box;overflow:visible}
+#playerChat{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;min-height:0;
+  resize:none;overflow-x:auto;overflow-y:hidden;box-sizing:border-box;
+  padding:0 5.7em 0 12px;border:0;background:transparent;color:transparent;
+  -webkit-text-fill-color:transparent;caret-color:#fff;outline:none;
+  font:400 clamp(14px,3.1vw,48px)/1 'PlayerChat CG',sans-serif;text-shadow:none;
+  user-select:text;-webkit-user-select:text;touch-action:pan-y;white-space:pre;overflow-wrap:normal}
+#playerChat:focus,#playerChat:focus-visible{outline:none!important;box-shadow:none}
+.player-chat-placeholder{position:absolute;left:12px;top:50%;z-index:2;
+  width:max-content;max-width:calc(100% - 7em);overflow:hidden;white-space:nowrap;
+  pointer-events:none;transform:translateY(-50%);
+  color:#e6e6e6;font:400 clamp(14px,3.1vw,48px)/1 'PlayerChat CG',sans-serif;text-shadow:none}
 .player-chat-placeholder[hidden]{display:none}
-.player-chat-counter{position:absolute;right:8px;top:50%;z-index:2;transform:translateY(-50%);
-  color:#fff;font:400 12px/1 'PlayerChat CG',sans-serif;text-shadow:none;pointer-events:none}
-#topBar-handle{position:absolute;top:calc(var(--topbar-height) - 1px);z-index:1;cursor:grab;pointer-events:auto;
-  transform:scaleY(-1);transform-origin:center;touch-action:none;outline:0}
+.player-chat-input-text{position:absolute;left:12px;top:50%;z-index:3;display:block;
+  width:max-content;max-width:none;overflow:visible;white-space:pre;pointer-events:none;
+  transform:translateY(-50%);color:#fff;
+  font:400 clamp(14px,3.1vw,48px)/1 'PlayerChat CG',sans-serif;text-shadow:none}
+.player-chat-input-text[hidden]{display:none}
+.player-chat-counter{position:absolute;right:10px;top:50%;z-index:4;display:flex;align-items:center;
+  justify-content:center;min-width:3.2em;padding:.22em .42em;box-sizing:border-box;
+  transform:translateY(-50%);border:var(--bd) solid var(--line);border-radius:var(--radius);
+  background:var(--line);box-shadow:var(--sh) var(--sh) 0 0 #000;
+  color:#fff;font:400 clamp(13px,2.7vw,40px)/1 'PlayerChat CG',sans-serif;
+  text-align:center;white-space:nowrap;text-shadow:none;pointer-events:none}
+
+/* Original pull handle remains centered immediately under both TopBar panels. */
+#topBar-handle{position:absolute;top:calc(var(--topbar-height) - 1px);z-index:1;cursor:grab;
+  pointer-events:auto;transform:scaleY(-1);transform-origin:center;touch-action:none;outline:0}
 #topBar-handle::before{content:'';position:absolute;inset:-6px -8px}
 #topBar-handle.drag{cursor:grabbing}
 #topBar-handle:focus-visible{outline:2px solid var(--line);outline-offset:3px}
@@ -69,29 +90,13 @@
   #topBar-handle .hm{display:block}
   #topBar-handle .hd{display:none}
   #player-chat-composer{gap:6px}
-  .player-chat-input-row{height:34px;min-height:34px}
-  #playerChat{font-size:16px}
+  .player-chat-input-row{height:clamp(36px,6.8vw,104px);min-height:36px}
+  #playerChat,.player-chat-placeholder,.player-chat-input-text{font-size:clamp(14px,3.1vw,48px)}
 }
 body:not(.live-preview) #preview-actions,
 body:not(.live-preview) #topBar,
 body:not(.live-preview) #player-chat-bubble{display:none!important}
 @media(prefers-reduced-motion:reduce){#player-chat-bubble{transition:none}}
 
-/* Large message text is a separate visual layer. Keep the reference topBar
-   and its 34px entry row fixed while allowing the glyphs to overflow the row. */
-#player-chat-composer{overflow:visible}
-.player-chat-input-row{overflow:visible}
-#playerChat{z-index:1;overflow-x:auto;overflow-y:hidden;padding:0 48px 0 9px;
-  color:transparent;-webkit-text-fill-color:transparent;caret-color:#fff;
-  font:400 36px/1 'PlayerChat CG',sans-serif;white-space:pre;overflow-wrap:normal}
-.player-chat-placeholder{left:9px;z-index:2;width:max-content;max-width:none;overflow:visible;
-  font:400 36px/1 'PlayerChat CG',sans-serif}
-.player-chat-input-text{position:absolute;left:9px;top:50%;z-index:3;display:block;width:max-content;max-width:none;
-  overflow:visible;white-space:pre;pointer-events:none;transform:translateY(-50%);
-  color:#fff;font:400 36px/1 'PlayerChat CG',sans-serif;text-shadow:none}
-.player-chat-input-text[hidden]{display:none}
-.player-chat-counter{z-index:4}
-@media(max-width:900px),(hover:none) and (pointer:coarse){
-  #playerChat,.player-chat-placeholder,.player-chat-input-text{font-size:36px}
-}
+/* Responsive input overlay rules are defined in the TopBar block above. */
 body:not(.live-preview) #pads{display:none!important}
