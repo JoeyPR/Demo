@@ -174,7 +174,7 @@ test("TopBar uses Demo colors, thin borders, compact corners and message-sized s
   assert.ok(css.includes("background-color:var(--fill)"));
   assert.ok(!css.includes("border-radius:1.6vw"));
   assert.ok(!css.includes("inset 0 0 0 .3vw #05090c"));
-  assert.match(css, /\.player-chat-entry:nth-child\(odd\)\{background-color:rgba\(123,186,210,\.25\)\}/);
+  assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\) 0 1\.1em,transparent 1\.1em 2\.2em\)/);
   assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:7\.4vw/);
   assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(10px,2\.65vw,48px\)/);
 });
