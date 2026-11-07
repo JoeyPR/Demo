@@ -302,17 +302,19 @@ test("speech chatbox auto-sizes to its text, stays centered and screen-sized ind
   assert.match(css, /border-radius:calc\(var\(--radius\) \+ 1px\)/);
 });
 
-test("topBar restores the fb93e23 panel geometry and retains the large entry overlay", () => {
+test("topBar matches the large two-panel framed reference design", () => {
   const css = read("../css/player-chat.css");
   const js = read("../js/player-chat.js");
   assert.match(js, /chatLog\.className = 'player-chat-log panel'/);
   assert.match(js, /inputRow\.className = 'player-chat-input-row panel'/);
   assert.match(css, /#player-chat-composer\{[\s\S]*?background:transparent;border:0/);
-  assert.match(css, /#player-chat-log\{[\s\S]*?background:var\(--fill\);border:var\(--bd\) solid var\(--line\)/);
-  assert.match(css, /\.player-chat-input-row\{[\s\S]*?width:100%[\s\S]*?height:34px/);
-  assert.match(css, /#player-chat-log\{[\s\S]*?font:400 16px/);
-  assert.match(css, /\.player-chat-input-text\{[^}]*font:400 36px/);
-  assert.match(css, /#player-chat-composer\{overflow:visible\}/);
+  assert.match(css, /#player-chat-log\{[\s\S]*?background-color:var\(--fill\)/);
+  assert.match(css, /repeating-linear-gradient\(to bottom,rgba\(123,186,210,\.25\)/);
+  assert.match(css, /border:calc\(16\*var\(--u\)\) solid #05090c/);
+  assert.match(css, /border-radius:calc\(40\*var\(--u\)\)/);
+  assert.match(css, /box-shadow:0 0 0 calc\(12\*var\(--u\)\) var\(--line\)/);
+  assert.match(css, /\.player-chat-input-row\{[\s\S]*?height:clamp\(42px,7vw,106px\)/);
+  assert.match(css, /\.player-chat-input-text\{[^}]*font:400 clamp\(32px,3vw,46px\)/);
 });
 
 test("live preview controls are small green Play and red two-bar Pause circles", () => {
