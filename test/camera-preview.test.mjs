@@ -128,7 +128,7 @@ test('zoom is applied around the pivot only — the draw transform has no transl
 
 test('pickup rendering projects its world point once outside the world zoom transform', () => {
   const app = readFileSync(join(here, '../js/app.js'), 'utf8');
-  assert.ok(app.includes("drawPickups(c, frame, s, cameraPivotX, cameraPivotY, zoom)"));
+  assert.ok(app.includes("drawPickups(ectx, frame, s, cameraPivotX, cameraPivotY, zoom)"));
   assert.ok(app.includes("(16 * PLAYER_VISUAL_SCALE + pose.y - frame.y - pose.bob) * scale * zoom"));
   assert.ok(!app.includes("PICKUP_SIZE * scale * pose.scale + pose.scale / safeZoom"));
 });

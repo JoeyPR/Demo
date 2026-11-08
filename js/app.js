@@ -13,6 +13,7 @@ import { registerBlocks, BLOCKS, LAND_NONE, DEFAULT_LAND_ID, resolveLandSelectio
 import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, playerShadowOffset } from "./player-shadow.mjs";
+import * as WorldEngine from "./render/world-engine.mjs";
 import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
@@ -259,6 +260,13 @@ function setLand(id) {
   state.editableWorld = uniformLandWorld(state.landBlock ?? 0, 24, 0);
   state.landWorld = state.landBlock == null ? null : state.editableWorld;
   if (motion) resetMotionForScene();
+  /* The setplanner world engine renders the very same grid the player
+     physically walks on (WorldMotion) — one source of truth for the Land. */
+  if (state.editableWorld) {
+    WorldEngine.setLandWorld(state.editableWorld.fg, state.editableWorld.bg,
+      state.editableWorld.fg[0].length, state.editableWorld.fg.length)
+      .catch(err => console.warn("[WorldEngine] land render unavailable.", err));
+  }
 }
 P.on("land", setLand);
 function resetMotionForScene() {
@@ -309,7 +317,7 @@ function updateHUD() {
   const extra = [ab?.doubleJump ? "double jump" : null, ab?.highJump ? "high jump" : null, ab?.speedy ? "speedy" : null].filter(Boolean).join(" · ");
   hud.textContent = `${act}${extra ? " · " + extra : ""} · ${state.equipped.size} pieces`;
 }
-P.on("frame", ({ dt, ctx: c, w, h }) => {
+P.on("frame", ({ dt, ctx: c, ectx, w, h }) => {
   if (!state.ready) return;
   try {
   const ms = Math.min(100, dt * 1000);
@@ -351,10 +359,20 @@ P.on("frame", ({ dt, ctx: c, w, h }) => {
     drawScene(w, h);
   }
 
+  // Terrain: the setplanner world engine draws the land grid (the same grid
+  // WorldMotion collides with) onto its own WebGL canvas between the weather
+  // and the entity layers.
+  try {
+    WorldEngine.render(performance.now(), frame.x + 1616, frame.y + 768,
+      32 * s * zoom, w, h, 1);
+  } catch (terrainError) {
+    console.error("[WorldEngine] frame failed; continuing.", terrainError);
+  }
+
   // Pickups use an explicit world-to-screen projection outside the world transform.
   // This keeps their world anchor fixed as the camera follows the player; offscreen
   // pickups remain in state and naturally reappear when the camera comes back.
-  drawPickups(c, frame, s, cameraPivotX, cameraPivotY, zoom);
+  drawPickups(ectx, frame, s, cameraPivotX, cameraPivotY, zoom);
 
   if (performance.now() - hudTimer > 250) { hudTimer = performance.now(); updateHUD(); }
   } catch (err) {
@@ -657,6 +675,7 @@ P.on("drop-confirm", payload => {
 
 /* ---------------- boot -------------------------------------------------- */
 window.plannerApp = state;   /* debug/QA hook */
+window.__we = WorldEngine;   /* debug/QA hook: render engine */
 (async function init() {
   try {
     const response = await fetch(moduleURL("../demo/catalog.json"));
@@ -682,6 +701,7 @@ window.plannerApp = state;   /* debug/QA hook */
       console.warn("[Land] Block catalog could not be loaded.", error);
     }
     // Preview and Live Preview share the selected land and weather.
+    WorldEngine.attachCanvas($("#terrain"));
     setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
 
     state.ready = true;

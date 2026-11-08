@@ -1,0 +1,1 @@
+["ItemRenderer",{"item":"ITEM_ID_BOW_HAIR_CLIP"},[["Data",{},[["Sprite",{"name":"s_bow","fileName":"game/player_cosmetics3.rttex","textureSize":"32","frame":"30,22"},[]]]],["RenderRules",{},[["RenderBackHat",{},[["SpriteRender",{"name":"s_bow","offset":"0,-15","alignment":"DOWN_CENTER"},[]]]]]]]]

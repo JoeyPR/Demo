@@ -3,4 +3,9 @@
 #preview{position:fixed;left:50%;top:50%;z-index:1;transform-origin:50% 50%;
   transform:translate(-50%,-50%) scale(var(--ps,1));pointer-events:auto;touch-action:none}
 #pv{position:relative;display:block;background:transparent;border:2px solid var(--line);border-radius:var(--radius);box-shadow:4px 4px 0 #000;touch-action:none}
+/* Terrain (setplanner WebGL engine) sits right above the weather canvas, and
+   entities (pickups, later the player/particles) above the terrain. Both are
+   transparent, inset by the weather canvas' 2px border. */
+#terrain,#ent{position:absolute;inset:2px;width:calc(100% - 4px);height:calc(100% - 4px);
+  pointer-events:none;border-radius:calc(var(--radius) - 2px)}
 #ui{z-index:2}

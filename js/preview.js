@@ -6,8 +6,12 @@
    CAMERA_ZOOM_DEFAULT in js/camera.mjs (kept in sync by test). Desktop: mouse wheel. Mobile: pinch. */
 (function(){
   const root = P.$('#preview'), cv = P.$('#pv'), ctx = cv.getContext('2d');
+  /* The preview is a 3-layer stack: weather (#pv, 2D) < terrain (#terrain, the
+     setplanner WebGL engine) < entities (#ent, 2D: pickups, later the player,
+     particles and effects). All share the logical viewport size. */
+  const terrainCv = P.$('#terrain'), ent = P.$('#ent'), ectx = ent.getContext('2d');
   const mq = matchMedia('(max-width:900px), (hover:none) and (pointer:coarse)');
-  const pv = P.preview = { w: 1920, h: 1080, ctx, scale: 1, mobile: false };
+  const pv = P.preview = { w: 1920, h: 1080, ctx, ectx, scale: 1, mobile: false };
   P.camZoom = { v: 1, min: 1 / 1.28, max: 4 };   /* 1.28× max zoom-out; 4× close-up */
   const Z = P.camZoom;
 
@@ -15,6 +19,9 @@
     pv.mobile = mq.matches;
     pv.w = pv.mobile ? 1280 : 1920; pv.h = pv.mobile ? 720 : 1080;
     if (cv.width !== pv.w) { cv.width = pv.w; cv.height = pv.h; }
+    if (ent.width !== pv.w) { ent.width = pv.w; ent.height = pv.h; }
+    /* #terrain is sized by the world engine itself (stage.resize) — the WebGL
+       renderer owns its canvas bitmap. */
     pv.baseScale = pv.mobile ? innerWidth * (907 / 923) / pv.w : Math.max(innerWidth / pv.w, innerHeight / pv.h);   // desktop: cover the window (world fills the screen, HUD overlays it) — phone: fills the width
     apply();
   }
@@ -75,7 +82,8 @@
   (function loop(t) {
     const dt = Math.min(.05, (t - t0) / 1000); t0 = t;
     ctx.clearRect(0, 0, pv.w, pv.h);
-    P.emit('frame', { dt, ctx, w: pv.w, h: pv.h });
+    ectx.clearRect(0, 0, pv.w, pv.h);
+    P.emit('frame', { dt, ctx, ectx, t, w: pv.w, h: pv.h });
     requestAnimationFrame(loop);
   })(t0);
 })();
