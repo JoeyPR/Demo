@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {WorldMotion,WORLD_ORIGIN_X,WORLD_ORIGIN_Y,WORLD_PLAYER_HEIGHT,WORLD_PLAYER_HALF_WIDTH,WORLD_TILE_SIZE} from '../js/world-motion.mjs';
-import {renderWorld,uniformLandWorld} from '../js/land-system.mjs';
+import {uniformLandWorld} from '../js/land-system.mjs';
 import {PreviewMotion} from '../src/motion.mjs';
 const blocks={1:{collision:1},2:{collision:2},3:{collision:0}};
 function world(){return {fg:Array.from({length:60},(_,y)=>new Array(100).fill(y>=24?1:0)),
@@ -84,20 +84,4 @@ test('falling below the world respawns through the event contract',()=>{
   const f=m.step(16,{});
   assert.equal(f.x,0);assert.equal(f.y,0);assert.equal(f.vx,0);assert.equal(f.vy,0);
   assert.ok(f.events.some(event=>event.type==='respawn'));
-});
-
-test('fractional camera positions rasterize adjacent tiles without partial texel edges',()=>{
-  const grid=uniformLandWorld(2,24,0);
-  for(const fraction of [.1,.35,.5,.9]) {
-    const calls=[];
-    renderWorld({drawImage(...args){calls.push(args);}},grid,()=>({}),
-      32+fraction,800+fraction,100,100,0,{layers:['fg']});
-    assert.ok(calls.length>=16);
-    for(const call of calls) {
-      assert.ok(Number.isInteger(call[5]));assert.ok(Number.isInteger(call[6]));
-      assert.equal(call[7],32);assert.equal(call[8],32);
-    }
-    const firstRow=calls.filter(call=>call[6]===calls[0][6]);
-    for(let i=1;i<firstRow.length;i++)assert.equal(firstRow[i][5]-firstRow[i-1][5],32);
-  }
 });

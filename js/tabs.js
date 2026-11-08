@@ -1,15 +1,13 @@
-/* TABS: the planner tabs (Equipped / Favorites / Clothing / Custom /
-   Player Customization / Makeup). Weather and Land moved to corner dropdown
-   buttons; wrench styles and decorations live inside Player Customization.
+/* TABS: the planner tabs (Equipped / Favorites / Clothing / Custom).
+   Weather and Land moved to corner dropdown buttons; the appearance tabs
+   (Player Customization / Makeup) were removed with the rendering strip.
    The default tab at startup is Clothing. */
 (function(){
   const TABS = [
     { id: 'equip',   label: 'Equipped' },
     { id: 'fav',     label: 'Favorites' },
     { id: 'cloth',   label: 'Clothing' },
-    { id: 'custom',  label: 'Custom' },
-    { id: 'player',  label: 'Player Customization' },
-    { id: 'makeup',  label: 'Makeup' }
+    { id: 'custom',  label: 'Custom' }
   ];
   P.tabs = {
     list: TABS.map(t => t.id),
@@ -22,11 +20,8 @@
 
       /* Set visibility before notifying listeners. Grid refreshes need the
          real visible layout metrics, not a hidden grid's 1-column fallback. */
-      const toolsTab = id === 'player' || id === 'makeup';
       const grid = P.$('#grid');
-      const tools = P.$('#custom-tools');
-      if (grid) grid.hidden = toolsTab;
-      if (tools) tools.hidden = !toolsTab;
+      if (grid) grid.hidden = false;
 
       document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === id)));
       P.emit('tab', id);

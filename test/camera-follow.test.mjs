@@ -34,10 +34,9 @@ test("camera pivot stays at the player's center while the ground line follows ve
   assert.equal(jumping.ground, jumping.cameraPivotY + 16 * PLAYER_VISUAL_SCALE * 3 - jumping.cameraWorldY * 3);
 });
 
-test("live app passes current player position into camera and scenery", () => {
+test("live app passes current player position into camera and weather", () => {
   const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
   assert.match(app, /frameX: frame\.x, frameY: frame\.y/);
   assert.match(app, /hillOffsetsNow\(w, h, s, camera\.cameraWorldX\)/);
-  assert.match(app, /WORLD_ORIGIN_X\+camera\.cameraWorldX/);
-  assert.match(app, /drawTerrainLayer\(w,h,s,camera,"solid"\)/);
+  assert.match(app, /state\.weatherRenderer\.render\(t, hillOffsetsNow/);
 });

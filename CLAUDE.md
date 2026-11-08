@@ -1,5 +1,7 @@
 # Claude implementation instructions
 
+CURRENT STATE: all rendering has been stripped — read RENDER_STRIP.md first. Only the DROP system, preview box, weather (Paradise City fixed), movement buttons/pads, inventory and the Land concept (player walks and stands on real land via WorldMotion) remain, plus the untouched simulation engines in demo/engine. The next phase rebuilds rendering from the setplanner reference (see setplanner-how-it-works.md); do not restore the old renderer.
+
 Read PUNCH_RESTORATION.md first. Preserve its Set Planner-derived generic punch curve and 200ms held cadence; do not substitute a new extension/retraction easing curve.
 
 Current revision: read INPUT_ABILITIES_FX_REVISION.md before the older revision notes below. Use the sourced ability registry, default naked/single-jump startup, adaptive draw bounds, held pointer punch, positive animal gait classification and shared reference float fallback. Unknown FX flags remain unresolved, not generically “implemented.”

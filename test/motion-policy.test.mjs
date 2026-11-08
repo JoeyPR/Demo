@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {sequencePolicy,sequenceTime,sampleSequenceIndex,isFloatingItem} from "../src/motion-policy.mjs";
-import {PlannerPlayer} from "../src/player.mjs";
-import {angleDelta} from "../src/math.mjs";
-import {normalizeCatalogItem} from "../src/catalog-adapter.mjs";
 const frame=(clockMs,locomotion="idle",extra={})=>({clockMs,moveMs:clockMs,x:0,y:0,
   facing:1,ground:!["jump","fall","glide"].includes(locomotion),locomotion,
   vx:locomotion==="walk"?90:0,events:[],...extra});
@@ -31,16 +28,4 @@ test("floating inference is not merely a negative rider offset",()=>{
   assert.equal(isFloatingItem({riderLift:-9}),false);
   assert.equal(isFloatingItem({raw:{gameOptions:{ShouldHover:true}}}),true);
   assert.equal(isFloatingItem({floatBehavior:{enabled:false},raw:{script:"Cumulus"}}),false);
-});
-test("floating movement and stop share the rig transition path",()=>{
-  const catalog={frameMs:225};
-  const item=normalizeCatalogItem({id:1,slot:5,parts:[],gameIcon:[],floatBehavior:{enabled:true}},catalog);
-  const player=new PlannerPlayer(catalog,[item]);
-  let result;
-  for(let n=0;n<8;n++)result=player.step(frame(n*16.667,"walk"),16.667);
-  assert.equal(angleDelta(0,result.pose.backAngle),-45);
-  assert.equal(angleDelta(0,result.pose.frontAngle),45);
-  for(let n=8;n<16;n++)result=player.step(frame(n*16.667),16.667);
-  assert.equal(angleDelta(0,result.pose.backAngle),0);
-  assert.equal(angleDelta(0,result.pose.frontAngle),0);
 });

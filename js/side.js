@@ -1,35 +1,6 @@
-/* SIDE: search switch + STORE/DROP/INFO/FAV/WRENCH/EXPORT acting on the
-   focused item. Item WRENCH opens its generated item-specific dialog. */
+/* SIDE: search switch + STORE/DROP/INFO/FAV acting on the focused item. */
 (function(){
   const side = P.$('#side'), sw = P.$('#sw'), main = P.$('#main'), q = P.$('#q');
-  const wrenchButton = P.$('.sbtn[data-a="wrench"]');
-
-  function hasWrenchControls(item) {
-    if (!item || item.tool || item.gone || item.wearable === false) return false;
-    const definition = item.wrenchDefinition;
-    if (!definition) return false;
-    const hasControl = control => !!control?.type && control.type !== 'heading';
-    return (definition.sharedControls || []).some(hasControl) ||
-      (definition.sections || []).some(section => (section.controls || []).some(hasControl));
-  }
-  function isEquipped(item) {
-    const equipped = P.equippedIds;
-    const id = Number(item?.id);
-    return !!equipped && (equipped.has(item?.id) || equipped.has(id));
-  }
-  function syncWrenchAvailability(item) {
-    const focused = item === undefined ? (P.inv.focus || P.inv.sel) : item;
-    const available = hasWrenchControls(focused);
-    wrenchButton.disabled = !available;
-    wrenchButton.setAttribute('aria-disabled', String(!available));
-    wrenchButton.title = !available ? 'No Wrench settings for this item'
-      : isEquipped(focused) ? 'Customize this equipped item' : 'Equip the item first.';
-  }
-  P.on('item-focus', syncWrenchAvailability);
-  P.on('catalog', () => syncWrenchAvailability());
-  P.on('equip-state', () => syncWrenchAvailability());
-  P.on('tab', () => syncWrenchAvailability());
-  syncWrenchAvailability();
   const nonSearchableTabs = new Set(['equip', 'custom', 'player', 'makeup']);
 
   const setSw = on => {
@@ -55,23 +26,8 @@
     fav(it)   { P.emit('fav-toggle', it); }
   };
   P.$$('.sbtn').forEach(b => b.onclick = () => {
-    if (b.dataset.a === 'export') return; /* handled by app.js */
     /* STORE is disabled for now */
     if (b.dataset.a === 'store') return;
-    /* Item WRENCH acts on the focused item, not the nameplate Wrench. */
-    if (b.dataset.a === 'wrench') {
-      const focused = P.inv.focus || P.inv.sel;
-      if (!hasWrenchControls(focused)) {
-        syncWrenchAvailability(focused);
-        return;
-      }
-      if (!isEquipped(focused)) {
-        P.blackbox?.("Equip the item first.", 1800, wrenchButton);
-        return;
-      }
-      P.emit('item-wrench-request', focused);
-      return;
-    }
     const it = P.inv.focus || P.inv.sel;
     /* Fist/Wrench are core tools, not drop-able inventory items. */
     if (!it) return P.toast('Select an item first');

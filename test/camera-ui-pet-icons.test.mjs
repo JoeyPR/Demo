@@ -10,7 +10,6 @@ const handle = read("../js/handle.js");
 const dropdowns = read("../css/dropdowns.css");
 const icons = read("../js/inventory-icons.mjs");
 const inventoryCss = read("../css/inv.css");
-const plate = read("../js/plate.js");
 const prehistoricPng = readFileSync(new URL("../demo/assets/p_prehistoric.png", import.meta.url));
 
 test("camera supports a closer close-up and a capped 1.28x zoom-out", () => {
@@ -19,21 +18,6 @@ test("camera supports a closer close-up and a capped 1.28x zoom-out", () => {
   assert.equal(clampCameraZoom(99), 4);
   assert.ok(Math.abs(clampCameraZoom(0) - 1 / 1.28) < 1e-10);
   assert.equal(preview.includes("min: 1 / 1.28, max: 4"), true);
-});
-
-test("nameplate anchor and scale follow the camera and requested offsets", () => {
-  const p = projectCameraPoint(100, 80, 50, 50, 2);
-  assert.deepEqual(p, { x: 150, y: 110 });
-  assert.match(app, /projectCameraPoint\([\s\S]*cameraPivotX, cameraPivotY, zoom/);
-  assert.match(app, /w \/ 2 - 3, playerTop - 6 \* s/);
-  assert.match(app, /P\.plate\.draw\(c, platePoint\.x, platePoint\.y, s \* zoom, state\.clock, 0\.80/);
-  assert.match(plate, /const iconPR = built\.size \* p;[\s\S]*const PR = iconPR \* factor/);
-  assert.match(plate, /const PG = iconPR \* 1\.25 \* PN/);
-  assert.match(plate, /const LC = iconPR \* 1\.226 \* 1\.2/);
-  assert.match(plate, /textScale = 1/);
-  assert.match(plate, /const iconPart = part\.flag \|\| part\.badge \|\| part\.guild/);
-  assert.match(plate, /const tagPR = iconPR \* factor \+ 5/);
-  assert.match(inventoryCss, /\.box\.tool \.ic\{inset:8%;overflow:hidden\}/);
 });
 
 test("filter panel retains its inner and outer drop shadows", () => {

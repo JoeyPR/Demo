@@ -35,12 +35,12 @@ test("Clothing Fist/Wrench boxes focus and synchronize the quick-drawer tool", (
   const activate = grid.slice(start, end);
   assert.ok(activate.includes("if (item.tool)"));
   assert.ok(activate.includes("P.inv.focus = item"));
-  assert.ok(activate.includes("const wrenchOn = item.toolType === 'wrench'"));
-  assert.ok(activate.includes("P.plateConfig.setWrenchOn(wrenchOn)"));
+  assert.ok(activate.includes("toolState.wrenchOn = item.toolType === 'wrench'"));
+  assert.ok(activate.includes("toolState.wrenchOn = item.toolType === 'wrench'"));
   assert.ok(activate.includes("P.blackbox?.(item.name, 1500, box)"));
   assert.ok(grid.includes("b.dataset.toolType === f.toolType"));
   assert.ok(grid.includes("if (!toolArmed)"));
-  assert.ok(grid.includes("P.plateConfig.setWrenchOn(on)"));
+  assert.ok(grid.includes("toolState.wrenchOn = on;"));
   assert.ok(grid.includes("P.blackbox?.(on ? 'Wrench' : 'Fist', 1500, currentToolBox)"));
   assert.ok(invCss.includes("#grid-window .box.tool.focus{background-image:url(../img/box-blue.png)"));
   assert.ok(!invCss.includes("#grid-window .box.tool::before{display:none}"));
@@ -52,7 +52,7 @@ test("weather failures use a black fallback and do not disable the app", () => {
   assert.match(app, /state\.weatherFailedKey = key/);
   assert.match(app, /state\.weatherRenderer\.render\(t, hillOffsetsNow\([\s\S]*?\}\s*catch \(weatherError\)\s*\{\s*markWeatherFailed/);
   assert.doesNotMatch(app, /state\.ready = false/);
-  assert.match(app, /Render warning:/);
+  assert.match(app, /failed; using black background/);
 });
 
 test("DROP still opens if an item thumbnail fails to render", () => {

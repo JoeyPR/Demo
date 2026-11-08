@@ -338,6 +338,10 @@
   }
 
   /* ---------------- box-focus activation (the four-click state machine) --- */
+  /* The Fist/Wrench tool state lives here since the nameplate system was
+     removed with the rendering strip; the swap persists across sessions. */
+  const toolState = { get wrenchOn() { return !!P.store.get('toolWrenchOn', false); },
+    set wrenchOn(on) { P.store.set('toolWrenchOn', !!on); } };
   function activate(item, box) {
     const f = P.inv.focus;
     if (item.tool) {
@@ -345,11 +349,7 @@
          selecting the matching Fist/Wrench art in the top drawer. */
       toolArmed = false;
       P.inv.focus = item;
-      const wrenchOn = item.toolType === 'wrench';
-      const pc = P.plateConfig.get();
-      P.plateConfig.setWrenchOn(wrenchOn);
-      if (wrenchOn && !pc.growId.trim())
-        P.toast('Type your GrowID in Player Customization to pull up the wrench.');
+      toolState.wrenchOn = item.toolType === 'wrench';
       markFocus();
       P.blackbox?.(item.name, 1500, box);
       return;
@@ -399,12 +399,11 @@
       img.alt = on ? 'Wrench' : 'Fist';
       img.className = on ? 'art-wrench' : 'art-fist';
     };
-    setToolArt(P.plateConfig.get().wrenchOn);
+    setToolArt(toolState.wrenchOn);
     ic.append(img);
     b.append(ic);
     b.addEventListener('click', () => {
-      const pc = P.plateConfig.get();
-      const activeType = pc.wrenchOn ? 'wrench' : 'fist';
+      const activeType = toolState.wrenchOn ? 'wrench' : 'fist';
       P.inv.focus = { tool: true, toolType: activeType };
       markFocus();
       if (!toolArmed) {
@@ -412,9 +411,8 @@
         P.blackbox?.(activeType === 'wrench' ? 'Wrench' : 'Fist', 1500, b);
         return;
       }
-      const on = !pc.wrenchOn;
-      P.plateConfig.setWrenchOn(on);
-      if (on && !pc.growId.trim()) P.toast('Type your GrowID in Player Customization to pull up the wrench.');
+      const on = !toolState.wrenchOn;
+      toolState.wrenchOn = on;
       P.inv.focus = { tool: true, toolType: on ? 'wrench' : 'fist' };
       markFocus();
       const currentToolBox = P.$('#quick .box.tool') || b;
