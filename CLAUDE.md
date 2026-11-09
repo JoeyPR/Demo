@@ -4,7 +4,7 @@ CURRENT STATE: all rendering has been stripped — read RENDER_STRIP.md first. O
 
 Read PUNCH_RESTORATION.md first. Preserve its Set Planner-derived generic punch curve and 200ms held cadence; do not substitute a new extension/retraction easing curve.
 
-Current revision: read INPUT_ABILITIES_FX_REVISION.md before the older revision notes below. Use the sourced ability registry, default naked/single-jump startup, adaptive draw bounds, held pointer punch, positive animal gait classification and shared reference float fallback. Unknown FX flags remain unresolved, not generically “implemented.”
+Current revision: read NATIVE_PLAYER_RENDER_REVISION.md (M2 native player renderer, its six fixed composition bugs and the pivot-anchored rig contract) before the older revision notes below. Previous: INPUT_ABILITIES_FX_REVISION.md. Use the sourced ability registry, default naked/single-jump startup, adaptive draw bounds, held pointer punch, positive animal gait classification and shared reference float fallback. Unknown FX flags remain unresolved, not generically “implemented.”
 
 You are implementing a Growtopia planner's player rendering system. Read RESEARCH.md, API.md, GAPS.md, and VALIDATION.md before editing the host application, and preserve its existing weather system.
 
