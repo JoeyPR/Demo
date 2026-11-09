@@ -380,22 +380,29 @@ P.on("frame", ({ dt, ctx: c, ectx, w, h }) => {
      composite). */
   if (state.playerRenderer) {
     try {
-      const result = state.playerRenderer.step(frame, ms);
+      /* The rig canvas is pivot-anchored (the camera projects the whole rig),
+         so the character's WORLD x/y must NOT enter the rig matrices — the
+         setplanner playerRoot translates by motion.x/y because its own
+         drawCanvas viewport subtracts the camera. Zero them here; facing,
+         locomotion and vy still pass through. */
+      const result = state.playerRenderer.step({ ...frame, x: 0, y: 0 }, ms);
       state.playerResult = result;
       const names = [...new Set(result.calls.map(call => call.atlas))];
       state.playerAtlas.ensure(names).then(() => { /* next frame picks up images */ });
       if (names.every(name => state.playerAtlas.has(name))) {
-        // local rig canvas: root at (0, 0), player root at rig origin
+        /* local rig canvas: 32-unit grid. The character's rig root is its HEAD
+           TOP (the setplanner convention: base pieces span rig y 0..32 with
+           feet at y≈31), so the root sits 32 units ABOVE the feet anchor:
+           translate(padX, padY - 32) puts the feet at y = padY. */
         const rig = state.playerRigCanvas ?? (state.playerRigCanvas = document.createElement("canvas"));
-        const pad = 128;
-        if (rig.width !== pad * 2 || rig.height !== pad * 2) { rig.width = pad * 2; rig.height = pad * 2; }
+        const padX = 128, padY = 192;
+        if (rig.width !== padX * 2 || rig.height !== padY + 64) { rig.width = padX * 2; rig.height = padY + 64; }
         const rctx = rig.getContext("2d");
         rctx.setTransform(1, 0, 0, 1, 0, 0);
         rctx.clearRect(0, 0, rig.width, rig.height);
-        // translate so the player root (feet at rig origin) sits at (pad, pad*2)
-        rctx.translate(pad, pad * 2);
+        rctx.translate(padX, padY - 32);
         drawPlayerCalls(rctx, result.calls, state.playerAtlas, state.skin);
-        /* project the rig canvas (feet pivot at [pad, pad*2]) onto the entity
+        /* project the rig canvas (feet pivot at [padX, padY]) onto the entity
            layer. drawPickups uses: anchorX = cameraPivotX + (pose.x − frame.x)
            · s · zoom; bottomY = cameraPivotY + (16 + pose.y − frame.y − bob)
            · s · zoom. For the player itself: anchorX = cameraPivotX (pose.x =
@@ -403,8 +410,8 @@ P.on("frame", ({ dt, ctx: c, ectx, w, h }) => {
            camera's vertical focus). */
         const size = 32 * s * zoom;
         const dstW = rig.width * size / 32, dstH = rig.height * size / 32;
-        const left = cameraPivotX - pad * size / 32;
-        const top = cameraPivotY + 16 * s * zoom - pad * 2 * size / 32;
+        const left = cameraPivotX - padX * size / 32;
+        const top = cameraPivotY + 16 * s * zoom - padY * size / 32;
         ectx.imageSmoothingEnabled = false;
         ectx.drawImage(rig, left, top, dstW, dstH);
       }

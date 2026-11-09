@@ -164,9 +164,10 @@ function basePieces(pose, hide, faceOverride) {
   for (const side of ["back", "front"]) {
     if (hidden(`${side}Arm`)) continue;
     if (side === "back" && pose.punch) continue; // punch arm replaces the back arm
+    const at = ARM[side];
+    const matrix = compose(limbMatrix(side, pose[`${side}Angle`]), translate(at[0], at[1]));
     out.push({ atlas: ARM.atlas, sx: 0, sy: 0, sw: ARM.w, sh: ARM.h,
-      matrix: limbMatrix(side, pose[`${side}Angle`]),
-      pass: side === "back" ? "RenderBackArm" : "RenderFrontArm", tint: "SKIN", tag: `${side}Arm` });
+      matrix, pass: side === "back" ? "RenderBackArm" : "RenderFrontArm", tint: "SKIN", tag: `${side}Arm` });
   }
   return out;
 }

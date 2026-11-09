@@ -17,6 +17,14 @@ export class PlayerAtlas {
       const img = new Image();
       img.src = new URL(`../../atlas/${encodeURIComponent(name)}`, import.meta.url).href;
       await img.decode().catch(() => {});
+      /* A broken load (404/decode failure) must not be cached forever —
+         has() would stay false and the player would silently never draw.
+         Drop the entry so the next frame retries, and warn once per atlas. */
+      if ((img.naturalWidth ?? 0) === 0) {
+        if (!this.warned) this.warned = new Set();
+        if (!this.warned.has(name)) { this.warned.add(name); console.warn(`[PlayerAtlas] failed to load atlas/${name}; will retry`); }
+        return;
+      }
       this.images.set(name, img);
     }));
   }
@@ -34,8 +42,12 @@ function spriteMatrix(record) {
 /* Helper: skin-relative tint (multiply RGB preserve alpha), used when the
    caller passes a literal rgb array or "SKIN" sentinel. */
 
+/* Apply the sprite matrix ON TOP of the caller's current transform (the rig
+   canvas is pre-translated to the player root). ctx.transform composes;
+   setTransform would wipe the outer translate and pin every sprite to the
+   canvas origin. */
 function applyMatrix(ctx, m) {
-  ctx.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
+  ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
 }
 
 /* Compose two affine matrices (column-vector, canvas order). */
@@ -58,7 +70,10 @@ export function drawPlayerCalls(ctx, calls, atlases, skin) {
   for (const call of calls) {
     const img = atlases.get(call.atlas);
     if (!img) continue;
-    const m = mul(IDENT, call.matrix ?? spriteMatrix(call));
+    const m = call.matrix ?? spriteMatrix(call);
+    // dest rect: sprite corners mapped through the matrix (no rotation for base
+    // sprites — rotation only comes from sleeves/punch, which we handle here too)
+    ctx.save();
     applyMatrix(ctx, m);
     ctx.globalAlpha = call.o ?? 1;
     let tint = null;
@@ -80,11 +95,9 @@ export function drawPlayerCalls(ctx, calls, atlases, skin) {
       }
       ctx.drawImage(crop, 0, 0);
     } else {
-      // alpha-only tint would be handled above; otherwise blit the raw cell
       ctx.drawImage(img, call.sx, call.sy, call.sw, call.sh, 0, 0, call.sw, call.sh);
     }
+    ctx.restore();
   }
   ctx.restore();
 }
-
-const IDENT = [1, 0, 0, 1, 0, 0];

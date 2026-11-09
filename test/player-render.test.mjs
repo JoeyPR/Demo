@@ -3,7 +3,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { NativePlayerRenderer, sampleMoments } from "../js/render/player.mjs";
-import { buildPlayerDrawList } from "../js/render/player-draw-list.mjs";
 import { PlayerRig } from "../js/render/rig.mjs";
 
 const catalog = {
