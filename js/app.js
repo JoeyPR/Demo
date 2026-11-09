@@ -14,6 +14,8 @@ import { renderDemoInventoryIcon } from "./inventory-icons.mjs";
 import { clampCameraZoom, computeCameraLayout, unprojectCameraPoint } from "./camera.mjs";
 import { PLAYER_VISUAL_SCALE, PLAYER_SHADOW_OPACITY, PLAYER_SHADOW_COLOR, playerShadowOffset } from "./player-shadow.mjs";
 import * as WorldEngine from "./render/world-engine.mjs";
+import { NativePlayerRenderer } from "./render/player.mjs";
+import { PlayerAtlas, drawPlayerCalls } from "./render/draw.mjs";
 import { PICKUP_ATLAS_RECT, PICKUP_SIZE, PICKUP_BOX_EXTRA_SIZE, PICKUP_HOVER_HEIGHT, PICKUP_COLLECTION_TOTAL_DURATION, PICKUP_ICON_ART_SIZE, pickupDropVary, pickupPose, pickupIconFlightPose, pickupShouldCollect } from "./drop-world.mjs";
 
 const $ = s => document.querySelector(s);
@@ -34,7 +36,8 @@ const state = {
   abilities: null,
   landBlock: null, landWorld: null, view: null, aim: null, punchHold: false, punchPointer: null, gesturePunchUntil: 0,
   pickups: [], nextPickupId: 1, pendingWorldEvents: [],
-  livePreview: false, editableWorld: null
+  livePreview: false, editableWorld: null,
+  playerRenderer: null, playerAtlas: null, playerResult: null
 };
 let motion, lastTimestamp = 0;
 
@@ -47,6 +50,7 @@ function equipToggle(id) {
   state.abilities = resolveAbilities([...state.equipped.values()], state.abilityRegistry);
   motion?.setAbilities(state.abilities);
   P.equippedIds = new Set([...state.equipped.values()].map(i => i.id));
+  state.playerRenderer?.equip([...state.equipped.values()]);
   P.emit("equip-state");
   P.emit("look-update");
   updateHUD();
@@ -367,6 +371,46 @@ P.on("frame", ({ dt, ctx: c, ectx, w, h }) => {
       32 * s * zoom, w, h, 1);
   } catch (terrainError) {
     console.error("[WorldEngine] frame failed; continuing.", terrainError);
+  }
+
+  /* Native player renderer: the character composes in 32-unit rig space onto
+     a local canvas, then projects onto the entity layer with the same explicit
+     world-to-screen projection drawPickups uses (cameraPivotX/Y + zoom).
+     Skin tint multiplies RGB preserving alpha (per-piece, never the whole
+     composite). */
+  if (state.playerRenderer) {
+    try {
+      const result = state.playerRenderer.step(frame, ms);
+      state.playerResult = result;
+      const names = [...new Set(result.calls.map(call => call.atlas))];
+      state.playerAtlas.ensure(names).then(() => { /* next frame picks up images */ });
+      if (names.every(name => state.playerAtlas.has(name))) {
+        // local rig canvas: root at (0, 0), player root at rig origin
+        const rig = state.playerRigCanvas ?? (state.playerRigCanvas = document.createElement("canvas"));
+        const pad = 128;
+        if (rig.width !== pad * 2 || rig.height !== pad * 2) { rig.width = pad * 2; rig.height = pad * 2; }
+        const rctx = rig.getContext("2d");
+        rctx.setTransform(1, 0, 0, 1, 0, 0);
+        rctx.clearRect(0, 0, rig.width, rig.height);
+        // translate so the player root (feet at rig origin) sits at (pad, pad*2)
+        rctx.translate(pad, pad * 2);
+        drawPlayerCalls(rctx, result.calls, state.playerAtlas, state.skin);
+        /* project the rig canvas (feet pivot at [pad, pad*2]) onto the entity
+           layer. drawPickups uses: anchorX = cameraPivotX + (pose.x − frame.x)
+           · s · zoom; bottomY = cameraPivotY + (16 + pose.y − frame.y − bob)
+           · s · zoom. For the player itself: anchorX = cameraPivotX (pose.x =
+           frame.x), bottomY = cameraPivotY + 16 · s · zoom (feet on the
+           camera's vertical focus). */
+        const size = 32 * s * zoom;
+        const dstW = rig.width * size / 32, dstH = rig.height * size / 32;
+        const left = cameraPivotX - pad * size / 32;
+        const top = cameraPivotY + 16 * s * zoom - pad * 2 * size / 32;
+        ectx.imageSmoothingEnabled = false;
+        ectx.drawImage(rig, left, top, dstW, dstH);
+      }
+    } catch (playerError) {
+      console.error("[PlayerRenderer] frame failed; continuing.", playerError);
+    }
   }
 
   // Pickups use an explicit world-to-screen projection outside the world transform.
@@ -704,6 +748,8 @@ window.__we = WorldEngine;   /* debug/QA hook: render engine */
     WorldEngine.attachCanvas($("#terrain"));
     setLand(resolveLandSelection(P.store.get("land", String(DEFAULT_LAND))));
 
+    state.playerRenderer = new NativePlayerRenderer(state.catalog);
+    state.playerAtlas = new PlayerAtlas();
     state.ready = true;
     P.equippedIds = new Set();
     P.emit("catalog");
